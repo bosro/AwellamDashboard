@@ -1,0 +1,168 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Transport Dashboard</h1>
+        <p class="mt-1 text-sm text-gray-600">Overview of transport operations</p>
+      </div>
+      <div class="flex space-x-3">
+        <button 
+          [routerLink]="['/transport/trips/new']"
+          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <i class="ri-add-line mr-2"></i>
+          New Transport
+        </button>
+      </div>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+      <i class="ri-loader-4-line text-3xl animate-spin text-blue-600"></i>
+    </div>
+  
+    <!-- Dashboard Content -->
+    <div *ngIf="!loading" class="space-y-6">
+      <!-- Key Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Active Trips -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-3 bg-blue-100 rounded-full">
+              <i class="ri-truck-line text-xl text-blue-600"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Active Trips</p>
+              <p class="text-lg font-semibold">{{metrics?.activeTrips}}</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Available Trucks -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-3 bg-green-100 rounded-full">
+              <i class="ri-roadster-line text-xl text-green-600"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Available Trucks</p>
+              <p class="text-lg font-semibold">{{metrics?.availableTrucks}}</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Available Drivers -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-3 bg-purple-100 rounded-full">
+              <i class="ri-user-star-line text-xl text-purple-600"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Available Drivers</p>
+              <p class="text-lg font-semibold">{{metrics?.availableDrivers}}</p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Maintenance Alerts -->
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="flex items-center">
+            <div class="p-3 bg-red-100 rounded-full">
+              <i class="ri-alert-line text-xl text-red-600"></i>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm text-gray-600">Maintenance Alerts</p>
+              <p class="text-lg font-semibold">{{metrics?.maintenanceAlerts}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Analytics Charts -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Trip Trends -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-medium mb-4">Trip Trends</h2>
+          <div class="h-64">
+            <ngx-charts-line-chart
+              [results]="tripTrends"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="true"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+              xAxisLabel="Date"
+              yAxisLabel="Trips">
+            </ngx-charts-line-chart>
+          </div>
+        </div>
+  
+        <!-- Fuel Consumption -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-medium mb-4">Fuel Consumption</h2>
+          <div class="h-64">
+            <ngx-charts-bar-vertical
+              [results]="fuelConsumption"
+              [xAxis]="true"
+              [yAxis]="true"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+              xAxisLabel="Truck"
+              yAxisLabel="Consumption (L)">
+            </ngx-charts-bar-vertical>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Recent Transports and Maintenance -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Recent Transports -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-medium mb-4">Recent Transports</h2>
+          <div class="space-y-4">
+            <div *ngFor="let transport of recentTransports" 
+                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="font-medium">{{transport.startLocation}} → {{transport.endLocation}}</p>
+                <p class="text-sm text-gray-500">
+                  Driver: {{transport.driverName}} • Truck: {{transport.truckRegistration}}
+                </p>
+              </div>
+              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + 
+                            getStatusClass(transport.status)">
+                {{transport.status | titlecase}}
+              </span>
+            </div>
+            <button 
+              routerLink="/transport/trips"
+              class="w-full text-center text-sm text-blue-600 hover:text-blue-800 mt-4">
+              View All Transports
+            </button>
+          </div>
+        </div>
+  
+        <!-- Maintenance Schedule -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-medium mb-4">Upcoming Maintenance</h2>
+          <div class="space-y-4">
+            <div *ngFor="let schedule of maintenanceSchedule" 
+                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="font-medium">{{schedule.truckRegistration}}</p>
+                <p class="text-sm text-gray-500">
+                  Due: {{schedule.maintenanceDate | date:'mediumDate'}}
+                </p>
+              </div>
+              <span class="text-sm">
+                {{schedule.maintenanceType}}
+              </span>
+            </div>
+            <button 
+              routerLink="/transport/maintenance"
+              class="w-full text-center text-sm text-blue-600 hover:text-blue-800 mt-4">
+              View Full Schedule
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

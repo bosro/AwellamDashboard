@@ -1,0 +1,153 @@
+<div class="p-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">
+          Inventory Item Details
+        </h1>
+        <p class="mt-1 text-sm text-gray-600">{{item?.itemName}}</p>
+      </div>
+      <div class="flex space-x-3">
+        <button 
+          (click)="downloadStockReport()"
+          class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+          <i class="ri-download-line mr-2"></i>
+          Download Report
+        </button>
+        <button 
+          [routerLink]="['/inventory/edit', item?.id]"
+          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <i class="ri-edit-line mr-2"></i>
+          Edit Item
+        </button>
+      </div>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+      <i class="ri-loader-4-line text-3xl animate-spin text-blue-600"></i>
+    </div>
+  
+    <!-- Item Details -->
+    <div *ngIf="!loading && item" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Basic Info Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Basic Information</h2>
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Stock Type</dt>
+            <dd class="mt-1">{{item.stockType | titlecase}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Location</dt>
+            <dd class="mt-1">{{item.location}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Supplier</dt>
+            <dd class="mt-1">{{item.supplier || 'Not specified'}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+            <dd class="mt-1">{{item.lastUpdated | date:'medium'}}</dd>
+          </div>
+        </dl>
+      </div>
+  
+      <!-- Stock Levels Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Stock Levels</h2>
+        <div class="space-y-4">
+          <div>
+            <p class="text-sm font-medium text-gray-500">Current Status</p>
+            <span 
+              [class]="'mt-1 inline-block px-3 py-1 rounded-full text-sm font-medium ' + getStatusClass(item.status)">
+              {{item.status | titlecase}}
+            </span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Current Quantity</p>
+            <p class="mt-1 text-2xl font-semibold">{{item.quantity}}</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Minimum Quantity</p>
+            <p class="mt-1">{{item.minimumQuantity}}</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Unit Price</p>
+            <p class="mt-1">{{item.unitPrice | currency}}</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Total Value</p>
+            <p class="mt-1">{{item.quantity * item.unitPrice | currency}}</p>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Stock Movement Chart -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Stock Movement</h2>
+        <div class="h-64">
+          <!-- Add Stock Movement Chart Here -->
+          <ngx-charts-line-chart
+            [results]="chartData"
+            [xAxis]="true"
+            [yAxis]="true"
+            [legend]="true"
+            [showXAxisLabel]="true"
+            [showYAxisLabel]="true"
+            xAxisLabel="Date"
+            yAxisLabel="Quantity">
+          </ngx-charts-line-chart>
+        </div>
+      </div>
+  
+      <!-- Recent Disbursements -->
+      <div class="md:col-span-3 bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Recent Disbursements</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Quantity
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Truck ID
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Requested By
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let disbursement of disbursements">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{disbursement.disbursementDate | date:'medium'}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{disbursement.quantity}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{disbursement.truckId || 'N/A'}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {{disbursement.requestedBy}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(disbursement.status)">
+                    {{disbursement.status | titlecase}}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>

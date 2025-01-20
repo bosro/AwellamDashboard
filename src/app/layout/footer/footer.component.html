@@ -1,0 +1,80 @@
+<footer class="bg-white border-t">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Company Info -->
+          <div>
+            <img src="assets/images/logo.png" alt="Logo" class="h-8 w-auto mb-4">
+            <p class="text-sm text-gray-500">
+              AWELLAM Company Limited - Your trusted partner in transport and logistics.
+            </p>
+          </div>
+  
+          <!-- Quick Links -->
+          <div class="grid grid-cols-2 gap-8">
+            <div>
+              <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Company</h3>
+              <ul class="mt-4 space-y-2">
+                <li *ngFor="let link of companyLinks">
+                  <a [routerLink]="link.route" 
+                     class="text-sm text-gray-500 hover:text-gray-900">
+                    {{link.title}}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Support</h3>
+              <ul class="mt-4 space-y-2">
+                <li *ngFor="let link of supportLinks">
+                  <a [routerLink]="link.route" 
+                     class="text-sm text-gray-500 hover:text-gray-900">
+                    {{link.title}}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+  
+          <!-- Contact Info -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact Us</h3>
+            <ul class="mt-4 space-y-2">
+              <li class="flex items-center text-sm text-gray-500">
+                <i class="ri-map-pin-line mr-2"></i>
+                123 Business Street, City, Country
+              </li>
+              <li class="flex items-center text-sm text-gray-500">
+                <i class="ri-phone-line mr-2"></i>
+                +1 234 567 890
+              </li>
+              <li class="flex items-center text-sm text-gray-500">
+                <i class="ri-mail-line mr-2"></i>
+                contact@awellam.com
+              </li>
+            </ul>
+          </div>
+        </div>
+  
+        <!-- Bottom Bar -->
+        <div class="mt-8 border-t border-gray-200 pt-4">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-400">
+              © {{currentYear}} AWELLAM Company Limited. All rights reserved.
+            </p>
+            <div class="flex space-x-6">
+              <a href="#" class="text-gray-400 hover:text-gray-500">
+                <i class="ri-facebook-circle-fill text-xl"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-gray-500">
+                <i class="ri-twitter-fill text-xl"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-gray-500">
+                <i class="ri-linkedin-box-fill text-xl"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>

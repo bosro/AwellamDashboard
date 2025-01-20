@@ -1,0 +1,327 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Claims Management</h1>
+        <p class="mt-1 text-sm text-gray-600">Process and manage VAT claims</p>
+      </div>
+      <div class="flex space-x-3">
+        <!-- Batch Actions -->
+        <div class="relative" *ngIf="selectedClaims.size > 0">
+          <button 
+            class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+            Actions ({{selectedClaims.size}})
+            <i class="ri-arrow-down-s-line ml-2"></i>
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
+            <button 
+              (click)="batchProcess('approve')"
+              class="w-full px-4 py-2 text-left hover:bg-gray-100">
+              Approve Selected
+            </button>
+            <button 
+              (click)="batchProcess('reject')"
+              class="w-full px-4 py-2 text-left hover:bg-gray-100">
+              Reject Selected
+            </button>
+            <div class="border-t my-1"></div>
+            <button 
+              (click)="generateBatchReport()"
+              class="w-full px-4 py-2 text-left hover:bg-gray-100">
+              Generate Reports
+            </button>
+          </div>
+        </div>
+        
+        <button 
+          [routerLink]="['new']"
+          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <i class="ri-add-line mr-2"></i>
+          New Claim
+        </button>
+      </div>
+    </div>
+  
+    <!-- Claims Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="p-3 bg-blue-100 rounded-full">
+            <i class="ri-file-list-line text-xl text-blue-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Total Claims</p>
+            <p class="text-lg font-semibold">{{total}}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="p-3 bg-yellow-100 rounded-full">
+            <i class="ri-time-line text-xl text-yellow-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Pending Claims</p>
+            <p class="text-lg font-semibold">{{getPendingCount()}}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="p-3 bg-green-100 rounded-full">
+            <i class="ri-check-double-line text-xl text-green-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Approved Claims</p>
+            <p class="text-lg font-semibold">{{getApprovedCount()}}</p>
+          </div>
+        </div>
+      </div>
+  
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="p-3 bg-purple-100 rounded-full">
+            <i class="ri-money-pound-circle-line text-xl text-purple-600"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm text-gray-600">Total Value</p>
+            <p class="text-lg font-semibold">{{getTotalClaimsValue() | currency}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Advanced Filters -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <form [formGroup]="filterForm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Search -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Search
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                formControlName="searchTerm"
+                placeholder="Search claims..."
+                class="w-full pl-10 pr-4 py-2 border rounded-lg"
+              >
+              <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+            </div>
+          </div>
+  
+          <!-- Date Range -->
+          <div formGroupName="dateRange">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Date Range
+            </label>
+            <div class="flex space-x-2">
+              <input
+                type="date"
+                formControlName="start"
+                class="flex-1 px-4 py-2 border rounded-lg"
+              >
+              <input
+                type="date"
+                formControlName="end"
+                class="flex-1 px-4 py-2 border rounded-lg"
+              >
+            </div>
+          </div>
+  
+          <!-- Status -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              formControlName="status"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="">All Statuses</option>
+              <option *ngFor="let status of statusOptions" [value]="status">
+                {{status | titlecase}}
+              </option>
+            </select>
+          </div>
+  
+          <!-- Payment Status -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Payment Status
+            </label>
+            <select
+              formControlName="paymentStatus"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="">All Payment Statuses</option>
+              <option *ngFor="let status of paymentStatusOptions" [value]="status">
+                {{status | titlecase}}
+              </option>
+            </select>
+          </div>
+  
+          <!-- Amount Range -->
+          <div formGroupName="amountRange">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Amount Range
+            </label>
+            <div class="flex space-x-2">
+              <input
+                type="number"
+                formControlName="min"
+                placeholder="Min"
+                class="flex-1 px-4 py-2 border rounded-lg"
+              >
+              <input
+                type="number"
+                formControlName="max"
+                placeholder="Max"
+                class="flex-1 px-4 py-2 border rounded-lg"
+              >
+            </div>
+          </div>
+  
+          <!-- Clear Filters -->
+          <div class="flex items-end">
+            <button
+              type="button"
+              (click)="clearFilters()"
+              class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              <i class="ri-filter-off-line mr-2"></i>
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  
+    <!-- Claims Table -->
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th scope="col" class="p-4">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  [checked]="selectedClaims.size === claims.length"
+                  (change)="toggleAllSelection()"
+                  class="w-4 h-4 text-blue-600 rounded"
+                >
+              </div>
+            </th>
+            <th scope="col" class="py-3 px-6">Claim Number</th>
+            <th scope="col" class="py-3 px-6">Customer</th>
+            <th scope="col" class="py-3 px-6">Date</th>
+            <th scope="col" class="py-3 px-6">Amount</th>
+            <th scope="col" class="py-3 px-6">VAT Amount</th>
+            <th scope="col" class="py-3 px-6">Total</th>
+            <th scope="col" class="py-3 px-6">Status</th>
+            <th scope="col" class="py-3 px-6">Payment Status</th>
+            <th scope="col" class="py-3 px-6">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let claim of claims" 
+              class="bg-white border-b hover:bg-gray-50">
+            <td class="p-4">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  [checked]="selectedClaims.has(claim.id)"
+                  (change)="toggleSelection(claim.id)"
+                  class="w-4 h-4 text-blue-600 rounded"
+                >
+              </div>
+            </td>
+            <td class="py-4 px-6 font-medium text-gray-900">
+              {{claim.claimNumber}}
+            </td>
+            <td class="py-4 px-6">{{claim.customerName}}</td>
+            <td class="py-4 px-6">{{claim.date | date:'mediumDate'}}</td>
+            <td class="py-4 px-6">{{claim.amount | currency}}</td>
+            <td class="py-4 px-6">{{claim.vatAmount | currency}}</td>
+            <td class="py-4 px-6 font-medium">{{claim.totalAmount | currency}}</td>
+            <td class="py-4 px-6">
+              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + 
+                            getStatusClass(claim.status)">
+                {{claim.status | titlecase}}
+              </span>
+            </td>
+            <td class="py-4 px-6">
+              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + 
+                            getPaymentStatusClass(claim.paymentStatus)">
+                {{claim.paymentStatus | titlecase}}
+              </span>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center space-x-3">
+                <button 
+                  [routerLink]="['/claims/details', claim.id]"
+                  class="text-blue-600 hover:text-blue-900">
+                  <i class="ri-eye-line text-lg"></i>
+                </button>
+                <button 
+                  [routerLink]="['/claims/edit', claim.id]"
+                  class="text-blue-600 hover:text-blue-900">
+                  <i class="ri-edit-line text-lg"></i>
+                </button>
+                <button 
+                  (click)="generateReport(claim.id)"
+                  class="text-green-600 hover:text-green-900">
+                  <i class="ri-file-text-line text-lg"></i>
+                </button>
+                <button 
+                  (click)="deleteClaim(claim.id)"
+                  class="text-red-600 hover:text-red-900">
+                  <i class="ri-delete-bin-line text-lg"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+  
+          <!-- No Results -->
+          <tr *ngIf="claims.length === 0 && !loading">
+            <td colspan="10" class="py-4 text-center text-gray-500">
+              No claims found matching your criteria
+            </td>
+          </tr>
+  
+          <!-- Loading State -->
+          <tr *ngIf="loading">
+            <td colspan="10" class="py-4">
+              <div class="flex justify-center items-center">
+                <i class="ri-loader-4-line text-2xl animate-spin text-blue-600"></i>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-4">
+      <div class="text-sm text-gray-700">
+        Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
+      </div>
+      <div class="flex items-center space-x-2">
+        <button 
+          [disabled]="currentPage === 1"
+          (click)="onPageChange(currentPage - 1)"
+          class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <button 
+          [disabled]="currentPage * pageSize >= total"
+          (click)="onPageChange(currentPage + 1)"
+          class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </div>
+  </div>

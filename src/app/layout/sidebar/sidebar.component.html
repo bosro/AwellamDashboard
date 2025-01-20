@@ -1,0 +1,87 @@
+<aside 
+  class="bg-gray-800 flex-shrink-0 transition-all duration-300"
+  [class.w-64]="!isCollapsed"
+  [class.w-20]="isCollapsed">
+  <div class="h-full flex flex-col">
+    <!-- Sidebar Header -->
+    <div class="h-16 flex items-center justify-between px-4 bg-gray-900">
+      <div class="flex items-center" *ngIf="!isCollapsed">
+        <img src="assets/images/logo-white.png" alt="Logo" class="h-8 w-auto">
+      </div>
+      <button 
+        (click)="toggleSidebar()"
+        class="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700"
+      >
+        <i [class]="isCollapsed ? 'ri-menu-unfold-line' : 'ri-menu-fold-line'" class="text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
+      <ng-container *ngFor="let item of menuItems">
+        <!-- Single Menu Item -->
+        <ng-container *ngIf="!item.children">
+          <a 
+            [routerLink]="item.route"
+            routerLinkActive="bg-gray-900 text-white"
+            [class.justify-center]="isCollapsed"
+            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+          >
+            <i [class]="item.icon + ' text-xl'" class="mr-3"></i>
+            <span *ngIf="!isCollapsed">{{item.title}}</span>
+          </a>
+        </ng-container>
+
+        <!-- Menu Item with Submenu -->
+        <div *ngIf="item.children" class="space-y-1">
+          <button
+            (click)="toggleSubmenu(item)"
+            [class.justify-center]="isCollapsed"
+            class="w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+            [class.bg-gray-900]="isMenuActive(item)"
+          >
+            <i [class]="item.icon + ' text-xl'" class="mr-3"></i>
+            <span *ngIf="!isCollapsed" class="flex-1">{{item.title}}</span>
+            <i *ngIf="!isCollapsed" 
+               [class]="item.expanded ? 'ri-arrow-down-s-line' : 'ri-arrow-right-s-line'"
+               class="text-xl"></i>
+          </button>
+
+          <!-- Submenu -->
+          <div *ngIf="item.expanded && !isCollapsed" 
+               class="space-y-1 pl-10">
+            <a *ngFor="let child of item.children"
+               [routerLink]="child.route"
+               routerLinkActive="bg-gray-900 text-white"
+               class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+            >
+              <i [class]="child.icon + ' text-lg'" class="mr-3"></i>
+              {{child.title}}
+            </a>
+          </div>
+        </div>
+      </ng-container>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="p-4 border-t border-gray-700">
+      <div *ngIf="!isCollapsed" class="flex items-center space-x-3">
+        <div class="flex-shrink-0">
+          <i class="ri-question-line text-xl text-gray-400"></i>
+        </div>
+        <div class="flex-1">
+          <a 
+            href="#"
+            class="text-sm font-medium text-gray-300 hover:text-white"
+          >
+            Need Help?
+          </a>
+          <p class="text-xs text-gray-500">Support Center</p>
+        </div>
+      </div>
+      <div *ngIf="isCollapsed" class="flex justify-center">
+        <i class="ri-question-line text-xl text-gray-400"></i>
+      </div>
+    </div>
+  </div>
+</aside>

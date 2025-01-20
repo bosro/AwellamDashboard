@@ -1,0 +1,39 @@
+:host {
+    display: block;
+  
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+  
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+  
+    select {
+      scrollbar-width: thin;
+      scrollbar-color: #CBD5E0 #EDF2F7;
+      
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #EDF2F7;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: #CBD5E0;
+        border-radius: 4px;
+      }
+    }
+  }

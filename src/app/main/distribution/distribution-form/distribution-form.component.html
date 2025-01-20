@@ -1,0 +1,238 @@
+<div class="p-6 max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold text-gray-900">
+          {{ isEditMode ? 'Edit Distribution Order' : 'Create New Distribution Order' }}
+        </h1>
+        <button 
+          routerLink="/distribution"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
+      </div>
+    </div>
+  
+    <!-- Form -->
+    <form [formGroup]="distributionForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Customer Information -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Customer Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Customer Name
+            </label>
+            <input 
+              type="text"
+              formControlName="customerName"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [class.border-red-500]="distributionForm.get('customerName')!.touched && 
+                                    distributionForm.get('customerName')!.invalid"
+            >
+            <div *ngIf="distributionForm.get('customerName')!.touched && 
+                        distributionForm.get('customerName')!.invalid"
+                 class="mt-1 text-sm text-red-600">
+              Customer name is required
+            </div>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Contact Person
+            </label>
+            <input 
+              type="text"
+              formControlName="contactPerson"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [class.border-red-500]="distributionForm.get('contactPerson')!.touched && 
+                                    distributionForm.get('contactPerson')!.invalid"
+            >
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Contact Number
+            </label>
+            <input 
+              type="text"
+              formControlName="contactNumber"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [class.border-red-500]="distributionForm.get('contactNumber')!.touched && 
+                                    distributionForm.get('contactNumber')!.invalid"
+            >
+            <div *ngIf="distributionForm.get('contactNumber')!.touched && 
+                        distributionForm.get('contactNumber')!.invalid"
+                 class="mt-1 text-sm text-red-600">
+              Please enter a valid contact number
+            </div>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Delivery Address
+            </label>
+            <textarea 
+              formControlName="deliveryAddress"
+              rows="2"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [class.border-red-500]="distributionForm.get('deliveryAddress')!.touched && 
+                                    distributionForm.get('deliveryAddress')!.invalid"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Order Details -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Order Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Product Type
+            </label>
+            <select 
+              formControlName="productType"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Product</option>
+              <option *ngFor="let type of productTypes" [value]="type">
+                {{type}}
+              </option>
+            </select>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Quantity
+            </label>
+            <input 
+              type="number"
+              formControlName="quantity"
+              min="1"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Price per Unit
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-2 text-gray-500">$</span>
+              <input 
+                type="number"
+                formControlName="price"
+                min="0"
+                step="0.01"
+                class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+            </div>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Plant
+            </label>
+            <select 
+              formControlName="plant"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Plant</option>
+              <option *ngFor="let plant of plants" [value]="plant">
+                {{plant}}
+              </option>
+            </select>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Estimated Delivery Time
+            </label>
+            <input 
+              type="datetime-local"
+              formControlName="estimatedDeliveryTime"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+  
+          <!-- Total Amount Display -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Total Amount
+            </label>
+            <div class="px-4 py-2 bg-gray-100 rounded-lg text-lg font-semibold">
+              {{ calculateTotalAmount() | currency }}
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Driver & Truck Assignment -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Delivery Assignment</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Assign Driver
+            </label>
+            <select 
+              formControlName="driverId"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Driver</option>
+              <option *ngFor="let driver of availableDrivers" [value]="driver.id">
+                {{driver.name}} ({{driver.status}})
+              </option>
+            </select>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Assign Truck
+            </label>
+            <select 
+              formControlName="truckId"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Truck</option>
+              <option *ngFor="let truck of availableTrucks" [value]="truck.id">
+                {{truck.registrationNumber}} ({{truck.status}})
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Additional Notes -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Additional Notes</h2>
+        <textarea 
+          formControlName="notes"
+          rows="3"
+          placeholder="Enter any additional notes or special instructions..."
+          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+        ></textarea>
+      </div>
+  
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-4 pt-4">
+        <button 
+          type="button"
+          routerLink="/distribution"
+          class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+          Cancel
+        </button>
+        <button 
+          type="submit"
+          [disabled]="distributionForm.invalid || loading"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          <div class="flex items-center">
+            <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
+            {{ isEditMode ? 'Update' : 'Create' }} Order
+          </div>
+        </button>
+      </div>
+    </form>
+  </div>

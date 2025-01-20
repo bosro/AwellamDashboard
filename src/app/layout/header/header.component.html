@@ -1,0 +1,117 @@
+<header class="bg-white shadow">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <!-- Left section -->
+        <div class="flex">
+          <!-- Logo -->
+          <div class="flex-shrink-0 flex items-center">
+            <img class="h-8 w-auto" src="assets/images/logo.png" alt="Logo">
+          </div>
+        </div>
+  
+        <!-- Right section -->
+        <div class="flex items-center">
+          <!-- Search -->
+          <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end">
+            <div class="max-w-lg w-full lg:max-w-xs">
+              <label for="search" class="sr-only">Search</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="ri-search-line text-gray-400"></i>
+                </div>
+                <input
+                  id="search"
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white shadow-sm focus:outline-none focus:bg-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Search"
+                  type="search"
+                >
+              </div>
+            </div>
+          </div>
+  
+          <!-- Notifications -->
+          <div class="ml-4 relative flex-shrink-0">
+            <button
+              (click)="toggleNotifications()"
+              class="bg-white rounded-full p-1 hover:bg-gray-100 relative"
+            >
+              <i class="ri-notification-3-line text-xl text-gray-600"></i>
+              <span *ngIf="unreadCount > 0" 
+                    class="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-xs text-white text-center">
+                {{unreadCount}}
+              </span>
+            </button>
+  
+            <!-- Notifications dropdown -->
+            <div *ngIf="showNotifications"
+                 class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+              <div class="py-1">
+                <div class="px-4 py-2 border-b border-gray-200">
+                  <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+                </div>
+                <div *ngFor="let notification of notifications" 
+                     class="px-4 py-3 hover:bg-gray-50 cursor-pointer">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                      <i [class]="notification.icon + ' text-xl'" [ngClass]="notification.iconClass"></i>
+                    </div>
+                    <div class="ml-3 w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900">{{notification.title}}</p>
+                      <p class="mt-1 text-sm text-gray-500">{{notification.message}}</p>
+                      <p class="mt-1 text-xs text-gray-400">{{notification.time | date:'short'}}</p>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="notifications.length === 0" class="px-4 py-3 text-sm text-gray-500">
+                  No new notifications
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Profile dropdown -->
+          <div class="ml-4 relative flex-shrink-0">
+            <div>
+              <button
+                (click)="toggleProfileMenu()"
+                class="bg-white rounded-full flex text-sm focus:outline-none"
+              >
+                <img
+                  [src]="currentUser?.profileImage || 'assets/images/default-avatar.png'"
+                  alt="Profile"
+                  class="h-8 w-8 rounded-full"
+                >
+              </button>
+            </div>
+  
+            <div *ngIf="showProfileMenu"
+                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+              <div class="py-1">
+                <div class="px-4 py-2 border-b border-gray-200">
+                  <p class="text-sm font-medium text-gray-900">{{currentUser?.firstName}} {{currentUser?.lastName}}</p>
+                  <p class="text-xs text-gray-500">{{currentUser?.email}}</p>
+                </div>
+                <a routerLink="/profile" 
+                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="ri-user-settings-line mr-2"></i>
+                  Profile Settings
+                </a>
+                <a routerLink="/auth/change-password" 
+                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="ri-lock-password-line mr-2"></i>
+                  Change Password
+                </a>
+                <button
+                  (click)="logout()"
+                  class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                >
+                  <i class="ri-logout-box-line mr-2"></i>
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>

@@ -1,0 +1,89 @@
+<div *ngIf="show" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="relative p-4 w-full max-w-md">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 border-b rounded-t">
+          <h3 class="text-xl font-semibold text-gray-900">
+            Create Disbursement
+          </h3>
+          <button 
+            type="button"
+            (click)="onClose()"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+            <i class="ri-close-line text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="p-6 space-y-6">
+          <form [formGroup]="disbursementForm" (ngSubmit)="onSubmit()">
+            <div class="space-y-4">
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                  Quantity
+                </label>
+                <input
+                  type="number"
+                  formControlName="quantity"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  [class.border-red-500]="isFieldInvalid('quantity')"
+                  [attr.max]="getMaxQuantity()"
+                  min="1"
+                >
+                <div *ngIf="isFieldInvalid('quantity')"
+                     class="mt-2 text-sm text-red-600">
+                  <span *ngIf="hasError('quantity', 'required')">Quantity is required</span>
+                  <span *ngIf="hasError('quantity', 'max')">Cannot exceed available quantity ({{getMaxQuantity()}})</span>
+                  <span *ngIf="hasError('quantity', 'min')">Quantity must be at least 1</span>
+                </div>
+              </div>
+  
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                  Truck ID
+                </label>
+                <input
+                  type="text"
+                  formControlName="truckId"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                >
+              </div>
+  
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900">
+                  Requested By
+                </label>
+                <input
+                  type="text"
+                  formControlName="requestedBy"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  [class.border-red-500]="isFieldInvalid('requestedBy')"
+                >
+                <div *ngIf="isFieldInvalid('requestedBy')"
+                     class="mt-2 text-sm text-red-600">
+                  Requester name is required
+                </div>
+              </div>
+            </div>
+  
+            <!-- Modal footer -->
+            <div class="flex items-center justify-end space-x-2 mt-6">
+              <button
+                type="button"
+                (click)="onClose()"
+                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                [disabled]="disbursementForm.invalid"
+                class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50">
+                Create Disbursement
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>

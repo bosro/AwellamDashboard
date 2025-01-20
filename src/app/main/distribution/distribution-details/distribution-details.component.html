@@ -1,0 +1,171 @@
+<div class="p-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">
+          Distribution Order Details
+        </h1>
+        <p class="mt-1 text-sm text-gray-600">Order #{{order?.salesOrderNumber}}</p>
+      </div>
+      <div class="flex space-x-3">
+        <button 
+          [routerLink]="['/distribution']"
+          class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
+        <button 
+          [routerLink]="['/distribution/edit', order?.id]"
+          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <i class="ri-edit-line mr-2"></i>
+          Edit Order
+        </button>
+      </div>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+      <i class="ri-loader-4-line text-3xl animate-spin text-blue-600"></i>
+    </div>
+  
+    <!-- Order Details -->
+    <div *ngIf="!loading && order" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Basic Info Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Order Information</h2>
+        <dl class="space-y-4">
+          <div class="flex justify-between">
+            <dt class="text-sm font-medium text-gray-500">Status</dt>
+            <dd>
+              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(order.status)">
+                {{order.status | titlecase}}
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Customer Name</dt>
+            <dd class="mt-1">{{order.customerName}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Contact Person</dt>
+            <dd class="mt-1">{{order.contactPerson}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Contact Number</dt>
+            <dd class="mt-1">{{order.contactNumber}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Delivery Address</dt>
+            <dd class="mt-1">{{order.deliveryAddress}}</dd>
+          </div>
+        </dl>
+      </div>
+  
+      <!-- Product Details Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Product Details</h2>
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Product Type</dt>
+            <dd class="mt-1">{{order.productType}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Quantity</dt>
+            <dd class="mt-1">{{order.quantity}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Unit Price</dt>
+            <dd class="mt-1">{{order.price | currency}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+            <dd class="mt-1 text-lg font-semibold">{{order.totalAmount | currency}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Plant</dt>
+            <dd class="mt-1">{{order.plant}}</dd>
+          </div>
+        </dl>
+      </div>
+  
+      <!-- Delivery Information Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Delivery Information</h2>
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Driver</dt>
+            <dd class="mt-1">{{order.driverName || 'Unassigned'}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Truck</dt>
+            <dd class="mt-1">{{order.truckRegistration || 'Unassigned'}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Estimated Delivery</dt>
+            <dd class="mt-1">{{order.estimatedDeliveryTime | date:'medium'}}</dd>
+          </div>
+          <div *ngIf="order.actualDeliveryTime">
+            <dt class="text-sm font-medium text-gray-500">Actual Delivery</dt>
+            <dd class="mt-1">{{order.actualDeliveryTime | date:'medium'}}</dd>
+          </div>
+        </dl>
+  
+        <!-- Status Update Actions -->
+        <div *ngIf="order.status !== 'delivered' && order.status !== 'cancelled'" 
+             class="mt-6 space-y-3">
+          <button 
+            *ngIf="order.status === 'pending' && order.driverId"
+            (click)="updateStatus('in-transit')"
+            class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <i class="ri-truck-line mr-2"></i>
+            Start Delivery
+          </button>
+          <button 
+            *ngIf="order.status === 'in-transit'"
+            (click)="updateStatus('delivered')"
+            class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <i class="ri-check-double-line mr-2"></i>
+            Mark as Delivered
+          </button>
+        </div>
+      </div>
+  
+      <!-- Delivery Timeline -->
+      <div class="md:col-span-3 bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-6">Delivery Timeline</h2>
+        <div class="relative">
+          <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+          <div class="space-y-6">
+            <div *ngFor="let step of deliverySteps" 
+                 class="relative flex items-start group">
+              <div class="h-16">
+                <span 
+                  [class]="'flex items-center justify-center w-16 h-16 rounded-full ' + 
+                            (step.status === 'completed' ? 'bg-green-100' :
+                             step.status === 'current' ? 'bg-blue-100' : 'bg-gray-100')"
+                >
+                  <i [class]="step.icon + ' text-2xl ' +
+                             (step.status === 'completed' ? 'text-green-600' :
+                              step.status === 'current' ? 'text-blue-600' : 'text-gray-400')"
+                  ></i>
+                </span>
+              </div>
+              <div class="ml-4 min-w-0 flex-1">
+                <div class="text-sm font-medium text-gray-900">{{step.title}}</div>
+                <div class="mt-1 text-sm text-gray-500">{{step.description}}</div>
+                <div *ngIf="step.timestamp" class="mt-1 text-xs text-gray-400">
+                  {{step.timestamp | date:'medium'}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Notes Section -->
+      <div *ngIf="order.notes" class="md:col-span-3 bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-medium mb-4">Additional Notes</h2>
+        <p class="text-gray-600">{{order.notes}}</p>
+      </div>
+    </div>
+  </div>
