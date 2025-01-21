@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { TransportService, Transport } from '../../services/transport.service';
+import { TransportService, Transport } from '../../../services/transport.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
 
 @Component({
   selector: 'app-transport-list',
-  templateUrl: './transport-list.component.html',
-  styleUrls: ['./transport-list.component.scss']
+  templateUrl: './transportlist.component.html',
+  styleUrls: ['./transportlist.component.css']
 })
 export class TransportListComponent implements OnInit {
   transports: Transport[] = [];
@@ -16,10 +18,12 @@ export class TransportListComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   
-  filterForm: FormGroup;
+  Math = Math;
+
+  filterForm!: FormGroup;
   exportLoading = false;
 
-  statusOptions = ['scheduled', 'in-transit', 'completed', 'cancelled'];
+  statusOptions: TransportStatus[] = ['scheduled', 'in-transit', 'completed', 'cancelled'];
 
   constructor(
     private transportService: TransportService,
@@ -81,7 +85,9 @@ export class TransportListComponent implements OnInit {
     });
   }
 
-  toggleSelection(transportId: number): void {
+  toggleSelection(transportId: number | undefined): void {
+    if (!transportId) return;
+    
     if (this.selectedTransports.has(transportId)) {
       this.selectedTransports.delete(transportId);
     } else {
@@ -94,7 +100,9 @@ export class TransportListComponent implements OnInit {
       this.selectedTransports.clear();
     } else {
       this.transports.forEach(transport => {
-        this.selectedTransports.add(transport.id);
+        if (transport.id) {
+          this.selectedTransports.add(transport.id);
+        }
       });
     }
   }
@@ -103,7 +111,7 @@ export class TransportListComponent implements OnInit {
     if (this.selectedTransports.size === 0) return;
     
     const waypoints = this.transports
-      .filter(t => this.selectedTransports.has(t.id))
+      .filter(t => t.id && this.selectedTransports.has(t.id))
       .map(t => [t.startLocation, t.endLocation])
       .flat();
 
@@ -139,7 +147,9 @@ export class TransportListComponent implements OnInit {
     });
   }
 
-  updateTransportStatus(id: number, status: string): void {
+  updateTransportStatus(id: number | undefined, status: TransportStatus): void {
+    if (!id) return;
+    
     this.transportService.updateTransport(id, { status }).subscribe({
       next: () => {
         this.loadTransports();
@@ -147,14 +157,14 @@ export class TransportListComponent implements OnInit {
     });
   }
 
-  getStatusClass(status: string): string {
-    const classes = {
+  getStatusClass(status: TransportStatus): string {
+    const statusClasses: Record<TransportStatus, string> = {
       'scheduled': 'bg-yellow-100 text-yellow-800',
       'in-transit': 'bg-blue-100 text-blue-800',
       'completed': 'bg-green-100 text-green-800',
       'cancelled': 'bg-red-100 text-red-800'
     };
-    return classes[status] || '';
+    return statusClasses[status];
   }
 
   clearFilters(): void {
@@ -168,18 +178,18 @@ export class TransportListComponent implements OnInit {
 
   calculateTotalDistance(): number {
     return this.transports
-      .filter(t => this.selectedTransports.has(t.id))
-      .reduce((sum, t) => sum + t.distance, 0);
+      .filter(t => t.id && this.selectedTransports.has(t.id))
+      .reduce((sum, t) => sum + (t.distance || 0), 0);
   }
 
   getFuelEfficiency(): number {
     const selectedTransports = this.transports
-      .filter(t => this.selectedTransports.has(t.id));
+      .filter(t => t.id && this.selectedTransports.has(t.id));
     
     if (selectedTransports.length === 0) return 0;
 
     const totalFuel = selectedTransports
-      .reduce((sum, t) => sum + t.fuelConsumption, 0);
+      .reduce((sum, t) => sum + (t.fuelConsumption || 0), 0);
     const totalDistance = this.calculateTotalDistance();
 
     return totalDistance > 0 ? totalFuel / totalDistance : 0;

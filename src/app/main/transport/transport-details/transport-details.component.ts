@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TransportService, Transport } from '../../services/transport.service';
+import { TransportService, Transport } from '../../../services/transport.service';
+
+type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
+type TimelineStatus = 'completed' | 'current' | 'pending';
 
 interface TimelineEvent {
   title: string;
   description: string;
   timestamp: string;
-  status: 'completed' | 'current' | 'pending';
+  status: TimelineStatus;
   icon: string;
 }
 
@@ -16,11 +19,11 @@ interface TimelineEvent {
   styleUrls: ['./transport-details.component.scss']
 })
 export class TransportDetailsComponent implements OnInit {
-  transport: Transport;
+  transport!: Transport;
   loading = false;
   timeline: TimelineEvent[] = [];
   fuelConsumptionData: any[] = [];
-  routeProgress: number = 0;
+  routeProgress = 0;
 
   constructor(
     private transportService: TransportService,
@@ -29,7 +32,7 @@ export class TransportDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.params['id'];
+    const id = Number(this.route.snapshot.params['id']);
     this.loadTransportDetails(id);
   }
 
@@ -74,8 +77,7 @@ export class TransportDetailsComponent implements OnInit {
         title: 'Transport Started',
         description: 'Vehicle departed from starting location',
         timestamp: this.transport.startTime,
-        status: this.transport.status === 'in-transit' || this.transport.status === 'completed' 
-                ? 'completed' : this.transport.status === 'scheduled' ? 'pending' : 'current',
+        status: this.getTransportStartStatus(),
         icon: 'ri-truck-line'
       },
       {
@@ -88,6 +90,16 @@ export class TransportDetailsComponent implements OnInit {
         icon: 'ri-flag-2-line'
       }
     ];
+  }
+
+  private getTransportStartStatus(): TimelineStatus {
+    if (this.transport.status === 'in-transit' || this.transport.status === 'completed') {
+      return 'completed';
+    }
+    if (this.transport.status === 'scheduled') {
+      return 'pending';
+    }
+    return 'current';
   }
 
   calculateRouteProgress(): void {
@@ -108,7 +120,7 @@ export class TransportDetailsComponent implements OnInit {
   }
 
   loadFuelConsumption(): void {
-    if (this.transport.truckId) {
+    if (this.transport.truckId && this.transport.id) {
       this.transportService.getFuelConsumptionReport(
         this.transport.truckId,
         { transportId: this.transport.id }
@@ -120,35 +132,37 @@ export class TransportDetailsComponent implements OnInit {
     }
   }
 
-  updateStatus(status: string): void {
-    this.transportService.updateTransport(
-      this.transport.id,
-      { status }
-    ).subscribe({
-      next: (updated) => {
-        this.transport = updated;
-        this.generateTimeline();
-        this.calculateRouteProgress();
-      }
-    });
+  updateStatus(status: TransportStatus): void {
+    if (this.transport.id) {
+      this.transportService.updateTransport(
+        this.transport.id,
+        { status }
+      ).subscribe({
+        next: (updated) => {
+          this.transport = updated;
+          this.generateTimeline();
+          this.calculateRouteProgress();
+        }
+      });
+    }
   }
 
-  getStatusClass(status: string): string {
-    const classes = {
+  getStatusClass(status: TransportStatus): string {
+    const statusClasses: Record<TransportStatus, string> = {
       'scheduled': 'bg-yellow-100 text-yellow-800',
       'in-transit': 'bg-blue-100 text-blue-800',
       'completed': 'bg-green-100 text-green-800',
       'cancelled': 'bg-red-100 text-red-800'
     };
-    return classes[status] || '';
+    return statusClasses[status] || '';
   }
 
-  getTimelineStatus(status: string): string {
-    const classes = {
+  getTimelineStatus(status: TimelineStatus): string {
+    const timelineClasses: Record<TimelineStatus, string> = {
       'completed': 'bg-green-500',
       'current': 'bg-blue-500',
       'pending': 'bg-gray-300'
     };
-    return classes[status] || '';
+    return timelineClasses[status];
   }
 }

@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { Truck } from '../shared/types/truck-operation.types';
+import { OperationFormData } from '../shared/types/truck-operation.types';
 
 export interface TruckOperation {
-  id?: number;
+  checklist: any;
+  id: number;
   truckId: number;
   truckRegistration: string;
   operationType: 'maintenance' | 'inspection' | 'repair' | 'fuel' | 'service';
@@ -62,13 +65,15 @@ export class TruckOpsService {
     return this.http.get<TruckOperation>(`${this.apiUrl}/operations/${id}`);
   }
 
-  createOperation(operation: Omit<TruckOperation, 'id'>): Observable<TruckOperation> {
+  createOperation(operation: OperationFormData): Observable<TruckOperation> {
     return this.http.post<TruckOperation>(`${this.apiUrl}/operations`, operation);
   }
 
-  updateOperation(id: number, operation: Partial<TruckOperation>): Observable<TruckOperation> {
+  updateOperation(id: number, operation: OperationFormData): Observable<TruckOperation> {
     return this.http.patch<TruckOperation>(`${this.apiUrl}/operations/${id}`, operation);
   }
+
+ 
 
   deleteOperation(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/operations/${id}`);
@@ -142,4 +147,29 @@ export class TruckOpsService {
   getDueInspections(): Observable<TruckOperation[]> {
     return this.http.get<TruckOperation[]>(`${this.apiUrl}/due-inspections`);
   }
+
+
+
+  // getTrucks(): Observable<Truck[]> {
+  //   return this.http.get<Truck[]>(`${this.apiUrl}/trucks`);
+  // }
+
+  getTrucks(): Observable<Truck[]> {
+    // If the API returns a different structure, map it to match our Truck interface
+    return this.http.get<any[]>(`${this.apiUrl}/trucks`).pipe(
+      map(trucks => trucks.map(truck => ({
+        id: truck.id,
+        registration: truck.registration || truck.registrationNumber || truck.regNumber // handle different possible property names
+      })))
+    );
+  }
+
+  getLocations(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/locations`);
+  }
+
+ 
+
+ 
+
 }

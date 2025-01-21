@@ -56,7 +56,7 @@ export class FuelTrackingService {
     return 'good';
   }
 
-  exportFuelData(truckId: number, format: 'excel' | 'pdf'): Observable<Blob> {
+  exportFuelData(truckId: any, format: 'excel' | 'pdf'): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/export/${truckId}/${format}`, {
       responseType: 'blob'
     });

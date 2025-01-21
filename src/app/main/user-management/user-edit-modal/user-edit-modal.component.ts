@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService, User } from '../../services/auth.service';
+import { AuthService, User } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-user-edit-modal',
@@ -12,7 +12,7 @@ export class UserEditModalComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
-  userForm: FormGroup;
+  userForm!: FormGroup;
   loading = false;
   showPassword = false;
   error = '';
@@ -50,7 +50,7 @@ export class UserEditModalComponent implements OnInit {
         status: this.user.status,
         permissions: this.user.permissions
       });
-      this.userForm.get('email').disable();
+      this.userForm.get('email')!.disable();
     }
   }
 
@@ -70,7 +70,7 @@ export class UserEditModalComponent implements OnInit {
     });
 
     // Update permissions when role changes
-    this.userForm.get('role').valueChanges.subscribe(role => {
+    this.userForm.get('role')!.valueChanges.subscribe(role => {
       const rolePermissions = this.roles.find(r => r.id === role)?.permissions || [];
       this.userForm.patchValue({ permissions: rolePermissions }, { emitEvent: false });
     });
@@ -112,7 +112,7 @@ export class UserEditModalComponent implements OnInit {
   }
 
   getPasswordStrength(): 'weak' | 'medium' | 'strong' {
-    const password = this.userForm.get('password').value;
+    const password = this.userForm.get('password')!.value;
     if (!password) return 'weak';
 
     let score = 0;

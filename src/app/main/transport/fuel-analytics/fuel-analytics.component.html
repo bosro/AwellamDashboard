@@ -41,7 +41,7 @@
           </div>
   
           <!-- Custom Date Range -->
-          <div *ngIf="filterForm.get('dateRange').value === 'custom'"
+          <div *ngIf="filterForm.get('dateRange')!.value === 'custom'"
                formGroupName="customDateRange"
                class="grid grid-cols-2 gap-2">
             <div>
@@ -259,7 +259,7 @@
       <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-medium mb-4">Recent Refueling</h2>
         <div class="space-y-3">
-          <div *ngFor="let record of fuelRecords.slice(0, 5)" 
+          <!-- <div *ngFor="let record of fuelRecords.slice(0, 5)" 
                class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
             <div>
               <p class="font-medium">{{record.quantity}} L</p>
@@ -269,7 +269,7 @@
               <p class="font-medium">{{record.cost | currency}}</p>
               <p class="text-sm text-gray-500">{{record.date | date:'shortDate'}}</p>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -287,10 +287,10 @@
               </div>
               <div class="ml-3">
                 <h3 class="text-sm font-medium text-blue-900">Cost Savings</h3>
-                <p class="mt-1 text-sm text-blue-700">
+                <!-- <p class="mt-1 text-sm text-blue-700">
                   Potential monthly savings of {{calculatePotentialSavings() | currency}} 
                   by optimizing refueling locations
-                </p>
+                </p> -->
               </div>
             </div>
           </div>

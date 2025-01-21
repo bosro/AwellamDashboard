@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TransportService } from '../../services/transport.service';
+import { TransportService, Transport } from '../../../services/transport.service';
 import { forkJoin } from 'rxjs';
 
 interface DashboardMetrics {
@@ -13,21 +13,64 @@ interface DashboardMetrics {
   fuelEfficiency: number;
 }
 
+interface MaintenanceSchedule {
+  id: number;
+  truckId: number;
+  scheduledDate: string;
+  type: string;
+  description: string;
+  truckRegistration?: string
+  maintenanceDate?: string;
+  maintenanceType?: string;
+}
+
+interface AnalyticsData {
+  tripTrends: TripTrend[];
+  fuelConsumption: FuelConsumption[];
+  routePerformance: RoutePerformance[];
+  totalTrips: number;
+  activeTrips: number;
+  availableTrucks: number;
+  availableDrivers: number;
+  completedToday: number;
+  scheduledToday: number;
+  maintenanceAlerts: number;
+  fuelEfficiency: number;
+}
+
+interface TripTrend {
+  date: string;
+  count: number;
+}
+
+interface FuelConsumption {
+  date: string;
+  consumption: number;
+}
+
+interface RoutePerformance {
+  routeId: number;
+  routeName: string;
+  performance: number;
+}
+
+type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
+
 @Component({
   selector: 'app-transport-dashboard',
   templateUrl: './transport-dashboard.component.html',
   styleUrls: ['./transport-dashboard.component.scss']
 })
 export class TransportDashboardComponent implements OnInit {
-  metrics: DashboardMetrics;
-  recentTransports = [];
-  maintenanceSchedule = [];
+  metrics!: DashboardMetrics;
+  recentTransports: Transport[] = [];
+  maintenanceSchedule: MaintenanceSchedule[] = [];
   loading = false;
   
   // Analytics data
-  tripTrends = [];
-  fuelConsumption = [];
-  routePerformance = [];
+  tripTrends: TripTrend[] = [];
+  fuelConsumption: FuelConsumption[] = [];
+  routePerformance: RoutePerformance[] = [];
 
   constructor(private transportService: TransportService) {}
 
@@ -56,7 +99,7 @@ export class TransportDashboardComponent implements OnInit {
     });
   }
 
-  private processAnalytics(data: any): void {
+  private processAnalytics(data: AnalyticsData): void {
     this.metrics = {
       totalTrips: data.totalTrips,
       activeTrips: data.activeTrips,
@@ -73,8 +116,8 @@ export class TransportDashboardComponent implements OnInit {
     this.routePerformance = data.routePerformance;
   }
 
-  getStatusClass(status: string): string {
-    const classes = {
+  getStatusClass(status: TransportStatus): string {
+    const classes: Record<TransportStatus, string> = {
       'scheduled': 'bg-yellow-100 text-yellow-800',
       'in-transit': 'bg-blue-100 text-blue-800',
       'completed': 'bg-green-100 text-green-800',

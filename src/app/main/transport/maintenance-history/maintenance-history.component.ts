@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { TransportService } from '../../services/transport.service';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { TransportService } from '../../../services/transport.service';
 
-interface MaintenanceRecord {
+export interface MaintenanceRecord {
   id: number;
   truckId: number;
   date: string;
@@ -25,6 +25,13 @@ interface MaintenancePart {
   status: 'available' | 'ordered' | 'installed';
 }
 
+interface MaintenanceMetrics {
+  totalCost: number;
+  averageRepairTime: number;
+  commonRepairs: [string, number][];
+  upcomingServices: MaintenanceRecord[];
+}
+
 @Component({
   selector: 'app-maintenance-history',
   templateUrl: './maintenance-history.component.html'
@@ -32,7 +39,7 @@ interface MaintenancePart {
 export class MaintenanceHistoryComponent implements OnInit {
   maintenanceRecords: MaintenanceRecord[] = [];
   loading = false;
-  selectedRecord: MaintenanceRecord = null;
+  selectedRecord!: MaintenanceRecord;
   showMaintenanceForm = false;
   maintenanceForm: FormGroup;
 
@@ -47,7 +54,7 @@ export class MaintenanceHistoryComponent implements OnInit {
     'Body Repair'
   ];
 
-  maintenanceMetrics = {
+  maintenanceMetrics: MaintenanceMetrics = {
     totalCost: 0,
     averageRepairTime: 0,
     commonRepairs: [],
@@ -58,7 +65,7 @@ export class MaintenanceHistoryComponent implements OnInit {
     private transportService: TransportService,
     private fb: FormBuilder
   ) {
-    this.createMaintenanceForm();
+    this.maintenanceForm = this.createMaintenanceForm();
   }
 
   ngOnInit(): void {
@@ -66,8 +73,8 @@ export class MaintenanceHistoryComponent implements OnInit {
     this.calculateMaintenanceMetrics();
   }
 
-  private createMaintenanceForm(): void {
-    this.maintenanceForm = this.fb.group({
+  private createMaintenanceForm(): FormGroup {
+    return this.fb.group({
       type: ['', Validators.required],
       date: ['', Validators.required],
       description: ['', Validators.required],
@@ -81,6 +88,10 @@ export class MaintenanceHistoryComponent implements OnInit {
     });
   }
 
+  get partsArray(): FormArray {
+    return this.maintenanceForm.get('parts') as FormArray;
+  }
+
   addPartToForm(): void {
     const partGroup = this.fb.group({
       name: ['', Validators.required],
@@ -88,12 +99,13 @@ export class MaintenanceHistoryComponent implements OnInit {
       cost: [0, [Validators.required, Validators.min(0)]],
       status: ['available']
     });
-    this.maintenanceForm.get('parts').push(partGroup);
+    this.partsArray.push(partGroup);
   }
 
   private loadMaintenanceHistory(): void {
     this.loading = true;
-    this.transportService.getMaintenanceHistory().subscribe({
+    // Add this method to TransportService
+    this.transportService.getMaintenanceRecords().subscribe({
       next: (records) => {
         this.maintenanceRecords = records;
         this.loading = false;
@@ -119,10 +131,10 @@ export class MaintenanceHistoryComponent implements OnInit {
       0
     );
     this.maintenanceMetrics.averageRepairTime = 
-      totalHours / this.maintenanceRecords.length;
+      this.maintenanceRecords.length > 0 ? totalHours / this.maintenanceRecords.length : 0;
 
     // Find common repairs
-    const repairCounts = {};
+    const repairCounts: Record<string, number> = {};
     this.maintenanceRecords.forEach(record => {
       repairCounts[record.type] = (repairCounts[record.type] || 0) + 1;
     });
@@ -144,6 +156,7 @@ export class MaintenanceHistoryComponent implements OnInit {
       this.loading = true;
       const formData = this.maintenanceForm.value;
 
+      // Add this method to TransportService
       this.transportService.createMaintenanceRecord(formData).subscribe({
         next: () => {
           this.loadMaintenanceHistory();
@@ -160,7 +173,8 @@ export class MaintenanceHistoryComponent implements OnInit {
   }
 
   exportMaintenanceHistory(format: 'excel' | 'pdf'): void {
-    this.transportService.exportMaintenanceHistory(format).subscribe({
+    // Add this method to TransportService
+    this.transportService.exportMaintenanceData(format).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -172,8 +186,8 @@ export class MaintenanceHistoryComponent implements OnInit {
     });
   }
 
-  getStatusClass(status: string): string {
-    const classes = {
+  getStatusClass(status: 'completed' | 'scheduled' | 'in-progress'): string {
+    const classes: Record<string, string> = {
       'completed': 'bg-green-100 text-green-800',
       'scheduled': 'bg-yellow-100 text-yellow-800',
       'in-progress': 'bg-blue-100 text-blue-800'

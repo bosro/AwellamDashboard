@@ -1,14 +1,35 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { AuthService, User } from '../../services/auth.service';
+import { AuthService, User } from '../../../core/services/auth.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface UserMetrics {
   total: number;
   active: number;
   inactive: number;
-  byRole: { [key: string]: number };
+  byRole: Record<string, number>;
 }
+
+interface UsersResponse {
+  data: User[];
+  total: number;
+}
+
+interface UserFilters {
+  searchTerm?: string;
+  role?: string;
+  status?: string;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+  page?: number;
+  pageSize?: number;
+}
+
+type RoleClasses = {
+  [K in User['role']]: string;
+};
 
 @Component({
   selector: 'app-user-management',
@@ -18,20 +39,28 @@ export class UserManagementComponent implements OnInit {
   users: User[] = [];
   selectedUsers: Set<number> = new Set();
   loading = false;
-  metrics: UserMetrics;
-  filterForm: FormGroup;
+  metrics!: UserMetrics;
+  filterForm!: FormGroup;
   showUserModal = false;
   editingUser: User | null = null;
   currentPage = 1;
   pageSize = 10;
   total = 0;
 
+  Math = Math
   roles = [
     { id: 'admin', name: 'Administrator' },
     { id: 'manager', name: 'Manager' },
     { id: 'operator', name: 'Operator' },
     { id: 'driver', name: 'Driver' }
-  ];
+  ] as const;
+
+  private readonly roleClasses: RoleClasses = {
+    admin: 'bg-purple-100 text-purple-800',
+    manager: 'bg-blue-100 text-blue-800',
+    operator: 'bg-yellow-100 text-yellow-800',
+    driver: 'bg-green-100 text-green-800'
+  };
 
   constructor(
     private authService: AuthService,
@@ -71,21 +100,20 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
-    const params = {
+    const filters: UserFilters = {
       page: this.currentPage,
       pageSize: this.pageSize,
       ...this.filterForm.value
     };
 
-    // Replace with actual API call
-    this.authService.getUsers(params).subscribe({
-      next: (response) => {
+    this.authService.getUsers(filters).subscribe({
+      next: (response: UsersResponse) => {
         this.users = response.data;
         this.total = response.total;
         this.calculateMetrics();
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: unknown) => {
         console.error('Error loading users:', error);
         this.loading = false;
       }
@@ -93,7 +121,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   private calculateMetrics(): void {
-    const byRole = {};
+    const byRole: Record<string, number> = {};
     let active = 0;
     let inactive = 0;
 
@@ -129,18 +157,18 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  updateUserStatus(userId: number, status: 'active' | 'inactive'): void {
+  updateUserStatus(userId: number, status: User['status']): void {
     this.authService.updateUserStatus(userId, status).subscribe({
       next: () => {
         this.loadUsers();
       },
-      error: (error) => {
+      error: (error: unknown) => {
         console.error('Error updating user status:', error);
       }
     });
   }
 
-  bulkUpdateStatus(status: 'active' | 'inactive'): void {
+  bulkUpdateStatus(status: User['status']): void {
     const updates = Array.from(this.selectedUsers).map(userId =>
       this.authService.updateUserStatus(userId, status)
     );
@@ -148,6 +176,8 @@ export class UserManagementComponent implements OnInit {
     Promise.all(updates).then(() => {
       this.selectedUsers.clear();
       this.loadUsers();
+    }).catch((error: unknown) => {
+      console.error('Error in bulk status update:', error);
     });
   }
 
@@ -162,7 +192,7 @@ export class UserManagementComponent implements OnInit {
         next: () => {
           this.loadUsers();
         },
-        error: (error) => {
+        error: (error: unknown) => {
           console.error('Error deleting user:', error);
         }
       });
@@ -178,6 +208,8 @@ export class UserManagementComponent implements OnInit {
       Promise.all(deletions).then(() => {
         this.selectedUsers.clear();
         this.loadUsers();
+      }).catch((error: unknown) => {
+        console.error('Error in bulk deletion:', error);
       });
     }
   }
@@ -185,13 +217,16 @@ export class UserManagementComponent implements OnInit {
   exportUsers(format: 'excel' | 'pdf'): void {
     const selectedIds = Array.from(this.selectedUsers);
     this.authService.exportUsers(format, selectedIds).subscribe({
-      next: (blob) => {
+      next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = `users-export.${format}`;
         link.click();
         window.URL.revokeObjectURL(url);
+      },
+      error: (error: unknown) => {
+        console.error('Error exporting users:', error);
       }
     });
   }
@@ -205,21 +240,15 @@ export class UserManagementComponent implements OnInit {
     this.filterForm.reset();
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: User['status']): string {
     return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   }
 
-  getRoleClass(role: string): string {
-    const classes = {
-      'admin': 'bg-purple-100 text-purple-800',
-      'manager': 'bg-blue-100 text-blue-800',
-      'operator': 'bg-yellow-100 text-yellow-800',
-      'driver': 'bg-green-100 text-green-800'
-    };
-    return classes[role] || 'bg-gray-100 text-gray-800';
+  getRoleClass(role: User['role']): string {
+    return this.roleClasses[role] || 'bg-gray-100 text-gray-800';
   }
 
-  getLastLoginText(date: string): string {
+  getLastLoginText(date: string | undefined): string {
     if (!date) return 'Never';
     const lastLogin = new Date(date);
     const now = new Date();

@@ -18,14 +18,49 @@ export interface User {
   profileImage?: string;
 }
 
+interface UsersResponse {
+  data: User[];
+  total: number;
+}
+
+interface UserFilters {
+  searchTerm?: string;
+  role?: string;
+  status?: string;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+  page?: number;
+  pageSize?: number;
+}
+
 export interface AuthResponse {
   token: string;
   refreshToken: string;
   user: User;
 }
 
+export interface CreateUserDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: string;
+  status: 'active' | 'inactive';
+  permissions: string[];
+}
+
+export interface UpdateUserDto {
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  status?: 'active' | 'inactive';
+  permissions?: string[];
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private currentUserSubject: BehaviorSubject<User | null>;
@@ -41,10 +76,14 @@ export class AuthService {
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  login(credentials: { email: string; password: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
+  login(credentials: {
+    email: string;
+    password: string;
+  }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
       .pipe(
-        tap(response => {
+        tap((response) => {
           localStorage.setItem(this.TOKEN_KEY, response.token);
           localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
           this.currentUserSubject.next(response.user);
@@ -52,15 +91,27 @@ export class AuthService {
       );
   }
 
-  logout(): void {
-    // Revoke token on server
-    this.http.post(`${environment.apiUrl}/auth/logout`, {})
-      .subscribe({
-        next: () => this.clearAuthData(),
-        error: () => this.clearAuthData()
-      });
+  
+  
+  public getUser(): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/me`).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem('user', JSON.stringify(user));
+      })
+    );
   }
 
+ 
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/logout`, {}).pipe(
+      tap(() => {
+        this.currentUserSubject.next(null);
+        localStorage.removeItem('user');
+      })
+    );
+  }
   private clearAuthData(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
@@ -69,9 +120,12 @@ export class AuthService {
 
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh-token`, { refreshToken })
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh-token`, {
+        refreshToken,
+      })
       .pipe(
-        tap(response => {
+        tap((response) => {
           localStorage.setItem(this.TOKEN_KEY, response.token);
           localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
           this.currentUserSubject.next(response.user);
@@ -86,9 +140,10 @@ export class AuthService {
     lastName: string;
     role: string;
   }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData)
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData)
       .pipe(
-        tap(response => {
+        tap((response) => {
           localStorage.setItem(this.TOKEN_KEY, response.token);
           localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
           this.currentUserSubject.next(response.user);
@@ -97,31 +152,50 @@ export class AuthService {
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email });
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/forgot-password`,
+      { email }
+    );
   }
 
-  resetPassword(token: string, password: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, {
-      token,
-      password
-    });
+  resetPassword(
+    token: string,
+    password: string
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/reset-password`,
+      {
+        token,
+        password,
+      }
+    );
   }
 
-  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/change-password`, {
-      currentPassword,
-      newPassword
-    });
+  changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/change-password`,
+      {
+        currentPassword,
+        newPassword,
+      }
+    );
   }
 
   verifyEmail(token: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/verify-email`, { token });
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/verify-email`,
+      { token }
+    );
   }
 
   updateProfile(userData: Partial<User>): Observable<User> {
-    return this.http.patch<User>(`${environment.apiUrl}/auth/profile`, userData)
+    return this.http
+      .patch<User>(`${environment.apiUrl}/auth/profile`, userData)
       .pipe(
-        tap(user => {
+        tap((user) => {
           const currentUser = this.currentUserSubject.value;
           this.currentUserSubject.next({ ...currentUser, ...user });
         })
@@ -132,7 +206,7 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  isAuthenticated(): boolean | null | "" {
+  isAuthenticated(): boolean | null | '' {
     const token = this.getToken();
     return token && !this.jwtHelper.isTokenExpired(token);
   }
@@ -145,11 +219,46 @@ export class AuthService {
   hasRole(role: string | string[]): boolean {
     const user = this.currentUserSubject.value;
     if (!user) return false;
-    
+
     if (Array.isArray(role)) {
       return role.includes(user.role);
     }
     return user.role === role;
+  }
+
+  // Add to AuthService class
+  getUsers(filters: UserFilters): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/users`, {
+      params: filters as any,
+    });
+  }
+
+  updateUserStatus(userId: number, status: User['status']): Observable<void> {
+    return this.http.patch<void>(
+      `${environment.apiUrl}/users/${userId}/status`,
+      { status }
+    );
+  }
+
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/users/${userId}`);
+  }
+
+  exportUsers(format: 'excel' | 'pdf', userIds: number[]): Observable<Blob> {
+    return this.http.post(
+      `${environment.apiUrl}/users/export`,
+      { format, userIds },
+      { responseType: 'blob' }
+    );
+  }
+
+
+  createUser(userData: CreateUserDto): Observable<User> {
+    return this.http.post<User>(`${environment.apiUrl}/users`, userData);
+  }
+
+  updateUser(userId: number, userData: UpdateUserDto): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/users/${userId}`, userData);
   }
 
   private getUserFromToken(): User | null {

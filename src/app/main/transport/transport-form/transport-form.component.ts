@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TransportService, Transport, Driver, Truck } from '../../services/transport.service';
+import { TransportService, Transport, Driver, Truck } from '../../../services/transport.service';
 import { combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -11,10 +11,10 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
   styleUrls: ['./transport-form.component.scss']
 })
 export class TransportFormComponent implements OnInit {
-  transportForm: FormGroup;
+  transportForm!: FormGroup;
   isEditMode = false;
   loading = false;
-  transportId: number;
+  transportId!: number;
 
   availableDrivers: Driver[] = [];
   availableTrucks: Truck[] = [];
@@ -57,8 +57,8 @@ export class TransportFormComponent implements OnInit {
 
   private setupRouteCalculation(): void {
     combineLatest([
-      this.transportForm.get('startLocation').valueChanges,
-      this.transportForm.get('endLocation').valueChanges
+      this.transportForm.get('startLocation')!.valueChanges,
+      this.transportForm.get('endLocation')!.valueChanges
     ]).pipe(
       debounceTime(500),
       distinctUntilChanged(),
@@ -90,7 +90,7 @@ export class TransportFormComponent implements OnInit {
   }
 
   private updateEstimatedEndTime(): void {
-    const startTime = this.transportForm.get('startTime').value;
+    const startTime = this.transportForm.get('startTime')!.value;
     if (startTime && this.estimatedDuration) {
       const endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + this.estimatedDuration);
@@ -133,14 +133,14 @@ export class TransportFormComponent implements OnInit {
     });
   }
 
-  onDriverSelect(driverId: number): void {
+  onDriverSelect(driverId:any): void {
     const driver = this.availableDrivers.find(d => d.id === driverId);
     if (driver && driver.status !== 'available') {
-      this.transportForm.get('driverId').setErrors({ 'driverUnavailable': true });
+      this.transportForm.get('driverId')!.setErrors({ 'driverUnavailable': true });
     }
   }
 
-  onTruckSelect(truckId: number): void {
+  onTruckSelect(truckId:any): void {
     const truck = this.availableTrucks.find(t => t.id === truckId);
     if (truck) {
       this.transportForm.patchValue({
@@ -150,8 +150,8 @@ export class TransportFormComponent implements OnInit {
   }
 
   validateLoad(): boolean {
-    const currentLoad = this.transportForm.get('currentLoad').value;
-    const loadCapacity = this.transportForm.get('loadCapacity').value;
+    const currentLoad = this.transportForm.get('currentLoad')!.value;
+    const loadCapacity = this.transportForm.get('loadCapacity')!.value;
     return currentLoad <= loadCapacity;
   }
 
@@ -179,8 +179,8 @@ export class TransportFormComponent implements OnInit {
     } else {
       Object.keys(this.transportForm.controls).forEach(key => {
         const control = this.transportForm.get(key);
-        if (control.invalid) {
-          control.markAsTouched();
+        if (control!.invalid) {
+          control!.markAsTouched();
         }
       });
     }

@@ -3,14 +3,7 @@ export type OperationType = 'maintenance' | 'inspection' | 'repair' | 'fuel' | '
 export type OperationStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
 export type OperationPriority = 'low' | 'medium' | 'high';
 
-export interface TruckOperation {
-  id: number;
-  type: OperationType;
-  status: OperationStatus;
-  priority: OperationPriority;
-  endDate: string;
-  // Add other properties as needed
-}
+
 
 export interface StatusClasses {
   scheduled: string;
@@ -51,3 +44,51 @@ export interface OperationFilter {
   };
   truckId?: string;
 }
+export interface TruckOperation {
+    id: number;
+    truckId: number;
+    truckRegistration: string;
+    operationType: 'maintenance' | 'inspection' | 'repair' | 'fuel' | 'service';
+    status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+    startDate: string;
+    endDate?: string;
+    description: string;
+    cost?: number;
+    technicianName?: string;
+    notes?: string;
+    attachments?: string[];
+    mileage: number;
+    priority: 'low' | 'medium' | 'high';
+    location: string;
+    checklist?: Task[];
+  }
+
+  export interface OperationFormData {
+    truckId: number;
+    operationType: TruckOperation['operationType'];
+    status: TruckOperation['status'];
+    priority: TruckOperation['priority'];
+    startDate: string;
+    endDate?: string;
+    description: string;
+    cost?: number;
+    technicianName?: string;
+    notes?: string;
+    mileage: number;
+    location: string;
+    tasks: Task[];
+  }
+
+export interface Task {
+  id?: number;
+  name: string;
+  description?: string;
+  estimatedTime?: string;
+  completed: boolean;
+  notes?: string;
+}
+
+export interface Truck {
+    id: number;
+    registration: string;
+  }

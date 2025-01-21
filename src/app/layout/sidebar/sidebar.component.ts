@@ -1,3 +1,5 @@
+
+
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
@@ -18,7 +20,7 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   isCollapsed = false;
-  currentRoute: string;
+  currentRoute = '';
   menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
@@ -168,13 +170,14 @@ export class SidebarComponent implements OnInit {
     this.menuItems.forEach(item => {
       if (item.children) {
         item.expanded = item.children.some(child => 
-          this.router.isActive(child.route, false)
+          child.route ? this.router.isActive(child.route, false) : false
         );
       }
     });
   }
 
-  isActive(route: string): boolean {
+  isActive(route: string | undefined): boolean {
+    if (!route) return false;
     return this.router.isActive(route, false);
   }
 
@@ -182,6 +185,9 @@ export class SidebarComponent implements OnInit {
     if (item.route) {
       return this.isActive(item.route);
     }
-    return item.children?.some(child => this.isActive(child.route)) || false;
+    if (item.children) {
+      return item.children.some(child => child.route ? this.isActive(child.route) : false);
+    }
+    return false;
   }
 }

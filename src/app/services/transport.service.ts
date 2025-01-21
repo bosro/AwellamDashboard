@@ -2,9 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { MaintenanceRecord } from '../main/transport/maintenance-history/maintenance-history.component';
+import { FuelRecord } from './fuel-tracking.service';
+import { FuelRefill } from '../main/transport/truck-details/truck-details.component';
 
 export interface Transport {
-  id?: number;
+  id: number;
   truckId: number;
   driverId: number;
   routeId: number;
@@ -19,6 +22,8 @@ export interface Transport {
   loadCapacity: number;
   currentLoad: number;
   notes?: string;
+  driverName?: string;
+  truckRegistration?: string;
 }
 
 export interface Truck {
@@ -103,6 +108,10 @@ export class TransportService {
     return this.http.patch<Truck>(`${this.apiUrl}/trucks/${id}/status`, { status });
   }
 
+  recordFuelRefill(truckId: number, refillData: FuelRefill): Observable<any> {
+    return this.http.post(`${this.apiUrl}/trucks/${truckId}/fuel-refills`, refillData);
+  }
+  
   scheduleMaintenance(id: number, date: string): Observable<Truck> {
     return this.http.post<Truck>(
       `${this.apiUrl}/trucks/${id}/maintenance`,
@@ -168,5 +177,31 @@ export class TransportService {
         responseType: 'blob'
       }
     );
+  }
+
+  getMaintenanceRecords(): Observable<MaintenanceRecord[]> {
+    return this.http.get<MaintenanceRecord[]>(`${this.apiUrl}/maintenance`);
+  }
+
+  createMaintenanceRecord(record: Partial<MaintenanceRecord>): Observable<MaintenanceRecord> {
+    return this.http.post<MaintenanceRecord>(`${this.apiUrl}/maintenance`, record);
+  }
+
+  exportMaintenanceData(format: 'excel' | 'pdf'): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/maintenance/export/${format}`, {
+      responseType: 'blob'
+    });
+  }
+
+  getTruckMaintenanceHistory(truckId: number): Observable<MaintenanceRecord[]> {
+    return this.http.get<MaintenanceRecord[]>(`${this.apiUrl}/trucks/${truckId}/maintenance-history`);
+  }
+
+  getTruckFuelHistory(truckId: number): Observable<FuelRecord[]> {
+    return this.http.get<FuelRecord[]>(`${this.apiUrl}/trucks/${truckId}/fuel-history`);
+  }
+
+  getTruckAnalytics(truckId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/trucks/${truckId}/analytics`);
   }
 }
