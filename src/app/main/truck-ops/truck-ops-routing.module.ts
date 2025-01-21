@@ -8,7 +8,8 @@ const routes: Routes = [
   {
     path: '',
     children: [
-      { path: '', component: TruckOpsListComponent },
+      {path: '', redirectTo: 'truck-list', pathMatch: 'full'},
+      { path: 'truck-list', component: TruckOpsListComponent },
       { path: 'new', component: TruckOpsFormComponent },
       { path: 'edit/:id', component: TruckOpsFormComponent },
     //   { path: 'details/:id', component: TruckOpsDetailsComponent },

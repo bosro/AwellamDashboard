@@ -1,0 +1,128 @@
+<div class="h-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-medium text-gray-900">Revenue Overview</h2>
+  
+      <!-- Chart Controls -->
+      <form [formGroup]="filterForm" class="flex items-center space-x-4">
+        <!-- View Type -->
+        <div class="flex items-center space-x-2">
+          <label class="text-sm text-gray-600">View:</label>
+          <select 
+            formControlName="view"
+            class="text-sm border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500"
+          >
+            <option *ngFor="let option of viewOptions" [value]="option.id">
+              {{option.name}}
+            </option>
+          </select>
+        </div>
+  
+        <!-- Comparison -->
+        <div class="flex items-center space-x-2">
+          <label class="text-sm text-gray-600">Compare:</label>
+          <select 
+            formControlName="comparison"
+            class="text-sm border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">No Comparison</option>
+            <option *ngFor="let option of comparisonOptions" [value]="option.id">
+              {{option.name}}
+            </option>
+          </select>
+        </div>
+  
+        <!-- Projection Toggle -->
+        <div class="flex items-center">
+          <label class="inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox"
+              formControlName="showProjection"
+              class="form-checkbox h-4 w-4 text-blue-600 rounded"
+            >
+            <span class="ml-2 text-sm text-gray-600">Show Projection</span>
+          </label>
+        </div>
+      </form>
+    </div>
+  
+    <!-- Metrics Summary -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <!-- Total Revenue -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <p class="text-sm text-gray-600">Total Revenue</p>
+        <p class="text-xl font-semibold mt-1">
+          {{formatValue(metrics.totalRevenue)}}
+        </p>
+      </div>
+  
+      <!-- Average Revenue -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <p class="text-sm text-gray-600">Average Revenue</p>
+        <p class="text-xl font-semibold mt-1">
+          {{formatValue(metrics.averageRevenue)}}
+        </p>
+      </div>
+  
+      <!-- Growth -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <p class="text-sm text-gray-600">Growth</p>
+        <div class="flex items-center mt-1">
+          <p class="text-xl font-semibold" [class]="getGrowthClass()">
+            {{metrics.growth | number:'1.1-1'}}%
+          </p>
+          <i [class]="'ml-2 text-lg ' + 
+                      (metrics.growth > 0 ? 'ri-arrow-up-line text-green-600' : 
+                       metrics.growth < 0 ? 'ri-arrow-down-line text-red-600' : 
+                       'ri-more-line text-gray-600')"></i>
+        </div>
+      </div>
+  
+      <!-- Peak Revenue -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <p class="text-sm text-gray-600">Peak Revenue</p>
+        <p class="text-xl font-semibold mt-1">
+          {{formatValue(metrics.peakRevenue)}}
+        </p>
+      </div>
+    </div>
+  
+    <!-- Chart -->
+    <div class="relative h-[400px]">
+      <!-- Loading State -->
+      <div *ngIf="loading" 
+           class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+        <i class="ri-loader-4-line animate-spin text-3xl text-blue-600"></i>
+      </div>
+  
+      <!-- Chart Container -->
+      <div *ngIf="!loading && chartData.length > 0" class="h-full">
+        <ngx-charts-line-chart
+          [results]="chartData"
+          [view]="view"
+          [scheme]="'forest'"
+          [legend]="legend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxis]="xAxis"
+          [yAxis]="yAxis"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          [timeline]="timeline"
+          [showGridLines]="showGridLines"
+          [autoScale]="true"
+          [gradient]="true"
+          (select)="onSelect($event)"
+          (window:resize)="onResize($event)"
+        >
+        </ngx-charts-line-chart>
+      </div>
+  
+      <!-- No Data State -->
+      <div *ngIf="!loading && chartData.length === 0" 
+           class="absolute inset-0 flex flex-col items-center justify-center">
+        <i class="ri-bar-chart-2-line text-4xl text-gray-400 mb-2"></i>
+        <p class="text-sm text-gray-500">No revenue data available</p>
+      </div>
+    </div>
+  </div>

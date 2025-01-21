@@ -10,7 +10,8 @@ const routes: Routes = [
   {
     path: '',
     children: [
-      { path: '', component: InventoryListComponent },
+      {path: '', redirectTo: 'inventory-list', pathMatch: 'full'},
+      { path: 'inventory-list', component: InventoryListComponent },
       { path: 'new', component: InventoryFormComponent },
       { path: 'edit/:id', component: InventoryFormComponent },
       { path: 'details/:id', component: InventoryDetailsComponent },

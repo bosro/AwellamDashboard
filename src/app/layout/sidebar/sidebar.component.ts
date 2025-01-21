@@ -26,13 +26,13 @@ export class SidebarComponent implements OnInit {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/dashboard',
-      roles: ['admin', 'manager', 'operator', 'driver']
+      // roles: ['admin', 'manager', 'operator', 'driver']
     },
     {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
-      roles: ['admin', 'manager', 'operator'],
+      // roles: ['admin', 'manager', 'operator'],
       children: [
         {
           title: 'Operations',
@@ -60,7 +60,7 @@ export class SidebarComponent implements OnInit {
       title: 'Inventory',
       icon: 'ri-stock-line',
       expanded: false,
-      roles: ['admin', 'manager', 'operator'],
+      // roles: ['admin', 'manager', 'operator'],
       children: [
         {
           title: 'Stock Overview',
@@ -96,13 +96,13 @@ export class SidebarComponent implements OnInit {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
       route: '/claims',
-      roles: ['admin', 'manager']
+      // roles: ['admin', 'manager']
     },
     {
       title: 'Reports',
       icon: 'ri-bar-chart-2-line',
       expanded: false,
-      roles: ['admin', 'manager'],
+      // roles: ['admin', 'manager'],
       children: [
         {
           title: 'Operations',
@@ -125,13 +125,13 @@ export class SidebarComponent implements OnInit {
       title: 'User Management',
       icon: 'ri-user-settings-line',
       route: '/auth/users',
-      roles: ['admin']
+      // roles: ['admin']
     },
     {
       title: 'Settings',
       icon: 'ri-settings-3-line',
       route: '/settings',
-      roles: ['admin']
+      // roles: ['admin']
     }
   ];
 

@@ -9,7 +9,8 @@ const routes: Routes = [
   {
     path: '',
     children: [
-      { path: '', component: DistributionListComponent },
+      {path: '', redirectTo: 'distribution-list', pathMatch: 'full'},
+      { path: 'distribution-list', component: DistributionListComponent },
       { path: 'new', component: DistributionFormComponent },
       { path: 'edit/:id', component: DistributionFormComponent },
       { path: 'details/:id', component: DistributionDetailsComponent },

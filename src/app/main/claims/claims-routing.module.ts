@@ -9,7 +9,8 @@ const routes: Routes = [
   {
     path: '',
     children: [
-      { path: '', component: ClaimsListComponent },
+      {path: '', redirectTo: 'claims-list', pathMatch: 'full'},
+      { path: 'claims-list', component: ClaimsListComponent },
       { path: 'new', component: ClaimFormComponent },
       { path: 'edit/:id', component: ClaimFormComponent },
       { path: 'details/:id', component: ClaimDetailsComponent },

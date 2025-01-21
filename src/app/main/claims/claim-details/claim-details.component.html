@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-semibold text-gray-900">
           Claim Details
         </h1>
-        <p class="mt-1 text-sm text-gray-600">Claim #{{claim?.claimNumber}}</p>
+        <p class="mt-1 text-sm text-gray-600">Claim #{{claim.claimNumber}}</p>
       </div>
       <div class="flex space-x-3">
         <button 
@@ -15,7 +15,7 @@
           Download Report
         </button>
         <button 
-          [routerLink]="['/claims/edit', claim?.id]"
+          [routerLink]="['/claims/edit', claim.id]"
           class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           <i class="ri-edit-line mr-2"></i>
           Edit Claim

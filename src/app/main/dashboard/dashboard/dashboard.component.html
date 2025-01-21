@@ -1,0 +1,158 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <p class="mt-1 text-sm text-gray-600">Overview of your transport operations</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Date Range Selector -->
+        <div class="flex items-center space-x-2">
+          <label class="text-sm font-medium text-gray-700">Time Period:</label>
+          <!-- <select 
+            [(ngModel)]="selectedRange"
+            (change)="onDateRangeChange($event.target.value)"
+            class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          >
+            <option *ngFor="let range of dateRanges" [value]="range.value">
+              {{range.label}}
+            </option>
+          </select> -->
+          <select 
+            [(ngModel)]="selectedRange"
+            class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          >
+            <option *ngFor="let range of dateRanges" [value]="range.value">
+              {{range.label}}
+            </option>
+          </select>
+        </div>
+  
+        <!-- Export Buttons -->
+        <div class="flex space-x-2">
+          <button 
+            (click)="exportDashboard('excel')"
+            class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50"
+          >
+            <i class="ri-file-excel-line mr-2 text-green-600"></i>
+            Export Excel
+          </button>
+          <button 
+            (click)="exportDashboard('pdf')"
+            class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50"
+          >
+            <i class="ri-file-pdf-line mr-2 text-red-600"></i>
+            Export PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <!-- Transport Metrics -->
+      <app-metrics-card
+        title="Active Deliveries"
+        [value]="metrics.transport.activeDeliveries"
+        icon="ri-truck-line"
+        colorClass="bg-blue-100 text-blue-600"
+        [change]="10"
+        trend="up"
+      ></app-metrics-card>
+  
+      <!-- Inventory Metrics -->
+      <app-metrics-card
+        title="Low Stock Items"
+        [value]="metrics.inventory.lowStockItems"
+        icon="ri-store-2-line"
+        colorClass="bg-yellow-100 text-yellow-600"
+        [change]="5"
+        trend="down"
+      ></app-metrics-card>
+  
+      <!-- Maintenance Metrics -->
+      <app-metrics-card
+        title="Pending Maintenance"
+        [value]="metrics.maintenance.pendingMaintenance"
+        icon="ri-tools-line"
+        colorClass="bg-red-100 text-red-600"
+        [change]="3"
+        trend="up"
+      ></app-metrics-card>
+  
+      <!-- Performance Metrics -->
+      <app-metrics-card
+        title="On-Time Delivery"
+        [value]="metrics.performance.onTimeDelivery"
+        icon="ri-time-line"
+        colorClass="bg-green-100 text-green-600"
+        [change]="2"
+        trend="up"
+        suffix="%"
+      ></app-metrics-card>
+    </div>
+  
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Revenue Chart -->
+      <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
+        <app-revenue-chart
+          [data]="revenueData"
+          [loading]="loading"
+        ></app-revenue-chart>
+      </div>
+  
+      <!-- Activity Log -->
+      <!-- <div class="bg-white rounded-lg shadow p-6">
+        <app-activity-log
+          [activities]="activityLogs"
+          [loading]="loading"
+        ></app-activity-log>
+      </div> -->
+  
+      <!-- Delivery Map -->
+      <!-- <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
+        <app-delivery-map></app-delivery-map>
+      </div> -->
+  
+      <!-- Alerts -->
+      <!-- <div class="bg-white rounded-lg shadow p-6">
+        <app-alerts
+          [alerts]="alerts"
+          [loading]="loading"
+        ></app-alerts>
+      </div> -->
+  
+      <!-- Performance Charts -->
+      <!-- <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <app-vehicle-utilization
+            [data]="vehicleUtilization"
+            [loading]="loading"
+          ></app-vehicle-utilization>
+        </div>
+  
+        <div class="bg-white rounded-lg shadow p-6">
+          <app-fuel-consumption
+            [data]="fuelConsumption"
+            [loading]="loading"
+          ></app-fuel-consumption>
+        </div>
+      </div> -->
+  
+      <!-- Maintenance Schedule -->
+      <!-- <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
+        <app-maintenance-schedule
+          [loading]="loading"
+        ></app-maintenance-schedule>
+      </div> -->
+  
+      <!-- Inventory Status -->
+      <!-- <div class="bg-white rounded-lg shadow p-6">
+        <app-inventory-status
+          [data]="inventoryStatus"
+          [loading]="loading"
+        ></app-inventory-status>
+      </div> -->
+    </div>
+  </div>
