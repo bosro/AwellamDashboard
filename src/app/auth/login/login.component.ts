@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit {
     });
 
     // get return url from route parameters or default to '/'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    // this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   get formControls(): LoginFormControls {
@@ -80,5 +80,10 @@ export class LoginComponent implements OnInit {
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  navigate(){
+    this.router.navigate(['/dashboard'])
+    console.log('----> giiiiii <------')
   }
 }

@@ -22,7 +22,7 @@ export class MainLayoutComponent implements OnInit {
   // Define route configurations
   private readonly routes: RouteConfig[] = [
     { path: '/dashboard', title: 'Dashboard' },
-    { path: '/transport/trips', title: 'Transport Operations' },
+    { path: '/transport', title: 'Transport Operations' },
     { path: '/inventory', title: 'Inventory Management' },
     { path: '/purchasing', title: 'Purchase Orders' },
     { path: '/claims', title: 'Claims Management' }
@@ -40,11 +40,11 @@ export class MainLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/auth/login']);
-      return;
-    }
-    this.updatePageTitle();
+    // if (!this.authService.isAuthenticated()) {
+    //   this.router.navigate(['/auth/login']);
+    //   return;
+    // }
+    // this.updatePageTitle();
   }
 
   toggleSidebar(): void {

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DashboardService, DashboardMetrics } from '../../../services/dashboard.service';
+import { DashboardService } from '../../../mock/mock-dashboard.service';
+import { DashboardMetrics } from '../../../mock/mock-dashboard.interface';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 

@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, User } from '../../core/services/auth.service';
-import { NotificationService } from '../../services/notification.service';
+import { AuthService } from '../../mock/mock-auth.service';
+import { User } from '../../mock/mock.interface';
+import { NotificationService } from '../../mock/mock-notification.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -40,16 +41,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     // Subscribe to user changes
     this.authService.currentUser
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        this.currentUser = user ?? undefined;
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(user => {
+      this.currentUser = user ?? undefined; // Already handled in the code.
+    });
+  
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 
   private loadUserData(): void {
     this.authService.getUser()
@@ -105,19 +103,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
     
     if (unreadIds.length > 0) {
       this.notificationService.markAsRead(unreadIds)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notifications = this.notifications.map(n => ({
-              ...n,
-              read: true
-            }));
-            this.updateUnreadCount();
-          },
-          error: (error) => {
-            console.error('Error marking notifications as read:', error);
-          }
-        });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.notifications = this.notifications.map(n => ({
+            ...n,
+            read: unreadIds.includes(n.id) ? true : n.read
+          }));
+          this.updateUnreadCount();
+        },
+        error: (error) => {
+          console.error('Error marking notifications as read:', error);
+        }
+      });
+    
     }
   }
 
@@ -133,4 +132,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  
 }

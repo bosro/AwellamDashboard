@@ -25,6 +25,7 @@ import { SidebarComponent } from './layout/sidebar/sidebar.component';
     BrowserModule,
     AppRoutingModule,
     RouterModule,
+    MainModule
   ],
   providers: [
     provideAnimationsAsync(),

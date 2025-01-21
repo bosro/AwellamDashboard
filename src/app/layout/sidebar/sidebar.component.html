@@ -40,11 +40,13 @@
             class="w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
             [class.bg-gray-900]="isMenuActive(item)"
           >
+           <span>
             <i [class]="item.icon + ' text-xl'" class="mr-3"></i>
             <span *ngIf="!isCollapsed" class="flex-1">{{item.title}}</span>
+           </span>
             <i *ngIf="!isCollapsed" 
                [class]="item.expanded ? 'ri-arrow-down-s-line' : 'ri-arrow-right-s-line'"
-               class="text-xl"></i>
+               class="text-xl ml-2 mt-1"></i>
           </button>
 
           <!-- Submenu -->

@@ -22,13 +22,19 @@ const routes: Routes = [
     component: MainLayoutComponent,
     // canActivate: [AuthGuard],
     children: [
-      { path: '',
+      { 
+         path: '',
          redirectTo: 'dashboard', 
          pathMatch: 'full' 
       },
+      // { 
+      //   path: 'dashboard', 
+      //   component: DashboardComponent 
+      // },
       { 
         path: 'dashboard', 
-        component: DashboardComponent 
+        loadChildren: () =>
+          import('./dashboard/dashboard-routing.module').then((m) => m.DashboardRoutingModule), 
       },
       {
         path: 'transport',
