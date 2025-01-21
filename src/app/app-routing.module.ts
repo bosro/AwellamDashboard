@@ -23,10 +23,10 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes,
    {
-      scrollPositionRestoration: "enabled",
-      anchorScrolling: "enabled",
-      useHash: true,
-      enableTracing: true,
+      // scrollPositionRestoration: "enabled",
+      // anchorScrolling: "enabled",
+      // useHash: true,
+      // enableTracing: true,
     },
   )],
   exports: [RouterModule],

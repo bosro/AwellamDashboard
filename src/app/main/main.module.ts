@@ -19,10 +19,10 @@ import { DashboardModule } from './dashboard/dashboard.module';
 const routes: Routes = [
   {
     path: '',
-    component: DashboardComponent,
+    component: MainLayoutComponent,
     // canActivate: [AuthGuard],
     children: [
-      { path: '/',
+      { path: '',
          redirectTo: 'dashboard', 
          pathMatch: 'full' 
       },
@@ -95,7 +95,7 @@ const routes: Routes = [
   ],
   imports: [
     CommonModule,
-    RouterModule,
+    RouterModule.forChild(routes),
   ],
 })
 export class MainModule {}
