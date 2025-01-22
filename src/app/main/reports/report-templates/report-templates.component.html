@@ -1,0 +1,85 @@
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Report Templates</h1>
+        <p class="mt-1 text-sm text-gray-600">Manage reusable report configurations</p>
+      </div>
+      <button 
+        (click)="showForm = true; selectedTemplate = null"
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <i class="ri-add-line mr-2"></i>
+        New Template
+      </button>
+    </div>
+  
+    <!-- Templates Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div *ngFor="let template of templates" 
+           class="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-lg font-medium text-gray-900">{{template.name}}</h3>
+            <p class="text-sm text-gray-600">{{template.description}}</p>
+          </div>
+          <div class="flex space-x-2">
+            <button (click)="editTemplate(template)" class="text-blue-600 hover:text-blue-900">
+              <i class="ri-edit-line"></i>
+            </button>
+            <button (click)="deleteTemplate(template.id)" class="text-red-600 hover:text-red-900">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+          </div>
+        </div>
+  
+        <div class="space-y-3">
+          <div>
+            <span class="text-sm font-medium text-gray-500">Report Type</span>
+            <p class="mt-1 text-sm text-gray-900">{{template.type}}</p>
+          </div>
+          <div>
+            <span class="text-sm font-medium text-gray-500">Default Format</span>
+            <p class="mt-1 text-sm text-gray-900">{{template.format}}</p>
+          </div>
+          <div *ngIf="template.locations?.length">
+            <span class="text-sm font-medium text-gray-500">Locations</span>
+            <p class="mt-1 text-sm text-gray-900">{{template.locations.join(', ')}}</p>
+          </div>
+          <div *ngIf="template.chartOptions?.showCharts">
+            <span class="text-sm font-medium text-gray-500">Charts</span>
+            <div class="mt-1 flex flex-wrap gap-1">
+              <span *ngFor="let type of template.chartOptions.chartTypes"
+                    class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                {{type}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Template Form Dialog -->
+    <div *ngIf="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white rounded-lg p-6 max-w-2xl w-full">
+        <h3 class="text-lg font-medium mb-4">
+          {{selectedTemplate ? 'Edit Template' : 'New Template'}}
+        </h3>
+  
+        <form [formGroup]="templateForm" (ngSubmit)="createTemplate()" class="space-y-4">
+          <!-- Template Form Fields -->
+          <!-- Similar structure to scheduleForm but with template-specific fields -->
+          <!-- ... -->
+  
+          <div class="flex justify-end space-x-3 mt-6">
+            <button type="button" (click)="showForm = false" 
+                    class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" [disabled]="templateForm.invalid || loading"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+              {{selectedTemplate ? 'Update' : 'Create'}} Template
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

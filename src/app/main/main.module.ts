@@ -65,6 +65,34 @@ const routes: Routes = [
           import('./user-management/user-management.module').then((m) => m.UserManagementModule),
         canActivate: [AuthGuard],
       },
+      {
+        path: 'reports',
+        loadChildren: () =>
+          import('./reports/reports.module').then((m) => m.ReportsModule),
+        // canActivate: [RoleGuard],
+        // data: { roles: ['admin', 'manager'] }
+      },
+      {
+        path: 'products',
+        loadChildren: () =>
+          import('./products/products.module').then((m) => m.ProductsModule),
+        // canActivate: [RoleGuard],
+        // data: { roles: ['admin', 'manager'] }
+      },
+
+
+      // {
+      //   path: 'reports',
+      //   loadChildren: () => import('./main/reports/reports.module').then(m => m.ReportsModule),
+      //   canActivate: [RoleGuard],
+      //   data: { roles: ['admin', 'manager'] }
+      // },
+      // {
+      //   path: 'settings',
+      //   loadChildren: () => import('./main/settings/settings.module').then(m => m.SettingsModule),
+      //   canActivate: [RoleGuard],
+      //   data: { roles: ['admin'] }
+      // }
     ],
   },
 ];

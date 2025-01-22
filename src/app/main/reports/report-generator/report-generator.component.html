@@ -1,0 +1,158 @@
+<!-- report-generator.component.html -->
+<div class="p-6 max-w-4xl mx-auto">
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-semibold text-gray-900">Generate Report</h1>
+            <button routerLink="/reports/list"
+                class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                <i class="ri-arrow-left-line mr-2"></i>
+                Back to Reports
+            </button>
+        </div>
+    </div>
+
+    <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <!-- Basic Info -->
+            <div class="mb-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Report Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Report Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Report Name
+                        </label>
+                        <input type="text" formControlName="name" placeholder="Enter report name"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Report Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Report Type
+                        </label>
+                        <select formControlName="type"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Type</option>
+                            <option *ngFor="let type of reportTypes" [value]="type">
+                                {{type}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Range -->
+            <div class="mb-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Date Range</h2>
+                <div formGroupName="dateRange" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Start Date
+                        </label>
+                        <input type="date" formControlName="start"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            End Date
+                        </label>
+                        <input type="date" formControlName="end"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates -->
+            <div class="mb-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Template (Optional)</h2>
+                <select formControlName="template" (change)="onTemplateChange($event)"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Template</option>
+                    <option *ngFor="let template of templates" [value]="template.id">
+                        {{template.name}}
+                    </option>
+                </select>
+
+            </div>
+
+            <!-- Format -->
+            <div class="mb-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Output Format</h2>
+                <div class="flex space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" formControlName="format" value="pdf" class="form-radio text-blue-600">
+                        <span class="ml-2">PDF</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" formControlName="format" value="excel" class="form-radio text-blue-600">
+                        <span class="ml-2">Excel</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" formControlName="format" value="csv" class="form-radio text-blue-600">
+                        <span class="ml-2">CSV</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div formGroupName="schedule">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Schedule (Optional)</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" formControlName="enabled" class="form-checkbox text-blue-600">
+                            <span class="ml-2">Enable Scheduling</span>
+                        </label>
+                    </div>
+
+                    <div *ngIf="reportForm.get('schedule.enabled')?.value"
+                        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Frequency
+                            </label>
+                            <select formControlName="frequency"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Time
+                            </label>
+                            <input type="time" formControlName="time"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Recipients (comma-separated emails)
+                            </label>
+                            <input type="text" formControlName="recipients"
+                                placeholder="email@example.com, another@example.com"
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4">
+            <button type="button" routerLink="/reports/list" class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+                Cancel
+            </button>
+            <button type="submit" [disabled]="reportForm.invalid || loading"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                <div class="flex items-center">
+                    <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
+                    Generate Report
+                </div>
+            </button>
+        </div>
+    </form>
+</div>

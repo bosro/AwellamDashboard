@@ -31,6 +31,11 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       children: [
         {
+          title: 'dashboard',
+          route: '/transport/dashboard',
+          icon: 'ri-speed-up-line'
+        },
+        {
           title: 'Operations',
           route: '/main/transport/trips',
           icon: 'ri-route-line'
@@ -41,17 +46,23 @@ export class SidebarComponent implements OnInit {
           icon: 'ri-truck-fill'
         },
         {
-          title: 'Drivers',
-          route: '/main/transport/drivers',
-          icon: 'ri-user-star-line'
+          title: 'Trips',
+          route: '/transport/trips',
+          icon: 'ri-caravan-line'
+        },
+        {
+          title: 'fuel analytics',
+          route: '/transport/fuel-analytics',
+          icon: 'ri-ink-bottle-line'
         },
         {
           title: 'Maintenance',
-          route: '/main/transport/maintenance',
+          route: '/transport/maintenance-history',
           icon: 'ri-tools-line'
         }
       ]
     },
+ 
     {
       title: 'Inventory',
       icon: 'ri-stock-line',
@@ -98,32 +109,66 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       children: [
         {
-          title: 'Operations',
-          route: '/main/reports/operations',
-          icon: 'ri-line-chart-line'
+          title: 'Reports Lists',
+          route: '/reports/list',
+          icon: 'ri-list-view'
         },
         {
-          title: 'Financial',
-          route: '/main/reports/financial',
-          icon: 'ri-money-dollar-circle-line'
+          title: 'Report Generator',
+          route: '/reports/generator',
+          icon: 'ri-ai-generate-text'
         },
         {
-          title: 'Analytics',
-          route: '/main/reports/analytics',
-          icon: 'ri-pie-chart-2-line'
+          title: 'Report Schedule',
+          route: '/reports/scheduled',
+          icon: 'ri-calendar-2-line'
+        },
+        {
+          title: 'Report Templates',
+          route: '/reports/templates',
+          icon: 'ri-book-open-line'
         }
       ]
     },
+
+    {
+      title: 'Products',
+      icon: 'ri-bar-chart-2-line',
+      expanded: false,
+      // roles: ['admin', 'manager'],
+      children: [
+        {
+          title: 'Product List',
+          route: '/products/list',
+          icon: 'ri-file-list-2-line'
+        },
+        {
+          title: 'Product Categories',
+          route: '/products/categories',
+          icon: 'ri-pie-chart-2-line'
+        },
+        {
+          title: 'Product Inventory',
+          route: '/products/inventory',
+          icon: 'ri-file-list-3-line'
+        }
+      ]
+    },
+
+  
     {
       title: 'User Management',
       icon: 'ri-user-settings-line',
-      route: '/main/auth/users',
+      route: '/user-management',
+      // roles: ['admin']
     },
-    {
-      title: 'Settings',
-      icon: 'ri-settings-3-line',
-      route: '/main/settings',
-    }
+    // {
+    //   // title: 'Settings',
+    //   // icon: 'ri-settings-3-line',
+    //   // route: '/settings',
+    //   // roles: ['admin']
+    // }
+
   ];
 
   constructor(
