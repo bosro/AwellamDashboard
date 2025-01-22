@@ -87,18 +87,18 @@ const routes: Routes = [
 // ];
 
 
-      // {
-      //   path: 'reports',
-      //   loadChildren: () => import('./main/reports/reports.module').then(m => m.ReportsModule),
-      //   canActivate: [RoleGuard],
-      //   data: { roles: ['admin', 'manager'] }
-      // },
-      // {
-      //   path: 'settings',
-      //   loadChildren: () => import('./main/settings/settings.module').then(m => m.SettingsModule),
-      //   canActivate: [RoleGuard],
-      //   data: { roles: ['admin'] }
-      // }
+      {
+        path: 'orders',
+        loadChildren: () => import('./order/order.module').then(m => m.OrderModule),
+        // canActivate: [RoleGuard],
+        // data: { roles: ['admin', 'manager'] }
+      },
+      {
+        path: 'customers',
+        loadChildren: () => import('./customers/customers.module').then(m => m.CustomersModule),
+        // canActivate: [RoleGuard],
+        // data: { roles: ['admin'] }
+      }
     ],
   },
 ];
