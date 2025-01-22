@@ -1,7 +1,7 @@
 export const environment = {
-    apiUrl: 'http://localhost:3000/api'
+    apiUrl: 'https://newawellambcckend.onrender.com/api'
 }
 
 export const url ={
-    url:"http://localhost:3000/api"
+    url:"https://newawellambcckend.onrender.com/api"
 }

@@ -10,9 +10,9 @@ interface UserMetrics {
   byRole: Record<string, number>;
 }
 
-interface UsersResponse {
-  data: User[];
-  total: number;
+export interface UsersResponse {
+  admins: User[];
+  message: string;
 }
 
 interface UserFilters {
@@ -108,8 +108,10 @@ export class UserManagementComponent implements OnInit {
   
     this.authService.getAdmins(filters).subscribe({
       next: (response: UsersResponse) => {
-        this.users = response.data;
-        this.total = response.total;
+        this.users = response.admins;
+  
+        console.log(response.admins);
+        // this.total = response.total;
   
         console.log(this.users);
         this.calculateMetrics();
@@ -130,7 +132,7 @@ export class UserManagementComponent implements OnInit {
     this.users.forEach(user => {
       byRole[user.role] = (byRole[user.role] || 0) + 1;
       if (user.status === 'active') active++;
-      else inactive++;
+      // else inactive++;
     });
 
     this.metrics = {
