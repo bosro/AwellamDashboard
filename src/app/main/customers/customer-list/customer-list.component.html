@@ -4,15 +4,15 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">Customers</h1>
-            <p class="mt-1 text-sm text-gray-600">Manage your customer database</p>
+            <!-- <p class="mt-1 text-sm text-gray-600">Manage your customer database</p> -->
         </div>
         <div class="flex space-x-3">
-            <button [routerLink]="['/customers/segments']"
+            <!-- <button [routerLink]="['/customers/segments']"
                 class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
                 <i class="ri-group-line mr-2"></i>
                 Segments
-            </button>
-            <button [routerLink]="['/customers/new']"
+            </button> -->
+            <button [routerLink]="['/main/customers/new']"
                 class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 <i class="ri-add-line mr-2"></i>
                 Add Customer
@@ -20,68 +20,7 @@
         </div>
     </div>
 
-    <!-- Batch Operations -->
-    <div *ngIf="selectedCustomers.size > 0" class="mb-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex justify-between items-center">
-                <span class="text-sm text-blue-700">
-                    {{selectedCustomers.size}} customers selected
-                </span>
-                <div class="flex space-x-3">
-                    <div class="relative">
-                        <button (click)="showStatusDropdown = !showStatusDropdown"
-                            class="text-sm px-3 py-1 bg-white border rounded hover:bg-gray-50">
-                            Update Status
-                            <i class="ri-arrow-down-s-line ml-1"></i>
-                        </button>
-                        <div *ngIf="showStatusDropdown"
-                            class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-10">
-                            <button (click)="bulkUpdateStatus(CustomerStatus.ACTIVE)"
-                                class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-                                Set Active
-                            </button>
-                            <button (click)="bulkUpdateStatus(CustomerStatus.ACTIVE)"
-                                class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-                                Set Inactive
-                            </button>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <button (click)="showSegmentDropdown = !showSegmentDropdown"
-                            class="text-sm px-3 py-1 bg-white border rounded hover:bg-gray-50">
-                            Apply Segment
-                            <i class="ri-arrow-down-s-line ml-1"></i>
-                        </button>
-                        <div *ngIf="showSegmentDropdown"
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
-                            <button *ngFor="let segment of segments" (click)="applySegmentToSelected(segment.id)"
-                                class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-                                {{segment.name}}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <button (click)="showExportDropdown = !showExportDropdown"
-                            class="text-sm px-3 py-1 bg-white border rounded hover:bg-gray-50">
-                            Export
-                            <i class="ri-arrow-down-s-line ml-1"></i>
-                        </button>
-                        <div *ngIf="showExportDropdown"
-                            class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-10">
-                            <button (click)="exportCustomers('csv')"
-                                class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-                                Export as CSV
-                            </button>
-                            <button (click)="exportCustomers('excel')"
-                                class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-                                Export as Excel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
@@ -96,32 +35,11 @@
                 </div>
             </div>
 
-            <!-- Status Filter -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select formControlName="status" class="w-full px-4 py-2 border rounded-lg">
-                    <option value="">All Statuses</option>
-                    <option [value]="CustomerStatus.ACTIVE">Active</option>
-                    <option [value]="CustomerStatus.INACTIVE">Inactive</option>
-                    <option [value]="CustomerStatus.BLOCKED">Blocked</option>
-                    <option [value]="CustomerStatus.PENDING">Pending</option>
-                </select>
-            </div>
 
             <!-- Type Filter -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select formControlName="type" class="w-full px-4 py-2 border rounded-lg">
-                    <option value="">All Types</option>
-                    <option [value]="CustomerType.REGULAR">Regular</option>
-                    <option [value]="CustomerType.VIP">VIP</option>
-                    <option [value]="CustomerType.WHOLESALE">Wholesale</option>
-                    <option [value]="CustomerType.BUSINESS">Business</option>
-                </select>
-            </div>
 
             <!-- Segment Filter -->
-            <div>
+            <!-- <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Segment</label>
                 <select formControlName="segment" class="w-full px-4 py-2 border rounded-lg">
                     <option value="">All Segments</option>
@@ -129,19 +47,19 @@
                         {{segment.name}}
                     </option>
                 </select>
-            </div>
+            </div> -->
 
             <!-- Registration Date Range -->
-            <div formGroupName="dateRange">
+            <!-- <div formGroupName="dateRange">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Registration Date</label>
                 <div class="flex space-x-2">
                     <input type="date" formControlName="start" class="flex-1 px-4 py-2 border rounded-lg">
                     <input type="date" formControlName="end" class="flex-1 px-4 py-2 border rounded-lg">
                 </div>
-            </div>
+            </div> -->
 
             <!-- Total Spent Range -->
-            <div class="flex space-x-2">
+            <!-- <div class="flex space-x-2">
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Min Spent</label>
                     <div class="relative">
@@ -156,7 +74,7 @@
                         <input type="number" formControlName="maxSpent" class="w-full pl-8 pr-4 py-2 border rounded-lg">
                     </div>
                 </div>
-            </div>
+            </div> -->
         </form>
     </div>
 
@@ -174,12 +92,10 @@
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th> -->
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Spent
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Order
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance
                     </th>
                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions
                     </th>
@@ -189,73 +105,60 @@
                 <tr *ngFor="let customer of customers">
                     <td class="px-6 py-4">
                         <div class="flex items-center">
-                            <input type="checkbox" [checked]="selectedCustomers.has(customer.id)"
-                                (change)="toggleSelection(customer.id)"
+                            <input type="checkbox" [checked]="selectedCustomers.has(customer._id)"
+                                (change)="toggleSelection(customer._id)"
                                 class="h-4 w-4 rounded border-gray-300 text-blue-600">
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
-                            <div class="h-10 w-10 flex-shrink-0">
+                            <!-- <div class="h-10 w-10 flex-shrink-0">
                                 <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                                     <span class="text-lg font-medium text-gray-600">
-                                        {{customer.personalInfo.firstName[0]}}{{customer.personalInfo.lastName[0]}}
+                                        {{customer.fullName}}
                                     </span>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="ml-4">
                                 <div class="text-sm font-medium text-gray-900">
                                     {{getFullName(customer)}}
                                 </div>
                                 <div class="text-sm text-gray-500">
-                                    Joined {{customer.accountInfo.registeredAt | date}}
+                                    Joined {{customer.createdAt}}
                                 </div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">{{customer.personalInfo.email}}</div>
-                        <div class="text-sm text-gray-500">{{customer.personalInfo.phone}}</div>
+                        <div class="text-sm text-gray-900">{{customer.email}}</div>
+                        <div class="text-sm text-gray-500">{{customer.phoneNumber}}</div>
+                    </td>
+                 
+
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">Active</div>
+                    </td>
+           
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">10</div>
                     </td>
                     <td class="px-6 py-4">
-                        <span [ngClass]="getTypeClass(customer.accountInfo.type)"
-                            class="px-2 py-1 text-xs font-medium rounded-full">
-                            {{customer.accountInfo.type}}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span [ngClass]="getStatusClass(customer.accountInfo.status)"
-                            class="px-2 py-1 text-xs font-medium rounded-full">
-                            {{customer.accountInfo.status}}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">{{customer.metadata.totalOrders}}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">${{customer.metadata.totalSpent}}</div>
+                        <div class="text-sm text-gray-900">$4545</div>
                         <div class="text-xs text-gray-500">
-                            Avg: ${{customer.metadata.averageOrderValue}}
-                        </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">
-                            {{customer.metadata.lastPurchaseDate | date}}
+                            Avg: 232
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right text-sm font-medium">
                         <div class="flex justify-end space-x-3">
-                            <button [routerLink]="['/customers/details', customer.id]"
+                            <button [routerLink]="['/main/customers/details', customer._id]"
                                 class="text-blue-600 hover:text-blue-900">
                                 <i class="ri-eye-line"></i>
                             </button>
-                            <button [routerLink]="['/customers/edit', customer.id]"
+                            <button [routerLink]="['/main/customers/edit', customer._id]"
                                 class="text-blue-600 hover:text-blue-900">
                                 <i class="ri-edit-line"></i>
                             </button>
-                            <button (click)="showStatusOptions(customer)" class="text-blue-600 hover:text-blue-900">
-                                <i class="ri-settings-line"></i>
-                            </button>
+                          
                         </div>
                     </td>
                 </tr>
@@ -282,8 +185,7 @@
     <!-- Pagination -->
     <div class="flex items-center justify-between mt-4">
         <div class="text-sm text-gray-700">
-            Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}}
-            customers
+            Showing {{getMinValue()}} to {{getMaxValue()}} of {{total}} customers
         </div>
         <div class="flex items-center space-x-2">
             <button [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)"
@@ -299,7 +201,7 @@
 </div>
 
 <!-- Status Update Modal -->
-<div *ngIf="selectedCustomerForStatus" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+<!-- <div *ngIf="selectedCustomerForStatus" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
     <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
         <h3 class="text-lg font-medium text-gray-900 mb-4">
             Update Customer Status
@@ -320,4 +222,4 @@
             </button>
         </div>
     </div>
-</div>
+</div> -->
