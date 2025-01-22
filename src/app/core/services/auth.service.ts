@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
 
 // export interface User {
 //   id: number;
@@ -210,8 +211,8 @@ export class AuthService {
   //   return this.http.get(`${environment.apiUrl}/users`, { params: filters as any });
   // }
 
-  getAdmins(filters: UserFilters): Observable<User> {
-    return this.http.get<User>(`${environment.apiUrl}/admin/get`, {
+  getAdmins(filters: UserFilters): Observable<UsersResponse> {
+    return this.http.get<UsersResponse>(`${environment.apiUrl}/admin/get`, {
       params: filters as any
     });
   }
