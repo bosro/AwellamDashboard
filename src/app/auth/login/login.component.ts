@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
   ) {
     // redirect to home if already logged in
     if (this.authService.currentUserValue) {
-      this.router.navigate(['/']);
+      this.router.navigate(['dashboard']);
     }
   }
 
@@ -50,33 +50,59 @@ export class LoginComponent implements OnInit {
     return this.loginForm.controls as LoginFormControls;
   }
 
-  onSubmit(): void {
-    this.submitted = true;
+  // onSubmit(): void {
+  //   this.submitted = true;
 
-    if (this.loginForm.invalid) {
-      return;
-    }
+  //   if (this.loginForm.invalid) {
+  //     return;
+  //   }
 
-    this.loading = true;
-    this.authService.login({
-      email: this.formControls.email.value,
-      password: this.formControls.password.value
-    })
-    .pipe(first())
-    .subscribe({
-      next: () => {
-        this.router.navigate([this.returnUrl]);
-      },
-      error: (error: unknown) => {
-        this.error = error instanceof Error 
-          ? error.message 
-          : typeof error === 'object' && error && 'error' in error 
-            ? (error.error as any)?.message 
-            : 'An error occurred during login';
+  //   this.loading = true;
+  //   this.authService.login({
+  //     email: this.formControls.email.value,
+  //     password: this.formControls.password.value
+  //   })
+  //   .subscribe({
+  //     next: () => {
+  //       this.router.navigate(['/main/dashboard']);
+  //     },
+  //     error: (error: unknown) => {
+  //       this.error = error instanceof Error 
+  //         ? error.message 
+  //         : typeof error === 'object' && error && 'error' in error 
+  //           ? (error.error as any)?.message 
+  //           : 'An error occurred during login';
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
+
+  onSubmits() {
+    if (this.loginForm.valid) {
+      this.loading = true;
+      this.error = '';
+      this.authService.login(this.loginForm.value).subscribe({
+        next: () => {
+          // Redirect to the return URL or dashboard
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/main/dashboard';
+          this.router.navigate([returnUrl]);
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'Login failed. Please try again.';
+          console.error('Login error:', err);
+        },
+      });
+    } else {
+      Object.keys(this.loginForm.controls).forEach((key) => {
+        const control = this.loginForm.get(key);
+        control?.markAsTouched();
         this.loading = false;
-      }
-    });
+      });
+    }
   }
+  
+  
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;

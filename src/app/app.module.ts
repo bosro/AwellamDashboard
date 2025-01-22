@@ -9,6 +9,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { MainModule } from './main/main.module';
 import {  provideHttpClient } from '@angular/common/http';
 import { MainLayoutComponent } from './main/main-layout.component';
+// import { InjectionService } from '';
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
@@ -29,7 +30,8 @@ import { SidebarComponent } from './layout/sidebar/sidebar.component';
   ],
   providers: [
     provideAnimationsAsync(),
-    provideHttpClient()
+    provideHttpClient(),
+    // InjectionService,
   ],
   bootstrap: [AppComponent]
 })
