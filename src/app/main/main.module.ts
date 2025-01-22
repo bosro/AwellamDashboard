@@ -81,7 +81,7 @@ const routes: Routes = [
         path:'customers-management',
         loadChildren: ()=> import ('./customers/customer.module').then((m)=>m.CustomerModule),
         canActivate: [AuthGuard],
-      }
+      },
 //     ],
 //   },
 // ];
