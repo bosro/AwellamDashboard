@@ -69,16 +69,22 @@ const routes: Routes = [
         path: 'reports',
         loadChildren: () =>
           import('./reports/reports.module').then((m) => m.ReportsModule),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager'] }
+        canActivate: [AuthGuard],
       },
       {
         path: 'products',
         loadChildren: () =>
           import('./products/products.module').then((m) => m.ProductsModule),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager'] }
+        canActivate: [AuthGuard],
       },
+      {
+        path:'customers-management',
+        loadChildren: ()=> import ('./customers/customer.module').then((m)=>m.CustomerModule),
+        canActivate: [AuthGuard],
+      }
+//     ],
+//   },
+// ];
 
 
       // {

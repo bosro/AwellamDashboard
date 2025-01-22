@@ -1,1 +1,46 @@
-<p>product-details works!</p>
+<div class="p-6">
+    <div class="mb-6">
+      <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-900">{{ product?.name }}</h1>
+        <button 
+          routerLink="/main/products/list"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to Products
+        </button>
+      </div>
+    </div>
+  
+    <div *ngIf="loading" class="flex justify-center py-12">
+      <i class="ri-loader-4-line animate-spin text-3xl text-blue-600"></i>
+    </div>
+  
+    <div *ngIf="!loading && product">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <img 
+              [src]="product.image || '/assets/placeholder.png'"
+              class="w-full h-64 object-cover rounded-lg"
+              [alt]="product.name"
+            >
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Product Details</h2>
+            <p class="text-sm text-gray-700 mb-2"><strong>Price:</strong> ${{ product.price }}</p>
+            <p class="text-sm text-gray-700 mb-2"><strong>Description:</strong> {{ product.description }}</p>
+            <p class="text-sm text-gray-700 mb-2"><strong>In Stock:</strong> {{ product.inStock ? 'Yes' : 'No' }}</p>
+            <!-- <p class="text-sm text-gray-700 mb-2"><strong>Status:</strong> {{ product.status }}</p> -->
+          </div>
+        </div>
+      </div>
+  
+      <div class="mt-6">
+        <button 
+          (click)="deleteProduct()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          Delete Product
+        </button>
+      </div>
+    </div>
+  </div>

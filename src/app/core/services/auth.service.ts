@@ -5,15 +5,30 @@ import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
+// export interface User {
+//   id: number;
+//   fullName: string;
+//   email: string;
+//   role: 'admin' | 'manager' | 'driver' | 'operator' ;
+//   permissions: string[];
+//   lastLogin?: string;
+//   status: 'active' | 'inactive';
+//   profileImage?: string;
+// }
+
 export interface User {
-  id: number;
+  total: number;
+  data: User[];
+  _id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'manager' | 'driver' | 'operator' ;
-  permissions: string[];
-  lastLogin?: string;
-  status: 'active' | 'inactive';
-  profileImage?: string;
+  password: string;
+  role: string;
+  lastLogin: string | null;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  status?: 'active' | 'inactive'; // Optional, inferred from your metrics logic
 }
 
 interface UserFilters {
@@ -176,10 +191,10 @@ export class AuthService {
     return token ? !this.jwtHelper.isTokenExpired(token) : false;
   }
 
-  hasPermission(permission: string): boolean {
-    const user = this.currentUserSubject.value;
-    return user?.permissions?.includes(permission) || false;
-  }
+  // hasPermission(permission: string): boolean {
+  //   const user = this.currentUserSubject.value;
+  //   return user?.permissions?.includes(permission) || false;
+  // }
 
   hasRole(role: string | string[]): boolean {
     const user = this.currentUserSubject.value;
@@ -191,8 +206,14 @@ export class AuthService {
     return user.role === role;
   }
 
-  getUsers(filters: UserFilters): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/users`, { params: filters as any });
+  // getUsers(filters: UserFilters): Observable<any> {
+  //   return this.http.get(`${environment.apiUrl}/users`, { params: filters as any });
+  // }
+
+  getAdmins(filters: UserFilters): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/admin/get`, {
+      params: filters as any
+    });
   }
 
   updateUserStatus(userId: number, status: User['status']): Observable<void> {

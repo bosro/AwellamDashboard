@@ -105,11 +105,13 @@ export class UserManagementComponent implements OnInit {
       pageSize: this.pageSize,
       ...this.filterForm.value
     };
-
-    this.authService.getUsers(filters).subscribe({
+  
+    this.authService.getAdmins(filters).subscribe({
       next: (response: UsersResponse) => {
         this.users = response.data;
         this.total = response.total;
+  
+        console.log(this.users);
         this.calculateMetrics();
         this.loading = false;
       },
@@ -147,15 +149,15 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  toggleAllSelection(): void {
-    if (this.selectedUsers.size === this.users.length) {
-      this.selectedUsers.clear();
-    } else {
-      this.users.forEach(user => {
-        this.selectedUsers.add(user.id);
-      });
-    }
-  }
+  // toggleAllSelection(): void {
+  //   if (this.selectedUsers.size === this.users.length) {
+  //     this.selectedUsers.clear();
+  //   } else {
+  //     this.users.forEach(user => {
+  //       this.selectedUsers.add(user.id);
+  //     });
+  //   }
+  // }
 
   updateUserStatus(userId: number, status: User['status']): void {
     this.authService.updateUserStatus(userId, status).subscribe({
