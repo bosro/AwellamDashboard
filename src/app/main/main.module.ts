@@ -73,6 +73,20 @@ const routes: Routes = [
         // canActivate: [RoleGuard],
         // data: { roles: ['admin', 'manager'] }
       },
+      {
+        path: 'reports',
+        loadChildren: () =>
+          import('./reports/reports.module').then((m) => m.ReportsModule),
+        // canActivate: [RoleGuard],
+        // data: { roles: ['admin', 'manager'] }
+      },
+      {
+        path: 'products',
+        loadChildren: () =>
+          import('./products/products.module').then((m) => m.ProductsModule),
+        // canActivate: [RoleGuard],
+        // data: { roles: ['admin', 'manager'] }
+      },
 
 
       // {
