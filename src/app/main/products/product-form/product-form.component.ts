@@ -6,7 +6,8 @@ import { Product, Category } from '../../../shared/types/product.interface';
 
 @Component({
   selector: 'app-product-form',
-  templateUrl: './product-form.component.html'
+  templateUrl: './product-form.component.html',
+  styleUrls: ['./product-form.component.css'] // Add this if you have specific styles
 })
 export class ProductFormComponent implements OnInit {
   productForm: FormGroup;
@@ -16,7 +17,6 @@ export class ProductFormComponent implements OnInit {
   categories: Category[] = [];
   imageFiles: File[] = [];
   currentProduct?: Product;
-  activeSection = 'basic info'; 
 
   constructor(
     private fb: FormBuilder,
@@ -25,11 +25,12 @@ export class ProductFormComponent implements OnInit {
     private router: Router
   ) {
     this.productForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      price: [0, [Validators.required, Validators.min(0)]],
+      name: ['', [Validators.required]],
+      price: [0, [Validators.required]],
       description: ['', Validators.required],
       inStock: [true, Validators.required],
-      image: [null, Validators.required]
+      totalStock: [0, [Validators.required]],
+      image: [null]
     });
   }
 
@@ -62,7 +63,7 @@ export class ProductFormComponent implements OnInit {
       price: product.price,
       description: product.description,
       inStock: product.inStock,
-      image: product.image
+      totalStock: product.totalStock
     });
   }
 
@@ -98,14 +99,15 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  private prepareFormData(): any {
+  private prepareFormData(): FormData {
     const formValue = this.productForm.value;
     const formData = new FormData();
 
     formData.append('name', formValue.name);
     formData.append('price', formValue.price);
     formData.append('description', formValue.description);
-    formData.append('inStock', formValue.inStock);
+    formData.append('inStock', formValue.inStock.toString());
+    formData.append('totalStock', formValue.totalStock.toString());
     if (this.imageFiles.length > 0) {
       formData.append('image', this.imageFiles[0]);
     }
