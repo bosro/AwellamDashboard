@@ -161,6 +161,49 @@ export class SidebarComponent implements OnInit {
         }
       ]
     },
+    {
+      title: 'Orders',
+      icon: 'ri-file-list-3-line',
+      expanded: false,
+      // roles: ['admin', 'manager'],
+      children: [
+        {
+          title: 'Order Analytics',
+          route: '/orders/analytics',
+          icon: 'ri-pie-chart-2-line'
+        },
+        {
+          title: 'Order List',
+          route: '/orders/list',
+          icon: 'ri-file-list-2-line'
+        },
+        {
+          title: 'Create Order',
+          route: '/orders/processing',
+          icon: 'ri-play-list-add-fill'
+        }
+      ]
+    },
+
+    {
+      title: 'Customers Management',
+      icon: 'ri-user-settings-line',
+      expanded: false,
+      // roles: ['admin', 'manager'],
+      children: [
+        {
+          title: 'Customers',
+          route: '/customers/list',
+          icon: 'ri-group-line'
+        },
+        {
+          title: 'Add Customer',
+          route: '/customers/new',
+          icon: 'i-user-add-line'
+        },
+       
+      ]
+    },
 
   
     {

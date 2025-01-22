@@ -76,4 +76,10 @@ export class ProductsService {
       responseType: 'blob'
     });
   }
+
+  searchProducts(term: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/search`, {
+      params: { term }
+    });
+  }
 }

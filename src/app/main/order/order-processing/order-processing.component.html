@@ -1,0 +1,402 @@
+<!-- order-processing.component.html -->
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Create New Order</h1>
+        <p class="mt-1 text-sm text-gray-600">Process a new customer order</p>
+      </div>
+      <button 
+        routerLink="/orders/list"
+        class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+        <i class="ri-arrow-left-line mr-2"></i>
+        Back to Orders
+      </button>
+    </div>
+  
+    <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Product Search -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Products</h2>
+          <div class="space-y-4">
+            <!-- Search Input -->
+            <div class="relative">
+              <input
+                id="product-search"
+                type="text"
+                placeholder="Search products by name or SKU..."
+                class="w-full pl-10 pr-4 py-2 border rounded-lg"
+              >
+              <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+            </div>
+  
+            <!-- Search Results -->
+            <div *ngIf="searchResults.length > 0" 
+                 class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-lg max-h-60 overflow-auto">
+              <ul role="list" class="divide-y divide-gray-200">
+                <li *ngFor="let product of searchResults"
+                    (click)="addItem(product)"
+                    class="p-4 hover:bg-gray-50 cursor-pointer">
+                  <div class="flex items-center space-x-4">
+                    <img [src]="product.image" 
+                         class="h-10 w-10 rounded-lg object-cover"
+                         [alt]="product.name">
+                    <div class="flex-1">
+                      <p class="text-sm font-medium text-gray-900">{{product.name}}</p>
+                      <p class="text-sm text-gray-500">SKU: {{product.sku}}</p>
+                    </div>
+                    <div class="text-sm font-medium text-gray-900">
+                      ${{product.price.base}}
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+  
+            <!-- Selected Products -->
+            <div formArrayName="items">
+              <div *ngFor="let item of items.controls; let i = index" 
+                   [formGroupName]="i"
+                   class="flex items-center space-x-4 p-4 border rounded-lg">
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-900">
+                    {{item.get('name')?.value}}
+                  </p>
+                  <p class="text-sm text-gray-500">
+                    SKU: {{item.get('sku')?.value}}
+                  </p>
+                </div>
+                <div class="w-24">
+                  <input
+                    type="number"
+                    formControlName="quantity"
+                    min="1"
+                    class="w-full px-3 py-2 border rounded-lg"
+                  >
+                </div>
+                <div class="text-sm font-medium text-gray-900 w-24 text-right">
+                  ${{item.get('total')?.value}}
+                </div>
+                <button 
+                  type="button"
+                  (click)="removeItem(i)"
+                  class="text-red-600 hover:text-red-900">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Customer Information -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6" formGroupName="customer">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                formControlName="name"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                formControlName="email"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Phone *
+              </label>
+              <input
+                type="tel"
+                formControlName="phone"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Billing Information -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6" formGroupName="billing">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Billing Information</h2>
+          
+          <div formGroupName="address" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Address Line 1 *
+              </label>
+              <input
+                type="text"
+                formControlName="line1"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Address Line 2
+              </label>
+              <input
+                type="text"
+                formControlName="line2"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                City *
+              </label>
+              <input
+                type="text"
+                formControlName="city"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                State/Province *
+              </label>
+              <input
+                type="text"
+                formControlName="state"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Postal Code *
+              </label>
+              <input
+                type="text"
+                formControlName="postalCode"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Country *
+              </label>
+              <select
+                formControlName="country"
+                class="w-full px-4 py-2 border rounded-lg"
+              >
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+              <option value="GB">United Kingdom</option>
+              <option value="AU">Australia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Payment Method *
+          </label>
+          <select
+            formControlName="paymentMethod"
+            class="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="">Select Payment Method</option>
+            <option *ngFor="let method of paymentMethods" [value]="method.id">
+              {{method.name}}
+            </option>
+          </select>
+        </div>
+
+        <div class="mt-4">
+          <button 
+            type="button"
+            (click)="validateAddress('billing')"
+            class="text-sm text-blue-600 hover:text-blue-900">
+            Validate Address
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping Information -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6" formGroupName="shipping">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Shipping Information</h2>
+
+        <div class="mb-6">
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              formControlName="sameAsBilling"
+              class="h-4 w-4 text-blue-600 rounded"
+            >
+            <span class="ml-2 text-sm text-gray-700">
+              Same as billing address
+            </span>
+          </label>
+        </div>
+
+        <div *ngIf="!orderForm.get('shipping.sameAsBilling')?.value" 
+             formGroupName="address" 
+             class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Address Line 1 *
+            </label>
+            <input
+              type="text"
+              formControlName="line1"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Address Line 2
+            </label>
+            <input
+              type="text"
+              formControlName="line2"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              City *
+            </label>
+            <input
+              type="text"
+              formControlName="city"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              State/Province *
+            </label>
+            <input
+              type="text"
+              formControlName="state"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Postal Code *
+            </label>
+            <input
+              type="text"
+              formControlName="postalCode"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Country *
+            </label>
+            <select
+              formControlName="country"
+              class="w-full px-4 py-2 border rounded-lg"
+            >
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="GB">United Kingdom</option>
+              <option value="AU">Australia</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Shipping Method Selection -->
+        <div class="mt-6">
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Shipping Method *</h3>
+          <div class="space-y-3">
+            <div *ngFor="let method of availableShippingMethods" 
+                 class="relative flex items-center p-4 border rounded-lg"
+                 [class.border-blue-500]="orderForm.get('shipping.method')?.value === method.id"
+                 [class.bg-blue-50]="orderForm.get('shipping.method')?.value === method.id">
+              <input
+                type="radio"
+                [id]="method.id"
+                [value]="method.id"
+                formControlName="method"
+                class="h-4 w-4 text-blue-600"
+              >
+              <label [for]="method.id" class="ml-3 flex flex-1 justify-between">
+                <div class="text-sm">
+                  <p class="font-medium text-gray-900">{{method.name}}</p>
+                  <p class="text-gray-500">{{method.description}}</p>
+                </div>
+                <p class="text-sm font-medium text-gray-900">${{method.cost}}</p>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Notes -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Notes</h2>
+        <textarea
+          formControlName="notes"
+          rows="4"
+          placeholder="Add any special instructions or notes..."
+          class="w-full px-4 py-2 border rounded-lg"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
+        <div class="space-y-4">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="text-gray-900">${{getSubtotal() | number:'1.2-2'}}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Shipping</span>
+            <span class="text-gray-900">${{getShippingCost() | number:'1.2-2'}}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Tax</span>
+            <span class="text-gray-900">${{getTax() | number:'1.2-2'}}</span>
+          </div>
+          <div class="pt-4 flex justify-between text-lg font-semibold border-t">
+            <span>Total</span>
+            <span>${{getTotal() | number:'1.2-2'}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-4">
+      <button 
+        type="button"
+        routerLink="/orders/list"
+        class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+        Cancel
+      </button>
+      <button 
+        type="submit"
+        [disabled]="orderForm.invalid || saving || items.length === 0"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+        <div class="flex items-center">
+          <i *ngIf="saving" class="ri-loader-4-line animate-spin mr-2"></i>
+          Create Order
+        </div>
+      </button>
+    </div>
+  </form>
+</div>
