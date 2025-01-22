@@ -43,8 +43,7 @@ export class UserEditModalComponent implements OnInit {
   ngOnInit(): void {
     if (this.user) {
       this.userForm.patchValue({
-        firstName: this.user.firstName,
-        lastName: this.user.lastName,
+       fullName: this.user.fullName,
         email: this.user.email,
         role: this.user.role,
         status: this.user.status,

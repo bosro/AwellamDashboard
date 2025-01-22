@@ -15,22 +15,21 @@ import { SidebarComponent } from '../layout/sidebar/sidebar.component';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard/dashboard.component';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AuthGuard } from '../guards/auth.guard';
+
+
 
 const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    // canActivate: [AuthGuard],
+    canActivate: [AuthGuard],
     children: [
       { 
-         path: '',
-         redirectTo: 'dashboard', 
-         pathMatch: 'full' 
+        path: '',
+        redirectTo: 'dashboard', 
+        pathMatch: 'full' 
       },
-      // { 
-      //   path: 'dashboard', 
-      //   component: DashboardComponent 
-      // },
       { 
         path: 'dashboard', 
         loadChildren: () =>
@@ -40,38 +39,31 @@ const routes: Routes = [
         path: 'transport',
         loadChildren: () =>
           import('./transport/transport.module').then((m) => m.TransportModule),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager', 'operator'] }
+        canActivate: [AuthGuard],
       },
       {
         path: 'inventory',
         loadChildren: () =>
           import('./inventory/inventory.module').then((m) => m.InventoryModule),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager', 'operator'] }
+        canActivate: [AuthGuard],
       },
       {
         path: 'purchasing',
         loadChildren: () =>
-          import('./purchasing/purchasing.module').then(
-            (m) => m.PurchasingModule
-          ),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager'] }
+          import('./purchasing/purchasing.module').then((m) => m.PurchasingModule),
+        canActivate: [AuthGuard],
       },
       {
         path: 'claims',
         loadChildren: () =>
           import('./claims/claims.module').then((m) => m.ClaimsModule),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager'] }
+        canActivate: [AuthGuard],
       },
       {
         path: 'user-management',
         loadChildren: () =>
           import('./user-management/user-management.module').then((m) => m.UserManagementModule),
-        // canActivate: [RoleGuard],
-        // data: { roles: ['admin', 'manager'] }
+        canActivate: [AuthGuard],
       },
       {
         path: 'reports',
@@ -103,7 +95,6 @@ const routes: Routes = [
       // }
     ],
   },
-
 ];
 
 @NgModule({
@@ -117,5 +108,6 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes),
   ],
+  exports: [RouterModule],
 })
 export class MainModule {}

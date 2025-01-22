@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
@@ -25,14 +23,12 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
-      route: '/dashboard',
-      // roles: ['admin', 'manager', 'operator', 'driver']
+      route: '/main/dashboard',
     },
     {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
-      // roles: ['admin', 'manager', 'operator'],
       children: [
         {
           title: 'dashboard',
@@ -41,12 +37,12 @@ export class SidebarComponent implements OnInit {
         },
         {
           title: 'Operations',
-          route: '/transport/trips',
+          route: '/main/transport/trips',
           icon: 'ri-route-line'
         },
         {
           title: 'Trucks',
-          route: '/transport/trucks',
+          route: '/main/transport/trucks',
           icon: 'ri-truck-fill'
         },
         {
@@ -71,16 +67,15 @@ export class SidebarComponent implements OnInit {
       title: 'Inventory',
       icon: 'ri-stock-line',
       expanded: false,
-      // roles: ['admin', 'manager', 'operator'],
       children: [
         {
           title: 'Stock Overview',
-          route: '/inventory',
+          route: '/main/inventory',
           icon: 'ri-database-2-line'
         },
         {
           title: 'Disbursements',
-          route: '/inventory/disbursement',
+          route: '/main/inventory/disbursement',
           icon: 'ri-exchange-funds-line'
         }
       ]
@@ -93,12 +88,12 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Orders',
-          route: '/purchasing',
+          route: '/main/purchasing',
           icon: 'ri-order-play-line'
         },
         {
           title: 'Suppliers',
-          route: '/purchasing/suppliers',
+          route: '/main/purchasing/suppliers',
           icon: 'ri-store-2-line'
         }
       ]
@@ -106,14 +101,12 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
-      route: '/claims',
-      // roles: ['admin', 'manager']
+      route: '/main/claims',
     },
     {
       title: 'Reports',
       icon: 'ri-bar-chart-2-line',
       expanded: false,
-      // roles: ['admin', 'manager'],
       children: [
         {
           title: 'Reports Lists',
@@ -175,6 +168,7 @@ export class SidebarComponent implements OnInit {
     //   // route: '/settings',
     //   // roles: ['admin']
     // }
+
   ];
 
   constructor(
