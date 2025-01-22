@@ -68,16 +68,17 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading = true;
+  
     const params = {
       ...this.filterForm.value,
       page: this.currentPage,
       pageSize: this.pageSize
     };
-
+  
     this.productsService.getProducts(params).subscribe({
       next: (response) => {
-        this.products = response.data;
-        this.total = response.total;
+        this.products = response.products; // Use the 'products' field from the API response
+        this.total = response.products.length; // Set total based on the array size if pagination is not provided in the API
         this.loading = false;
       },
       error: (error) => {
@@ -86,6 +87,8 @@ export class ProductListComponent implements OnInit {
       }
     });
   }
+  
+  
 
   onPageChange(page: number): void {
     this.currentPage = page;
@@ -104,45 +107,54 @@ export class ProductListComponent implements OnInit {
     if (this.selectedProducts.size === this.products.length) {
       this.selectedProducts.clear();
     } else {
-      this.products.forEach(product => this.selectedProducts.add(product.id));
+      this.products.forEach(product => this.selectedProducts.add(product._id));
     }
   }
 
-  bulkUpdateStatus(status: 'active' | 'inactive' | 'draft' | 'discontinued'): void {
-    if (this.selectedProducts.size === 0) return;
 
-    this.productsService.bulkUpdateStatus(Array.from(this.selectedProducts), status as ProductStatus)
-      .subscribe({
-        next: () => {
-          this.selectedProducts.clear();
-          this.loadProducts();
-        },
-        error: (error) => console.error('Error updating status:', error)
-      });
-  }
 
   exportProducts(format: 'csv' | 'excel'): void {
-    this.productsService.exportProducts(format).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `products-export.${format}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error) => console.error('Error exporting products:', error)
-    });
-  }
-
-  deleteProduct(productId: string): void {
-    if (confirm('Are you sure you want to delete this product?')) {
-      this.productsService.deleteProduct(productId).subscribe({
-        next: () => {
-          this.loadProducts();
-        },
-        error: (error) => console.error('Error deleting product:', error)
-      });
+    if (format === 'csv') {
+      this.exportToCSV();
+    } else if (format === 'excel') {
+      this.exportToExcel();
     }
   }
+
+  private exportToCSV(): void {
+    const headers = ['ID', 'Name', 'SKU', 'Price', 'Description', 'In Stock', 'Image'];
+    const rows = this.products.map(product => [
+      product._id,
+      product.name,
+      product.price,
+      product.description,
+      product.inStock ? 'Yes' : 'No',
+      product.image
+    ]);
+
+    const csvContent = [headers, ...rows].map(e => e.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'products-export.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private exportToExcel(): void {
+    // Implement Excel export logic here
+    console.error('Excel export is not implemented yet.');
+  }
+
+  // deleteProduct(productId: string): void {
+  //   if (confirm('Are you sure you want to delete this product?')) {
+  //     this.productsService.deleteProduct(productId).subscribe({
+  //       next: () => {
+  //         this.loadProducts();
+  //       },
+  //       error: (error) => console.error('Error deleting product:', error)
+  //     });
+  //   }
+  // }
 }

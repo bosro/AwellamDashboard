@@ -23,6 +23,7 @@ export class MainLayoutComponent implements OnInit {
     { path: '/main/inventory', title: 'Inventory Management' },
     { path: '/main/purchasing', title: 'Purchase Orders' },
     { path: '/main/claims', title: 'Claims Management' }
+    
   ];
 
   constructor(
