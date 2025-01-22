@@ -4,6 +4,26 @@ import { Observable } from 'rxjs';
 import { Product, Category, ProductStatus } from '../shared/types/product.interface';
 import { environment } from '../environments/environment';
 
+
+export interface ProductsResponse {
+  products: Product[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface ProductFilters {
+  search?: string;
+  category?: string;
+  status?: ProductStatus;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -58,5 +78,32 @@ export class ProductsService {
     return this.http.get<any[]>(`${this.apiUrl}/search`, {
       params: { term }
     });
+  }
+
+
+  getProducts(filters: ProductFilters): Observable<ProductsResponse> {
+    // Convert filters to query parameters
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+
+    return this.http.get<ProductsResponse>(`${this.apiUrl}?${params.toString()}`);
+  }
+
+  deleteProduct(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  updateProductStatus(id: string, status: ProductStatus): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/${id}/status`, { status });
+  }
+
+ 
+
+  bulkDelete(ids: string[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/bulk/delete`, { ids });
   }
 }
