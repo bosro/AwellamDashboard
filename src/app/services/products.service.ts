@@ -28,7 +28,7 @@ export interface ProductFilters {
   providedIn: 'root'
 })
 export class ProductsService {
-  private apiUrl = `${environment.apiUrl}/products`;
+  private apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
@@ -41,7 +41,7 @@ export class ProductsService {
   }
 
   createProduct(productData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, productData);
+    return this.http.post(`${this.apiUrl}/products/create`, productData);
   }
 
   updateProduct(id: string, productData: FormData): Observable<any> {

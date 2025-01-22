@@ -42,17 +42,17 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     this.setupFilters();
     this.loadProducts();
-    this.loadCategories();
+    // this.loadCategories();
   }
 
-  private loadCategories(): void {
-    this.productsService.getCategories().subscribe({
-      next: (categories) => {
-        this.categories = categories;
-      },
-      error: (error) => console.error('Error loading categories:', error)
-    });
-  }
+  // private loadCategories(): void {
+  //   this.productsService.getCategories().subscribe({
+  //     next: (categories) => {
+  //       this.categories = categories;
+  //     },
+  //     error: (error) => console.error('Error loading categories:', error)
+  //   });
+  // }
 
   private setupFilters(): void {
     this.filterForm.valueChanges

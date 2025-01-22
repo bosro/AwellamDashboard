@@ -139,11 +139,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/products/list',
           icon: 'ri-file-list-2-line'
         },
-        {
-          title: 'Product Categories',
-          route: '/main/products/categories',
-          icon: 'ri-pie-chart-2-line'
-        },
+        // {
+        //   title: 'Product Categories',
+        //   route: '/main/products/categories',
+        //   icon: 'ri-pie-chart-2-line'
+        // },
         {
           title: 'Product Inventory',
           route: '/main/products/inventory',
