@@ -159,17 +159,17 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Order Analytics',
-          route: '/orders/analytics',
+          route: '/main/orders/analytics',
           icon: 'ri-pie-chart-2-line'
         },
         {
           title: 'Order List',
-          route: '/orders/list',
+          route: '/main/orders/list',
           icon: 'ri-file-list-2-line'
         },
         {
           title: 'Create Order',
-          route: '/orders/processing',
+          route: '/main/orders/processing',
           icon: 'ri-play-list-add-fill'
         }
       ]
@@ -183,12 +183,12 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Customers',
-          route: '/customers/list',
+          route: '/main/customers/list',
           icon: 'ri-group-line'
         },
         {
           title: 'Add Customer',
-          route: '/customers/new',
+          route: '/main/customers/new',
           icon: 'i-user-add-line'
         },
        
@@ -196,11 +196,11 @@ export class SidebarComponent implements OnInit {
     },
 
   
-    {
-      title: 'Customer Management',
-      icon: 'ri-user-settings-line',
-      route: '/main/customers-management',
-    },
+    // {
+    //   title: 'Customer Management',
+    //   icon: 'ri-user-settings-line',
+    //   route: '/main/customers-management',
+    // },
     {
       title: 'Admin Management',
       icon: 'ri-user-settings-line',

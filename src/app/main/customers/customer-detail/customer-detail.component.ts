@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomersService } from '../../../services/customer.service';
-import { Customer, CustomerNote, CustomerStatus } from '../../../shared/types/customer.interface';
+import { Customer, } from '../../../shared/types/customer.interface';
 
 interface CustomerOrder {
   id: string;
@@ -69,7 +69,7 @@ export class CustomerDetailsComponent implements OnInit {
   noteForm: FormGroup;
   emailForm: FormGroup;
   
-  readonly CustomerStatus = CustomerStatus;
+
   
   customerMetrics: CustomerMetrics = {
     lifetimeValue: 0,
@@ -143,39 +143,12 @@ export class CustomerDetailsComponent implements OnInit {
     return statusClasses[status.toLowerCase()] || '';
   }
 
-  editNote(note: CustomerNote): void {
-    // Implementation for editing note
-    console.log('Editing note:', note);
-  }
 
-  deleteNote(noteId: string): void {
-    // Implementation for deleting note
-    console.log('Deleting note:', noteId);
-  }
 
-  getCommunicationIcon(type: string): string {
-    switch (type.toLowerCase()) {
-      case 'email': return 'ri-mail-line';
-      case 'sms': return 'ri-message-2-line';
-      case 'phone': return 'ri-phone-line';
-      case 'marketing': return 'ri-megaphone-line';
-      default: return 'ri-question-line';
-    }
-  }
 
-  getNoteIcon(type: string): string {
-    switch (type.toLowerCase()) {
-      case 'internal': return 'ri-file-text-line';
-      case 'customer': return 'ri-user-voice-line';
-      case 'system': return 'ri-settings-line';
-      default: return 'ri-sticky-note-line';
-    }
-  }
 
-  resendEmail(emailId: string): void {
-    // Implementation for resending email
-    console.log('Resending email:', emailId);
-  }
+
+
 
   viewDetails(communicationId: string): void {
     // Implementation for viewing communication details
@@ -219,7 +192,7 @@ export class CustomerDetailsComponent implements OnInit {
     if (!this.customer) return;
 
     // Load orders
-    this.customersService.getCustomerOrders(this.customer.id).subscribe({
+    this.customersService.getCustomerOrders(this.customer._id).subscribe({
       next: (orders: CustomerOrder[]) => {
         this.orders = orders;
         this.calculateMetrics();
@@ -227,7 +200,7 @@ export class CustomerDetailsComponent implements OnInit {
     });
 
     // Load communications
-    this.customersService.getCommunicationHistory(this.customer.id).subscribe({
+    this.customersService.getCommunicationHistory(this.customer._id).subscribe({
       next: (communications) => {
         this.communications = communications;
       }
@@ -283,45 +256,8 @@ export class CustomerDetailsComponent implements OnInit {
     }, []);
   }
 
-  addNote(): void {
-    if (!this.customer || !this.noteForm.valid) return;
 
-    this.customersService.addCustomerNote(this.customer.id, this.noteForm.value).subscribe({
-      next: (note: CustomerNote) => {
-        this.customer?.metadata.notes.push(note);
-        this.showNoteForm = false;
-        this.noteForm.reset();
-      },
-      error: (error) => console.error('Error adding note:', error)
-    });
-  }
 
-  sendEmail(): void {
-    if (!this.customer || !this.emailForm.valid) return;
 
-    const emailData = {
-      ...this.emailForm.value,
-      recipientId: this.customer.id
-    };
 
-    this.customersService.sendCustomerEmail(this.customer.id, emailData).subscribe({
-      next: () => {
-        this.showEmailForm = false;
-        this.emailForm.reset();
-        this.loadCustomerData(); // Reload communications
-      },
-      error: (error) => console.error('Error sending email:', error)
-    });
-  }
-
-  updateStatus(status: CustomerStatus): void {
-    if (!this.customer) return;
-
-    this.customersService.updateCustomerStatus(this.customer.id, status).subscribe({
-      next: (updatedCustomer) => {
-        this.customer = updatedCustomer;
-      },
-      error: (error) => console.error('Error updating status:', error)
-    });
-  }
 }
