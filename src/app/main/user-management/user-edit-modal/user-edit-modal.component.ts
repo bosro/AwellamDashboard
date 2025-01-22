@@ -43,12 +43,11 @@ export class UserEditModalComponent implements OnInit {
   ngOnInit(): void {
     if (this.user) {
       this.userForm.patchValue({
-        firstName: this.user.firstName,
-        lastName: this.user.lastName,
+       fullName: this.user.fullName,
         email: this.user.email,
         role: this.user.role,
         status: this.user.status,
-        permissions: this.user.permissions
+       
       });
       this.userForm.get('email')!.disable();
     }
@@ -76,30 +75,30 @@ export class UserEditModalComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
-    if (this.userForm.invalid) {
-      return;
-    }
+  // onSubmit(): void {
+  //   if (this.userForm.invalid) {
+  //     return;
+  //   }
 
-    this.loading = true;
-    const userData = { ...this.userForm.value };
+  //   this.loading = true;
+  //   const userData = { ...this.userForm.value };
 
-    const request = this.user
-      ? this.authService.updateUser(this.user.id, userData)
-      : this.authService.createUser(userData);
+  //   const request = this.user
+  //     ? this.authService.updateUser(this.user._id, userData)
+  //     : this.authService.createUser(userData);
 
-    request.subscribe({
-      next: () => {
-        this.loading = false;
-        this.saved.emit();
-        this.close.emit();
-      },
-      error: error => {
-        this.error = error?.error?.message || 'An error occurred';
-        this.loading = false;
-      }
-    });
-  }
+  //   request.subscribe({
+  //     next: () => {
+  //       this.loading = false;
+  //       this.saved.emit();
+  //       this.close.emit();
+  //     },
+  //     error: error => {
+  //       this.error = error?.error?.message || 'An error occurred';
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;

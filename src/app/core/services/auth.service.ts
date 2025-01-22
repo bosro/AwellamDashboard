@@ -1,26 +1,35 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
+
+// export interface User {
+//   id: number;
+//   fullName: string;
+//   email: string;
+//   role: 'admin' | 'manager' | 'driver' | 'operator' ;
+//   permissions: string[];
+//   lastLogin?: string;
+//   status: 'active' | 'inactive';
+//   profileImage?: string;
+// }
 
 export interface User {
-  id: number;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'manager' | 'driver' | 'operator';
-  permissions: string[];
-  lastLogin?: string;
-  status: 'active' | 'inactive';
-  profileImage?: string;
-}
-
-interface UsersResponse {
-  data: User[];
   total: number;
+  data: User[];
+  _id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  role: string;
+  lastLogin: string | null;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  status?: 'active' | 'inactive'; // Optional, inferred from your metrics logic
 }
 
 interface UserFilters {
@@ -36,9 +45,11 @@ interface UserFilters {
 }
 
 export interface AuthResponse {
-  token: string;
-  refreshToken: string;
-  user: User;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  admin: User;
 }
 
 export interface CreateUserDto {
@@ -68,31 +79,38 @@ export class AuthService {
   private readonly TOKEN_KEY = 'transport_token';
   private readonly REFRESH_TOKEN_KEY = 'transport_refresh_token';
   private jwtHelper = new JwtHelperService();
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   constructor(private http: HttpClient) {
-    this.currentUserSubject = new BehaviorSubject<User | null>(
-      this.getUserFromToken()
-    );
+    this.currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromToken());
     this.currentUser = this.currentUserSubject.asObservable();
+    this.checkAuthStatus();
   }
 
-  login(credentials: {
-    email: string;
-    password: string;
-  }): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
-      .pipe(
-        tap((response) => {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-          localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  private checkAuthStatus(): void {
+    const token = this.getToken();
+    if (token && !this.jwtHelper.isTokenExpired(token)) {
+      this.isAuthenticatedSubject.next(true);
+    } else {
+      this.isAuthenticatedSubject.next(false);
+    }
   }
 
-  
-  
+  login(credentials: { email: string; password: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/admin/login`, credentials).pipe(
+      tap((response) => {
+        console.log('Response:', response);
+        const { tokens: { accessToken, refreshToken }, admin } = response;
+        localStorage.setItem(this.TOKEN_KEY, accessToken);
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+        this.currentUserSubject.next(admin);
+        this.isAuthenticatedSubject.next(true); // Update authentication status
+        console.log('Access Token:', accessToken);
+        console.log('Refresh Token:', refreshToken);
+      })
+    );
+  }
+
   public getUser(): Observable<User> {
     return this.http.get<User>(`${environment.apiUrl}/me`).pipe(
       tap(user => {
@@ -102,119 +120,82 @@ export class AuthService {
     );
   }
 
- 
-
   logout(): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/logout`, {}).pipe(
       tap(() => {
         this.currentUserSubject.next(null);
         localStorage.removeItem('user');
+        this.clearAuthData();
       })
     );
   }
+
   private clearAuthData(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     this.currentUserSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
   }
 
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh-token`, {
-        refreshToken,
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh-token`, { refreshToken }).pipe(
+      tap((response) => {
+        localStorage.setItem(this.TOKEN_KEY, response.tokens.accessToken);
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
+        this.currentUserSubject.next(response.admin);
       })
-      .pipe(
-        tap((response) => {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-          localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-          this.currentUserSubject.next(response.user);
-        })
-      );
+    );
   }
 
-  register(userData: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-  }): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData)
-      .pipe(
-        tap((response) => {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-          localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  register(userData: { email: string; password: string; firstName: string; lastName: string; role: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData).pipe(
+      tap((response) => {
+        localStorage.setItem(this.TOKEN_KEY, response.tokens.accessToken);
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
+        this.currentUserSubject.next(response.admin);
+      })
+    );
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/forgot-password`,
-      { email }
-    );
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email });
   }
 
-  resetPassword(
-    token: string,
-    password: string
-  ): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/reset-password`,
-      {
-        token,
-        password,
-      }
-    );
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, { token, password });
   }
 
-  changePassword(
-    currentPassword: string,
-    newPassword: string
-  ): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/change-password`,
-      {
-        currentPassword,
-        newPassword,
-      }
-    );
+  changePassword(currentPassword: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/change-password`, { currentPassword, newPassword });
   }
 
   verifyEmail(token: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/verify-email`,
-      { token }
-    );
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/verify-email`, { token });
   }
 
   updateProfile(userData: Partial<User>): Observable<User> {
-    return this.http
-      .patch<User>(`${environment.apiUrl}/auth/profile`, userData)
-      .pipe(
-        tap((user) => {
-          const currentUser = this.currentUserSubject.value;
-          this.currentUserSubject.next({ ...currentUser, ...user });
-        })
-      );
+    return this.http.patch<User>(`${environment.apiUrl}/auth/profile`, userData).pipe(
+      tap((user) => {
+        const currentUser = this.currentUserSubject.value;
+        this.currentUserSubject.next({ ...currentUser, ...user });
+      })
+    );
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  isAuthenticated(): boolean | null | '' {
+  isAuthenticated(): boolean {
     const token = this.getToken();
-    return token && !this.jwtHelper.isTokenExpired(token);
+    return token ? !this.jwtHelper.isTokenExpired(token) : false;
   }
 
-  hasPermission(permission: string): boolean {
-    const user = this.currentUserSubject.value;
-    return user?.permissions?.includes(permission) || false;
-  }
+  // hasPermission(permission: string): boolean {
+  //   const user = this.currentUserSubject.value;
+  //   return user?.permissions?.includes(permission) || false;
+  // }
 
   hasRole(role: string | string[]): boolean {
     const user = this.currentUserSubject.value;
@@ -226,18 +207,18 @@ export class AuthService {
     return user.role === role;
   }
 
-  // Add to AuthService class
-  getUsers(filters: UserFilters): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/users`, {
-      params: filters as any,
+  // getUsers(filters: UserFilters): Observable<any> {
+  //   return this.http.get(`${environment.apiUrl}/users`, { params: filters as any });
+  // }
+
+  getAdmins(filters: UserFilters): Observable<UsersResponse> {
+    return this.http.get<UsersResponse>(`${environment.apiUrl}/admin/get`, {
+      params: filters as any
     });
   }
 
   updateUserStatus(userId: number, status: User['status']): Observable<void> {
-    return this.http.patch<void>(
-      `${environment.apiUrl}/users/${userId}/status`,
-      { status }
-    );
+    return this.http.patch<void>(`${environment.apiUrl}/users/${userId}/status`, { status });
   }
 
   deleteUser(userId: number): Observable<void> {
@@ -245,13 +226,8 @@ export class AuthService {
   }
 
   exportUsers(format: 'excel' | 'pdf', userIds: number[]): Observable<Blob> {
-    return this.http.post(
-      `${environment.apiUrl}/users/export`,
-      { format, userIds },
-      { responseType: 'blob' }
-    );
+    return this.http.post(`${environment.apiUrl}/users/export`, { format, userIds }, { responseType: 'blob' });
   }
-
 
   createUser(userData: CreateUserDto): Observable<User> {
     return this.http.post<User>(`${environment.apiUrl}/users`, userData);

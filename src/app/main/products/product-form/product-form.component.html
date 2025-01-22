@@ -1,326 +1,132 @@
-<!-- product-form.component.html -->
 <div class="p-6">
-    <div class="mb-6">
-      <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-semibold text-gray-900">
-          {{ isEditMode ? 'Edit Product' : 'New Product' }}
-        </h1>
+  <div class="mb-6">
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-semibold text-gray-900">
+        {{ isEditMode ? 'Edit Product' : 'New Product' }}
+      </h1>
+      <button 
+        routerLink="/main/products/list"
+        class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+        <i class="ri-arrow-left-line mr-2"></i>
+        Back to Products
+      </button>
+    </div>
+  </div>
+
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <div *ngIf="loading" class="flex justify-center py-12">
+      <i class="ri-loader-4-line animate-spin text-3xl text-blue-600"></i>
+    </div>
+
+    <div *ngIf="!loading">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Product Name *
+            </label>
+            <input 
+              type="text"
+              formControlName="name"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [class.border-red-500]="productForm.get('name')?.touched && productForm.get('name')?.invalid"
+            >
+            <div *ngIf="productForm.get('name')?.touched && productForm.get('name')?.invalid" 
+                 class="mt-1 text-sm text-red-600">
+              Product name is required and must be at least 3 characters
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Price *
+            </label>
+            <input 
+              type="number"
+              formControlName="price"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+
+          <!-- Description -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Description *
+            </label>
+            <textarea 
+              formControlName="description"
+              rows="4"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+          <!-- In Stock -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              In Stock *
+            </label>
+            <select 
+              formControlName="inStock"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option [value]="true">Yes</option>
+              <option [value]="false">No</option>
+            </select>
+          </div>
+
+          <!-- Image -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Image *
+            </label>
+            <input 
+              type="file"
+              (change)="onImageUpload($event)"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+
+          <!-- Image Preview -->
+          <div class="md:col-span-2">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div *ngFor="let file of imageFiles; let i = index" class="relative group">
+                <img 
+                  [src]="file | objectUrl"
+                  class="w-full h-32 object-cover rounded-lg"
+                  [alt]="file.name"
+                >
+                <button 
+                  type="button"
+                  (click)="removeImage(i)"
+                  class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i class="ri-close-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-4">
         <button 
-          routerLink="/products/list"
-          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-          <i class="ri-arrow-left-line mr-2"></i>
-          Back to Products
+          type="button"
+          routerLink="/main/products/list"
+          class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+          Cancel
+        </button>
+        <button 
+          type="Submit"
+          
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          <div class="flex items-center">
+            <i *ngIf="saving" class="ri-loader-4-line animate-spin mr-2"></i>
+            {{ isEditMode ? 'Update' : 'Create' }} Product
+          </div>
         </button>
       </div>
     </div>
-  
-    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Loading State -->
-      <div *ngIf="loading" class="flex justify-center py-12">
-        <i class="ri-loader-4-line animate-spin text-3xl text-blue-600"></i>
-      </div>
-  
-      <div *ngIf="!loading">
-        <!-- Form Navigation -->
-        <div class="bg-white rounded-lg shadow">
-          <nav class="flex divide-x border-b">
-            <button 
-              type="button"
-              *ngFor="let section of ['Basic Info', 'Pricing', 'Inventory', 'Variants', 'Images', 'SEO']"
-              [ngClass]="{
-                'text-blue-600 border-b-2 border-blue-600': activeSection === section.toLowerCase(),
-                'text-gray-500 hover:text-gray-700': activeSection !== section.toLowerCase()
-              }"
-              (click)="activeSection = section.toLowerCase()"
-              class="flex-1 px-4 py-3 text-sm font-medium"
-            >
-              {{section}}
-            </button>
-          </nav>
-  
-          <!-- Basic Info Section -->
-          <div *ngIf="activeSection === 'basic info'" class="p-6" formGroupName="basicInfo">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Name -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Product Name *
-                </label>
-                <input 
-                  type="text"
-                  formControlName="name"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  [class.border-red-500]="productForm.get('basicInfo.name')?.touched && 
-                                        productForm.get('basicInfo.name')?.invalid"
-                >
-                <div *ngIf="productForm.get('basicInfo.name')?.touched && 
-                           productForm.get('basicInfo.name')?.invalid" 
-                     class="mt-1 text-sm text-red-600">
-                  Product name is required and must be at least 3 characters
-                </div>
-              </div>
-  
-              <!-- SKU -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  SKU *
-                </label>
-                <input 
-                  type="text"
-                  formControlName="sku"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-  
-              <!-- Category -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Category *
-                </label>
-                <select 
-                  formControlName="categoryId"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option value="">Select Category</option>
-                  <option *ngFor="let category of categories" [value]="category.id">
-                    {{category.name}}
-                  </option>
-                </select>
-              </div>
-  
-              <!-- Brand -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Brand
-                </label>
-                <input 
-                  type="text"
-                  formControlName="brandId"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-  
-              <!-- Description -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Description *
-                </label>
-                <textarea 
-                  formControlName="description"
-                  rows="4"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
-  
-              <!-- Status -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select 
-                  formControlName="status"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="active">Active</option>
-                  <option value="draft">Draft</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="discontinued">Discontinued</option>
-                </select>
-              </div>
-  
-              <!-- Tags -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Tags
-                </label>
-                <input 
-                  type="text"
-                  formControlName="tags"
-                  placeholder="Enter tags separated by commas"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-            </div>
-          </div>
-  
-          <!-- Pricing Section -->
-          <div *ngIf="activeSection === 'pricing'" class="p-6" formGroupName="pricing">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Base Price -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Base Price *
-                </label>
-                <div class="relative">
-                  <span class="absolute left-3 top-2 text-gray-500">$</span>
-                  <input 
-                    type="number"
-                    formControlName="base"
-                    class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-              </div>
-  
-              <!-- Discounted Price -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Sale Price
-                </label>
-                <div class="relative">
-                  <span class="absolute left-3 top-2 text-gray-500">$</span>
-                  <input 
-                    type="number"
-                    formControlName="discounted"
-                    class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-              </div>
-  
-              <!-- Wholesale Price -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Wholesale Price
-                </label>
-                <div class="relative">
-                  <span class="absolute left-3 top-2 text-gray-500">$</span>
-                  <input 
-                    type="number"
-                    formControlName="wholesale"
-                    class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-              </div>
-  
-              <!-- Currency -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Currency
-                </label>
-                <select 
-                  formControlName="currency"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                </select>
-              </div>
-            </div>
-          </div>
-  
-          <!-- Inventory Section -->
-          <div *ngIf="activeSection === 'inventory'" class="p-6" formGroupName="inventory">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Quantity -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Current Stock *
-                </label>
-                <input 
-                  type="number"
-                  formControlName="quantity"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-  
-              <!-- Reorder Point -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Low Stock Threshold *
-                </label>
-                <input 
-                  type="number"
-                  formControlName="reorderPoint"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-  
-              <!-- Reorder Quantity -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Reorder Quantity *
-                </label>
-                <input 
-                  type="number"
-                  formControlName="reorderQuantity"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-  
-              <!-- Location -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Storage Location *
-                </label>
-                <input 
-                  type="text"
-                  formControlName="location"
-                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-              </div>
-            </div>
-          </div>
-  
-          <!-- Images Section -->
-          <div *ngIf="activeSection === 'images'" class="p-6">
-            <div class="space-y-4">
-              <div class="flex items-center justify-center w-full">
-                <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                    <i class="ri-upload-cloud-2-line text-4xl text-gray-500 mb-2"></i>
-                    <p class="mb-2 text-sm text-gray-500">
-                      <span class="font-semibold">Click to upload</span> or drag and drop
-                    </p>
-                    <p class="text-xs text-gray-500">PNG, JPG or WebP (MAX. 800x400px)</p>
-                  </div>
-                  <input 
-                    type="file" 
-                    class="hidden"
-                    multiple
-                    accept="image/*"
-                    (change)="onImageUpload($event)"
-                  >
-                </label>
-              </div>
-  
-              <!-- Image Preview -->
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div *ngFor="let file of imageFiles; let i = index" 
-                     class="relative group">
-                  <img 
-                    [src]="file | objectUrl"
-                    class="w-full h-32 object-cover rounded-lg"
-                    [alt]="file.name"
-                  >
-                  <button 
-                    type="button"
-                    (click)="removeImage(i)"
-                    class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i class="ri-close-line"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Form Actions -->
-        <div class="flex justify-end space-x-4">
-          <button 
-            type="button"
-            routerLink="/products/list"
-            class="px-6 py-2 border rounded-lg hover:bg-gray-50">
-            Cancel
-          </button>
-          <button 
-            type="submit"
-            [disabled]="productForm.invalid || saving"
-            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-            <div class="flex items-center">
-              <i *ngIf="saving" class="ri-loader-4-line animate-spin mr-2"></i>
-              {{ isEditMode ? 'Update' : 'Create' }} Product
-            </div>
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
+  </form>
+</div>

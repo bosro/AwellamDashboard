@@ -10,9 +10,9 @@ interface UserMetrics {
   byRole: Record<string, number>;
 }
 
-interface UsersResponse {
-  data: User[];
-  total: number;
+export interface UsersResponse {
+  admins: User[];
+  message: string;
 }
 
 interface UserFilters {
@@ -105,11 +105,15 @@ export class UserManagementComponent implements OnInit {
       pageSize: this.pageSize,
       ...this.filterForm.value
     };
-
-    this.authService.getUsers(filters).subscribe({
+  
+    this.authService.getAdmins(filters).subscribe({
       next: (response: UsersResponse) => {
-        this.users = response.data;
-        this.total = response.total;
+        this.users = response.admins;
+  
+        console.log(response.admins);
+        // this.total = response.total;
+  
+        console.log(this.users);
         this.calculateMetrics();
         this.loading = false;
       },
@@ -128,7 +132,7 @@ export class UserManagementComponent implements OnInit {
     this.users.forEach(user => {
       byRole[user.role] = (byRole[user.role] || 0) + 1;
       if (user.status === 'active') active++;
-      else inactive++;
+      // else inactive++;
     });
 
     this.metrics = {
@@ -147,15 +151,15 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  toggleAllSelection(): void {
-    if (this.selectedUsers.size === this.users.length) {
-      this.selectedUsers.clear();
-    } else {
-      this.users.forEach(user => {
-        this.selectedUsers.add(user.id);
-      });
-    }
-  }
+  // toggleAllSelection(): void {
+  //   if (this.selectedUsers.size === this.users.length) {
+  //     this.selectedUsers.clear();
+  //   } else {
+  //     this.users.forEach(user => {
+  //       this.selectedUsers.add(user.id);
+  //     });
+  //   }
+  // }
 
   updateUserStatus(userId: number, status: User['status']): void {
     this.authService.updateUserStatus(userId, status).subscribe({

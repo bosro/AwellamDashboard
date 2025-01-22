@@ -1,10 +1,8 @@
-
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
-// Define route configuration type
 type RouteConfig = {
   path: string;
   title: string;
@@ -19,13 +17,13 @@ export class MainLayoutComponent implements OnInit {
   pageTitle = '';
   loading = false;
 
-  // Define route configurations
   private readonly routes: RouteConfig[] = [
-    { path: '/dashboard', title: 'Dashboard' },
-    { path: '/transport', title: 'Transport Operations' },
-    { path: '/inventory', title: 'Inventory Management' },
-    { path: '/purchasing', title: 'Purchase Orders' },
-    { path: '/claims', title: 'Claims Management' }
+    { path: '/main/dashboard', title: 'Dashboard' },
+    { path: '/main/transport', title: 'Transport Operations' },
+    { path: '/main/inventory', title: 'Inventory Management' },
+    { path: '/main/purchasing', title: 'Purchase Orders' },
+    { path: '/main/claims', title: 'Claims Management' }
+    
   ];
 
   constructor(
@@ -40,11 +38,11 @@ export class MainLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // if (!this.authService.isAuthenticated()) {
-    //   this.router.navigate(['/auth/login']);
-    //   return;
-    // }
-    // this.updatePageTitle();
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+    this.updatePageTitle();
   }
 
   toggleSidebar(): void {
@@ -57,21 +55,18 @@ export class MainLayoutComponent implements OnInit {
   }
 
   private findMatchingRouteTitle(currentRoute: string): string {
-    // Find exact match first
     const exactMatch = this.routes.find(route => route.path === currentRoute);
     if (exactMatch) {
       return exactMatch.title;
     }
 
-    // Find partial match
     const partialMatch = this.routes
-      .sort((a, b) => b.path.length - a.path.length) // Sort by path length descending
+      .sort((a, b) => b.path.length - a.path.length)
       .find(route => currentRoute.startsWith(route.path));
 
     return partialMatch?.title || 'Dashboard';
   }
 
-  // Helper methods for getting route information
   getAvailableTitles(): string[] {
     return this.routes.map(route => route.title);
   }
@@ -84,7 +79,6 @@ export class MainLayoutComponent implements OnInit {
     return this.routes.some(route => route.path === path);
   }
 
-  // Method to get route title directly
   getRouteTitle(path: string): string {
     return this.routes.find(route => route.path === path)?.title || 'Dashboard';
   }

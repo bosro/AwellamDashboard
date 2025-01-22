@@ -1,3 +1,7 @@
 export const environment = {
-    apiUrl: 'http/dummy.com'
+    apiUrl: 'https://newawellambcckend.onrender.com/api'
+}
+
+export const url ={
+    url:"https://newawellambcckend.onrender.com/api"
 }
