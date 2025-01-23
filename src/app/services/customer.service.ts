@@ -21,10 +21,10 @@ export class CustomersService {
     return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`, { params: httpParams });
   }
 
-  getCustomerById(id: string): Observable<Customer> {
-    return this.http.get<Customer>(`${this.apiUrl}/get/${id}`);
+  getCustomerById(id: string): Observable<{ customer: Customer }> {
+    return this.http.get<{ customer: Customer }>(`${this.apiUrl}/get/${id}`);
   }
-
+  
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
     return this.http.post<Customer>(`${this.apiUrl}/create`, customer);
   }

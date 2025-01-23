@@ -1,4 +1,5 @@
 export interface Customer {
+  // [x: string]: Customer | undefined;
   _id: string;
   fullName: string;
   email: string;

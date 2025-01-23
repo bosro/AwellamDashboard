@@ -1,24 +1,55 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Address, Order, OrderNote, OrderStatus, PaymentStatus } from '../shared/types/order.interface';
+import { Order, OrderStatus, PaymentStatus } from '../shared/types/order.interface';
+
+// Define interfaces for better type safety
+interface OrderResponse {
+  orders: Order[];
+  total: number;
+}
+
+interface ShippingInfo {
+  trackingNumber?: string;
+  carrier?: string;
+  estimatedDeliveryDate?: Date;
+  shippingAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+}
+
+interface RefundData {
+  amount: number;
+  reason: string;
+  refundMethod: string;
+}
+
+interface ShippingRate {
+  carrier: string;
+  rate: number;
+  estimatedDays: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrdersService {
-  private apiUrl = '/api/orders';
+  private readonly apiUrl = 'http://0.0.0.0:3000/api/orders';
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
-  getOrders(params?: any): Observable<{ data: Order[]; total: number }> {
+  getOrders(params?: Record<string, any>): Observable<OrderResponse> {
     let httpParams = new HttpParams();
     if (params) {
-      Object.keys(params).forEach(key => {
-        httpParams = httpParams.set(key, params[key]);
+      Object.entries(params).forEach(([key, value]) => {
+        httpParams = httpParams.set(key, value);
       });
     }
-    return this.http.get<{ data: Order[]; total: number }>(this.apiUrl, { params: httpParams });
+    return this.http.get<OrderResponse>(`${this.apiUrl}/get`, { params: httpParams });
   }
 
   getOrderById(id: string): Observable<Order> {
@@ -29,31 +60,27 @@ export class OrdersService {
     return this.http.patch<Order>(`${this.apiUrl}/${id}/status`, { status });
   }
 
-  updateShippingInfo(id: string, shippingInfo: any): Observable<Order> {
+  updateShippingInfo(id: string, shippingInfo: ShippingInfo): Observable<Order> {
     return this.http.patch<Order>(`${this.apiUrl}/${id}/shipping`, shippingInfo);
   }
 
-  processRefund(id: string, refundData: any): Observable<Order> {
+  processRefund(id: string, refundData: RefundData): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/${id}/refund`, refundData);
-  }
-
-  addOrderNote(id: string, note: any): Observable<OrderNote> {
-    return this.http.post<OrderNote>(`${this.apiUrl}/${id}/notes`, note);
   }
 
   bulkUpdateStatus(ids: string[], status: OrderStatus): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/bulk/status`, { ids, status });
   }
 
-  getOrderAnalytics(params?: any): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/analytics`, { params });
+  getOrderAnalytics(params?: Record<string, any>): Observable<any> {
+    return this.http.get(`${this.apiUrl}/analytics`, { params });
   }
 
-  exportOrders(format: 'csv' | 'excel', filters?: any): Observable<Blob> {
+  exportOrders(format: 'csv' | 'excel', filters?: Record<string, any>): Observable<Blob> {
     let params = new HttpParams().set('format', format);
     if (filters) {
-      Object.keys(filters).forEach(key => {
-        params = params.set(key, filters[key]);
+      Object.entries(filters).forEach(([key, value]) => {
+        params = params.set(key, value);
       });
     }
     return this.http.get(`${this.apiUrl}/export`, {
@@ -62,17 +89,11 @@ export class OrdersService {
     });
   }
 
-  validateAddress(address: Address): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/validate-address`, address);
+  getShippingRates(orderData: Partial<Order>): Observable<ShippingRate[]> {
+    return this.http.post<ShippingRate[]>(`${this.apiUrl}/shipping-rates`, orderData);
   }
 
-  getShippingRates(orderData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/shipping-rates`, orderData);
+  createOrder(orderData: Partial<Order>): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/create`, orderData);
   }
-
-  createOrder(orderData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, orderData);
-  }
-
- 
 }

@@ -19,7 +19,7 @@
       </div>
       <div class="flex space-x-3">
         <button 
-          [routerLink]="['/customers/edit', customer?._id]"
+          [routerLink]="['/main/customers/edit', customer?._id]"
           class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
           <i class="ri-edit-line mr-2"></i>
           Edit
@@ -77,43 +77,43 @@
     <!-- Customer Info -->
     <div class="col-span-2 space-y-6">
       <!-- Basic Information -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
-          <div class="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-500">Full Name</label>
-              <p class="mt-1 text-sm text-gray-900">
-                {{customer?.fullName}}
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500">Email</label>
-              <p class="mt-1 text-sm text-gray-900">
-                {{customer?.email}}
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500">Phone</label>
-              <p class="mt-1 text-sm text-gray-900">
-                {{customer?.phoneNumber}}
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500">Address</label>
-              <p class="mt-1 text-sm text-gray-900">
-                {{customer?.address}}
-              </p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-500">Balance</label>
-              <p class="mt-1 text-sm text-gray-900">
-                ${{customer?.balance}}
-              </p>
-            </div>
-          </div>
-        </div>
+     <div class="bg-white rounded-lg shadow" *ngIf="customer">
+  <div class="p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
+    <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-500">Full Name</label>
+        <p class="mt-1 text-sm text-gray-900">
+          {{customer.fullName}}
+        </p>
       </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-500">Email</label>
+        <p class="mt-1 text-sm text-gray-900">
+          {{customer.email}}
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-500">Phone</label>
+        <p class="mt-1 text-sm text-gray-900">
+          {{customer.phoneNumber}}
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-500">Address</label>
+        <p class="mt-1 text-sm text-gray-900">
+          {{customer.address}}
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-500">Balance</label>
+        <p class="mt-1 text-sm text-gray-900">
+          ${{customer.balance}}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
   
     <!-- Orders Tab -->

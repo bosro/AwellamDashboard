@@ -1,428 +1,140 @@
-<!-- order-details.component.html -->
 <div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-semibold text-gray-900">
-          Order #{{order?.orderNumber}}
-        </h1>
-        <p class="mt-1 text-sm text-gray-600">
-          Placed on {{order?.metadata?.createdAt | date:'medium'}}
-        </p>
-      </div>
-      <div class="flex space-x-3">
-        <button 
-          (click)="downloadInvoice()"
-          class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
-          <i class="ri-file-text-line mr-2"></i>
-          Download Invoice
-        </button>
-        <button 
-          *ngIf="order?.status === 'pending'"
-          (click)="updateOrderStatus(OrderStatus.PROCESSING)"
-          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <i class="ri-play-line mr-2"></i>
-          Process Order
-        </button>
-      </div>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">
+        Order #{{order?.orderNumber}}
+      </h1>
+      <p class="mt-1 text-sm text-gray-600">
+        Placed on {{order?.date | date:'medium'}}
+      </p>
     </div>
-  
-    <!-- Order Status Timeline -->
-    <div class="mb-8">
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center" aria-hidden="true">
-          <div class="w-full border-t border-gray-200"></div>
-        </div>
-        <div class="relative flex justify-between">
-          <div *ngFor="let step of orderTimeline" 
-               class="flex flex-col items-center">
-            <div [ngClass]="{
-              'bg-blue-600 text-white': step.status === 'current',
-              'bg-green-500 text-white': step.status === 'completed',
-              'bg-gray-200 text-gray-500': step.status === 'pending'
-            }" class="h-12 w-12 rounded-full flex items-center justify-center">
-              <i [class]="step.icon"></i>
-            </div>
-            <div class="mt-2 text-sm font-medium text-gray-900">{{step.title}}</div>
-            <div class="mt-1 text-xs text-gray-500">{{step.description}}</div>
-            <div *ngIf="step.date" class="mt-1 text-xs text-gray-500">
-              {{step.date | date:'short'}}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-3 gap-6">
-      <!-- Order Details -->
-      <div class="col-span-2 space-y-6">
-        <!-- Order Items -->
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Order Items</h2>
-            <div class="flow-root">
-              <ul role="list" class="-my-6 divide-y divide-gray-200">
-                <li *ngFor="let item of order?.items" class="py-6 flex">
-                  <div class="flex-shrink-0 w-24 h-24 overflow-hidden rounded-lg">
-                    <img [src]="item.image || 'assets/placeholder.png'" 
-                         [alt]="item.name"
-                         class="w-full h-full object-cover">
-                  </div>
-                  <div class="ml-4 flex-1 flex flex-col">
-                    <div>
-                      <div class="flex justify-between">
-                        <h3 class="text-sm font-medium text-gray-900">
-                          {{item.name}}
-                        </h3>
-                        <p class="ml-4 text-sm font-medium text-gray-900">
-                          ${{item.total}}
-                        </p>
-                      </div>
-                      <p class="mt-1 text-sm text-gray-500">SKU: {{item.sku}}</p>
-                    </div>
-                    <div class="flex-1 flex items-end justify-between">
-                      <p class="text-sm text-gray-500">Qty {{item.quantity}}</p>
-                      <div [ngClass]="{
-                        'text-green-600': item.status === 'delivered',
-                        'text-blue-600': item.status === 'shipped',
-                        'text-yellow-600': item.status === 'processing',
-                        'text-red-600': item.status === 'cancelled'
-                      }" class="text-sm">
-                        {{item.status}}
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="border-t border-gray-200 px-6 py-4">
-            <div class="flex justify-between text-sm font-medium">
-              <span class="text-gray-600">Subtotal</span>
-              <span class="text-gray-900">${{order?.pricing?.subtotal}}</span>
-            </div>
-            <div class="flex justify-between text-sm font-medium mt-2">
-              <span class="text-gray-600">Shipping</span>
-              <span class="text-gray-900">${{order?.pricing?.shipping}}</span>
-            </div>
-            <div class="flex justify-between text-sm font-medium mt-2">
-              <span class="text-gray-600">Tax</span>
-              <span class="text-gray-900">${{order?.pricing?.tax}}</span>
-            </div>
-            <div *ngIf="order?.pricing?.discount" 
-                 class="flex justify-between text-sm font-medium mt-2 text-green-600">
-              <span>Discount</span>
-              <span>-${{order?.pricing?.discount}}</span>
-            </div>
-            <div class="flex justify-between text-lg font-semibold mt-4 pt-4 border-t">
-              <span>Total</span>
-              <span>${{order?.pricing?.total}}</span>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Customer Notes & Timeline -->
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-medium text-gray-900">Notes & Activity</h2>
-              <button 
-                (click)="showNoteForm = true"
-                class="text-sm text-blue-600 hover:text-blue-900">
-                Add Note
-              </button>
-            </div>
-  
-            <!-- Note Form -->
-            <div *ngIf="showNoteForm" class="mb-4">
-              <form [formGroup]="noteForm" (ngSubmit)="addNote()" class="space-y-4">
-                <div>
-                  <textarea
-                    formControlName="content"
-                    rows="3"
-                    placeholder="Enter note..."
-                    class="w-full px-4 py-2 border rounded-lg"
-                  ></textarea>
-                </div>
-                <div class="flex items-center space-x-4">
-                  <label class="flex items-center">
-                    <input
-                      type="radio"
-                      formControlName="type"
-                      value="internal"
-                      class="mr-2"
-                    >
-                    Internal Note
-                  </label>
-                  <label class="flex items-center">
-                    <input
-                      type="radio"
-                      formControlName="type"
-                      value="customer"
-                      class="mr-2"
-                    >
-                    Customer Note
-                  </label>
-                </div>
-                <div class="flex justify-end space-x-3">
-                  <button 
-                    type="button"
-                    (click)="showNoteForm = false"
-                    class="px-4 py-2 border rounded-lg hover:bg-gray-50">
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    [disabled]="!noteForm.valid || saving"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                    Add Note
-                  </button>
-                </div>
-              </form>
-            </div>
-  
-            <!-- Notes List -->
-            <div class="flow-root">
-              <ul role="list" class="-mb-8">
-                <li *ngFor="let note of order?.notes">
-                  <div class="relative pb-8">
-                    <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" 
-                          aria-hidden="true"></span>
-                    <div class="relative flex items-start space-x-3">
-                      <div>
-                        <div [ngClass]="{
-                          'bg-gray-400': note.type === 'internal',
-                          'bg-blue-400': note.type === 'customer'
-                        }" class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white">
-                          <i [class]="note.type === 'internal' ? 'ri-user-line' : 'ri-customer-service-line'"
-                             class="text-white"></i>
-                        </div>
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <div>
-                          <div class="text-sm">
-                            <span class="font-medium text-gray-900">
-                              {{note.createdBy}}
-                            </span>
-                            <span class="ml-2 text-gray-500">
-                              {{note.createdAt | date:'medium'}}
-                            </span>
-                          </div>
-                          <p class="mt-2 text-sm text-gray-700">
-                            {{note.content}}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Sidebar -->
-      <div class="space-y-6">
-        <!-- Customer Info -->
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h2>
-            <div class="space-y-4">
-              <div>
-                <h3 class="text-sm font-medium text-gray-500">Contact Details</h3>
-                <p class="mt-1 text-sm text-gray-900">{{order?.customerInfo?.name}}</p>
-                <p class="text-sm text-gray-900">{{order?.customerInfo?.email}}</p>
-                <p class="text-sm text-gray-900">{{order?.customerInfo?.phone}}</p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500">Shipping Address</h3>
-                <address class="mt-1 text-sm text-gray-900 not-italic">
-                  {{order?.shipping?.address?.line1}}<br>
-                  <span *ngIf="order?.shipping?.address?.line2">
-                    {{order?.shipping?.address?.line2}}<br>
-                  </span>
-                  {{order?.shipping?.address?.city}}, {{order?.shipping?.address?.state}} 
-                  {{order?.shipping?.address?.postalCode}}<br>
-                  {{order?.shipping?.address?.country}}
-                </address>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500">Billing Address</h3>
-                <address class="mt-1 text-sm text-gray-900 not-italic">
-                  {{order?.billing?.address?.line1}}<br>
-                  <span *ngIf="order?.billing?.address?.line2">
-                    {{order?.billing?.address?.line2}}<br>
-                  </span>
-                  {{order?.billing?.address?.city}}, {{order?.billing?.address?.state}} 
-                  {{order?.billing?.address?.postalCode}}<br>
-                  {{order?.billing?.address?.country}}
-                </address>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Payment Info -->
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h2>
-            <div class="space-y-4">
-              <div>
-                <h3 class="text-sm font-medium text-gray-500">Payment Method</h3>
-                <p class="mt-1 text-sm text-gray-900">
-                  {{order?.billing?.paymentMethod}}
-                </p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500">Transaction ID</h3>
-                <p class="mt-1 text-sm text-gray-900">
-                  {{order?.billing?.transactionId || 'N/A'}}
-                </p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500">Payment Status</h3>
-                <span [ngClass]="{
-                  'bg-green-100 text-green-800': order?.billing?.paymentStatus === 'paid',
-                  'bg-yellow-100 text-yellow-800': order?.billing?.paymentStatus === 'pending',
-                  'bg-red-100 text-red-800': order?.billing?.paymentStatus === 'failed'
-                }" class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full">
-                  {{order?.billing?.paymentStatus}}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Shipping Info -->
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-medium text-gray-900">Shipping Information</h2>
-              <button 
-                *ngIf="!order?.shipping?.trackingNumber"
-                (click)="showShippingForm = true"
-                class="text-sm text-blue-600 hover:text-blue-900">
-                Add Tracking
-              </button>
-            </div>
-            
-            <!-- Shipping Form -->
-            <div *ngIf="showShippingForm" class="mb-4">
-              <form [formGroup]="shippingForm" (ngSubmit)="updateShipping()" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Carrier
-                  </label>
-                  <select
-                    formControlName="carrier"
-                    class="w-full px-4 py-2 border rounded-lg"
-                  >
-                    <option value="fedex">FedEx</option>
-                    <option value="ups">UPS</option>
-                    <option value="usps">USPS</option>
-                    <option value="dhl">DHL</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Tracking Number
-                  </label>
-                  <input
-                    type="text"
-                    formControlName="trackingNumber"
-                  class="w-full px-4 py-2 border rounded-lg"
-                >
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Estimated Delivery
-                </label>
-                <input
-                  type="date"
-                  formControlName="estimatedDelivery"
-                  class="w-full px-4 py-2 border rounded-lg"
-                >
-              </div>
-              <div class="flex items-center">
-                <input
-                  type="checkbox"
-                  formControlName="notifyCustomer"
-                  class="h-4 w-4 text-blue-600 rounded"
-                >
-                <label class="ml-2 text-sm text-gray-700">
-                  Notify customer
-                </label>
-              </div>
-              <div class="flex justify-end space-x-3">
-                <button 
-                  type="button"
-                  (click)="showShippingForm = false"
-                  class="px-4 py-2 border rounded-lg hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  [disabled]="!shippingForm.valid || saving"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                  Update Shipping
-                </button>
-              </div>
-            </form>
-          </div>
+  </div>
 
-          <!-- Shipping Details -->
+  <!-- Order Status Timeline -->
+  <div class="mb-8">
+    <div class="relative">
+      <div class="absolute inset-0 flex items-center" aria-hidden="true">
+        <div class="w-full border-t border-gray-200"></div>
+      </div>
+      <div class="relative flex justify-between">
+        <div *ngFor="let step of orderTimeline" 
+             class="flex flex-col items-center">
+          <div [ngClass]="{
+            'bg-blue-600 text-white': step.status === 'current',
+            'bg-green-500 text-white': step.status === 'completed',
+            'bg-gray-200 text-gray-500': step.status === 'pending'
+          }" class="h-12 w-12 rounded-full flex items-center justify-center">
+            <i [class]="step.icon"></i>
+          </div>
+          <div class="mt-2 text-sm font-medium text-gray-900">{{step.title}}</div>
+          <div class="mt-1 text-xs text-gray-500">{{step.description}}</div>
+          <div *ngIf="step.date" class="mt-1 text-xs text-gray-500">
+            {{step.date | date:'short'}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-3 gap-6">
+    <!-- Order Details -->
+    <div class="col-span-2">
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Order Items</h2>
+          <div class="flow-root">
+            <ul role="list" class="-my-6 divide-y divide-gray-200">
+              <li *ngFor="let item of order?.orderItems" class="py-6 flex">
+                <div class="ml-4 flex-1 flex flex-col">
+                  <div>
+                    <div class="flex justify-between">
+                      <h3 class="text-sm font-medium text-gray-900">
+                        <!-- {{item.product?.name || 'Product Unavailable'}} -->
+                      </h3>
+                      <p class="ml-4 text-sm font-medium text-gray-900">
+                        ${{item.price}}
+                      </p>
+                    </div>
+                    <!-- <p class="mt-1 text-sm text-gray-500">SKU: {{item.product?._id}}</p> -->
+                  </div>
+                  <div class="flex-1 flex items-end justify-between">
+                    <p class="text-sm text-gray-500">Qty {{item.quantity}}</p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="border-t border-gray-200 px-6 py-4">
+          <div class="flex justify-between text-lg font-semibold">
+            <span>Total</span>
+            <span>${{order?.totalAmount}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Customer Info -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h2>
           <div class="space-y-4">
             <div>
-              <h3 class="text-sm font-medium text-gray-500">Shipping Method</h3>
-              <p class="mt-1 text-sm text-gray-900">
-                {{order?.shipping?.method}}
-              </p>
+              <h3 class="text-sm font-medium text-gray-500">Contact Details</h3>
+              <p class="mt-1 text-sm text-gray-900">{{order?.customerId?.fullName}}</p>
+              <p class="text-sm text-gray-900">Phone: {{order?.customerId?.phoneNumber}}</p>
             </div>
-            <div *ngIf="order?.shipping?.trackingNumber">
-              <h3 class="text-sm font-medium text-gray-500">Tracking Information</h3>
-              <div class="mt-1">
-                <p class="text-sm text-gray-900">
-                  {{order?.shipping?.carrier}} - {{order?.shipping?.trackingNumber}}
-                </p>
-                <a [href]="getTrackingUrl()" 
-                   target="_blank"
-                   class="text-sm text-blue-600 hover:text-blue-900">
-                  Track Package
-                </a>
-              </div>
-            </div>
-            <div *ngIf="order?.shipping?.estimatedDelivery">
-              <h3 class="text-sm font-medium text-gray-500">Estimated Delivery</h3>
-              <p class="mt-1 text-sm text-gray-900">
-                {{order?.shipping?.estimatedDelivery | date:'mediumDate'}}
-              </p>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Delivery Address</h3>
+              <p class="mt-1 text-sm text-gray-900">{{order?.deliveryAddress}}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Payment Info -->
       <div class="bg-white rounded-lg shadow">
-        <div class="p-6 space-y-3">
-          <button 
-            *ngIf="canProcessRefund()"
-            (click)="showRefundForm = true"
-            class="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700">
-            Process Refund
-          </button>
-          <button 
-            (click)="resendConfirmation()"
-            class="w-full flex justify-center items-center px-4 py-2 border rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            Resend Confirmation
-          </button>
-          <button 
-            *ngIf="order?.status === 'pending'"
-            (click)="updateOrderStatus(OrderStatus.CANCELLED)"
-            class="w-full flex justify-center items-center px-4 py-2 border rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50">
-            Cancel Order
-          </button>
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h2>
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Payment Status</h3>
+              <span [ngClass]="{
+                'bg-green-100 text-green-800': order?.paymentStatus === 'Paid',
+                'bg-yellow-100 text-yellow-800': order?.paymentStatus === 'Unpaid',
+                'bg-red-100 text-red-800': order?.paymentStatus === 'Failed'
+              }" class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full">
+                {{order?.paymentStatus}}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Info -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Delivery Information</h2>
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500">Delivery Status</h3>
+              <span [ngClass]="{
+                'bg-green-100 text-green-800': order?.deliveryStatus === 'DELIVERED',
+                'bg-blue-100 text-blue-800': order?.deliveryStatus === 'SHIPPING',
+                'bg-yellow-100 text-yellow-800': order?.deliveryStatus === 'PENDING'
+              }" class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full">
+                {{order?.deliveryStatus}}
+              </span>
+            </div>
+            <div *ngIf="order?.assignedTruck">
+              <h3 class="text-sm font-medium text-gray-500">Assigned Truck</h3>
+              <p class="mt-1 text-sm text-gray-900">{{order?.assignedTruck}}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

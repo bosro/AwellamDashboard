@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { TransportService, Truck } from '../../../services/transport.service'
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
+// import {transportService} from '../../../services/transport.service'
+import { Truck } from '../../../services/transport.service';
 
-type TruckStatus = 'available' | 'in-use' | 'maintenance';
-type MaintenanceStatus = 'overdue' | 'due-soon' | 'ok';
-type FuelStatus = 'low' | 'medium' | 'good';
+
+// Use the previously defined Truck interface
+import {TruckResponse } from '../../../shared/types/truck-operation.types';
+import { TransportService } from '../../../services/transport.service';
 
 @Component({
   selector: 'app-truck-management',
@@ -14,78 +18,42 @@ type FuelStatus = 'low' | 'medium' | 'good';
   styleUrls: ['./truck-management.component.scss']
 })
 export class TruckManagementComponent implements OnInit {
-  trucks: Truck[] = [];
-  selectedTrucks: Set<number> = new Set();
+  trucks: Truck[] =[];
+  selectedTrucks: Set<string> = new Set(); // Changed to use _id
   loading = false;
-  showMaintenanceModal = false;
-  maintenanceForm!: FormGroup;
   filterForm!: FormGroup;
-  currentPage = 1;
-  pageSize = 10;
-  total = 0;
-
-  Math = Math; // Add this to use Math in template
- 
-  maintenanceTypes = [
-    'Regular Service',
-    'Oil Change',
-    'Tire Replacement',
-    'Brake Service',
-    'Major Repair'
-  ];
 
   constructor(
-    private transportService: TransportService,
-    private fb: FormBuilder
-  ) {
-    this.createForms();
-  }
-
+    private http: HttpClient,
+    private fb: FormBuilder,
+    private transportService: TransportService ,
+    private router: Router // Inject TransportService
+  ) {}
   ngOnInit(): void {
+    this.createFilterForm();
     this.loadTrucks();
-    this.setupFilterSubscription();
   }
 
-  private createForms(): void {
+  createFilterForm(): void {
     this.filterForm = this.fb.group({
       searchTerm: [''],
-      status: [''],
-      location: [''],
-      maintenanceStatus: ['']
-    });
-
-    this.maintenanceForm = this.fb.group({
-      maintenanceDate: [''],
-      maintenanceType: [''],
-      notes: ['']
+      status: ['']
     });
   }
 
-  private setupFilterSubscription(): void {
-    this.filterForm.valueChanges
-      .pipe(
-        debounceTime(500),
-        distinctUntilChanged()
-      )
-      .subscribe(() => {
-        this.currentPage = 1;
-        this.loadTrucks();
-      });
+
+  viewDetails(truckId: string): void {
+    this.router.navigate(['/trips/:id', truckId]);
   }
 
   loadTrucks(): void {
     this.loading = true;
-    const params = {
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      ...this.filterForm.value
-    };
-
+    const params = this.filterForm.value; // Use filter form values as params
     this.transportService.getTrucks(params).subscribe({
       next: (response) => {
-        this.trucks = response.data;
-        this.total = response.total;
+        this.trucks = response.trucks;
         this.loading = false;
+        console.log(this.trucks)
       },
       error: (error) => {
         console.error('Error loading trucks:', error);
@@ -93,8 +61,8 @@ export class TruckManagementComponent implements OnInit {
       }
     });
   }
-
-  toggleSelection(truckId: number): void {
+  // Modify methods to use _id
+  toggleSelection(truckId: string): void {
     if (this.selectedTrucks.has(truckId)) {
       this.selectedTrucks.delete(truckId);
     } else {
@@ -102,153 +70,28 @@ export class TruckManagementComponent implements OnInit {
     }
   }
 
-  toggleAllSelection(): void {
-    if (this.selectedTrucks.size === this.trucks.length) {
-      this.selectedTrucks.clear();
-    } else {
-      this.trucks.forEach(truck => {
-        if (truck.id) {
-          this.selectedTrucks.add(truck.id);
-        }
-      });
-    }
+  // Update status method
+  updateTruckStatus(truckId: string, status: Truck['status']): void {
+    // Implement API call to update truck status
+    console.log(`Updating truck ${truckId} to status ${status}`);
   }
 
-  updateTruckStatus(truckId: number, status: TruckStatus): void {
-    this.transportService.updateTruckStatus(truckId, status).subscribe({
-      next: () => {
-        this.loadTrucks();
-      }
-    });
-  }
-
-  
-
-  getMaintenanceStatus(truck: Truck): MaintenanceStatus {
-    const today = new Date();
-    const nextMaintenance = new Date(truck.nextMaintenanceDate);
-    const daysUntilMaintenance = Math.floor((nextMaintenance.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (daysUntilMaintenance < 0) {
-      return 'overdue';
-    } else if (daysUntilMaintenance <= 7) {
-      return 'due-soon';
-    }
-    return 'ok';
-  }
-
-  getFuelStatus(truck: Truck): FuelStatus {
-    const fuelPercentage = (truck.currentFuelLevel / truck.fuelCapacity) * 100;
-    if (fuelPercentage <= 20) {
-      return 'low';
-    } else if (fuelPercentage <= 40) {
-      return 'medium';
-    }
-    return 'good';
-  }
-
-  getStatusClass(status: TruckStatus): string {
-    const classes: Record<TruckStatus, string> = {
-      'available': 'bg-green-100 text-green-800',
-      'in-use': 'bg-blue-100 text-blue-800',
-      'maintenance': 'bg-yellow-100 text-yellow-800'
-    };
-    return classes[status] || '';
-  }
-
-  getMaintenanceStatusClass(status: MaintenanceStatus): string {
-    const classes: Record<MaintenanceStatus, string> = {
-      'overdue': 'bg-red-100 text-red-800',
-      'due-soon': 'bg-yellow-100 text-yellow-800',
-      'ok': 'bg-green-100 text-green-800'
-    };
-    return classes[status] || '';
-  }
-
-  getFuelStatusClass(status: FuelStatus): string {
-    const classes: Record<FuelStatus, string> = {
-      'low': 'bg-red-100 text-red-800',
-      'medium': 'bg-yellow-100 text-yellow-800',
-      'good': 'bg-green-100 text-green-800'
-    };
-    return classes[status] || '';
-  }
-
-  clearFilters(): void {
-    this.filterForm.reset();
-  }
-
-  exportTruckData(format: 'excel' | 'pdf'): void {
-    const selectedIds = Array.from(this.selectedTrucks);
-    // Implement export functionality
-  }
-
-
-
+  // Utility methods
   getOperationalCount(): number {
-    return this.trucks.filter(truck => truck.status === 'in-use').length;
+    return this.trucks.filter(truck => truck.status === 'active').length;
   }
 
   getMaintenanceCount(): number {
     return this.trucks.filter(truck => truck.status === 'maintenance').length;
   }
 
-  getMaintenanceDueCount(): number {
-    const today = new Date();
-    return this.trucks.filter(truck => {
-      const nextMaintenance = new Date(truck.nextMaintenanceDate);
-      const daysUntil = Math.floor((nextMaintenance.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      return daysUntil <= 7 && daysUntil >= 0;
-    }).length;
-  }
-
-  getLowFuelCount(): number {
-    return this.trucks.filter(truck => {
-      const fuelPercentage = (truck.currentFuelLevel / truck.fuelCapacity) * 100;
-      return fuelPercentage <= 20;
-    }).length;
-  }
-
-  getAverageMileage(): number {
-    if (this.trucks.length === 0) return 0;
-    const totalMileage = this.trucks.reduce((sum, truck) => sum + truck.mileage, 0);
-    return Math.round(totalMileage / this.trucks.length);
-  }
-
-  getFleetUtilization(): number {
-    if (this.trucks.length === 0) return 0;
-    const operationalCount = this.getOperationalCount();
-    return Math.round((operationalCount / this.trucks.length) * 100);
-  }
-
-  scheduleMaintenance(truckId?: number): void {
-    if (this.maintenanceForm.valid) {
-      const { maintenanceDate, maintenanceType, notes } = this.maintenanceForm.value;
-      
-      // If truckId is not provided, schedule for all selected trucks
-      const trucksToSchedule = truckId ? [truckId] : Array.from(this.selectedTrucks);
-      
-      // Create an array of observables for each truck
-      const maintenanceRequests = trucksToSchedule.map(id =>
-        this.transportService.scheduleMaintenance(id, maintenanceDate)
-      );
-
-      // Execute all requests
-      forkJoin(maintenanceRequests).subscribe({
-        next: () => {
-          this.showMaintenanceModal = false;
-          this.maintenanceForm.reset();
-          this.loadTrucks();
-        },
-        error: (error) => {
-          console.error('Error scheduling maintenance:', error);
-        }
-      });
-    }
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.loadTrucks();
+  // Status and styling methods remain similar to previous implementation
+  getStatusClass(status: Truck['status']): string {
+    const classes: Record<Truck['status'], string> = {
+      'active': 'bg-green-100 text-green-800',
+      'inactive': 'bg-gray-100 text-gray-800',
+      'maintenance': 'bg-yellow-100 text-yellow-800'
+    };
+    return classes[status] || '';
   }
 }

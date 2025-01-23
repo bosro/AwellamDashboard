@@ -172,10 +172,11 @@ export class CustomerDetailsComponent implements OnInit {
   private loadCustomer(id: string): void {
     this.loading = true;
     this.customersService.getCustomerById(id).subscribe({
-      next: (customer) => {
-        this.customer = customer;
+      next: (response) => {
+        this.customer = response.customer; // Access the customer property from the response
         this.loadCustomerData();
         this.loading = false;
+        console.log(this.customer);
       },
       error: (error) => {
         console.error('Error loading customer:', error);
@@ -183,6 +184,8 @@ export class CustomerDetailsComponent implements OnInit {
       }
     });
   }
+
+
 
 
   

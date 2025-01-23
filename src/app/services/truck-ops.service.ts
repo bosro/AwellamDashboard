@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { Truck } from '../shared/types/truck-operation.types';
-import { OperationFormData } from '../shared/types/truck-operation.types';
+// import { OperationFormData } from '../shared/types/truck-operation.types';
 
 export interface TruckOperation {
   checklist: any;
@@ -45,11 +45,17 @@ export interface MaintenanceTask {
   notes?: string;
 }
 
+
+export interface TruckResponse {
+  message: string;
+  trucks: Truck[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class TruckOpsService {
-  private apiUrl = `${environment.apiUrl}/truck-ops`;
+  private apiUrl = `${environment.apiUrl}/truck`;
 
   constructor(private http: HttpClient) {}
 
@@ -65,13 +71,13 @@ export class TruckOpsService {
     return this.http.get<TruckOperation>(`${this.apiUrl}/operations/${id}`);
   }
 
-  createOperation(operation: OperationFormData): Observable<TruckOperation> {
-    return this.http.post<TruckOperation>(`${this.apiUrl}/operations`, operation);
-  }
+  // createOperation(operation: OperationFormData): Observable<TruckOperation> {
+  //   return this.http.post<TruckOperation>(`${this.apiUrl}/operations`, operation);
+  // }
 
-  updateOperation(id: number, operation: OperationFormData): Observable<TruckOperation> {
-    return this.http.patch<TruckOperation>(`${this.apiUrl}/operations/${id}`, operation);
-  }
+  // updateOperation(id: number, operation: OperationFormData): Observable<TruckOperation> {
+  //   return this.http.patch<TruckOperation>(`${this.apiUrl}/operations/${id}`, operation);
+  // }
 
  
 
@@ -154,15 +160,12 @@ export class TruckOpsService {
   //   return this.http.get<Truck[]>(`${this.apiUrl}/trucks`);
   // }
 
-  getTrucks(): Observable<Truck[]> {
-    // If the API returns a different structure, map it to match our Truck interface
-    return this.http.get<any[]>(`${this.apiUrl}/trucks`).pipe(
-      map(trucks => trucks.map(truck => ({
-        id: truck.id,
-        registration: truck.registration || truck.registrationNumber || truck.regNumber // handle different possible property names
-      })))
-    );
-  }
+   getTrucks(params?: any): Observable<TruckResponse> {
+      return this.http.get<TruckResponse>(
+        `${this.apiUrl}/truck/get`,
+        { params }
+      );
+    }
 
   getLocations(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/locations`);

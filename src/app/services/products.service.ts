@@ -90,7 +90,7 @@ export class ProductsService {
       }
     });
 
-    return this.http.get<ProductsResponse>(`${this.apiUrl}?${params.toString()}`);
+    return this.http.get<ProductsResponse>(`${this.apiUrl}/products/?${params.toString()}`);
   }
 
   deleteProduct(id: string): Observable<void> {

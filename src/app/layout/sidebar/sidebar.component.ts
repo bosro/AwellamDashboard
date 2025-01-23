@@ -45,21 +45,21 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/trucks',
           icon: 'ri-truck-fill'
         },
-        // {
-        //   title: 'Trips',
-        //   route: '/main/transport/trips',
-        //   icon: 'ri-caravan-line'
-        // },
         {
-          title: 'Fuel Analytics',
-          route: '/main/transport/fuel-analytics',
-          icon: 'ri-ink-bottle-line'
+          title: 'Drivers',
+          route: '/main/transport/trips',
+          icon: 'ri-caravan-line'
         },
-        {
-          title: 'Maintenance',
-          route: '/main/transport/maintenance-history',
-          icon: 'ri-tools-line'
-        }
+        // {
+        //   title: 'Fuel Analytics',
+        //   route: '/main/transport/fuel-analytics',
+        //   icon: 'ri-ink-bottle-line'
+        // },
+        // {
+        //   title: 'Maintenance',
+        //   route: '/main/transport/maintenance-history',
+        //   icon: 'ri-tools-line'
+        // }
       ]
     },
     {

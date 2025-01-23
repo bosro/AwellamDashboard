@@ -92,3 +92,24 @@ export interface Truck {
     id: number;
     registration: string;
   }
+
+  // Updated Truck Interface to match the provided JSON structure
+export interface Truck {
+  _id: string;
+  truckNumber: string;
+  capacity: number;
+  expenses: number;
+  status: 'active' | 'inactive' | 'maintenance';
+  product: string | null;
+  orderId: string | null;
+  deliveredOrders: any[];
+  expenditure: any[];
+  __v: number;
+
+}
+
+// Response interface for API calls
+export interface TruckResponse {
+  message: string;
+  trucks: Truck[];
+}
