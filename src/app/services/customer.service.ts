@@ -28,15 +28,15 @@ export class CustomersService {
   }
   
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
-    return this.http.post<Customer>(`${this.apiUrl}/customer/create`, customer);
+    return this.http.post<Customer>(`${this.apiUrl}/create`, customer);
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {
-    return this.http.put<Customer>(`${this.apiUrl}/customer/update/${id}`, customer);
+    return this.http.put<Customer>(`${this.apiUrl}/update/${id}`, customer);
   }
 
   deleteCustomer(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/customer/delete/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 
   getCustomerOrders(id: string, params?: any): Observable<any> {
