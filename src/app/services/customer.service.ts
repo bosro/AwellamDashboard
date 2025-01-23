@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Customer, } from '../shared/types/customer.interface';
+import { environment } from '../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomersService {
-  private apiUrl = 'http://0.0.0.0:3000/api/customers';
+  private apiUrl = `${environment.apiUrl}/customers`;
 
   constructor(private http: HttpClient) {}
 
@@ -18,7 +20,7 @@ export class CustomersService {
         httpParams = httpParams.set(key, params[key]);
       });
     }
-    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`, { params: httpParams });
+    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/customer/get`, { params: httpParams });
   }
 
   getCustomerById(id: string): Observable<{ customer: Customer }> {
@@ -26,15 +28,15 @@ export class CustomersService {
   }
   
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
-    return this.http.post<Customer>(`${this.apiUrl}/create`, customer);
+    return this.http.post<Customer>(`${this.apiUrl}/customer/create`, customer);
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {
-    return this.http.put<Customer>(`${this.apiUrl}/update/${id}`, customer);
+    return this.http.put<Customer>(`${this.apiUrl}/customer/update/${id}`, customer);
   }
 
   deleteCustomer(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/customer/delete/${id}`);
   }
 
   getCustomerOrders(id: string, params?: any): Observable<any> {
