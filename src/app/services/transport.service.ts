@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { MaintenanceRecord } from '../main/transport/maintenance-history/maintenance-history.component';
@@ -26,30 +26,40 @@ export interface Transport {
   truckRegistration?: string;
 }
 
+// Updated Truck Interface to match the provided JSON structure
 export interface Truck {
-  id: number;
-  registrationNumber: string;
-  model: string;
+  _id: string;
+  truckNumber: string;
   capacity: number;
-  currentLocation: string;
-  status: 'available' | 'in-use' | 'maintenance';
-  lastMaintenanceDate: string;
-  nextMaintenanceDate: string;
-  fuelCapacity: number;
-  currentFuelLevel: number;
-  mileage: number;
+  expenses: number;
+  status: 'active' | 'inactive' | 'maintenance';
+  product: string | null;
+  orderId: string | null;
+  deliveredOrders: any[];
+  expenditure: any[];
+  __v: number;
+
+
+}
+
+// Response interface for API calls
+export interface TruckResponse {
+  message: string;
+  trucks: Truck[];
+}
+
+export interface DriverResponse{
+  message:string,
+  drivers: Driver[]
 }
 
 export interface Driver {
-  id: number;
+  _id: string;
   name: string;
   licenseNumber: string;
   phoneNumber: string;
+  truck: Truck | null;
   status: 'available' | 'on-duty' | 'off-duty' | 'on-leave';
-  experience: number;
-  totalTrips: number;
-  rating: number;
-  licenseExpiry: string;
 }
 
 export interface Route {
@@ -68,7 +78,7 @@ export interface Route {
   providedIn: 'root'
 })
 export class TransportService {
-  private apiUrl = `${environment.apiUrl}/transport`;
+  private apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
@@ -84,35 +94,47 @@ export class TransportService {
     return this.http.get<Transport>(`${this.apiUrl}/trips/${id}`);
   }
 
-  createTransport(transport: Omit<Transport, 'id'>): Observable<Transport> {
-    return this.http.post<Transport>(`${this.apiUrl}/trips`, transport);
-  }
+  // createTransport(transport: Omit<Transport, 'id'>): Observable<Transport> {
+  //   return this.http.post<Transport>(`${this.apiUrl}/trips`, transport);
+  // }
 
   updateTransport(id: number, transport: Partial<Transport>): Observable<Transport> {
     return this.http.patch<Transport>(`${this.apiUrl}/trips/${id}`, transport);
   }
 
   // Truck Operations
-  getTrucks(params?: any): Observable<{ data: Truck[], total: number }> {
-    return this.http.get<{ data: Truck[], total: number }>(
-      `${this.apiUrl}/trucks`,
-      { params }
-    );
-  }
+  // getTrucks(params?: any): Observable<TruckResponse> {
+  //   const httpParams = new HttpParams({ fromObject: params });
+  //   return this.http.get<TruckResponse>(`${this.apiUrl}/truck/get`, { params: httpParams });
+  // }
 
-  getTruckById(id: number): Observable<Truck> {
+
+   getTrucks(params?: Record<string, any>): Observable<TruckResponse>  {
+      let httpParams = new HttpParams();
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          httpParams = httpParams.set(key, value);
+        });
+      }
+      return this.http.get<TruckResponse> (`${this.apiUrl}/truck/get`, { params: httpParams });
+    }
+  
+ 
+
+
+  getTruckById(id: string): Observable<Truck> { // Changed id type to string to match _id
     return this.http.get<Truck>(`${this.apiUrl}/trucks/${id}`);
   }
 
-  updateTruckStatus(id: number, status: string): Observable<Truck> {
+  updateTruckStatus(id: string, status: string): Observable<Truck> { // Changed id type to string to match _id
     return this.http.patch<Truck>(`${this.apiUrl}/trucks/${id}/status`, { status });
   }
 
-  recordFuelRefill(truckId: number, refillData: FuelRefill): Observable<any> {
+  recordFuelRefill(truckId: string, refillData: FuelRefill): Observable<any> { // Changed truckId type to string to match _id
     return this.http.post(`${this.apiUrl}/trucks/${truckId}/fuel-refills`, refillData);
   }
   
-  scheduleMaintenance(id: number, date: string): Observable<Truck> {
+  scheduleMaintenance(id: string, date: string): Observable<Truck> { // Changed id type to string to match _id
     return this.http.post<Truck>(
       `${this.apiUrl}/trucks/${id}/maintenance`,
       { maintenanceDate: date }
@@ -120,18 +142,29 @@ export class TransportService {
   }
 
   // Driver Operations
-  getDrivers(params?: any): Observable<{ data: Driver[], total: number }> {
-    return this.http.get<{ data: Driver[], total: number }>(
-      `${this.apiUrl}/drivers`,
-      { params }
-    );
+  // getDrivers(params?: any): Observable< Observable<TruckResponse>  > {
+  //   return this.http.get<{ data: Driver[], total: number }>(
+  //     `${this.apiUrl}/drivers`,
+  //     { params }
+  //   );
+  // }
+
+  getDrivers(params?: Record<string, any>): Observable<DriverResponse>  {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        httpParams = httpParams.set(key, value);
+      });
+    }
+    return this.http.get<DriverResponse> (`${this.apiUrl}/driver/get`, { params: httpParams });
   }
 
-  updateDriverStatus(id: number, status: string): Observable<Driver> {
+
+  updateDriverStatus(id: string, status: string): Observable<Driver> { // Changed id type to string to match _id
     return this.http.patch<Driver>(`${this.apiUrl}/drivers/${id}/status`, { status });
   }
 
-  assignDriver(tripId: number, driverId: number): Observable<Transport> {
+  assignDriver(tripId: number, driverId: string): Observable<Transport> { // Changed driverId type to string to match _id
     return this.http.post<Transport>(
       `${this.apiUrl}/trips/${tripId}/assign-driver`,
       { driverId }
@@ -158,7 +191,7 @@ export class TransportService {
     return this.http.get(`${this.apiUrl}/analytics`, { params });
   }
 
-  getFuelConsumptionReport(truckId: number, dateRange: any): Observable<any> {
+  getFuelConsumptionReport(truckId: string, dateRange: any): Observable<any> { // Changed truckId type to string to match _id
     return this.http.get(
       `${this.apiUrl}/trucks/${truckId}/fuel-consumption`,
       { params: dateRange }
@@ -193,15 +226,15 @@ export class TransportService {
     });
   }
 
-  getTruckMaintenanceHistory(truckId: number): Observable<MaintenanceRecord[]> {
+  getTruckMaintenanceHistory(truckId: string): Observable<MaintenanceRecord[]> { // Changed truckId type to string to match _id
     return this.http.get<MaintenanceRecord[]>(`${this.apiUrl}/trucks/${truckId}/maintenance-history`);
   }
 
-  getTruckFuelHistory(truckId: number): Observable<FuelRecord[]> {
+  getTruckFuelHistory(truckId: string): Observable<FuelRecord[]> { // Changed truckId type to string to match _id
     return this.http.get<FuelRecord[]>(`${this.apiUrl}/trucks/${truckId}/fuel-history`);
   }
 
-  getTruckAnalytics(truckId: number): Observable<any> {
+  getTruckAnalytics(truckId: string): Observable<any> { // Changed truckId type to string to match _id
     return this.http.get(`${this.apiUrl}/trucks/${truckId}/analytics`);
   }
 }

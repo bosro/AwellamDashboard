@@ -101,17 +101,17 @@ export class TransportFormComponent implements OnInit {
   }
 
   private loadAvailableResources(): void {
-    this.transportService.getDrivers({ status: 'available' }).subscribe({
-      next: (response) => {
-        this.availableDrivers = response.data;
-      }
-    });
+    // this.transportService.getDrivers({ status: 'available' }).subscribe({
+    //   next: (response) => {
+    //     this.availableDrivers = response.data;
+    //   }
+    // });
 
-    this.transportService.getTrucks({ status: 'available' }).subscribe({
-      next: (response) => {
-        this.availableTrucks = response.data;
-      }
-    });
+    // this.transportService.getTrucks({ status: 'available' }).subscribe({
+    //   next: (response) => {
+    //     this.availableTrucks = response.data;
+    //   }
+    // });
   }
 
   private loadTransport(): void {
@@ -134,14 +134,14 @@ export class TransportFormComponent implements OnInit {
   }
 
   onDriverSelect(driverId:any): void {
-    const driver = this.availableDrivers.find(d => d.id === driverId);
+    const driver = this.availableDrivers.find(d => d._id === driverId);
     if (driver && driver.status !== 'available') {
       this.transportForm.get('driverId')!.setErrors({ 'driverUnavailable': true });
     }
   }
 
   onTruckSelect(truckId:any): void {
-    const truck = this.availableTrucks.find(t => t.id === truckId);
+    const truck = this.availableTrucks.find(t => t._id === truckId);
     if (truck) {
       this.transportForm.patchValue({
         loadCapacity: truck.capacity
@@ -163,26 +163,27 @@ export class TransportFormComponent implements OnInit {
         distance: this.estimatedDistance
       };
 
-      const request = this.isEditMode
-        ? this.transportService.updateTransport(this.transportId, formData)
-        : this.transportService.createTransport(formData);
+  //     const request = this.isEditMode
+  //       ? this.transportService.updateTransport(this.transportId, formData)
+  //       : this.transportService.createTransport(formData);
 
-      request.subscribe({
-        next: () => {
-          this.router.navigate(['/transport/trips']);
-        },
-        error: (error) => {
-          console.error('Error saving transport:', error);
-          this.loading = false;
-        }
-      });
-    } else {
-      Object.keys(this.transportForm.controls).forEach(key => {
-        const control = this.transportForm.get(key);
-        if (control!.invalid) {
-          control!.markAsTouched();
-        }
-      });
-    }
+  //     request.subscribe({
+  //       next: () => {
+  //         this.router.navigate(['/transport/trips']);
+  //       },
+  //       error: (error) => {
+  //         console.error('Error saving transport:', error);
+  //         this.loading = false;
+  //       }
+  //     });
+  //   } else {
+  //     Object.keys(this.transportForm.controls).forEach(key => {
+  //       const control = this.transportForm.get(key);
+  //       if (control!.invalid) {
+  //         control!.markAsTouched();
+  //       }
+  //     });
+  //   }
   }
+}
 }

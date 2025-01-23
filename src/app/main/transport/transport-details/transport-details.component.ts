@@ -43,7 +43,7 @@ export class TransportDetailsComponent implements OnInit {
         this.transport = data;
         this.generateTimeline();
         this.calculateRouteProgress();
-        this.loadFuelConsumption();
+        // this.loadFuelConsumption();
         this.loading = false;
       },
       error: (error) => {
@@ -119,18 +119,18 @@ export class TransportDetailsComponent implements OnInit {
     }
   }
 
-  loadFuelConsumption(): void {
-    if (this.transport.truckId && this.transport.id) {
-      this.transportService.getFuelConsumptionReport(
-        this.transport.truckId,
-        { transportId: this.transport.id }
-      ).subscribe({
-        next: (data) => {
-          this.fuelConsumptionData = data;
-        }
-      });
-    }
-  }
+  // loadFuelConsumption(): void {
+  //   if (this.transport.truckId && this.transport.id) {
+  //     this.transportService.getFuelConsumptionReport(
+  //       this.transport.truckId,
+  //       { transportId: this.transport.id }
+  //     ).subscribe({
+  //       next: (data) => {
+  //         this.fuelConsumptionData = data;
+  //       }
+  //     });
+  //   }
+  // }
 
   updateStatus(status: TransportStatus): void {
     if (this.transport.id) {

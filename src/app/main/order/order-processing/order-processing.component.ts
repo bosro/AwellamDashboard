@@ -3,8 +3,9 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrdersService } from '../../../services/order.service';
 import { ProductsService } from '../../../services/products.service';
-import { debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
-import { forkJoin, fromEvent } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { fromEvent, forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-order-processing',
@@ -17,75 +18,71 @@ export class OrderProcessingComponent implements OnInit {
   searchResults: any[] = [];
   selectedProducts: any[] = [];
   availableShippingMethods: any[] = [];
-  paymentMethods = [
-    { id: 'credit_card', name: 'Credit Card' },
-    { id: 'paypal', name: 'PayPal' },
-    { id: 'bank_transfer', name: 'Bank Transfer' }
-  ];
+  products: any[] = [];
+  customers: any[] = [];
+  selectedProduct: any;
+  selectedCustomer: any;
+  quantity: number = 1;
+  total: number = 0;
+  subtotal: number = 0;
+  tax: number = 0;
 
   constructor(
     private fb: FormBuilder,
     private ordersService: OrdersService,
     private productsService: ProductsService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
+      product: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
       customer: this.fb.group({
+        id: ['', Validators.required],
         name: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        phone: ['', Validators.required]
-      }),
-      billing: this.fb.group({
-        address: this.fb.group({
-          line1: ['', Validators.required],
-          line2: [''],
-          city: ['', Validators.required],
-          state: ['', Validators.required],
-          postalCode: ['', Validators.required],
-          country: ['', Validators.required]
-        }),
-        paymentMethod: ['', Validators.required]
-      }),
-      shipping: this.fb.group({
-        sameAsBilling: [true],
-        address: this.fb.group({
-          line1: [''],
-          line2: [''],
-          city: [''],
-          state: [''],
-          postalCode: [''],
-          country: ['']
-        }),
-        method: ['', Validators.required]
+        phone: ['', Validators.required],
+        address: ['', Validators.required]
       }),
       items: this.fb.array([]),
       notes: [''],
-      source: ['website']
+      pricing: this.fb.group({
+        subtotal: [0],
+        tax: [0],
+        shipping: [0],
+        total: [0]
+      })
     });
-
-    // Handle same as billing checkbox
-    this.orderForm.get('shipping.sameAsBilling')?.valueChanges
-      .subscribe(sameAsBilling => {
-        if (sameAsBilling) {
-          this.copyBillingAddress();
-        }
-      });
   }
 
   ngOnInit(): void {
-    this.setupProductSearch();
+    this.fetchProductsAndCustomers();
+    
+    // Subscribe to quantity changes
+    this.orderForm.get('quantity')?.valueChanges.subscribe(value => {
+      this.quantity = value;
+      this.calculateTotal();
+    });
   }
 
-  private setupProductSearch(): void {
-    // Implement product search with debounce
-    const searchInput = document.getElementById('product-search') as HTMLInputElement;
-    fromEvent(searchInput, 'input').pipe(
-      map((e: Event) => (e.target as HTMLInputElement).value),
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => this.productsService.searchProducts(term))
-    ).subscribe(results => {
-      this.searchResults = results;
+  private fetchProductsAndCustomers(): void {
+    this.loading = true;
+    forkJoin({
+      products: this.http.get<any>('http://localhost:3000/api/products'),
+      customers: this.http.get<any>('http://0.0.0.0:3000/api/customers/get')
+    }).subscribe({
+      next: ({ products, customers }) => {
+        this.products = products.products;
+        this.customers = customers.customers;
+        console.log('Loaded products:', this.products);
+        console.log('Loaded customers:', this.customers);
+      },
+      error: (error) => {
+        console.error('Error fetching data:', error);
+      },
+      complete: () => {
+        this.loading = false;
+      }
     });
   }
 
@@ -95,15 +92,13 @@ export class OrderProcessingComponent implements OnInit {
 
   addItem(product: any): void {
     const itemGroup = this.fb.group({
-      productId: [product.id],
-      sku: [product.sku],
+      productId: [product._id],
       name: [product.name],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      price: [product.price.base],
-      total: [product.price.base]
+      price: [product.price],
+      total: [product.price]
     });
 
-    // Update total when quantity changes
     itemGroup.get('quantity')?.valueChanges.subscribe(qty => {
       const price = itemGroup.get('price')?.value || 0;
       itemGroup.patchValue({ total: qty! * price }, { emitEvent: false });
@@ -121,112 +116,95 @@ export class OrderProcessingComponent implements OnInit {
   }
 
   private calculateOrderTotals(): void {
-    let subtotal = 0;
-    this.items.controls.forEach(control => {
-      subtotal += control.get('total')?.value || 0;
-    });
+    this.subtotal = this.items.controls.reduce((total, control) => 
+      total + (control.get('total')?.value || 0), 0);
+    this.tax = this.subtotal * 0.1;
+    const shipping = this.getShippingCost();
+    this.total = this.subtotal + this.tax + shipping;
 
-    // Update form with totals
     this.orderForm.patchValue({
       pricing: {
-        subtotal,
-        tax: subtotal * 0.1, // Example tax calculation
-        shipping: this.getShippingCost(),
-        total: subtotal + (subtotal * 0.1) + this.getShippingCost()
+        subtotal: this.subtotal,
+        tax: this.tax,
+        shipping: shipping,
+        total: this.total
       }
     });
   }
 
   getShippingCost(): number {
-    const method = this.orderForm.get('shipping.method')?.value;
-    const rates = this.availableShippingMethods.find(m => m.id === method);
-    return rates?.cost || 0;
-  }
-  private copyBillingAddress(): void {
-    const billingAddress = this.orderForm.get('billing.address')?.value;
-    this.orderForm.get('shipping.address')?.patchValue(billingAddress);
+    // You can implement your shipping cost logic here
+    return 10; // Default shipping cost
   }
 
-  validateAddress(type: 'billing' | 'shipping'): void {
-    const address = this.orderForm.get(`${type}.address`)?.value;
-    this.ordersService.validateAddress(address).subscribe({
-      next: (validatedAddress) => {
-        this.orderForm.get(`${type}.address`)?.patchValue(validatedAddress);
-      },
-      error: (error) => console.error('Error validating address:', error)
-    });
+  getSubtotal(): number {
+    return this.subtotal;
   }
 
-  calculateShippingRates(): void {
-    const orderData = {
-      items: this.items.value,
-      address: this.orderForm.get('shipping.address')?.value
-    };
+  getTax(): number {
+    return this.tax;
+  }
 
-    this.ordersService.getShippingRates(orderData).subscribe({
-      next: (rates) => {
-        this.availableShippingMethods = rates;
-      },
-      error: (error) => console.error('Error calculating shipping rates:', error)
-    });
+  getTotal(): number {
+    return this.total;
+  }
+
+  onProductSelect(event: any): void {
+    const productId = event.target.value;
+    this.selectedProduct = this.products.find(product => product._id === productId);
+    if (this.selectedProduct) {
+      this.calculateTotal();
+      this.addItem(this.selectedProduct);
+      console.log('Selected product:', this.selectedProduct);
+    }
+  }
+
+  onCustomerSelect(event: any): void {
+    const customerId = event.target.value;
+    this.selectedCustomer = this.customers.find(customer => customer._id === customerId);
+    if (this.selectedCustomer) {
+      this.orderForm.patchValue({
+        customer: {
+          id: this.selectedCustomer._id,
+          name: this.selectedCustomer.fullName,
+          email: this.selectedCustomer.email,
+          phone: this.selectedCustomer.phoneNumber,
+          address: this.selectedCustomer.address
+        }
+      });
+    }
+  }
+
+  calculateTotal(): void {
+    if (this.selectedProduct && this.quantity) {
+      this.total = this.selectedProduct.price * this.quantity;
+    }
   }
 
   async onSubmit(): Promise<void> {
-    if (this.orderForm.valid) {
+    if (this.orderForm.valid && this.items.length > 0) {
       this.saving = true;
 
       try {
-        // Process payment first
-        const paymentResult = await this.processPayment();
-        
-        // Create order with payment information
         const orderData = {
-          ...this.orderForm.value,
-          billing: {
-            ...this.orderForm.value.billing,
-            transactionId: paymentResult.transactionId
-          }
+          customerId: this.orderForm.value.customer.id,
+          orderItems: this.items.value.map((item: any) => ({
+            product: item.productId,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          deliveryAddress: this.orderForm.value.customer.address,
+          totalAmount: this.getTotal(),
+          notes: this.orderForm.value.notes
         };
 
         const order = await this.ordersService.createOrder(orderData).toPromise();
-        this.router.navigate(['/orders/details', order.id]);
+        // this.router.navigate(['/orders/details', order.id]);
       } catch (error) {
         console.error('Error creating order:', error);
-        // Handle error (show error message to user)
       } finally {
         this.saving = false;
       }
     }
-  }
-
-  private async processPayment(): Promise<any> {
-    // Implement payment processing logic
-    return new Promise((resolve) => {
-      // Simulated payment processing
-      setTimeout(() => {
-        resolve({
-          success: true,
-          transactionId: `TR${Date.now()}`
-        });
-      }, 1000);
-    });
-  }
-
- 
-
-  getSubtotal(): number {
-    let subtotal = 0;
-    this.items.controls.forEach(control => {
-      subtotal += control.get('total')?.value || 0;
-    });
-    return subtotal;
-  }
-
-  getTax(): number {
-    return this.getSubtotal() * 0.1; // 10% tax rate
-  }
-
-  getTotal(): number {
-    return this.getSubtotal() + this.getTax() + this.getShippingCost();
   }
 }

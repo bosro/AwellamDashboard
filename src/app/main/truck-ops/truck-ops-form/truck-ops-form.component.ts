@@ -60,8 +60,8 @@ throw new Error('Method not implemented.');
       this.isEditMode = true;
       this.loadOperation();
     }
-    this.loadTrucks();
-    this.loadLocations();
+    // this.loadTrucks();
+    // this.loadLocations();
   }
 
   private createForm(): void {
@@ -147,31 +147,31 @@ throw new Error('Method not implemented.');
   }
 
 
-  private loadTrucks(): void {
-    this.loading = true;
-    this.truckOpsService.getTrucks().pipe(
-      finalize(() => this.loading = false)
-    ).subscribe({
-      next: (trucks: Truck[]) => {
-        this.trucks = trucks;
-      },
-      error: (error) => {
-        console.error('Error loading trucks:', error);
-      }
-    });
-  }
-  private loadLocations(): void {
-    this.truckOpsService.getLocations().pipe(
-      finalize(() => this.loading = false)
-    ).subscribe({
-      next: (locations) => {
-        this.locations = locations;
-      },
-      error: (error) => {
-        console.error('Error loading locations:', error);
-      }
-    });
-  }
+  // private loadTrucks(): void {
+  //   this.loading = true;
+  //   this.truckOpsService.getTrucks().pipe(
+  //     finalize(() => this.loading = false)
+  //   ).subscribe({
+  //     next: (trucks: Truck[]) => {
+  //       this.trucks = trucks;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading trucks:', error);
+  //     }
+  //   });
+  // }
+  // private loadLocations(): void {
+  //   this.truckOpsService.getLocations().pipe(
+  //     finalize(() => this.loading = false)
+  //   ).subscribe({
+  //     next: (locations) => {
+  //       this.locations = locations;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading locations:', error);
+  //     }
+  //   });
+  // }
 
 
   async onSubmit(): Promise<void> {
@@ -192,13 +192,13 @@ throw new Error('Method not implemented.');
         tasks: this.tasksFormArray.value
       };
 
-      const operation = this.isEditMode
-        ? await this.truckOpsService.updateOperation(this.operationId, formData).toPromise()
-        : await this.truckOpsService.createOperation(formData).toPromise();
+      // const operation = this.isEditMode
+      //   ? await this.truckOpsService.updateOperation(this.operationId, formData).toPromise()
+      //   : await this.truckOpsService.createOperation(formData).toPromise();
 
-      if (this.attachments.length > 0 && operation) {
-        await this.truckOpsService.uploadAttachments(operation.id, this.attachments).toPromise();
-      }
+      // if (this.attachments.length > 0 && operation) {
+      //   await this.truckOpsService.uploadAttachments(operation.id, this.attachments).toPromise();
+      // }
 
       this.router.navigate(['/truck-ops']);
     } catch (error) {

@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomersService } from '../../../services/customer.service';
+import { Customer } from '../../../shared/types/customer.interface';
 
 @Component({
   selector: 'app-customer-form',
   templateUrl: './customer-form.component.html',
 })
 export class CustomerFormComponent implements OnInit {
+  customer?: Customer;
   customerForm: FormGroup;
   isEditMode = false;
   loading = false;
@@ -44,21 +46,16 @@ export class CustomerFormComponent implements OnInit {
   private loadCustomer(id: string): void {
     this.loading = true;
     this.customersService.getCustomerById(id).subscribe({
-      next: (customer) => {
-        this.currentCustomer = customer;
-        this.customerForm.patchValue({
-          fullName: customer.fullName,
-          email: customer.email,
-          address: customer.address,
-          balance: customer.balance,
-          phoneNumber: customer.phoneNumber,
-        });
+      next: (response) => {
+        this.customer = response.customer; // Access the customer property from the response
+        // this.loadCustomerData();
         this.loading = false;
+        console.log(this.customer);
       },
       error: (error) => {
         console.error('Error loading customer:', error);
         this.loading = false;
-      },
+      }
     });
   }
 

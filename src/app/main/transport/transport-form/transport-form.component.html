@@ -96,8 +96,8 @@
           <select formControlName="driverId" (change)="onDriverSelect($event)"
             class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
             <option value="">Select Driver</option>
-            <option *ngFor="let driver of availableDrivers" [value]="driver.id">
-              {{driver.name}} - Experience: {{driver.experience}} years
+            <option *ngFor="let driver of availableDrivers" [value]="driver._id">
+              {{driver.name}} 
             </option>
           </select>
           <div *ngIf="transportForm.get('driverId')?.errors?.['driverUnavailable']" class="mt-1 text-sm text-red-600">
@@ -106,7 +106,7 @@
         </div>
 
         <!-- Truck Selection -->
-        <div>
+        <!-- <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Assign Truck
           </label>
@@ -117,7 +117,7 @@
               {{truck.registrationNumber}} - Capacity: {{truck.capacity}} tons
             </option>
           </select>
-        </div>
+        </div> -->
       </div>
     </div>
 

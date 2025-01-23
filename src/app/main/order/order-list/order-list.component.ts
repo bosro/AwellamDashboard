@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { OrdersService } from '../../../services/order.service';
-import { Order, OrderStatus, PaymentStatus } from '../../../shared/types/order.interface';
+import { Order, OrderStatus, PaymentStatus, OrderResponse } from '../../../shared/types/order.interface';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -16,8 +16,9 @@ export class OrderListComponent implements OnInit {
   currentPage = 1;
   selectedOrders = new Set<string>();
   filterForm: FormGroup;
-  Math = Math
-  OrderStatus = OrderStatus
+  Math = Math;
+  OrderStatus = OrderStatus;
+  PaymentStatus = PaymentStatus;
 
   showExportDropdown = false;
 
@@ -64,10 +65,11 @@ export class OrderListComponent implements OnInit {
     };
 
     this.ordersService.getOrders(params).subscribe({
-      next: (response) => {
-        this.orders = response.data;
-        this.total = response.total;
+      next:(response) => {
+        this.orders = response.orders;
+        // this.total = response.orders.length;
         this.loading = false;
+        console.log(this.orders)
       },
       error: (error) => {
         console.error('Error loading orders:', error);
@@ -86,6 +88,14 @@ export class OrderListComponent implements OnInit {
       this.selectedOrders.delete(orderId);
     } else {
       this.selectedOrders.add(orderId);
+    }
+  }
+
+  toggleAllSelection(): void {
+    if (this.selectedOrders.size === this.orders.length) {
+      this.selectedOrders.clear();
+    } else {
+      this.orders.forEach(order => this.selectedOrders.add(order._id));
     }
   }
 
@@ -118,15 +128,6 @@ export class OrderListComponent implements OnInit {
     });
   }
 
-
-  toggleAllSelection(): void {
-    if (this.selectedOrders.size === this.orders.length) {
-      this.selectedOrders.clear();
-    } else {
-      this.orders.forEach(order => this.selectedOrders.add(order.id));
-    }
-  }
-
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
@@ -144,9 +145,28 @@ export class OrderListComponent implements OnInit {
 
   canRefund(order: Order): boolean {
     return (
-      order.status === 'delivered' && 
-      order.billing.paymentStatus === 'paid' &&
-      !order.billing.paymentStatus.includes('refunded')
+      order.status === OrderStatus.DELIVERED &&
+      order.paymentStatus === PaymentStatus.PAID
     );
+  }
+
+  getStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'PENDING': 'bg-yellow-100 text-yellow-800',
+      'PROCESSING': 'bg-blue-100 text-blue-800',
+      'SHIPPED': 'bg-purple-100 text-purple-800',
+      'DELIVERED': 'bg-green-100 text-green-800',
+      'CANCELLED': 'bg-red-100 text-red-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+  }
+
+  getPaymentStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'Unpaid': 'bg-yellow-100 text-yellow-800',
+      'Paid': 'bg-green-100 text-green-800',
+      'Refunded': 'bg-gray-100 text-gray-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
   }
 }

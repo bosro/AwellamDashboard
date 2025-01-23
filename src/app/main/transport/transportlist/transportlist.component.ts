@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { TransportService, Transport } from '../../../services/transport.service';
+import { TransportService, Transport, Driver } from '../../../services/transport.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
@@ -12,6 +12,7 @@ type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
 })
 export class TransportListComponent implements OnInit {
   transports: Transport[] = [];
+  drivers: Driver[] = [];
   selectedTransports: Set<number> = new Set();
   loading = false;
   total = 0;
@@ -34,6 +35,7 @@ export class TransportListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTransports();
+    this.loadDrivers();
     this.setupFilterSubscription();
   }
 
@@ -81,6 +83,17 @@ export class TransportListComponent implements OnInit {
       error: (error) => {
         console.error('Error loading transports:', error);
         this.loading = false;
+      }
+    });
+  }
+
+  loadDrivers(): void {
+    this.transportService.getDrivers().subscribe({
+      next: (response) => {
+        this.drivers = response.drivers;
+      },
+      error: (error) => {
+        console.error('Error loading drivers:', error);
       }
     });
   }

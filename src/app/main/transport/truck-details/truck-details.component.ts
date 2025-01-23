@@ -84,7 +84,7 @@ export class TruckDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.params['id']);
-    this.loadTruckDetails(id);
+    // this.loadTruckDetails(id);
   }
 
   getStatusClass(status: TruckStatus): string {
@@ -96,29 +96,29 @@ export class TruckDetailsComponent implements OnInit {
     return statusClasses[status];
   }
 
-  private loadTruckDetails(id: number): void {
-    this.loading = true;
+  // private loadTruckDetails(id: number): void {
+  //   this.loading = true;
 
-    // Load all truck-related data in parallel
-    forkJoin({
-      truck: this.transportService.getTruckById(id),
-      maintenance: this.loadMaintenanceHistory(id),
-      // fuel: this.loadFuelHistory(id),
-      analytics: this.loadTruckAnalytics(id),
-    }).subscribe({
-      next: (data) => {
-        this.truck = data.truck;
-        this.maintenanceHistory = data.maintenance;
-        // this.fuelHistory = data.fuel;
-        this.processAnalytics(data.analytics);
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading truck details:', error);
-        this.loading = false;
-      },
-    });
-  }
+  //   // Load all truck-related data in parallel
+  //   forkJoin({
+  //     truck: this.transportService.getTruckById(id),
+  //     maintenance: this.loadMaintenanceHistory(id),
+  //     // fuel: this.loadFuelHistory(id),
+  //     analytics: this.loadTruckAnalytics(id),
+  //   }).subscribe({
+  //     next: (data) => {
+  //       this.truck = data.truck;
+  //       this.maintenanceHistory = data.maintenance;
+  //       // this.fuelHistory = data.fuel;
+  //       this.processAnalytics(data.analytics);
+  //       this.loading = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading truck details:', error);
+  //       this.loading = false;
+  //     },
+  //   });
+  // }
 
   private createForms(): void {
     this.fuelRefillForm = this.fb.group({
@@ -147,22 +147,22 @@ export class TruckDetailsComponent implements OnInit {
     return statusClasses[status];
   }
 
-  private loadMaintenanceHistory(
-    truckId: number
-  ): Observable<MaintenanceRecord[]> {
-    // Add this method to TransportService
-    return this.transportService.getTruckMaintenanceHistory(truckId);
-  }
+  // private loadMaintenanceHistory(
+  //   truckId: number
+  // ): Observable<MaintenanceRecord[]> {
+  //   // Add this method to TransportService
+  //   return this.transportService.getTruckMaintenanceHistory(truckId);
+  // }
 
   // private loadFuelHistory(truckId: number): Observable<FuelRecord[]> {
   //   // Add this method to TransportService
   //   return this.transportService.getTruckFuelHistory(truckId);
   // }
 
-  private loadTruckAnalytics(truckId: number): Observable<TruckAnalytics> {
-    // Add this method to TransportService
-    return this.transportService.getTruckAnalytics(truckId);
-  }
+  // private loadTruckAnalytics(truckId: number): Observable<TruckAnalytics> {
+  //   // Add this method to TransportService
+  //   return this.transportService.getTruckAnalytics(truckId);
+  // }
 
   private processAnalytics(data: TruckAnalytics): void {
     this.fuelEfficiencyTrend = data.fuelEfficiency;
@@ -226,29 +226,29 @@ export class TruckDetailsComponent implements OnInit {
     this.showFuelRefillModal = true;
   }
 
-  submitFuelRefill(): void {
-    if (this.fuelRefillForm.valid && this.truck.id) {
-      const refillData: FuelRefill = {
-        ...this.fuelRefillForm.value,
-        date: new Date().toISOString(),
-      };
+  // submitFuelRefill(): void {
+  //   if (this.fuelRefillForm.valid && this.truck.id) {
+  //     const refillData: FuelRefill = {
+  //       ...this.fuelRefillForm.value,
+  //       date: new Date().toISOString(),
+  //     };
 
-      this.transportService
-        .recordFuelRefill(this.truck.id, refillData)
-        .subscribe({
-          next: () => {
-            this.showFuelRefillModal = false;
-            this.fuelRefillForm.reset({
-              fuelType: 'diesel',
-            });
-            this.loadTruckDetails(this.truck.id!);
-          },
-          error: (error) => {
-            console.error('Error recording fuel refill:', error);
-          },
-        });
-    }
-  }
+  //     this.transportService
+  //       .recordFuelRefill(this.truck.id, refillData)
+  //       .subscribe({
+  //         next: () => {
+  //           this.showFuelRefillModal = false;
+  //           this.fuelRefillForm.reset({
+  //             fuelType: 'diesel',
+  //           });
+  //           this.loadTruckDetails(this.truck.id!);
+  //         },
+  //         error: (error) => {
+  //           console.error('Error recording fuel refill:', error);
+  //         },
+  //       });
+  //   }
+  // }
 
   exportMaintenanceHistory(format: 'excel' | 'pdf'): void {
     // Implement export functionality
