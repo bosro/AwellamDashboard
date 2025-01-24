@@ -1,6 +1,24 @@
+// user-edit-modal.component.ts
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService, User } from '../../../core/services/auth.service';
+import { AuthService,  } from '../../../core/services/auth.service';
+
+
+enum UserRole {
+  TRANSPORT = "transport",
+  SUPER_ADMIN = "super_admin",
+  CUSTOMER = "customer",
+  FINANCE = "finance"
+}
+
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+}
 
 @Component({
   selector: 'app-user-edit-modal',
@@ -17,21 +35,7 @@ export class UserEditModalComponent implements OnInit {
   showPassword = false;
   error = '';
 
-  roles = [
-    { id: 'admin', name: 'Administrator', permissions: ['all'] },
-    { id: 'manager', name: 'Manager', permissions: ['view_all', 'edit_basic'] },
-    { id: 'operator', name: 'Operator', permissions: ['view_assigned', 'edit_basic'] },
-    { id: 'driver', name: 'Driver', permissions: ['view_own'] }
-  ];
-
-  permissions = [
-    { id: 'view_all', name: 'View All' },
-    { id: 'edit_all', name: 'Edit All' },
-    { id: 'delete_all', name: 'Delete All' },
-    { id: 'view_assigned', name: 'View Assigned' },
-    { id: 'edit_basic', name: 'Edit Basic' },
-    { id: 'view_own', name: 'View Own' }
-  ];
+  roles = Object.values(UserRole);
 
   constructor(
     private fb: FormBuilder,
@@ -43,65 +47,46 @@ export class UserEditModalComponent implements OnInit {
   ngOnInit(): void {
     if (this.user) {
       this.userForm.patchValue({
-       fullName: this.user.fullName,
+        name: this.user.name,
         email: this.user.email,
-        role: this.user.role,
-        status: this.user.status,
-       
+        role: this.user.role
       });
-      this.userForm.get('email')!.disable();
     }
   }
 
   private createForm(): void {
     this.userForm = this.fb.group({
-      firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', this.user ? [] : [
         Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)
+        Validators.minLength(8)
       ]],
-      role: ['', Validators.required],
-      status: ['active'],
-      permissions: [[]]
-    });
-
-    // Update permissions when role changes
-    this.userForm.get('role')!.valueChanges.subscribe(role => {
-      const rolePermissions = this.roles.find(r => r.id === role)?.permissions || [];
-      this.userForm.patchValue({ permissions: rolePermissions }, { emitEvent: false });
+      role: ['', Validators.required]
     });
   }
 
-  // onSubmit(): void {
-  //   if (this.userForm.invalid) {
-  //     return;
-  //   }
+  onSubmit(): void {
+    if (this.userForm.invalid) return;
 
-  //   this.loading = true;
-  //   const userData = { ...this.userForm.value };
+    this.loading = true;
+    const userData = this.userForm.value;
 
-  //   const request = this.user
-  //     ? this.authService.updateUser(this.user._id, userData)
-  //     : this.authService.createUser(userData);
+    const request = this.user
+      ? this.authService.editAdmin(this.user.id, userData)
+      : this.authService.createAdmin(userData);
 
-  //   request.subscribe({
-  //     next: () => {
-  //       this.loading = false;
-  //       this.saved.emit();
-  //       this.close.emit();
-  //     },
-  //     error: error => {
-  //       this.error = error?.error?.message || 'An error occurred';
-  //       this.loading = false;
-  //     }
-  //   });
-  // }
-
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
+    request.subscribe({
+      next: () => {
+        this.loading = false;
+        this.saved.emit();
+        this.close.emit();
+      },
+      error: error => {
+        this.error = error?.error?.message || 'An error occurred';
+        this.loading = false;
+      }
+    });
   }
 
   closeModal(): void {
@@ -110,23 +95,7 @@ export class UserEditModalComponent implements OnInit {
     this.close.emit();
   }
 
-  getPasswordStrength(): 'weak' | 'medium' | 'strong' {
-    const password = this.userForm.get('password')!.value;
-    if (!password) return 'weak';
-
-    let score = 0;
-    if (password.length >= 12) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score >= 4) return 'strong';
-    if (score >= 3) return 'medium';
-    return 'weak';
-  }
-
-  getRoleDescription(roleId: string): string {
-    return this.roles.find(r => r.id === roleId)?.permissions.join(', ') || '';
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

@@ -35,11 +35,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/dashboard',
           icon: 'ri-speed-up-line'
         },
-        {
-          title: 'Operations',
-          route: '/main/transport/trips',
-          icon: 'ri-route-line'
-        },
+        // {
+        //   title: 'Operations',
+        //   route: '/main/transport/trips',
+        //   icon: 'ri-route-line'
+        // },
         {
           title: 'Trucks',
           route: '/main/transport/trucks',
@@ -47,7 +47,7 @@ export class SidebarComponent implements OnInit {
         },
         {
           title: 'Drivers',
-          route: '/main/transport/trips',
+          route: '/main/transport/drivers',
           icon: 'ri-caravan-line'
         },
         // {

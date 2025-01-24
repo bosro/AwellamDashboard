@@ -20,7 +20,7 @@ export class CustomersService {
         httpParams = httpParams.set(key, params[key]);
       });
     }
-    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/customer/get`, { params: httpParams });
+    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`, { params: httpParams });
   }
 
   getCustomerById(id: string): Observable<{ customer: Customer }> {

@@ -15,32 +15,24 @@
           </button>
           <!-- <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
             <button 
-              (click)="showMaintenanceModal = true"
-              class="w-full px-4 py-2 text-left hover:bg-gray-100">
-              <i class="ri-tools-line mr-2"></i>
-              Schedule Maintenance
-            </button>
-            <div class="border-t my-1"></div>
-            <button 
               (click)="exportTruckData('excel')"
               class="w-full px-4 py-2 text-left hover:bg-gray-100">
               <i class="ri-file-excel-line mr-2"></i>
               Export to Excel
             </button>
-            <button 
-              (click)="exportTruckData('pdf')"
-              class="w-full px-4 py-2 text-left hover:bg-gray-100">
-              <i class="ri-file-pdf-line mr-2"></i>
-              Export to PDF
-            </button>
           </div> -->
         </div>
-  
+        <button 
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"  [routerLink]="['/main/trips/new']">
+        <i class="ri-add-line mr-2"></i>
+        <!-- [routerLink]="['/main/products/new']" -->
+        Add Load
+      </button>
         <!-- Add New Truck Button -->
         <button 
           class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"  [routerLink]="['/main/trips/new']">
           <i class="ri-add-line mr-2"></i>
-          <!-- [routerLink]="['/main/products/new']" -->
+
           Add New Truck
         </button>
       </div>

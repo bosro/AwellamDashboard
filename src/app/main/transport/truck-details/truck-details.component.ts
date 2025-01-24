@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TransportService, Truck } from '../../../services/transport.service';
+import { TransportService, Truck } from '../../../services/driver.service';
 import { forkJoin, Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 

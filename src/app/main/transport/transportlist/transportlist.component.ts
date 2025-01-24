@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { TransportService, Transport, Driver } from '../../../services/transport.service';
+import { TransportService, Transport, Driver, DriverResponse } from '../../../services/driver.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
+// type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
 
 @Component({
   selector: 'app-transport-list',
@@ -24,7 +24,7 @@ export class TransportListComponent implements OnInit {
   filterForm!: FormGroup;
   exportLoading = false;
 
-  statusOptions: TransportStatus[] = ['scheduled', 'in-transit', 'completed', 'cancelled'];
+
 
   constructor(
     private transportService: TransportService,
@@ -91,6 +91,7 @@ export class TransportListComponent implements OnInit {
     this.transportService.getDrivers().subscribe({
       next: (response) => {
         this.drivers = response.drivers;
+        console.log(this.drivers)
       },
       error: (error) => {
         console.error('Error loading drivers:', error);
@@ -113,28 +114,28 @@ export class TransportListComponent implements OnInit {
       this.selectedTransports.clear();
     } else {
       this.transports.forEach(transport => {
-        if (transport.id) {
-          this.selectedTransports.add(transport.id);
+        if (transport._id) {
+          // this.selectedTransports.add(transport._id);
         }
       });
     }
   }
 
-  optimizeSelectedRoutes(): void {
-    if (this.selectedTransports.size === 0) return;
+  // optimizeSelectedRoutes(): void {
+  //   if (this.selectedTransports.size === 0) return;
     
-    const waypoints = this.transports
-      .filter(t => t.id && this.selectedTransports.has(t.id))
-      .map(t => [t.startLocation, t.endLocation])
-      .flat();
+  //   const waypoints = this.transports
+  //     .filter(t => t.id && this.selectedTransports.has(t.id))
+  //     .map(t => [t.startLocation, t.endLocation])
+  //     .flat();
 
-    this.transportService.optimizeRoute(waypoints).subscribe({
-      next: (optimizedRoute) => {
-        // Handle optimized route
-        console.log('Route optimized:', optimizedRoute);
-      }
-    });
-  }
+  //   this.transportService.optimizeRoute(waypoints).subscribe({
+  //     next: (optimizedRoute) => {
+  //       // Handle optimized route
+  //       console.log('Route optimized:', optimizedRoute);
+  //     }
+  //   });
+  // }
 
   exportSelected(format: 'excel' | 'pdf'): void {
     if (this.selectedTransports.size === 0) return;
@@ -160,24 +161,22 @@ export class TransportListComponent implements OnInit {
     });
   }
 
-  updateTransportStatus(id: number | undefined, status: TransportStatus): void {
-    if (!id) return;
+  // updateTransportStatus(id: number | undefined, status: TransportStatus): void {
+  //   if (!id) return;
     
-    this.transportService.updateTransport(id, { status }).subscribe({
-      next: () => {
-        this.loadTransports();
-      }
-    });
-  }
+  //   this.transportService.updateTransport(id, { status }).subscribe({
+  //     next: () => {
+  //       this.loadTransports();
+  //     }
+  //   });
+  // }
 
-  getStatusClass(status: TransportStatus): string {
-    const statusClasses: Record<TransportStatus, string> = {
-      'scheduled': 'bg-yellow-100 text-yellow-800',
-      'in-transit': 'bg-blue-100 text-blue-800',
-      'completed': 'bg-green-100 text-green-800',
-      'cancelled': 'bg-red-100 text-red-800'
+  getdriverClass(status: DriverResponse): string {
+    const statusClasses: { [key: string]: string } = {
+      'active': 'bg-yellow-100 text-green-800',
+      'inactive': 'bg-blue-100 text-red-800',
     };
-    return statusClasses[status];
+    return statusClasses[status as unknown as keyof typeof statusClasses];
   }
 
   clearFilters(): void {
@@ -189,22 +188,22 @@ export class TransportListComponent implements OnInit {
     this.loadTransports();
   }
 
-  calculateTotalDistance(): number {
-    return this.transports
-      .filter(t => t.id && this.selectedTransports.has(t.id))
-      .reduce((sum, t) => sum + (t.distance || 0), 0);
-  }
+  // calculateTotalDistance(): number {
+  //   return this.transports
+  //     .filter(t => t.id && this.selectedTransports.has(t.id))
+  //     .reduce((sum, t) => sum + (t.distance || 0), 0);
+  // }
 
-  getFuelEfficiency(): number {
-    const selectedTransports = this.transports
-      .filter(t => t.id && this.selectedTransports.has(t.id));
+  // getFuelEfficiency(): number {
+  //   const selectedTransports = this.transports
+  //     .filter(t => t.id && this.selectedTransports.has(t.id));
     
-    if (selectedTransports.length === 0) return 0;
+  //   if (selectedTransports.length === 0) return 0;
 
-    const totalFuel = selectedTransports
-      .reduce((sum, t) => sum + (t.fuelConsumption || 0), 0);
-    const totalDistance = this.calculateTotalDistance();
+  //   const totalFuel = selectedTransports
+  //     .reduce((sum, t) => sum + (t.fuelConsumption || 0), 0);
+  //   const totalDistance = this.calculateTotalDistance();
 
-    return totalDistance > 0 ? totalFuel / totalDistance : 0;
-  }
+  //   return totalDistance > 0 ? totalFuel / totalDistance : 0;
+  // }
 }

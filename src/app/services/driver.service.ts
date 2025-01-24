@@ -7,23 +7,27 @@ import { FuelRecord } from './fuel-tracking.service';
 import { FuelRefill } from '../main/transport/truck-details/truck-details.component';
 
 export interface Transport {
-  id: number;
-  truckId: number;
-  driverId: number;
-  routeId: number;
-  startLocation: string;
-  endLocation: string;
-  status: 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
-  startTime: string;
-  estimatedEndTime: string;
-  actualEndTime?: string;
-  distance: number;
-  fuelConsumption: number;
-  loadCapacity: number;
-  currentLoad: number;
-  notes?: string;
-  driverName?: string;
-  truckRegistration?: string;
+  _id: string;
+  name: string;
+  licenseNumber: string;
+  phoneNumber: string;
+  truck: {
+    _id: string;
+    truckNumber: string;
+    capacity: number;
+    expenses: number;
+    status: 'active' | 'inactive' | 'maintenance';
+    product: string | null;
+    orderId: string | null;
+    deliveredOrders: any[];
+    expenditure: any[];
+    __v: number;
+    driver: string;
+  } | null;
+  status: 'available' | 'on-duty' | 'off-duty' | 'on-leave';
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 // Updated Truck Interface to match the provided JSON structure
@@ -38,8 +42,10 @@ export interface Truck {
   deliveredOrders: any[];
   expenditure: any[];
   __v: number;
-
-
+  driver: {
+    _id: string;
+    name: string;
+  } | null;
 }
 
 // Response interface for API calls
@@ -59,7 +65,7 @@ export interface Driver {
   licenseNumber: string;
   phoneNumber: string;
   truck: Truck | null;
-  status: 'available' | 'on-duty' | 'off-duty' | 'on-leave';
+  status: string
 }
 
 export interface Route {
@@ -91,7 +97,7 @@ export class TransportService {
   }
 
   getTransportById(id: number): Observable<Transport> {
-    return this.http.get<Transport>(`${this.apiUrl}/trips/${id}`);
+    return this.http.get<Transport>(`${this.apiUrl}/truck/${id}`);
   }
 
   // createTransport(transport: Omit<Transport, 'id'>): Observable<Transport> {
@@ -99,7 +105,7 @@ export class TransportService {
   // }
 
   updateTransport(id: number, transport: Partial<Transport>): Observable<Transport> {
-    return this.http.patch<Transport>(`${this.apiUrl}/trips/${id}`, transport);
+    return this.http.patch<Transport>(`${this.apiUrl}/driver/${id}`, transport);
   }
 
   // Truck Operations
@@ -161,7 +167,7 @@ export class TransportService {
 
 
   updateDriverStatus(id: string, status: string): Observable<Driver> { // Changed id type to string to match _id
-    return this.http.patch<Driver>(`${this.apiUrl}/drivers/${id}/status`, { status });
+    return this.http.patch<Driver>(`${this.apiUrl}/driver/${id}/status`, { status });
   }
 
   assignDriver(tripId: number, driverId: string): Observable<Transport> { // Changed driverId type to string to match _id

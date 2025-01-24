@@ -75,7 +75,7 @@ export class ProductListComponent implements OnInit {
       pageSize: this.pageSize
     };
   
-    this.productsService.getProducts(params).subscribe({
+    this.productsService.getProducts().subscribe({
       next: (response) => {
         this.products = response.products; // Use the 'products' field from the API response
         this.total = response.products.length; // Set total based on the array size if pagination is not provided in the API
@@ -87,6 +87,23 @@ export class ProductListComponent implements OnInit {
       }
     });
   }
+
+  deleteProduct(productId: string): void{
+    this.productsService.deleteProduct
+  }
+
+
+  // In product-list.component.ts
+// exportToExcel(): void {
+//   this.productsService.exportToExcel(this.products);
+// }
+
+toggleStock(productId: string): void {
+  this.productsService.toggleStock(productId).subscribe({
+    next: () => this.loadProducts(),
+    error: (error) => console.error('Error toggling stock:', error)
+  });
+}
   
   
 

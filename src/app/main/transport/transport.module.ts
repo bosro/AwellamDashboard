@@ -5,7 +5,7 @@ import { TransportRoutingModule } from './transport-routing.module';
 import { TransportDashboardComponent } from './transport-dashboard/transport-dashboard.component';
 import { TransportFormComponent } from './transport-form/transport-form.component';
 import { TransportListComponent } from './transportlist/transportlist.component';
-import { TransportDetailsComponent } from './transport-details/transport-details.component';
+import { TransportDetailsComponent } from './driver-details/transport-details.component';
 import { TruckManagementComponent } from './truck-management/truck-management.component';
 import { TruckDetailsComponent } from './truck-details/truck-details.component';
 import { MaintenanceHistoryComponent } from './maintenance-history/maintenance-history.component';

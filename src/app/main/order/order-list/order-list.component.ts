@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { OrdersService } from '../../../services/order.service';
-import { Order, OrderStatus, PaymentStatus, OrderResponse } from '../../../shared/types/order.interface';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -9,7 +8,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './order-list.component.html'
 })
 export class OrderListComponent implements OnInit {
-  orders: Order[] = [];
+  orders: any[] = [];
   loading = false;
   total = 0;
   pageSize = 10;
@@ -17,10 +16,6 @@ export class OrderListComponent implements OnInit {
   selectedOrders = new Set<string>();
   filterForm: FormGroup;
   Math = Math;
-  OrderStatus = OrderStatus;
-  PaymentStatus = PaymentStatus;
-
-  showExportDropdown = false;
 
   constructor(
     private ordersService: OrdersService,
@@ -58,18 +53,10 @@ export class OrderListComponent implements OnInit {
 
   loadOrders(): void {
     this.loading = true;
-    const params = {
-      ...this.filterForm.value,
-      page: this.currentPage,
-      pageSize: this.pageSize
-    };
-
-    this.ordersService.getOrders(params).subscribe({
-      next:(response) => {
+    this.ordersService.getOrders().subscribe({
+      next: (response) => {
         this.orders = response.orders;
-        // this.total = response.orders.length;
         this.loading = false;
-        console.log(this.orders)
       },
       error: (error) => {
         console.error('Error loading orders:', error);
@@ -99,32 +86,17 @@ export class OrderListComponent implements OnInit {
     }
   }
 
-  bulkUpdateStatus(status: OrderStatus): void {
-    if (this.selectedOrders.size === 0) return;
-
-    this.ordersService.bulkUpdateStatus(Array.from(this.selectedOrders), status)
-      .subscribe({
-        next: () => {
-          this.selectedOrders.clear();
-          this.loadOrders();
-        },
-        error: (error) => console.error('Error updating status:', error)
-      });
+  deleteOrder(id: string): void {
+    this.ordersService.deleteOrder(id).subscribe({
+      next: () => this.loadOrders(),
+      error: (error) => console.error('Error deleting order:', error)
+    });
   }
 
-  exportOrders(format: 'csv' | 'excel'): void {
-    const filters = this.filterForm.value;
-    this.ordersService.exportOrders(format, filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `orders-export.${format}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.showExportDropdown = false;
-      },
-      error: (error) => console.error('Error exporting orders:', error)
+  toggleStatus(id: string): void {
+    this.ordersService.toggleOrderStatus(id).subscribe({
+      next: () => this.loadOrders(),
+      error: (error) => console.error('Error toggling status:', error)
     });
   }
 
@@ -132,22 +104,6 @@ export class OrderListComponent implements OnInit {
     this.filterForm.reset();
     this.currentPage = 1;
     this.loadOrders();
-  }
-
-  processOrder(orderId: string): void {
-    this.ordersService.updateOrderStatus(orderId, OrderStatus.PROCESSING).subscribe({
-      next: () => {
-        this.loadOrders();
-      },
-      error: (error) => console.error('Error processing order:', error)
-    });
-  }
-
-  canRefund(order: Order): boolean {
-    return (
-      order.status === OrderStatus.DELIVERED &&
-      order.paymentStatus === PaymentStatus.PAID
-    );
   }
 
   getStatusClass(status: string): string {
