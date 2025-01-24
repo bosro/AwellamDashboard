@@ -170,7 +170,7 @@ export class OrderProcessingComponent implements OnInit {
 
       this.ordersService.createOrder(orderData).subscribe({
         next: () => {
-          this.router.navigate(['/orders/list']);
+          this.router.navigate(['main/orders/list']);
           this.saving = false;
         },
         error: (error:any) => {
