@@ -4,7 +4,7 @@ import { OrderListComponent } from './order-list/order-list.component';
 import { OrderDetailsComponent } from './order-details/order-details.component';
 import { OrderProcessingComponent } from './order-processing/order-processing.component';
 import { OrderAnalyticsComponent } from './order-analytics/order-analytics.component';
-
+import { OrderEditComponent } from './order-edit/order-edit';
 
 const routes: Routes = [
   {
@@ -15,6 +15,7 @@ const routes: Routes = [
       { path: 'details/:id', component: OrderDetailsComponent },
       { path: 'processing', component: OrderProcessingComponent },
       { path: 'analytics', component: OrderAnalyticsComponent },
+      {path:'edit/:id' , component:OrderEditComponent}
     ]
   }
 ];

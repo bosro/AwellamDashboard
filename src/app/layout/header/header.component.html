@@ -30,7 +30,7 @@
           </div>
   
           <!-- Notifications -->
-          <div class="ml-4 relative flex-shrink-0">
+          <div class="ml-4 relative flex-shrink-0 z-50">
             <button
               (click)="toggleNotifications()"
               class="bg-white rounded-full p-1 hover:bg-gray-100 relative"
@@ -85,31 +85,31 @@
             </div>
   
             <div *ngIf="showProfileMenu"
-                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-              <div class="py-1">
-                <div class="px-4 py-2 border-b border-gray-200">
-                  <p class="text-sm font-medium text-gray-900">{{currentUser?.firstName}} {{currentUser?.lastName}}</p>
-                  <p class="text-xs text-gray-500">{{currentUser?.email}}</p>
-                </div>
-                <a routerLink="/profile" 
-                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  <i class="ri-user-settings-line mr-2"></i>
-                  Profile Settings
-                </a>
-                <a routerLink="/auth/change-password" 
-                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  <i class="ri-lock-password-line mr-2"></i>
-                  Change Password
-                </a>
-                <button
-                  (click)="logout()"
-                  class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
-                >
-                  <i class="ri-logout-box-line mr-2"></i>
-                  Sign out
-                </button>
-              </div>
-            </div>
+     class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+  <div class="py-1">
+    <div class="px-4 py-2 border-b border-gray-200">
+      <p class="text-sm font-medium text-gray-900">{{currentUser?.firstName}} {{currentUser?.lastName}}</p>
+      <p class="text-xs text-gray-500">{{currentUser?.email}}</p>
+    </div>
+    <a routerLink="/profile" 
+       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      <i class="ri-user-settings-line mr-2"></i>
+      Profile Settings
+    </a>
+    <a routerLink="/auth/change-password" 
+       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      <i class="ri-lock-password-line mr-2"></i>
+      Change Password
+    </a>
+    <button
+      (click)="logout()"
+      class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+    >
+      <i class="ri-logout-box-line mr-2"></i>
+      Sign out
+    </button>
+  </div>
+</div>
           </div>
         </div>
       </div>

@@ -30,12 +30,7 @@
               type="text"
               formControlName="name"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="productForm.get('name')?.touched && productForm.get('name')?.invalid"
             >
-            <div *ngIf="productForm.get('name')?.touched && productForm.get('name')?.invalid" 
-                 class="mt-1 text-sm text-red-600">
-              Product name is required and must be at least 3 characters
-            </div>
           </div>
 
           <!-- Price -->
@@ -76,6 +71,18 @@
             </select>
           </div>
 
+          <!-- Total Stock -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Total Stock *
+            </label>
+            <input 
+              type="number"
+              formControlName="totalStock"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+          </div>
+
           <!-- Image -->
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -86,25 +93,6 @@
               (change)="onImageUpload($event)"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-          </div>
-
-          <!-- Image Preview -->
-          <div class="md:col-span-2">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div *ngFor="let file of imageFiles; let i = index" class="relative group">
-                <img 
-                  [src]="file | objectUrl"
-                  class="w-full h-32 object-cover rounded-lg"
-                  [alt]="file.name"
-                >
-                <button 
-                  type="button"
-                  (click)="removeImage(i)"
-                  class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                  <i class="ri-close-line"></i>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -118,13 +106,9 @@
           Cancel
         </button>
         <button 
-          type="Submit"
-          
+          type="submit"
           class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-          <div class="flex items-center">
-            <i *ngIf="saving" class="ri-loader-4-line animate-spin mr-2"></i>
-            {{ isEditMode ? 'Update' : 'Create' }} Product
-          </div>
+          {{ isEditMode ? 'Update' : 'Create' }} Product
         </button>
       </div>
     </div>

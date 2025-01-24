@@ -1,28 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Product, Category, ProductStatus } from '../shared/types/product.interface';
+import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 
+export interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  description: string;
+  inStock: boolean;
+  totalStock: number;
+  image: string;
+}
+
 export interface ProductsResponse {
+  message: string;
   products: Product[];
-  total: number;
-  page: number;
-  pageSize: number;
 }
 
-export interface ProductFilters {
-  search?: string;
-  category?: string;
-  status?: ProductStatus;
-  minPrice?: number;
-  maxPrice?: number;
-  inStock?: boolean;
-  page?: number;
-  pageSize?: number;
+interface ProductResponse {
+  message: string;
+  product: Product;
 }
-
 
 @Injectable({
   providedIn: 'root'
@@ -32,78 +32,49 @@ export class ProductsService {
 
   constructor(private http: HttpClient) {}
 
-  getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(`${this.apiUrl}/categories`);
+  getProducts(): Observable<ProductsResponse> {
+    return this.http.get<ProductsResponse>(`${this.apiUrl}/`);
   }
 
   getProductById(id: string): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${id}`);
+    return this.http.get<ProductResponse>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.product)
+    );
   }
 
-  createProduct(productData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, productData);
+  createProduct(productData: FormData): Observable<Product> {
+    return this.http.post<Product>(`${this.apiUrl}/create`, productData);
   }
 
-  updateProduct(id: string, productData: FormData): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update/${id}`, productData);
+  updateProduct(id: string, productData: FormData): Observable<Product> {
+    return this.http.put<Product>(`${this.apiUrl}/edit/${id}`, productData);
   }
 
-  createCategory(category: Partial<Category>): Observable<Category> {
-    return this.http.post<Category>(`${this.apiUrl}/categories`, category);
+  addStock(id: string, quantity: number): Observable<Product> {
+    return this.http.post<Product>(`${this.apiUrl}/${id}/add-stock`, { quantity });
   }
 
-  // Inventory
-  updateInventory(productId: string, quantity: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${productId}/inventory`, { quantity });
+  toggleStock(id: string): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/${id}/toggle-stock`, {});
   }
 
-  // Bulk Operations
-  bulkUpdateStatus(ids: string[], status: ProductStatus): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/bulk/status`, { ids, status });
+  deleteProduct(id: string, quantity: number): Observable<Product> {
+    return this.http.post<Product>(`${this.apiUrl}/delete/${id}`, { quantity });
   }
 
-  bulkUpdatePricing(ids: string[], priceChange: { type: string; value: number }): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/bulk/pricing`, { ids, priceChange });
-  }
-
-  // Export
-  exportProducts(format: 'csv' | 'excel'): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/export`, {
-      params: { format },
-      responseType: 'blob'
+  exportToExcel(products: Product[]): void {
+    import('xlsx').then(xlsx => {
+      const worksheet = xlsx.utils.json_to_sheet(products);
+      const workbook = { Sheets: { 'Products': worksheet }, SheetNames: ['Products'] };
+      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'products.xlsx';
+      link.click();
+      window.URL.revokeObjectURL(url);
     });
-  }
-
-  searchProducts(term: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/search`, {
-      params: { term }
-    });
-  }
-
-
-  getProducts(filters: ProductFilters): Observable<ProductsResponse> {
-    // Convert filters to query parameters
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        params.append(key, value.toString());
-      }
-    });
-
-    return this.http.get<ProductsResponse>(`${this.apiUrl}?${params.toString()}`);
-  }
-
-  deleteProduct(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  updateProductStatus(id: string, status: ProductStatus): Observable<Product> {
-    return this.http.patch<Product>(`${this.apiUrl}/${id}/status`, { status });
-  }
-
- 
-
-  bulkDelete(ids: string[]): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/bulk/delete`, { ids });
   }
 }

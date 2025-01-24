@@ -35,31 +35,31 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/dashboard',
           icon: 'ri-speed-up-line'
         },
-        {
-          title: 'Operations',
-          route: '/main/transport/trips',
-          icon: 'ri-route-line'
-        },
+        // {
+        //   title: 'Operations',
+        //   route: '/main/transport/trips',
+        //   icon: 'ri-route-line'
+        // },
         {
           title: 'Trucks',
           route: '/main/transport/trucks',
           icon: 'ri-truck-fill'
         },
-        // {
-        //   title: 'Trips',
-        //   route: '/main/transport/trips',
-        //   icon: 'ri-caravan-line'
-        // },
         {
-          title: 'Fuel Analytics',
-          route: '/main/transport/fuel-analytics',
-          icon: 'ri-ink-bottle-line'
+          title: 'Drivers',
+          route: '/main/transport/drivers',
+          icon: 'ri-caravan-line'
         },
-        {
-          title: 'Maintenance',
-          route: '/main/transport/maintenance-history',
-          icon: 'ri-tools-line'
-        }
+        // {
+        //   title: 'Fuel Analytics',
+        //   route: '/main/transport/fuel-analytics',
+        //   icon: 'ri-ink-bottle-line'
+        // },
+        // {
+        //   title: 'Maintenance',
+        //   route: '/main/transport/maintenance-history',
+        //   icon: 'ri-tools-line'
+        // }
       ]
     },
     {
@@ -139,11 +139,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/products/list',
           icon: 'ri-file-list-2-line'
         },
-        {
-          title: 'Product Categories',
-          route: '/main/products/categories',
-          icon: 'ri-pie-chart-2-line'
-        },
+        // {
+        //   title: 'Product Categories',
+        //   route: '/main/products/categories',
+        //   icon: 'ri-pie-chart-2-line'
+        // },
         {
           title: 'Product Inventory',
           route: '/main/products/inventory',
@@ -159,17 +159,17 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Order Analytics',
-          route: '/orders/analytics',
+          route: '/main/orders/analytics',
           icon: 'ri-pie-chart-2-line'
         },
         {
           title: 'Order List',
-          route: '/orders/list',
+          route: '/main/orders/list',
           icon: 'ri-file-list-2-line'
         },
         {
           title: 'Create Order',
-          route: '/orders/processing',
+          route: '/main/orders/processing',
           icon: 'ri-play-list-add-fill'
         }
       ]
@@ -183,12 +183,12 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Customers',
-          route: '/customers/list',
+          route: '/main/customers/list',
           icon: 'ri-group-line'
         },
         {
           title: 'Add Customer',
-          route: '/customers/new',
+          route: '/main/customers/new',
           icon: 'i-user-add-line'
         },
        
@@ -196,11 +196,11 @@ export class SidebarComponent implements OnInit {
     },
 
   
-    {
-      title: 'Customer Management',
-      icon: 'ri-user-settings-line',
-      route: '/main/customers-management',
-    },
+    // {
+    //   title: 'Customer Management',
+    //   icon: 'ri-user-settings-line',
+    //   route: '/main/customers-management',
+    // },
     {
       title: 'Admin Management',
       icon: 'ri-user-settings-line',

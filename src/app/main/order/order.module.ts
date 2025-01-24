@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormGroup } from '@angular/forms';
 
 import { OrderListComponent } from './order-list/order-list.component';
 import { OrderDetailsComponent } from './order-details/order-details.component';
@@ -8,6 +9,8 @@ import { OrderProcessingComponent } from './order-processing/order-processing.co
 import { ReactiveFormsModule } from '@angular/forms';
 import { OrdersRoutingModule } from './order-routing.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { OrderEditComponent } from './order-edit/order-edit';
+
 
 
 @NgModule({
@@ -15,7 +18,8 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     OrderListComponent,
     OrderDetailsComponent,
     OrderAnalyticsComponent,
-    OrderProcessingComponent
+    OrderProcessingComponent,
+    OrderEditComponent
   ],
   imports: [
     CommonModule,
