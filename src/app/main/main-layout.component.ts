@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 type RouteConfig = {
   path: string;
@@ -13,10 +14,11 @@ type RouteConfig = {
   templateUrl: './main-layout.component.html'
 })
 export class MainLayoutComponent implements OnInit {
-  isSidebarOpen = true;
+  isSidebarOpen = false;
   pageTitle = '';
   loading = false;
 
+ 
   private readonly routes: RouteConfig[] = [
     { path: '/main/dashboard', title: 'Dashboard' },
     { path: '/main/transport', title: 'Transport Operations' },
@@ -28,22 +30,36 @@ export class MainLayoutComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private breakpointObserver: BreakpointObserver
   ) {
+    this.breakpointObserver.observe([Breakpoints.Large, Breakpoints.XLarge])
+      .subscribe(result => {
+        this.isSidebarOpen = result.matches;
+      });
+
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
+      // Close sidebar on navigation in mobile view
+      if (!this.breakpointObserver.isMatched([Breakpoints.Large, Breakpoints.XLarge])) {
+        this.isSidebarOpen = false;
+      }
       this.updatePageTitle();
     });
   }
 
   ngOnInit(): void {
+    // Set initial sidebar state based on screen size
+    this.isSidebarOpen = this.breakpointObserver.isMatched([Breakpoints.Large, Breakpoints.XLarge]);
+    
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/auth/login']);
       return;
     }
     this.updatePageTitle();
   }
+
 
   toggleSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;
@@ -82,4 +98,7 @@ export class MainLayoutComponent implements OnInit {
   getRouteTitle(path: string): string {
     return this.routes.find(route => route.path === path)?.title || 'Dashboard';
   }
+
+ 
+
 }
