@@ -14,6 +14,7 @@ interface OrderItem {
   _id: string;
 }
 
+
 interface Order {
   _id: string;
   status: string;
@@ -33,6 +34,38 @@ interface Order {
   orderNumber: string;
   assignedTruck?: string | null;
 }
+
+interface OrderResponse {
+  message: string;
+  order: {
+    _id: string;
+    status: string;
+    customerId: {
+      _id: string;
+      fullName: string;
+      phoneNumber: number;
+    };
+    deliveryAddress: string;
+    orderItems: {
+      product: {
+        _id: string;
+        name: string;
+      };
+      quantity: number;
+      price: number;
+      _id: string;
+    }[];
+    totalAmount: number;
+    paymentStatus: string;
+    deliveryStatus: string;
+    date: string;
+    createdAt: string;
+    updatedAt: string;
+    orderNumber: string;
+  };
+}
+
+
 
 @Component({
   selector: 'app-order-details',
@@ -67,8 +100,8 @@ export class OrderDetailsComponent implements OnInit {
   private loadOrder(id: string): void {
     this.loading = true;
     this.ordersService.getOrderById(id).subscribe({
-      next: (order) => {
-        this.order = order;
+      next: (response) => {
+        this.order = response.order;
         this.buildTimeline();
         this.loading = false;
       },

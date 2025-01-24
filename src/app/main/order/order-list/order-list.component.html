@@ -1,66 +1,20 @@
-
 <div class="flex justify-between items-center mb-6">
   <div>
     <h1 class="text-2xl font-semibold text-gray-900">Orders</h1>
-    <!-- <p class="mt-1 text-sm text-gray-600">Manage and process customer orders</p> -->
   </div>
   <div class="flex space-x-3">
     <button 
-      [routerLink]="['/orders/analytics']"
+      [routerLink]="['/main/orders/analytics']"
       class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
       <i class="ri-bar-chart-line mr-2"></i>
       Analytics
     </button>
     <button 
-      [routerLink]="['/orders/processing']"
+      [routerLink]="['/main/orders/processing']"
       class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
       <i class="ri-add-line mr-2"></i>
       New Order
     </button>
-  </div>
-</div>
-
-<!-- Batch Operations -->
-<div *ngIf="selectedOrders.size > 0" class="mb-6">
-  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-    <div class="flex justify-between items-center">
-      <span class="text-sm text-blue-700">
-        {{selectedOrders.size}} orders selected
-      </span>
-      <div class="flex space-x-3">
-        <button 
-          (click)="bulkUpdateStatus(OrderStatus.PROCESSING)"
-          class="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
-          Process
-        </button>
-        <button 
-          (click)="bulkUpdateStatus(OrderStatus.SHIPPED)"
-          class="text-sm px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200">
-          Mark Shipped
-        </button>
-        <div class="relative">
-          <button 
-            (click)="showExportDropdown = !showExportDropdown"
-            class="text-sm px-3 py-1 bg-white border rounded hover:bg-gray-50">
-            Export
-            <i class="ri-arrow-down-s-line ml-1"></i>
-          </button>
-          <div *ngIf="showExportDropdown" 
-               class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-10">
-            <button 
-              (click)="exportOrders('csv')"
-              class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-              Export as CSV
-            </button>
-            <button 
-              (click)="exportOrders('excel')"
-              class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100">
-              Export as Excel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -75,30 +29,23 @@
           type="text"
           formControlName="search"
           placeholder="Search orders, customers..."
-          class="w-full pl-10 pr-4 py-2 border rounded-lg"
-        >
+          class="w-full pl-10 pr-4 py-2 border rounded-lg">
         <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
       </div>
     </div>
 
-    <!-- Order Status -->
+    <!-- Status -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-      <select
-        formControlName="status"
-        class="w-full px-4 py-2 border rounded-lg"
-      >
+      <select formControlName="status" class="w-full px-4 py-2 border rounded-lg">
         <option value="">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="processing">Processing</option>
-        <option value="shipped">Shipped</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-        <option value="refunded">Refunded</option>
+        <option value="PENDING">Pending</option>
+        <option value="PROCESSING">Processing</option>
+        <option value="SHIPPED">Shipped</option>
+        <option value="DELIVERED">Delivered</option>
+        <option value="CANCELLED">Cancelled</option>
       </select>
     </div>
-
-
 
     <!-- Date Range -->
     <div class="md:col-span-2" formGroupName="dateRange">
@@ -107,30 +54,27 @@
         <input
           type="date"
           formControlName="start"
-          class="flex-1 px-4 py-2 border rounded-lg"
-        >
+          class="flex-1 px-4 py-2 border rounded-lg">
         <input
           type="date"
           formControlName="end"
-          class="flex-1 px-4 py-2 border rounded-lg"
-        >
+          class="flex-1 px-4 py-2 border rounded-lg">
       </div>
     </div>
-
 
     <!-- Clear Filters -->
     <div class="flex items-end">
       <button
         type="button"
         (click)="clearFilters()"
-        class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-      >
+        class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
         <i class="ri-filter-off-line mr-2"></i>
         Clear Filters
       </button>
     </div>
   </form>
 </div>
+
 <!-- Orders Table -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <table class="min-w-full divide-y divide-gray-200">
@@ -142,8 +86,7 @@
               type="checkbox"
               [checked]="selectedOrders.size === orders.length"
               (change)="toggleAllSelection()"
-              class="h-4 w-4 rounded border-gray-300 text-blue-600"
-            >
+              class="h-4 w-4 rounded border-gray-300 text-blue-600">
           </div>
         </th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
@@ -163,8 +106,7 @@
               type="checkbox"
               [checked]="selectedOrders.has(order._id)"
               (change)="toggleSelection(order._id)"
-              class="h-4 w-4 rounded border-gray-300 text-blue-600"
-            >
+              class="h-4 w-4 rounded border-gray-300 text-blue-600">
           </div>
         </td>
         <td class="px-6 py-4">
@@ -197,21 +139,25 @@
         <td class="px-6 py-4 text-right text-sm font-medium">
           <div class="flex justify-end space-x-3">
             <button 
+  [routerLink]="['/main/orders/edit', order?._id]"
+  class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 mr-3">
+  <i class="ri-edit-line mr-2"></i>
+  Edit Order
+</button>
+            <button 
               [routerLink]="['/main/orders/details', order._id]"
               class="text-blue-600 hover:text-blue-900">
               <i class="ri-eye-line"></i>
             </button>
             <button 
-              *ngIf="order.status === 'PENDING'"
-              (click)="processOrder(order._id)"
+              (click)="toggleStatus(order._id)"
               class="text-green-600 hover:text-green-900">
-              <i class="ri-play-line"></i>
+              <i class="ri-refresh-line"></i>
             </button>
             <button 
-              *ngIf="canRefund(order)"
-              [routerLink]="['/main/orders/refunds', order._id]"
-              class="text-orange-600 hover:text-orange-900">
-              <i class="ri-refund-2-line"></i>
+              (click)="deleteOrder(order._id)"
+              class="text-red-600 hover:text-red-900">
+              <i class="ri-delete-bin-line"></i>
             </button>
           </div>
         </td>
@@ -235,8 +181,8 @@
     </tbody>
   </table>
 
-   <!-- Pagination -->
-   <div class="flex items-center justify-between mt-4">
+  <!-- Pagination -->
+  <div class="flex items-center justify-between border-t border-gray-200 px-6 py-3">
     <div class="text-sm text-gray-700">
       Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} orders
     </div>

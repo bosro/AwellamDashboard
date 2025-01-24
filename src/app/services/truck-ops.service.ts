@@ -162,7 +162,7 @@ export class TruckOpsService {
 
    getTrucks(params?: any): Observable<TruckResponse> {
       return this.http.get<TruckResponse>(
-        `${this.apiUrl}/truck/get`,
+        `${this.apiUrl}/get`,
         { params }
       );
     }

@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrdersService } from '../../../services/order.service';
-import { ProductsService } from '../../../services/products.service';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { fromEvent, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+// import 
 
 @Component({
   selector: 'app-order-processing',
@@ -15,9 +15,6 @@ export class OrderProcessingComponent implements OnInit {
   orderForm: FormGroup;
   loading = false;
   saving = false;
-  searchResults: any[] = [];
-  selectedProducts: any[] = [];
-  availableShippingMethods: any[] = [];
   products: any[] = [];
   customers: any[] = [];
   selectedProduct: any;
@@ -27,10 +24,11 @@ export class OrderProcessingComponent implements OnInit {
   subtotal: number = 0;
   tax: number = 0;
 
+  private apiUrl = `${environment.apiUrl}`;
+
   constructor(
     private fb: FormBuilder,
     private ordersService: OrdersService,
-    private productsService: ProductsService,
     private router: Router,
     private http: HttpClient
   ) {
@@ -45,20 +43,13 @@ export class OrderProcessingComponent implements OnInit {
         address: ['', Validators.required]
       }),
       items: this.fb.array([]),
-      notes: [''],
-      pricing: this.fb.group({
-        subtotal: [0],
-        tax: [0],
-        shipping: [0],
-        total: [0]
-      })
+      notes: ['']
     });
   }
 
   ngOnInit(): void {
     this.fetchProductsAndCustomers();
     
-    // Subscribe to quantity changes
     this.orderForm.get('quantity')?.valueChanges.subscribe(value => {
       this.quantity = value;
       this.calculateTotal();
@@ -68,21 +59,15 @@ export class OrderProcessingComponent implements OnInit {
   private fetchProductsAndCustomers(): void {
     this.loading = true;
     forkJoin({
-      products: this.http.get<any>('http://localhost:3000/api/products'),
-      customers: this.http.get<any>('http://0.0.0.0:3000/api/customers/get')
+      products: this.http.get<any>(`${this.apiUrl}/products`),
+      customers: this.http.get<any>(`${this.apiUrl}/customers/get`)
     }).subscribe({
       next: ({ products, customers }) => {
         this.products = products.products;
         this.customers = customers.customers;
-        console.log('Loaded products:', this.products);
-        console.log('Loaded customers:', this.customers);
       },
-      error: (error) => {
-        console.error('Error fetching data:', error);
-      },
-      complete: () => {
-        this.loading = false;
-      }
+      error: (error) => console.error('Error fetching data:', error),
+      complete: () => this.loading = false
     });
   }
 
@@ -101,13 +86,12 @@ export class OrderProcessingComponent implements OnInit {
 
     itemGroup.get('quantity')?.valueChanges.subscribe(qty => {
       const price = itemGroup.get('price')?.value || 0;
-      itemGroup.patchValue({ total: qty! * price }, { emitEvent: false });
+      itemGroup.patchValue({ total: (qty || 0) * price }, { emitEvent: false });
       this.calculateOrderTotals();
     });
 
     this.items.push(itemGroup);
     this.calculateOrderTotals();
-    this.searchResults = [];
   }
 
   removeItem(index: number): void {
@@ -119,22 +103,11 @@ export class OrderProcessingComponent implements OnInit {
     this.subtotal = this.items.controls.reduce((total, control) => 
       total + (control.get('total')?.value || 0), 0);
     this.tax = this.subtotal * 0.1;
-    const shipping = this.getShippingCost();
-    this.total = this.subtotal + this.tax + shipping;
-
-    this.orderForm.patchValue({
-      pricing: {
-        subtotal: this.subtotal,
-        tax: this.tax,
-        shipping: shipping,
-        total: this.total
-      }
-    });
+    this.total = this.subtotal + this.tax + this.getShippingCost();
   }
 
   getShippingCost(): number {
-    // You can implement your shipping cost logic here
-    return 10; // Default shipping cost
+    return 10;
   }
 
   getSubtotal(): number {
@@ -155,7 +128,6 @@ export class OrderProcessingComponent implements OnInit {
     if (this.selectedProduct) {
       this.calculateTotal();
       this.addItem(this.selectedProduct);
-      console.log('Selected product:', this.selectedProduct);
     }
   }
 
@@ -181,30 +153,31 @@ export class OrderProcessingComponent implements OnInit {
     }
   }
 
-  async onSubmit(): Promise<void> {
+  onSubmit(): void {
     if (this.orderForm.valid && this.items.length > 0) {
       this.saving = true;
+      
+      const orderData = {
+        customerId: this.orderForm.value.customer.id,
+        orderItems: this.items.value.map((item: any) => ({
+          product: item.productId,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        deliveryAddress: this.orderForm.value.customer.address,
+        totalAmount: this.getTotal()
+      };
 
-      try {
-        const orderData = {
-          customerId: this.orderForm.value.customer.id,
-          orderItems: this.items.value.map((item: any) => ({
-            product: item.productId,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          deliveryAddress: this.orderForm.value.customer.address,
-          totalAmount: this.getTotal(),
-          notes: this.orderForm.value.notes
-        };
-
-        const order = await this.ordersService.createOrder(orderData).toPromise();
-        // this.router.navigate(['/orders/details', order.id]);
-      } catch (error) {
-        console.error('Error creating order:', error);
-      } finally {
-        this.saving = false;
-      }
+      this.ordersService.createOrder(orderData).subscribe({
+        next: () => {
+          this.router.navigate(['/orders/list']);
+          this.saving = false;
+        },
+        error: (error:any) => {
+          console.error('Error creating order:', error);
+          this.saving = false;
+        }
+      });
     }
   }
 }

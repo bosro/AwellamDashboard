@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TransportService, Transport, Driver, Truck } from '../../../services/transport.service';
+import { TransportService, Transport, Driver, Truck } from '../../../services/driver.service';
 import { combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -34,7 +34,6 @@ export class TransportFormComponent implements OnInit {
     this.transportId = this.route.snapshot.params['id'];
     if (this.transportId) {
       this.isEditMode = true;
-      this.loadTransport();
     }
     this.setupRouteCalculation();
     this.loadAvailableResources();
@@ -114,24 +113,24 @@ export class TransportFormComponent implements OnInit {
     // });
   }
 
-  private loadTransport(): void {
-    this.loading = true;
-    this.transportService.getTransportById(this.transportId).subscribe({
-      next: (transport) => {
-        this.transportForm.patchValue({
-          ...transport,
-          startTime: new Date(transport.startTime).toISOString().slice(0, 16),
-          estimatedEndTime: new Date(transport.estimatedEndTime).toISOString().slice(0, 16)
-        });
-        this.estimatedDistance = transport.distance;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading transport:', error);
-        this.loading = false;
-      }
-    });
-  }
+  // private loadTransport(): void {
+  //   this.loading = true;
+  //   this.transportService.getTransportById(this.transportId).subscribe({
+  //     next: (transport) => {
+  //       this.transportForm.patchValue({
+  //         ...transport,
+  //         startTime: new Date(transport.startTime).toISOString().slice(0, 16),
+  //         estimatedEndTime: new Date(transport.estimatedEndTime).toISOString().slice(0, 16)
+  //       });
+  //       this.estimatedDistance = transport.distance;
+  //       this.loading = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading transport:', error);
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
 
   onDriverSelect(driverId:any): void {
     const driver = this.availableDrivers.find(d => d._id === driverId);

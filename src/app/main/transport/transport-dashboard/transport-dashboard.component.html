@@ -116,29 +116,7 @@
       <!-- Recent Transports and Maintenance -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Recent Transports -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-medium mb-4">Recent Transports</h2>
-          <div class="space-y-4">
-            <div *ngFor="let transport of recentTransports" 
-                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p class="font-medium">{{transport.startLocation}} → {{transport.endLocation}}</p>
-                <p class="text-sm text-gray-500">
-                  Driver: {{transport.driverName}} • Truck: {{transport.truckRegistration}}
-                </p>
-              </div>
-              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + 
-                            getStatusClass(transport.status)">
-                {{transport.status | titlecase}}
-              </span>
-            </div>
-            <button 
-              routerLink="/transport/trips"
-              class="w-full text-center text-sm text-blue-600 hover:text-blue-800 mt-4">
-              View All Transports
-            </button>
-          </div>
-        </div>
+  
   
         <!-- Maintenance Schedule -->
         <div class="bg-white rounded-lg shadow p-6">

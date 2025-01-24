@@ -5,12 +5,12 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 // import {transportService} from '../../../services/transport.service'
-import { Truck } from '../../../services/transport.service';
+import { Truck } from '../../../services/driver.service';
 
 
 // Use the previously defined Truck interface
 import {TruckResponse } from '../../../shared/types/truck-operation.types';
-import { TransportService } from '../../../services/transport.service';
+import { TransportService } from '../../../services/driver.service';
 
 @Component({
   selector: 'app-truck-management',

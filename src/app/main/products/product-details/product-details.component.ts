@@ -1,16 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductsService } from '../../../services/products.service';
-import { Product } from '../../../shared/types/product.interface';
+
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  description: string;
+  inStock: boolean;
+  totalStock: number;
+  image: string;
+}
 
 @Component({
   selector: 'app-product-details',
   templateUrl: './product-details.component.html'
 })
 export class ProductDetailsComponent implements OnInit {
-  product?: Product;
+  product: Product | undefined;
   loading = false;
-  activeTab: 'overview' | 'inventory' | 'sales' | 'reviews' = 'overview';
+  // stockQuantity = 0;
+  stockQuantity: number = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -19,40 +30,45 @@ export class ProductDetailsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.loadProduct(productId);
-    }
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) this.loadProduct(id);
   }
 
-  private loadProduct(id: string): void {
+  addStock(): void {
+    if (!this.product || this.stockQuantity <= 0) return;
+    
+    this.productsService.addStock(this.product._id, this.stockQuantity).subscribe({
+      next: (updatedProduct) => {
+        this.product = updatedProduct;
+        this.stockQuantity = 0;
+      },
+      error: (error) => console.error('Error adding stock:', error)
+    });
+  }
+
+  toggleStock(): void {
+    if (!this.product) return;
+    
+    this.productsService.toggleStock(this.product._id).subscribe({
+      next: (updatedProduct) => {
+        this.product = updatedProduct;
+      },
+      error: (error) => console.error('Error toggling stock status:', error)
+    });
+  }
+
+  private loadProduct(_id: string): void {
     this.loading = true;
-    this.productsService.getProductById(id).subscribe({
+    this.productsService.getProductById(_id).subscribe({
       next: (product) => {
         this.product = product;
         this.loading = false;
+        // console.log(this.product)
       },
       error: (error) => {
         console.error('Error loading product:', error);
         this.loading = false;
       }
     });
-  }
-
-  setActiveTab(tab: 'overview' | 'inventory' | 'sales' | 'reviews'): void {
-    this.activeTab = tab;
-  }
-
-
-
-  deleteProduct(): void {
-    if (!this.product || !confirm('Are you sure you want to delete this product?')) return;
-
-    // this.productsService.deleteProduct(this.product._id).subscribe({
-    //   next: () => {
-    //     this.router.navigate(['/main/products/list']);
-    //   },
-    //   error: (error) => console.error('Error deleting product:', error)
-    // });
   }
 }
