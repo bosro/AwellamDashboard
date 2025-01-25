@@ -8,7 +8,7 @@
       </div>
       <div class="flex space-x-3">
         <button 
-          [routerLink]="['/reports/generator']"
+          [routerLink]="['/main/reports/generator']"
           class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           <i class="ri-add-line mr-2"></i>
           Generate New Report
@@ -53,8 +53,8 @@
     </div>
   
     <!-- Reports Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
+    <div class="bg-white rounded-lg shadow" style="overflow-x: auto;">
+      <table class="min-w-full divide-y divide-gray-200" >
         <thead class="bg-gray-50">
           <tr>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>

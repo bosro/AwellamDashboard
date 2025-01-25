@@ -33,9 +33,13 @@
           </div>
         </div>
         
-        <button 
-          [routerLink]="['new']"
+        <!-- <button 
+        [routerLink]="'claims/new'"
           class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <i class="ri-add-line mr-2"></i>
+          New Claim
+        </button> -->
+        <button (click)="openNewClaimModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg">
           <i class="ri-add-line mr-2"></i>
           New Claim
         </button>
@@ -93,6 +97,15 @@
       </div>
     </div>
   
+  
+    
+    <app-claim-form
+      [isOpen]="showClaimModal"
+      [claimId]="selectedClaimId"
+      (closeModal)="showClaimModal = false"
+      (saved)="onClaimSaved()">
+    </app-claim-form>
+
     <!-- Advanced Filters -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
       <form [formGroup]="filterForm">

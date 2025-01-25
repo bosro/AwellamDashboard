@@ -18,13 +18,9 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
-  @Output() sidebarToggled = new EventEmitter<void>();
-  // currentRoute: string = '';
 
-  toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
-    this.sidebarToggled.emit();
-  }
+  @Output() toggleSidebar = new EventEmitter<void>();
+  currentRoute = '';
 
   menuItems: MenuItem[] = [
     {
@@ -109,6 +105,7 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/generator',
           icon: 'ri-file-settings-line'
         }
+
       ]
     },
     {

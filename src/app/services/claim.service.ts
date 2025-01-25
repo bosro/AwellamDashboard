@@ -112,7 +112,7 @@ export class ClaimsService {
   }
 
 
-  getClaimById(id: number): Observable<Claim> {
+  getClaimById(id: number | undefined): Observable<Claim> {
     return this.http.get<Claim>(`${this.apiUrl}/${id}`);
   }
 
