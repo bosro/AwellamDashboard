@@ -1,115 +1,107 @@
+// product-form.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProductsService } from '../../../services/products.service';
-import { Product, Category } from '../../../shared/types/product.interface';
+import { ProductsService } from "../../../services/products.service";
+
+interface Product {
+ _id: string;
+ name: string;
+ price: number;
+ description: string;
+ inStock: boolean;
+ totalStock: number;
+ image: string;
+}
 
 @Component({
-  selector: 'app-product-form',
-  templateUrl: './product-form.component.html'
+ selector: 'app-product-form',
+ templateUrl: './product-form.component.html'
 })
 export class ProductFormComponent implements OnInit {
-  productForm: FormGroup;
-  isEditMode = false;
-  loading = false;
-  saving = false;
-  categories: Category[] = [];
-  imageFiles: File[] = [];
-  currentProduct?: Product;
-  activeSection = 'basic info'; 
+ productForm: FormGroup;
+ isEditMode = false;
+ loading = false;
+ imageFile?: File;
 
-  constructor(
-    private fb: FormBuilder,
-    private productsService: ProductsService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {
-    this.productForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      price: [0, [Validators.required, Validators.min(0)]],
-      description: ['', Validators.required],
-      inStock: [true, Validators.required],
-      image: [null, Validators.required]
-    });
-  }
+ constructor(
+   private fb: FormBuilder,
+   private productsService: ProductsService,
+   private route: ActivatedRoute,
+   private router: Router
+ ) {
+   this.productForm = this.fb.group({
+     name: ['', Validators.required],
+     price: ['', [Validators.required, Validators.min(0)]],
+     description: ['', Validators.required],
+     inStock: [true],
+     totalStock: ['', [Validators.required, Validators.min(0)]],
+     image: ['string']
+   });
+ }
 
-  ngOnInit(): void {
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.isEditMode = true;
-      this.loadProduct(productId);
-    }
-  }
+ ngOnInit(): void {
+   const id = this.route.snapshot.paramMap.get('id');
+   if (id) {
+     this.isEditMode = true; 
+     this.loadProduct(id);
+   }
+ }
 
-  private loadProduct(id: string): void {
-    this.loading = true;
-    this.productsService.getProductById(id).subscribe({
-      next: (product) => {
-        this.currentProduct = product;
-        this.patchFormValues(product);
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading product:', error);
-        this.loading = false;
-      }
-    });
-  }
+ onSubmit(): void {
+   if (this.productForm.valid) {
+     const formData = new FormData();
+     formData.append('name', this.productForm.get('name')?.value);
+     formData.append('price', this.productForm.get('price')?.value);
+     formData.append('description', this.productForm.get('description')?.value);
+     formData.append('inStock', this.productForm.get('inStock')?.value);
+     formData.append('totalStock', this.productForm.get('totalStock')?.value);
+     formData.append('image', 'string');
+     if (this.imageFile) {
+       formData.append('imageFile', this.imageFile);
+     }
 
-  private patchFormValues(product: Product): void {
-    this.productForm.patchValue({
-      name: product.name,
-      price: product.price,
-      description: product.description,
-      inStock: product.inStock,
-      image: product.image
-    });
-  }
+     if (this.isEditMode) {
+       const id = this.route.snapshot.paramMap.get('id')!;
+       this.productsService.updateProduct(id, formData).subscribe({
+         next: () => this.router.navigate(['/main/products/list']),
+         error: (error) => console.error('Error updating product:', error)
+       });
+     } else {
+       this.productsService.createProduct(formData).subscribe({
+         next: () => this.router.navigate(['/main/products/list']),
+         error: (error) => console.error('Error creating product:', error)
+       });
+     }
+   } else {
+     Object.keys(this.productForm.controls).forEach(key => {
+       const control = this.productForm.get(key);
+       if (control?.invalid) {
+         control.markAsTouched();
+       }
+     });
+   }
+ }
 
-  onImageUpload(event: Event): void {
-    const element = event.target as HTMLInputElement;
-    const fileList = element.files;
-    if (fileList) {
-      this.imageFiles = Array.from(fileList);
-    }
-  }
+ onImageUpload(event: Event): void {
+   const element = event.target as HTMLInputElement;
+   const fileList = element.files;
+   if (fileList && fileList.length > 0) {
+     this.imageFile = fileList[0];
+   }
+ }
 
-  removeImage(index: number): void {
-    this.imageFiles.splice(index, 1);
-  }
-
-  async onSubmit(): Promise<void> {
-    if (this.productForm.valid) {
-      this.saving = true;
-      const formData = this.prepareFormData();
-
-      try {
-        if (this.isEditMode && this.currentProduct) {
-          await this.productsService.updateProduct(this.currentProduct._id, formData).toPromise();
-        } else {
-          await this.productsService.createProduct(formData).toPromise();
-        }
-        this.router.navigate(['/main/products/list']);
-      } catch (error) {
-        console.error('Error saving product:', error);
-      } finally {
-        this.saving = false;
-      }
-    }
-  }
-
-  private prepareFormData(): any {
-    const formValue = this.productForm.value;
-    const formData = new FormData();
-
-    formData.append('name', formValue.name);
-    formData.append('price', formValue.price);
-    formData.append('description', formValue.description);
-    formData.append('inStock', formValue.inStock);
-    if (this.imageFiles.length > 0) {
-      formData.append('image', this.imageFiles[0]);
-    }
-
-    return formData;
-  }
+ private loadProduct(id: string): void {
+   this.loading = true;
+   this.productsService.getProductById(id).subscribe({
+     next: (product) => {
+       this.productForm.patchValue(product);
+       this.loading = false;
+     },
+     error: (error) => {
+       console.error('Error loading product:', error);
+       this.loading = false;
+     }
+   });
+ }
 }

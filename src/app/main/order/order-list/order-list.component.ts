@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { OrdersService } from '../../../services/order.service';
-import { Order, OrderStatus, PaymentStatus } from '../../../shared/types/order.interface';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -9,17 +8,14 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './order-list.component.html'
 })
 export class OrderListComponent implements OnInit {
-  orders: Order[] = [];
+  orders: any[] = [];
   loading = false;
   total = 0;
   pageSize = 10;
   currentPage = 1;
   selectedOrders = new Set<string>();
   filterForm: FormGroup;
-  Math = Math
-  OrderStatus = OrderStatus
-
-  showExportDropdown = false;
+  Math = Math;
 
   constructor(
     private ordersService: OrdersService,
@@ -57,16 +53,9 @@ export class OrderListComponent implements OnInit {
 
   loadOrders(): void {
     this.loading = true;
-    const params = {
-      ...this.filterForm.value,
-      page: this.currentPage,
-      pageSize: this.pageSize
-    };
-
-    this.ordersService.getOrders(params).subscribe({
+    this.ordersService.getOrders().subscribe({
       next: (response) => {
-        this.orders = response.data;
-        this.total = response.total;
+        this.orders = response.orders;
         this.loading = false;
       },
       error: (error) => {
@@ -89,42 +78,26 @@ export class OrderListComponent implements OnInit {
     }
   }
 
-  bulkUpdateStatus(status: OrderStatus): void {
-    if (this.selectedOrders.size === 0) return;
-
-    this.ordersService.bulkUpdateStatus(Array.from(this.selectedOrders), status)
-      .subscribe({
-        next: () => {
-          this.selectedOrders.clear();
-          this.loadOrders();
-        },
-        error: (error) => console.error('Error updating status:', error)
-      });
-  }
-
-  exportOrders(format: 'csv' | 'excel'): void {
-    const filters = this.filterForm.value;
-    this.ordersService.exportOrders(format, filters).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `orders-export.${format}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        this.showExportDropdown = false;
-      },
-      error: (error) => console.error('Error exporting orders:', error)
-    });
-  }
-
-
   toggleAllSelection(): void {
     if (this.selectedOrders.size === this.orders.length) {
       this.selectedOrders.clear();
     } else {
-      this.orders.forEach(order => this.selectedOrders.add(order.id));
+      this.orders.forEach(order => this.selectedOrders.add(order._id));
     }
+  }
+
+  deleteOrder(id: string): void {
+    this.ordersService.deleteOrder(id).subscribe({
+      next: () => this.loadOrders(),
+      error: (error) => console.error('Error deleting order:', error)
+    });
+  }
+
+  toggleStatus(id: string): void {
+    this.ordersService.toggleOrderStatus(id).subscribe({
+      next: () => this.loadOrders(),
+      error: (error) => console.error('Error toggling status:', error)
+    });
   }
 
   clearFilters(): void {
@@ -133,20 +106,23 @@ export class OrderListComponent implements OnInit {
     this.loadOrders();
   }
 
-  processOrder(orderId: string): void {
-    this.ordersService.updateOrderStatus(orderId, OrderStatus.PROCESSING).subscribe({
-      next: () => {
-        this.loadOrders();
-      },
-      error: (error) => console.error('Error processing order:', error)
-    });
+  getStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'PENDING': 'bg-yellow-100 text-yellow-800',
+      'PROCESSING': 'bg-blue-100 text-blue-800',
+      'SHIPPED': 'bg-purple-100 text-purple-800',
+      'DELIVERED': 'bg-green-100 text-green-800',
+      'CANCELLED': 'bg-red-100 text-red-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
   }
 
-  canRefund(order: Order): boolean {
-    return (
-      order.status === 'delivered' && 
-      order.billing.paymentStatus === 'paid' &&
-      !order.billing.paymentStatus.includes('refunded')
-    );
+  getPaymentStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'Unpaid': 'bg-yellow-100 text-yellow-800',
+      'Paid': 'bg-green-100 text-green-800',
+      'Refunded': 'bg-gray-100 text-gray-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
   }
 }

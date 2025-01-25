@@ -1,46 +1,137 @@
-<div class="p-6">
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
     <div class="mb-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-semibold text-gray-900">{{ product?.name }}</h1>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">{{ product?.name }}</h1>
+          <p class="mt-2 text-gray-600">Product Details and Management</p>
+        </div>
         <button 
           routerLink="/main/products/list"
-          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+          class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
           <i class="ri-arrow-left-line mr-2"></i>
           Back to Products
         </button>
       </div>
     </div>
-  
+
+    <!-- Loading State -->
     <div *ngIf="loading" class="flex justify-center py-12">
-      <i class="ri-loader-4-line animate-spin text-3xl text-blue-600"></i>
+      <i class="ri-loader-4-line animate-spin text-3xl text-indigo-600"></i>
     </div>
-  
-    <div *ngIf="!loading && product">
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <img 
-              [src]="product.image || '/assets/placeholder.png'"
-              class="w-full h-64 object-cover rounded-lg"
-              [alt]="product.name"
-            >
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Product Details</h2>
-            <p class="text-sm text-gray-700 mb-2"><strong>Price:</strong> ${{ product.price }}</p>
-            <p class="text-sm text-gray-700 mb-2"><strong>Description:</strong> {{ product.description }}</p>
-            <p class="text-sm text-gray-700 mb-2"><strong>In Stock:</strong> {{ product.inStock ? 'Yes' : 'No' }}</p>
-            <!-- <p class="text-sm text-gray-700 mb-2"><strong>Status:</strong> {{ product.status }}</p> -->
+
+    <!-- Product Content -->
+    <div *ngIf="!loading && product" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column - Image -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <img 
+            [src]="product.image || '/assets/placeholder.png'"
+            class="w-full h-80 object-cover rounded-lg"
+            [alt]="product.name"
+          >
+        </div>
+      </div>
+
+      <!-- Middle Column - Details -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Product Information</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="text-sm font-medium text-gray-500">Price</label>
+              <p class="mt-1 text-2xl font-bold text-gray-900">${{ product.price }}</p>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-gray-500">Description</label>
+              <p class="mt-1 text-gray-900">{{ product.description }}</p>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-gray-500">Stock Status</label>
+              <div class="mt-1">
+                <span [class]="product.inStock ? 
+                  'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                  <span class="w-2 h-2 rounded-full mr-2"
+                    [class]="product.inStock ? 'bg-green-600' : 'bg-red-600'"></span>
+                  {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-gray-500">Total Stock</label>
+              <p class="mt-1 text-2xl font-bold text-gray-900">{{ product.totalStock }}</p>
+            </div>
           </div>
         </div>
       </div>
-  
-      <div class="mt-6">
-        <button 
-          (click)="deleteProduct()"
-          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-          Delete Product
-        </button>
+
+      <!-- Right Column - Actions -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Stock Management</h2>
+          
+          <div class="space-y-6">
+            <!-- Add Stock -->
+            <div>
+              <label class="text-sm font-medium text-gray-700">Add Stock Quantity</label>
+              <div class="mt-2 flex space-x-3">
+                <input 
+                  type="number"
+                  [(ngModel)]="stockQuantity"
+                  class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter quantity"
+                >
+                <button 
+                  (click)="addStock()"
+                  [disabled]="stockQuantity <= 0"
+                  class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
+                  Add Stock
+                </button>
+              </div>
+            </div>
+
+            <!-- Toggle Stock Status -->
+            <div>
+              <button 
+                (click)="toggleStock()"
+                class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <i class="ri-refresh-line mr-2"></i>
+                Toggle Stock Status
+              </button>
+            </div>
+
+            <!-- Edit Product -->
+            <div>
+              <button 
+                [routerLink]="['/main/products/edit', product._id]"
+                class="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                <i class="ri-edit-line mr-2"></i>
+                Edit Product
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Not Found State -->
+    <div *ngIf="!loading && !product" class="bg-white rounded-xl shadow-sm p-8 text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100">
+        <i class="ri-error-warning-line text-2xl text-gray-400"></i>
+      </div>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Product Not Found</h3>
+      <p class="mt-2 text-gray-500">The product you're looking for doesn't exist or has been removed.</p>
+      <button 
+        routerLink="/main/products/list"
+        class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        Back to Products
+      </button>
+    </div>
   </div>
+</div>

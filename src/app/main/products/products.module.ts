@@ -5,7 +5,7 @@ import { ProductsRoutingModule } from './products-routing.module';
 import { ProductListComponent } from './product-list/product-list.component';
 import { ProductFormComponent } from './product-form/product-form.component';
 import { ProductDetailsComponent } from './product-details/product-details.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ObjectUrlPipe } from '../../shared/pipe/object-url.pipe';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -21,6 +21,7 @@ import { SharedModule } from '../../shared/shared.module';
     CommonModule,
     ProductsRoutingModule,
     ReactiveFormsModule,
+    FormsModule
   ]
 })
 export class ProductsModule { }

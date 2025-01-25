@@ -67,34 +67,34 @@ export class OrderAnalyticsComponent implements OnInit {
     this.loading = true;
     const filters = this.filterForm.value;
 
-    this.ordersService.getOrderAnalytics(filters).subscribe({
-      next: (data) => {
-        this.summary = data.summary;
-        this.revenueChartData = this.prepareRevenueChartData(data.revenue);
-        this.orderStatusData = this.prepareOrderStatusData(data.statuses);
-        this.topProducts = data.topProducts;
-        this.customerSegments = data.customerSegments;
-        this.salesByRegion = data.salesByRegion;
+    // this.ordersService.getOrderAnalytics(filters).subscribe({
+    //   next: (data) => {
+    //     this.summary = data.summary;
+    //     this.revenueChartData = this.prepareRevenueChartData(data.revenue);
+    //     this.orderStatusData = this.prepareOrderStatusData(data.statuses);
+    //     this.topProducts = data.topProducts;
+    //     this.customerSegments = data.customerSegments;
+    //     this.salesByRegion = data.salesByRegion;
         
-        // Calculate growth metrics
-        if (data.previousPeriod) {
-          this.orderGrowth = this.calculateGrowth(
-            data.summary.totalOrders,
-            data.previousPeriod.totalOrders
-          );
-          this.revenueGrowth = this.calculateGrowth(
-            data.summary.totalRevenue,
-            data.previousPeriod.totalRevenue
-          );
-        }
+    //     // Calculate growth metrics
+    //     if (data.previousPeriod) {
+    //       this.orderGrowth = this.calculateGrowth(
+    //         data.summary.totalOrders,
+    //         data.previousPeriod.totalOrders
+    //       );
+    //       this.revenueGrowth = this.calculateGrowth(
+    //         data.summary.totalRevenue,
+    //         data.previousPeriod.totalRevenue
+    //       );
+    //     }
         
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading analytics:', error);
-        this.loading = false;
-      }
-    });
+    //     this.loading = false;
+    //   },
+    //   error: (error) => {
+    //     console.error('Error loading analytics:', error);
+    //     this.loading = false;
+    //   }
+    // });
   }
 
   private prepareRevenueChartData(data: any[]): any[] {
@@ -126,20 +126,20 @@ export class OrderAnalyticsComponent implements OnInit {
     return colors[status] || '#E5E7EB';
   }
 
-  exportAnalytics(format: 'csv' | 'excel'): void {
-    const filters = this.filterForm.value;
-    this.ordersService.exportOrders(format, { ...filters, type: 'analytics' }).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `order-analytics.${format}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error) => console.error('Error exporting analytics:', error)
-    });
-  }
+  // exportAnalytics(format: 'csv' | 'excel'): void {
+  //   const filters = this.filterForm.value;
+  //   this.ordersService.exportOrders(format, { ...filters, type: 'analytics' }).subscribe({
+  //     next: (blob) => {
+  //       const url = window.URL.createObjectURL(blob);
+  //       const link = document.createElement('a');
+  //       link.href = url;
+  //       link.download = `order-analytics.${format}`;
+  //       link.click();
+  //       window.URL.revokeObjectURL(url);
+  //     },
+  //     error: (error) => console.error('Error exporting analytics:', error)
+  //   });
+  // }
 
   calculateGrowth(current: number, previous: number): number {
     if (!previous) return 0;

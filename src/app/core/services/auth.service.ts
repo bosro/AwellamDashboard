@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+// import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
+import { environment } from '../../environments/environment';
 
 // export interface User {
 //   id: number;
@@ -181,6 +182,23 @@ export class AuthService {
         this.currentUserSubject.next({ ...currentUser, ...user });
       })
     );
+  }
+
+
+  // getAdmins(filters?: any): Observable<UsersResponse> {
+  //   return this.http.get<UsersResponse>(`${this.apiUrl}/get`, { params: filters });
+  // }
+
+  getAdminById(id: string): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/get/${id}`);
+  }
+
+  createAdmin(data: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/add`, data);
+  }
+
+  editAdmin(id: number, data: any): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/edit/${id}`, data);
   }
 
   getToken(): string | null {
