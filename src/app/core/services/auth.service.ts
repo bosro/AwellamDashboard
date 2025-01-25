@@ -251,7 +251,7 @@ export class AuthService {
     return this.http.post<User>(`${environment.apiUrl}/users`, userData);
   }
 
-  updateUser(userId: number, userData: UpdateUserDto): Observable<User> {
+  updateUser(userId: string, userData: UpdateUserDto): Observable<User> {
     return this.http.patch<User>(`${environment.apiUrl}/users/${userId}`, userData);
   }
 

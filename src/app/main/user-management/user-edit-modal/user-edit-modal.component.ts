@@ -54,6 +54,7 @@ export class UserEditModalComponent implements OnInit {
     }
   }
 
+
   private createForm(): void {
     this.userForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
