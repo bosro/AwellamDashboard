@@ -1,23 +1,15 @@
+
 // user-edit-modal.component.ts
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService,  } from '../../../core/services/auth.service';
+import { AuthService, } from '../../../core/services/auth.service';
+import { User } from '../user-management/user-management.component';
 
-
-enum UserRole {
-  TRANSPORT = "transport",
-  SUPER_ADMIN = "super_admin",
-  CUSTOMER = "customer",
-  FINANCE = "finance"
-}
-
-
-export interface User {
-  id: number;
-  name: string;
+export interface UserFormData {
+  fullName: string;
   email: string;
+  password?: string;
   role: string;
-  status: string;
 }
 
 @Component({
@@ -34,20 +26,18 @@ export class UserEditModalComponent implements OnInit {
   loading = false;
   showPassword = false;
   error = '';
-
-  roles = Object.values(UserRole);
+  roles = ['transport', 'super_admin', 'customer', 'finance'];
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService
-  ) {
-    this.createForm();
-  }
+  ) {}
 
   ngOnInit(): void {
+    this.createForm();
     if (this.user) {
       this.userForm.patchValue({
-        name: this.user.name,
+        fullName: this.user.fullName,
         email: this.user.email,
         role: this.user.role
       });
@@ -57,12 +47,9 @@ export class UserEditModalComponent implements OnInit {
 
   private createForm(): void {
     this.userForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
+      fullName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', this.user ? [] : [
-        Validators.required,
-        Validators.minLength(8)
-      ]],
+      password: ['', this.user ? [] : [Validators.required, Validators.minLength(8)]],
       role: ['', Validators.required]
     });
   }
@@ -71,19 +58,18 @@ export class UserEditModalComponent implements OnInit {
     if (this.userForm.invalid) return;
 
     this.loading = true;
-    const userData = this.userForm.value;
+    const userData: UserFormData = this.userForm.value;
 
     const request = this.user
-      ? this.authService.editAdmin(this.user.id, userData)
+      ? this.authService.updateAdmin(this.user.id.toString(), userData)
       : this.authService.createAdmin(userData);
 
     request.subscribe({
       next: () => {
         this.loading = false;
         this.saved.emit();
-        this.close.emit();
       },
-      error: error => {
+      error: (error:any) => {
         this.error = error?.error?.message || 'An error occurred';
         this.loading = false;
       }

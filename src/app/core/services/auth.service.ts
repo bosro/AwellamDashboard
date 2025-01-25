@@ -4,8 +4,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 // import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
+// import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
 import { environment } from '../../environments/environment';
+import { UserFormData } from '../../main/user-management/user-edit-modal/user-edit-modal.component';
 
 // export interface User {
 //   id: number;
@@ -69,6 +70,11 @@ export interface UpdateUserDto {
   role?: string;
   status?: 'active' | 'inactive';
   permissions?: string[];
+}
+
+export interface UsersResponse{
+  message:string;
+  admins: []
 }
 
 @Injectable({
@@ -194,8 +200,16 @@ export class AuthService {
   }
 
   createAdmin(data: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/add`, data);
+    return this.http.post(`${environment.apiUrl}/admin/add`, data);
   }
+
+  updateAdmin(id: string, userData: UserFormData): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/update/id`, userData);
+  }
+
+  // Admin(data: any): Observable<any> {
+  //   return this.http.post(`${environment.apiUrl}/add`, data);
+  // }
 
   editAdmin(id: number, data: any): Observable<any> {
     return this.http.put(`${environment.apiUrl}/edit/${id}`, data);

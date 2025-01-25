@@ -120,4 +120,5 @@ export class ReportViewerComponent implements OnInit {
       this.currentPage = page;
     }
   }
+  
 }

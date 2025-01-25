@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { TransportService, Transport } from '../../../services/driver.service';
+// import { TransportService, Transport } from '../../../services/driver.service';
 import { forkJoin } from 'rxjs';
+import { TruckService } from '../../../services/truck.service';
 
 interface DashboardMetrics {
   totalTrips: number;
@@ -63,7 +64,7 @@ type TransportStatus = 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
 })
 export class TransportDashboardComponent implements OnInit {
   metrics!: DashboardMetrics;
-  recentTransports: Transport[] = [];
+  // recentTransports: Transport[] = [];
   maintenanceSchedule: MaintenanceSchedule[] = [];
   loading = false;
   
@@ -72,7 +73,7 @@ export class TransportDashboardComponent implements OnInit {
   fuelConsumption: FuelConsumption[] = [];
   routePerformance: RoutePerformance[] = [];
 
-  constructor(private transportService: TransportService) {}
+  constructor(private transportService: TruckService) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -82,14 +83,14 @@ export class TransportDashboardComponent implements OnInit {
     this.loading = true;
     
     forkJoin({
-      transports: this.transportService.getTransports({ limit: 5 }),
-      analytics: this.transportService.getTransportAnalytics({ period: 'week' }),
-      maintenance: this.transportService.getMaintenanceSchedule()
+      // transports: this.transportService.getTransports({ limit: 5 }),
+      // analytics: this.transportService.getTransportAnalytics({ period: 'week' }),
+      // maintenance: this.transportService.getMaintenanceSchedule()
     }).subscribe({
       next: (data) => {
-        this.recentTransports = data.transports.data;
-        this.maintenanceSchedule = data.maintenance;
-        this.processAnalytics(data.analytics);
+        // this.recentTransports = data.transports.data;
+        // this.maintenanceSchedule = data.maintenance;
+        // this.processAnalytics(data.analytics);
         this.loading = false;
       },
       error: (error) => {

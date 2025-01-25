@@ -1,291 +1,135 @@
 <div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-semibold text-gray-900">Truck Management</h1>
-        <!-- <p class="mt-1 text-sm text-gray-600">Manage fleet and maintenance schedules</p> -->
-      </div>
-      <div class="flex space-x-3">
-        <!-- Batch Actions -->
-        <div class="relative" *ngIf="selectedTrucks.size > 0">
-          <button 
-            class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
-            Actions ({{selectedTrucks.size}})
-            <i class="ri-arrow-down-s-line ml-2"></i>
-          </button>
-          <!-- <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
-            <button 
-              (click)="exportTruckData('excel')"
-              class="w-full px-4 py-2 text-left hover:bg-gray-100">
-              <i class="ri-file-excel-line mr-2"></i>
-              Export to Excel
-            </button>
-          </div> -->
-        </div>
-        <button 
-        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"  [routerLink]="['/main/trips/new']">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Truck Management</h1>
+    </div>
+    <div class="flex space-x-3">
+      <button 
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        (click)="addTruck()">
         <i class="ri-add-line mr-2"></i>
-        <!-- [routerLink]="['/main/products/new']" -->
-        Add Load
+        Add New Truck
       </button>
-        <!-- Add New Truck Button -->
-        <button 
-          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"  [routerLink]="['/main/trips/new']">
-          <i class="ri-add-line mr-2"></i>
+    </div>
+  </div>
 
-          Add New Truck
-        </button>
-      </div>
-    </div>
   
-    <!-- Fleet Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-          <div class="p-3 bg-blue-100 rounded-full">
-            <i class="ri-truck-line text-xl text-blue-600"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600">Total Trucks</p>
-            <!-- <p class="text-lg font-semibold">{{total}}</p> -->
-          </div>
-        </div>
-      </div>
-  
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-          <div class="p-3 bg-green-100 rounded-full">
-            <i class="ri-road-map-line text-xl text-green-600"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600">In Operation</p>
-            <p class="text-lg font-semibold">{{getOperationalCount()}}</p>
-          </div>
-        </div>
-      </div>
-  
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-          <div class="p-3 bg-yellow-100 rounded-full">
-            <i class="ri-tools-line text-xl text-yellow-600"></i>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm text-gray-600">Under Maintenance</p>
-            <p class="text-lg font-semibold">{{getMaintenanceCount()}}</p>
-          </div>
-        </div>
-      </div>
-  
-      
-    </div>
-  
-    <!-- Filters -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-      <form [formGroup]="filterForm">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Search -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Search
-            </label>
-            <div class="relative">
-              <input
-                type="text"
-                formControlName="searchTerm"
-                placeholder="Search by registration number..."
-                class="w-full pl-10 pr-4 py-2 border rounded-lg"
-              >
-              <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
-            </div>
-          </div>
-  
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              formControlName="status"
-              class="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="">All Statuses</option>
-              <option value="available">Available</option>
-              <option value="in-use">In Use</option>
-              <option value="maintenance">Under Maintenance</option>
-            </select>
-          </div>
-  
-          <!-- Location Filter -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Location
-            </label>
-            <select
-              formControlName="location"
-              class="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="">All Locations</option>
-              <option value="warehouse-a">Warehouse A</option>
-              <option value="warehouse-b">Warehouse B</option>
-              <option value="depot">Main Depot</option>
-            </select>
-          </div>
-  
-          <!-- Maintenance Status -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Maintenance Status
-            </label>
-            <select
-              formControlName="maintenanceStatus"
-              class="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="">All</option>
-              <option value="due">Maintenance Due</option>
-              <option value="overdue">Overdue</option>
-              <option value="upcoming">Upcoming</option>
-            </select>
-          </div>
-  
-          <!-- Clear Filters -->
-          <!-- <div class="flex items-end">
-            <button
-              type="button"
-              (click)="clearFilters()"
-              class="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-              <i class="ri-filter-off-line mr-2"></i>
-              Clear Filters
-            </button>
-          </div> -->
-        </div>
-      </form>
-    </div>
-  
-    <!-- Truck Table -->
- <!-- Existing header and filters remain the same -->
 
-<!-- Truck Table -->
-<div class="overflow-x-auto relative shadow-md sm:rounded-lg">
-  <table class="w-full text-sm text-left text-gray-500">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-      <tr>
-        <th scope="col" class="p-4">
-          <!-- <div class="flex items-center">
-            <input
-              type="checkbox"
-              [checked]="selectedTrucks.size === trucks.length"
-              (change)="toggleAllSelection()"
-              class="w-4 h-4 text-blue-600 rounded"
-            >
-          </div> -->
-        </th>
-        <th scope="col" class="py-3 px-6">Truck Number</th>
-        <th scope="col" class="py-3 px-6">Status</th>
-        <th scope="col" class="py-3 px-6">Capacity</th>
-        <th scope="col" class="py-3 px-6">Expenses</th>
-        <th scope="col" class="py-3 px-6">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let truck of trucks" 
-          class="bg-white border-b hover:bg-gray-50">
-        <td class="p-4">
-          <div class="flex items-center">
-            <input
-              type="checkbox"
-              [checked]="selectedTrucks.has(truck._id)"
-              (change)="toggleSelection(truck._id)"
-              class="w-4 h-4 text-blue-600 rounded"
-            >
-          </div>
-        </td>
-        <td class="py-4 px-6 font-medium text-gray-900">
-          {{truck.truckNumber}}
-        </td>
-        <td class="py-4 px-6">
-          <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + 
-                        getStatusClass(truck.status)">
-            {{truck.status | titlecase}}
-          </span>
-        </td>
-        <td class="py-4 px-6">{{truck.capacity}} tons</td>
-        <td class="py-4 px-6">${{truck.expenses.toFixed(2)}}</td>
-        <td class="py-4 px-6">
-          <div class="flex items-center space-x-3">
-            <button 
-              class="text-blue-600 hover:text-blue-900"
-              title="View Details"
-              [routerLink]="['id']"
-              >
-              <i class="ri-eye-line text-lg"></i>
-            </button>
-            <div class="relative">
+  <!-- Fleet Overview -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex items-center">
+        <div class="p-3 bg-blue-100 rounded-full">
+          <i class="ri-truck-line text-xl text-blue-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm text-gray-600">Total Trucks</p>
+          <p class="text-lg font-semibold">{{trucks.length}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex items-center">
+        <div class="p-3 bg-green-100 rounded-full">
+          <i class="ri-road-map-line text-xl text-green-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm text-gray-600">In Operation</p>
+          <p class="text-lg font-semibold">{{getOperationalCount()}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex items-center">
+        <div class="p-3 bg-yellow-100 rounded-full">
+          <i class="ri-tools-line text-xl text-yellow-600"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm text-gray-600">Under Maintenance</p>
+          <p class="text-lg font-semibold">{{getMaintenanceCount()}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <form [formGroup]="filterForm">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <input
+            type="text"
+            formControlName="searchTerm"
+            placeholder="Search trucks..."
+            class="w-full px-4 py-2 border rounded-lg">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select formControlName="status" class="w-full px-4 py-2 border rounded-lg">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Truck Table -->
+  <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <tr>
+          <th scope="col" class="py-3 px-6">Truck Number</th>
+          <th scope="col" class="py-3 px-6">Status</th>
+          <th scope="col" class="py-3 px-6">Capacity</th>
+          <th scope="col" class="py-3 px-6">Driver</th>
+          <th scope="col" class="py-3 px-6">Expenses</th>
+          <th scope="col" class="py-3 px-6">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let truck of trucks" class="bg-white border-b hover:bg-gray-50">
+          <td class="py-4 px-6 font-medium text-gray-900">{{truck.truckNumber}}</td>
+          <td class="py-4 px-6">
+            <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(truck.status)">
+              {{truck.status}}
+            </span>
+          </td>
+          <td class="py-4 px-6">{{truck.capacity}} tons</td>
+          <td class="py-4 px-6">{{truck.driver?.name || 'No driver assigned'}}</td>
+          <td class="py-4 px-6">${{truck.expenses}}</td>
+          <td class="py-4 px-6">
+            <div class="flex items-center space-x-3">
               <button 
-                class="text-gray-600 hover:text-gray-900"
-                [matMenuTriggerFor]="actionMenu">
+                class="text-blue-600 hover:text-blue-900"
+                (click)="viewTruckDetails(truck._id)">
+                <i class="ri-eye-line text-lg"></i>
+              </button>
+              <button 
+                [matMenuTriggerFor]="menu"
+                class="text-gray-600 hover:text-gray-900">
                 <i class="ri-more-2-fill text-lg"></i>
               </button>
-              <mat-menu #actionMenu="matMenu">
+              <mat-menu #menu="matMenu">
                 <button mat-menu-item (click)="updateTruckStatus(truck._id, 'active')"
                         *ngIf="truck.status !== 'active'">
-                  <i class="ri-checkbox-circle-line mr-2"></i>
-                  Activate Truck
+                  Activate
                 </button>
                 <button mat-menu-item (click)="updateTruckStatus(truck._id, 'maintenance')"
                         *ngIf="truck.status !== 'maintenance'">
-                  <i class="ri-tools-line mr-2"></i>
                   Send to Maintenance
                 </button>
               </mat-menu>
             </div>
-          </div>
-        </td>
-      </tr>
-
-      <!-- No Results -->
-      <tr *ngIf="trucks.length === 0 && !loading">
-        <td colspan="6" class="py-4 text-center text-gray-500">
-          No trucks found
-        </td>
-      </tr>
-
-      <!-- Loading State -->
-      <tr *ngIf="loading">
-        <td colspan="6" class="py-4">
-          <div class="flex justify-center items-center">
-            <i class="ri-loader-4-line text-2xl animate-spin text-blue-600"></i>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
-  
-    <!-- Pagination -->
-    <!-- <div class="flex items-center justify-between mt-4">
-      <div class="text-sm text-gray-700">
-        Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
-      </div>
-      <div class="flex items-center space-x-2">
-        <button 
-          [disabled]="currentPage === 1"
-          (click)="onPageChange(currentPage - 1)"
-          class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
-          <i class="ri-arrow-left-s-line"></i>
-        </button>
-        <button 
-          [disabled]="currentPage * pageSize >= total"
-          (click)="onPageChange(currentPage + 1)"
-          class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
-          <i class="ri-arrow-right-s-line"></i>
-        </button>
-      </div>
-    </div> -->
-  
-    <!-- Maintenance Schedule Modal -->
-
-    
-      <!-- Quick Stats Panel -->
-   
-    </div>

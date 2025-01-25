@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CustomersService } from '../../../services/customer.service';
-import { Customer } from '../../../shared/types/customer.interface';
 
 @Component({
   selector: 'app-customer-form',
   templateUrl: './customer-form.component.html',
+  styleUrls: ['./customer-form.component.scss']
 })
 export class CustomerFormComponent implements OnInit {
-  customer?: Customer;
-  customerForm: FormGroup;
+  customerForm!: FormGroup;
   isEditMode = false;
   loading = false;
   saving = false;
@@ -18,14 +17,28 @@ export class CustomerFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private customersService: CustomersService,
+    private router: Router,
     private route: ActivatedRoute,
-    private router: Router
-  ) {
-    this.customerForm = this.createCustomerForm();
-  }
+    private customerService: CustomersService
+  ) {}
 
   ngOnInit(): void {
+    this.initForm();
+    this.checkEditMode();
+  }
+
+  private initForm(): void {
+    this.customerForm = this.fb.group({
+      personalInfo: this.fb.group({
+        fullName: ['', Validators.required],
+        address: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        phoneNumber: ['', Validators.required]
+      })
+    });
+  }
+
+  private checkEditMode(): void {
     const customerId = this.route.snapshot.paramMap.get('id');
     if (customerId) {
       this.isEditMode = true;
@@ -33,24 +46,21 @@ export class CustomerFormComponent implements OnInit {
     }
   }
 
-  private createCustomerForm(): FormGroup {
-    return this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      address: ['', Validators.required],
-      balance: [0, [Validators.required, Validators.min(0)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-    });
-  }
-
   private loadCustomer(id: string): void {
     this.loading = true;
-    this.customersService.getCustomerById(id).subscribe({
+    this.customerService.getCustomerById(id).subscribe({
       next: (response) => {
-        this.customer = response.customer; // Access the customer property from the response
-        // this.loadCustomerData();
+        const customer = response.customer; // Adjust this line based on the actual API response structure
+        this.currentCustomer = customer;
+        this.customerForm.patchValue({
+          personalInfo: {
+            fullName: customer.fullName,
+            address: customer.address,
+            email: customer.email,
+            phoneNumber: customer.phoneNumber
+          }
+        });
         this.loading = false;
-        console.log(this.customer);
       },
       error: (error) => {
         console.error('Error loading customer:', error);
@@ -62,22 +72,17 @@ export class CustomerFormComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.customerForm.valid) {
       this.saving = true;
+      const formData = this.customerForm.value.personalInfo;
 
       try {
-        const formData = this.customerForm.value;
-
-        if (this.isEditMode && this.currentCustomer) {
-          await this.customersService
-            .updateCustomer(this.currentCustomer._id, formData)
-            .toPromise();
+        if (this.isEditMode) {
+          await this.customerService.updateCustomer(this.currentCustomer._id, formData).toPromise();
         } else {
-          await this.customersService.createCustomer(formData).toPromise();
+          await this.customerService.createCustomer(formData).toPromise();
         }
-
-        this.router.navigate(['main/customers/list']);
+        this.router.navigate(['/main/customers/list']);
       } catch (error) {
         console.error('Error saving customer:', error);
-        // Handle error (show error message to user)
       } finally {
         this.saving = false;
       }
@@ -87,31 +92,27 @@ export class CustomerFormComponent implements OnInit {
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach((control) => {
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      } else {
+    Object.values(formGroup.controls).forEach(control => {
+      control instanceof FormGroup ? 
+        this.markFormGroupTouched(control) : 
         control.markAsTouched();
-      }
     });
   }
 
-  getFieldError(field: string): string {
-    const control = this.customerForm.get(field);
+  getFieldError(path: string): string {
+    const control = this.customerForm.get(path);
     if (control?.errors && control.touched) {
-      if (control.errors['required']) {
-        return 'This field is required';
-      }
-      if (control.errors['email']) {
-        return 'Please enter a valid email address';
-      }
-      if (control.errors['minlength']) {
-        return `Minimum length is ${control.errors['minlength'].requiredLength} characters`;
-      }
-      if (control.errors['pattern']) {
-        return 'Invalid phone number';
-      }
+      if (control.errors['required']) return 'This field is required';
+      if (control.errors['email']) return 'Please enter a valid email address';
     }
     return '';
+  }
+
+  onCancel(): void {
+    this.router.navigate(['/main/customers/list']);
+  }
+
+  onBack(): void {
+    this.router.navigate(['/main/customers/list']);
   }
 }

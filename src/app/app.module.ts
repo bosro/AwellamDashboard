@@ -13,6 +13,7 @@ import { MainLayoutComponent } from './main/main-layout.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,9 @@ import { SidebarComponent } from './layout/sidebar/sidebar.component';
     BrowserModule,
     AppRoutingModule,
     RouterModule,
-    MainModule
+    MainModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [
     provideAnimationsAsync(),

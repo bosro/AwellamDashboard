@@ -1,115 +1,75 @@
-// truck-operation.types.ts
-export type OperationType = 'maintenance' | 'inspection' | 'repair' | 'fuel' | 'service';
-export type OperationStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-export type OperationPriority = 'low' | 'medium' | 'high';
-
-
-
-export interface StatusClasses {
-  scheduled: string;
-  'in-progress': string;
-  completed: string;
-  cancelled: string;
-}
-
-export interface PriorityClasses {
-  low: string;
-  medium: string;
-  high: string;
-}
-
-export interface OperationMetrics {
-  totalOperations: number;
-  inProgress: number;
-  completed: number;
-  overdue: number;
-  maintenanceCost: number;
-}
-
-// export interface OperationType {
-//   id: string;
-//   name: string;
-// }
-
-export interface OperationFilter {
-  page: number;
-  pageSize: number;
-  searchTerm?: string;
-  operationType?: string;
-  status?: string;
-  priority?: string;
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  truckId?: string;
-}
-export interface TruckOperation {
-    id: number;
-    truckId: number;
-    truckRegistration: string;
-    operationType: 'maintenance' | 'inspection' | 'repair' | 'fuel' | 'service';
-    status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-    startDate: string;
-    endDate?: string;
-    description: string;
-    cost?: number;
-    technicianName?: string;
-    notes?: string;
-    attachments?: string[];
-    mileage: number;
-    priority: 'low' | 'medium' | 'high';
-    location: string;
-    checklist?: Task[];
-  }
-
-  export interface OperationFormData {
-    truckId: number;
-    operationType: TruckOperation['operationType'];
-    status: TruckOperation['status'];
-    priority: TruckOperation['priority'];
-    startDate: string;
-    endDate?: string;
-    description: string;
-    cost?: number;
-    technicianName?: string;
-    notes?: string;
-    mileage: number;
-    location: string;
-    tasks: Task[];
-  }
-
-export interface Task {
-  id?: number;
-  name: string;
-  description?: string;
-  estimatedTime?: string;
-  completed: boolean;
-  notes?: string;
-}
-
-export interface Truck {
-    id: number;
-    registration: string;
-  }
-
-  // Updated Truck Interface to match the provided JSON structure
 export interface Truck {
   _id: string;
   truckNumber: string;
   capacity: number;
   expenses: number;
   status: 'active' | 'inactive' | 'maintenance';
-  product: string | null;
+  product?: {
+    _id: string;
+    name: string;
+  };
   orderId: string | null;
   deliveredOrders: any[];
   expenditure: any[];
-  __v: number;
 
+  driver?: {
+    _id: string;
+    name: string;
+  };
 }
 
-// Response interface for API calls
 export interface TruckResponse {
   message: string;
   trucks: Truck[];
+}
+
+export interface TruckLoad {
+  capacity: string;
+  productId: string;
+  truckId: string;
+}
+
+export interface Driver {
+  _id: string;
+  name: string;
+}
+
+export interface TruckOperation {
+  checklist: any;
+  id: number;
+  truckId: number;
+  truckRegistration: string;
+  operationType: 'maintenance' | 'inspection' | 'repair' | 'fuel' | 'service';
+  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  startDate: string;
+  endDate?: string;
+  description: string;
+  cost?: number;
+  technicianName?: string;
+  notes?: string;
+  attachments?: string[];
+  mileage: number;
+  priority: 'low' | 'medium' | 'high';
+  location: string;
+}
+
+export interface MaintenanceSchedule {
+  id?: number;
+  truckId: number;
+  maintenanceType: string;
+  scheduledDate: string;
+  interval: number;
+  intervalUnit: 'days' | 'weeks' | 'months' | 'kilometers';
+  lastPerformed?: string;
+  description: string;
+  checklist: MaintenanceTask[];
+}
+
+export interface MaintenanceTask {
+  id?: number;
+  name: string;
+  completed: boolean;
+  completedBy?: string;
+  completedAt?: string;
+  notes?: string;
 }

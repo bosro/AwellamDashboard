@@ -1,0 +1,108 @@
+<div class="p-6 max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Driver Details</h1>
+      <p class="mt-1 text-sm text-gray-600" *ngIf="driver">{{driver.name}} - {{driver.licenseNumber}}</p>
+    </div>
+    <div class="flex space-x-3">
+      <button 
+        routerLink="/drivers"
+        class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+        <i class="ri-arrow-left-line mr-2"></i>
+        Back to List
+      </button>
+      <button 
+        *ngIf="driver"
+        [routerLink]="['/drivers', driver._id, 'edit']"
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <i class="ri-edit-line mr-2"></i>
+        Edit Driver
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <i class="ri-loader-4-line text-3xl animate-spin text-blue-600"></i>
+  </div>
+
+  <!-- Driver Details -->
+  <div *ngIf="!loading && driver" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Driver Information -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-medium mb-4">Driver Information</h2>
+      <dl class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Status</dt>
+          <dd class="mt-1">
+            <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(driver.status)">
+              {{driver.status}}
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Name</dt>
+          <dd class="mt-1">{{driver.name}}</dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
+          <dd class="mt-1">{{driver.phoneNumber}}</dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">License Number</dt>
+          <dd class="mt-1">{{driver.licenseNumber}}</dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Created At</dt>
+          <!-- <dd class="mt-1">{{formatDate(driver.createdAt)}}</dd> -->
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+          <!-- <dd class="mt-1">{{formatDate(driver.updatedAt)}}</dd> -->
+        </div>
+      </dl>
+    </div>
+
+    <!-- Truck Information -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-medium mb-4">Assigned Truck</h2>
+      <div *ngIf="driver.truck" class="space-y-4">
+        <dl class="space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Truck Number</dt>
+            <dd class="mt-1">{{driver.truck.truckNumber}}</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Capacity</dt>
+            <dd class="mt-1">{{driver.truck.capacity}} tons</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Truck Status</dt>
+            <dd class="mt-1">
+              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(driver.truck.status)">
+                {{driver.truck.status}}
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <div *ngIf="!driver.truck" class="flex flex-col items-center justify-center h-48 text-gray-500">
+        <i class="ri-truck-line text-4xl mb-2"></i>
+        <p>No truck assigned</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Driver Found -->
+  <div *ngIf="!loading && !driver" class="bg-white rounded-lg shadow p-6 text-center">
+    <i class="ri-error-warning-line text-4xl text-red-500 mb-2"></i>
+    <h2 class="text-lg font-medium text-gray-900">Driver Not Found</h2>
+    <p class="text-gray-500 mt-1">The requested driver could not be found.</p>
+    <button 
+      routerLink="/drivers"
+      class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Return to Driver List
+    </button>
+  </div>
+</div>
