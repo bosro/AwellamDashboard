@@ -18,9 +18,12 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
+  @Output() sidebarToggled = new EventEmitter<void>();
 
-  @Output() toggleSidebar = new EventEmitter<void>();
-  currentRoute = '';
+  toggleSidebar() {
+    this.isCollapsed = !this.isCollapsed;
+    this.sidebarToggled.emit();
+  }
 
   menuItems: MenuItem[] = [
     {
