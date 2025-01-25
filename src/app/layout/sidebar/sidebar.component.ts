@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -17,8 +17,15 @@ interface MenuItem {
   templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent implements OnInit {
-  isCollapsed = false;
-  currentRoute = '';
+  @Input() isCollapsed = false;
+  @Output() sidebarToggled = new EventEmitter<void>();
+  currentRoute: string = '';
+
+  toggleSidebar() {
+    this.isCollapsed = !this.isCollapsed;
+    this.sidebarToggled.emit();
+  }
+
   menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
@@ -184,9 +191,9 @@ export class SidebarComponent implements OnInit {
     this.filterMenuByRole();
   }
 
-  toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
-  }
+  // toggleSidebar(): void {
+  //   this.isCollapsed = !this.isCollapsed;
+  // }
 
   toggleSubmenu(item: MenuItem): void {
     item.expanded = !item.expanded;
