@@ -5,8 +5,6 @@ import { ReportsRoutingModule } from './reports-routing.module';
 import { ReportListComponent } from './report-list/report-list.component';
 import { ReportViewerComponent } from './report-viewer/report-viewer.component';
 import { ReportGeneratorComponent } from './report-generator/report-generator.component';
-import { ReportTemplatesComponent } from './report-templates/report-templates.component';
-import { ScheduledReportsComponent } from './scheduled-reports/scheduled-reports.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
@@ -15,8 +13,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReportListComponent,
     ReportViewerComponent,
     ReportGeneratorComponent,
-    ReportTemplatesComponent,
-    ScheduledReportsComponent
   ],
   imports: [
     CommonModule,

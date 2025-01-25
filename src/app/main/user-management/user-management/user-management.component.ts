@@ -1,18 +1,23 @@
+// user-management.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { AuthService, User } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+export interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
+  status: 'active' | 'inactive';
+  lastLogin?: string;
+}
 
 interface UserMetrics {
   total: number;
   active: number;
   inactive: number;
   byRole: Record<string, number>;
-}
-
-export interface UsersResponse {
-  admins: User[];
-  message: string;
 }
 
 interface UserFilters {
@@ -26,10 +31,6 @@ interface UserFilters {
   page?: number;
   pageSize?: number;
 }
-
-type RoleClasses = {
-  [K in User['role']]: string;
-};
 
 @Component({
   selector: 'app-user-management',
@@ -46,20 +47,14 @@ export class UserManagementComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   total = 0;
+  
+  roles = ['transport', 'super_admin', 'customer', 'finance'];
 
-  Math = Math
-  roles = [
-    { id: 'admin', name: 'Administrator' },
-    { id: 'manager', name: 'Manager' },
-    { id: 'operator', name: 'Operator' },
-    { id: 'driver', name: 'Driver' }
-  ] as const;
-
-  private readonly roleClasses: RoleClasses = {
-    admin: 'bg-purple-100 text-purple-800',
-    manager: 'bg-blue-100 text-blue-800',
-    operator: 'bg-yellow-100 text-yellow-800',
-    driver: 'bg-green-100 text-green-800'
+  roleClasses: Record<string, string> = {
+    transport: 'bg-purple-100 text-purple-800',
+    super_admin: 'bg-blue-100 text-blue-800', 
+    customer: 'bg-yellow-100 text-yellow-800',
+    finance: 'bg-green-100 text-green-800'
   };
 
   constructor(
@@ -87,37 +82,31 @@ export class UserManagementComponent implements OnInit {
   }
 
   private setupFilterSubscription(): void {
-    this.filterForm.valueChanges
-      .pipe(
-        debounceTime(500),
-        distinctUntilChanged()
-      )
-      .subscribe(() => {
-        this.currentPage = 1;
-        this.loadUsers();
-      });
+    this.filterForm.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.loadUsers();
+    });
   }
 
   loadUsers(): void {
     this.loading = true;
     const filters: UserFilters = {
+      ...this.filterForm.value,
       page: this.currentPage,
-      pageSize: this.pageSize,
-      ...this.filterForm.value
+      pageSize: this.pageSize
     };
-  
+
     this.authService.getAdmins(filters).subscribe({
-      next: (response: UsersResponse) => {
+      next: (response) => {
         this.users = response.admins;
-  
-        console.log(response.admins);
-        // this.total = response.total;
-  
-        console.log(this.users);
+        // this.total = response.total || 0;
         this.calculateMetrics();
         this.loading = false;
       },
-      error: (error: unknown) => {
+      error: (error) => {
         console.error('Error loading users:', error);
         this.loading = false;
       }
@@ -132,7 +121,7 @@ export class UserManagementComponent implements OnInit {
     this.users.forEach(user => {
       byRole[user.role] = (byRole[user.role] || 0) + 1;
       if (user.status === 'active') active++;
-      // else inactive++;
+      else inactive++;
     });
 
     this.metrics = {
@@ -151,38 +140,32 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  // toggleAllSelection(): void {
-  //   if (this.selectedUsers.size === this.users.length) {
-  //     this.selectedUsers.clear();
-  //   } else {
-  //     this.users.forEach(user => {
-  //       this.selectedUsers.add(user.id);
-  //     });
-  //   }
-  // }
+  toggleAllSelection(): void {
+    if (this.selectedUsers.size === this.users.length) {
+      this.selectedUsers.clear();
+    } else {
+      this.users.forEach(user => this.selectedUsers.add(user.id));
+    }
+  }
 
-  updateUserStatus(userId: number, status: User['status']): void {
+  updateUserStatus(userId: number, status: 'active' | 'inactive'): void {
     this.authService.updateUserStatus(userId, status).subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: (error: unknown) => {
-        console.error('Error updating user status:', error);
-      }
+      next: () => this.loadUsers(),
+      error: (error) => console.error('Error updating user status:', error)
     });
   }
 
-  bulkUpdateStatus(status: User['status']): void {
+  bulkUpdateStatus(status: 'active' | 'inactive'): void {
     const updates = Array.from(this.selectedUsers).map(userId =>
       this.authService.updateUserStatus(userId, status)
     );
 
-    Promise.all(updates).then(() => {
-      this.selectedUsers.clear();
-      this.loadUsers();
-    }).catch((error: unknown) => {
-      console.error('Error in bulk status update:', error);
-    });
+    Promise.all(updates)
+      .then(() => {
+        this.selectedUsers.clear();
+        this.loadUsers();
+      })
+      .catch(error => console.error('Error in bulk status update:', error));
   }
 
   openUserForm(user?: User): void {
@@ -193,74 +176,26 @@ export class UserManagementComponent implements OnInit {
   deleteUser(userId: number): void {
     if (confirm('Are you sure you want to delete this user?')) {
       this.authService.deleteUser(userId).subscribe({
-        next: () => {
-          this.loadUsers();
-        },
-        error: (error: unknown) => {
-          console.error('Error deleting user:', error);
-        }
+        next: () => this.loadUsers(),
+        error: (error) => console.error('Error deleting user:', error)
       });
     }
   }
 
-  bulkDelete(): void {
-    if (confirm(`Are you sure you want to delete ${this.selectedUsers.size} users?`)) {
-      const deletions = Array.from(this.selectedUsers).map(userId =>
-        this.authService.deleteUser(userId)
-      );
-
-      Promise.all(deletions).then(() => {
-        this.selectedUsers.clear();
-        this.loadUsers();
-      }).catch((error: unknown) => {
-        console.error('Error in bulk deletion:', error);
-      });
-    }
-  }
-
-  exportUsers(format: 'excel' | 'pdf'): void {
-    const selectedIds = Array.from(this.selectedUsers);
-    this.authService.exportUsers(format, selectedIds).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `users-export.${format}`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (error: unknown) => {
-        console.error('Error exporting users:', error);
-      }
-    });
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
+  onUserSaved(): void {
     this.loadUsers();
+    this.showUserModal = false;
   }
 
   clearFilters(): void {
     this.filterForm.reset();
   }
 
-  getStatusClass(status: User['status']): string {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  }
-
-  getRoleClass(role: User['role']): string {
+  getRoleClass(role: string): string {
     return this.roleClasses[role] || 'bg-gray-100 text-gray-800';
   }
 
-  getLastLoginText(date: string | undefined): string {
-    if (!date) return 'Never';
-    const lastLogin = new Date(date);
-    const now = new Date();
-    const diff = now.getTime() - lastLogin.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    return `${days} days ago`;
+  getStatusClass(status: string): string {
+    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   }
 }

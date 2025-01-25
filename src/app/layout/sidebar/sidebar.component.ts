@@ -22,7 +22,7 @@ export class SidebarComponent implements OnInit {
   menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
-      icon: 'ri-dashboard-line',
+      icon: 'ri-layout-grid-line',
       route: '/main/dashboard',
     },
     {
@@ -33,181 +33,141 @@ export class SidebarComponent implements OnInit {
         {
           title: 'Dashboard',
           route: '/main/transport/dashboard',
-          icon: 'ri-speed-up-line'
+          icon: 'ri-dashboard-3-line'
         },
-        // {
-        //   title: 'Operations',
-        //   route: '/main/transport/trips',
-        //   icon: 'ri-route-line'
-        // },
         {
           title: 'Trucks',
           route: '/main/transport/trucks',
-          icon: 'ri-truck-fill'
+          icon: 'ri-truck-line'
         },
         {
           title: 'Drivers',
           route: '/main/transport/drivers',
-          icon: 'ri-caravan-line'
-        },
-        // {
-        //   title: 'Fuel Analytics',
-        //   route: '/main/transport/fuel-analytics',
-        //   icon: 'ri-ink-bottle-line'
-        // },
-        // {
-        //   title: 'Maintenance',
-        //   route: '/main/transport/maintenance-history',
-        //   icon: 'ri-tools-line'
-        // }
+          icon: 'ri-user-star-line'
+        }
       ]
     },
     {
       title: 'Inventory',
-      icon: 'ri-stock-line',
+      icon: 'ri-archive-line',
       expanded: false,
       children: [
         {
           title: 'Stock Overview',
           route: '/main/inventory',
-          icon: 'ri-database-2-line'
+          icon: 'ri-stack-line'
         },
         {
           title: 'Disbursements',
           route: '/main/inventory/disbursement',
-          icon: 'ri-exchange-funds-line'
+          icon: 'ri-arrow-left-right-line'
         }
       ]
     },
     {
       title: 'Purchasing',
-      icon: 'ri-shopping-cart-2-line',
+      icon: 'ri-shopping-bag-3-line',
       expanded: false,
       roles: ['admin', 'manager'],
       children: [
         {
           title: 'Orders',
           route: '/main/purchasing',
-          icon: 'ri-order-play-line'
+          icon: 'ri-file-list-3-line'
         },
         {
           title: 'Suppliers',
           route: '/main/purchasing/suppliers',
-          icon: 'ri-store-2-line'
+          icon: 'ri-building-2-line'
         }
       ]
     },
     {
       title: 'Claims',
-      icon: 'ri-file-list-3-line',
+      icon: 'ri-clipboard-line',
       route: '/main/claims',
     },
     {
       title: 'Reports',
-      icon: 'ri-bar-chart-2-line',
+      icon: 'ri-line-chart-line',
       expanded: false,
       children: [
         {
           title: 'Reports Lists',
           route: '/main/reports/list',
-          icon: 'ri-list-view'
+          icon: 'ri-file-chart-line'
         },
         {
           title: 'Report Generator',
           route: '/main/reports/generator',
-          icon: 'ri-ai-generate-text'
-        },
-        {
-          title: 'Report Schedule',
-          route: '/main/reports/scheduled',
-          icon: 'ri-calendar-2-line'
-        },
-        {
-          title: 'Report Templates',
-          route: '/main/reports/templates',
-          icon: 'ri-book-open-line'
+          icon: 'ri-file-settings-line'
         }
       ]
     },
     {
       title: 'Products',
-      icon: 'ri-bar-chart-2-line',
+      icon: 'ri-box-3-line',
       expanded: false,
       children: [
         {
           title: 'Product List',
           route: '/main/products/list',
-          icon: 'ri-file-list-2-line'
+          icon: 'ri-list-check-2'
         },
-        // {
-        //   title: 'Product Categories',
-        //   route: '/main/products/categories',
-        //   icon: 'ri-pie-chart-2-line'
-        // },
         {
           title: 'Product Inventory',
           route: '/main/products/inventory',
-          icon: 'ri-file-list-3-line'
+          icon: 'ri-inbox-archive-line'
         }
       ]
     },
     {
       title: 'Orders',
-      icon: 'ri-file-list-3-line',
+      icon: 'ri-shopping-cart-line',
       expanded: false,
-      // roles: ['admin', 'manager'],
       children: [
         {
           title: 'Order Analytics',
           route: '/main/orders/analytics',
-          icon: 'ri-pie-chart-2-line'
+          icon: 'ri-bar-chart-box-line'
         },
         {
           title: 'Order List',
           route: '/main/orders/list',
-          icon: 'ri-file-list-2-line'
+          icon: 'ri-list-ordered'
         },
         {
           title: 'Create Order',
           route: '/main/orders/processing',
-          icon: 'ri-play-list-add-fill'
+          icon: 'ri-add-circle-line'
         }
       ]
     },
-
     {
       title: 'Customers Management',
-      icon: 'ri-user-settings-line',
+      icon: 'ri-team-line',
       expanded: false,
-      // roles: ['admin', 'manager'],
       children: [
         {
           title: 'Customers',
           route: '/main/customers/list',
-          icon: 'ri-group-line'
+          icon: 'ri-user-3-line'
         },
         {
           title: 'Add Customer',
           route: '/main/customers/new',
-          icon: 'i-user-add-line'
-        },
-       
+          icon: 'ri-user-add-line'
+        }
       ]
     },
-
-  
-    // {
-    //   title: 'Customer Management',
-    //   icon: 'ri-user-settings-line',
-    //   route: '/main/customers-management',
-    // },
     {
       title: 'Admin Management',
-      icon: 'ri-user-settings-line',
+      icon: 'ri-shield-user-line',
       route: '/main/user-management',
-    },
+    }
   ];
 
+  // Rest of the component code remains unchanged
   constructor(
     private authService: AuthService,
     private router: Router

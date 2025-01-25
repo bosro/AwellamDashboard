@@ -6,7 +6,7 @@
           {{ isEditMode ? 'Edit Inventory Item' : 'Add New Item' }}
         </h1>
         <button 
-          routerLink="/inventory"
+         (click)="BacktoInventory()"
           class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
           <i class="ri-arrow-left-line mr-2"></i>
           Back to List
