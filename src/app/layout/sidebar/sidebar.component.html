@@ -9,14 +9,12 @@
         <img src="assets/images/logo.png" alt="Logo" class="h-15 w-auto" style="border-radius: 50%;">
       </div>
       <button 
-
         (click)="toggleSidebar()"
         class="p-2 rounded-md text-white hover:bg-[#6366f1] transition-colors bg-red-500"
       >
         <i [class]="isCollapsed ? 'ri-menu-unfold-line' : 'ri-menu-fold-line'" class="text-xl"></i>
       </button>
     </div>
-
     <!-- Navigation Menu -->
     <nav class="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
       <ng-container *ngFor="let item of menuItems">
