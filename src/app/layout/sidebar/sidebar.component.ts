@@ -118,16 +118,16 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/generator',
           icon: 'ri-ai-generate-text'
         },
-        {
-          title: 'Report Schedule',
-          route: '/main/reports/scheduled',
-          icon: 'ri-calendar-2-line'
-        },
-        {
-          title: 'Report Templates',
-          route: '/main/reports/templates',
-          icon: 'ri-book-open-line'
-        }
+        // {
+        //   title: 'Report Schedule',
+        //   route: '/main/reports/scheduled',
+        //   icon: 'ri-calendar-2-line'
+        // },
+        // {
+        //   title: 'Report Templates',
+        //   route: '/main/reports/templates',
+        //   icon: 'ri-book-open-line'
+        // }
       ]
     },
     {

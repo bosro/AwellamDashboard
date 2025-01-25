@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClaimsService, Claim } from '../../../services/claim.service'
@@ -10,14 +10,26 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: ['./claim-form.component.scss']
 })
 export class ClaimFormComponent implements OnInit {
+  // claimForm!: FormGroup;
+  // isEditMode = false;
+  // loading = false;
+  // claimId!: number;
+  // attachments: File[] = [];
+  // existingAttachments: string[] = [];
+  
+  // productTypes = ['42.5R', '32.5N']; 
+
+  @Input() isOpen = false;
+  @Input() claimId?: number;
+  @Output() closeModal = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();
+
   claimForm!: FormGroup;
   isEditMode = false;
   loading = false;
-  claimId!: number;
   attachments: File[] = [];
   existingAttachments: string[] = [];
-  
-  productTypes = ['42.5R', '32.5N']; // Add more as needed
+  productTypes = ['42.5R', '32.5N'];
 
   constructor(
     private fb: FormBuilder,
@@ -26,15 +38,28 @@ export class ClaimFormComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.createForm();
+
+
   }
 
   ngOnInit(): void {
-    this.claimId = this.route.snapshot.params['id'];
     if (this.claimId) {
       this.isEditMode = true;
       this.loadClaim();
     }
     this.setupAmountSubscription();
+  }
+
+  close(): void {
+    this.closeModal.emit();
+    this.resetForm();
+  }
+
+  private resetForm(): void {
+    this.claimForm.reset();
+    this.attachments = [];
+    this.existingAttachments = [];
+    this.isEditMode = false;
   }
 
   private createForm(): void {
@@ -78,7 +103,7 @@ export class ClaimFormComponent implements OnInit {
 
   private loadClaim(): void {
     this.loading = true;
-    this.claimsService.getClaimById(this.claimId).subscribe({
+    this.claimsService.getClaimById(this?.claimId).subscribe({
       next: (claim) => {
         this.claimForm.patchValue(claim);
         this.existingAttachments = claim.attachments || [];
@@ -113,14 +138,15 @@ export class ClaimFormComponent implements OnInit {
         const formValue = this.claimForm.getRawValue();
         
         const claim = this.isEditMode
-          ? await this.claimsService.updateClaim(this.claimId, formValue).toPromise()
+          ? await this.claimsService.updateClaim(this.claimId!, formValue).toPromise()
           : await this.claimsService.createClaim(formValue).toPromise();
 
         if (this.attachments.length > 0) {
           await this.claimsService.uploadAttachments(claim!.id, this.attachments).toPromise();
         }
 
-        this.router.navigate(['/claims']);
+        this.saved.emit();
+        this.close();
       } catch (error) {
         console.error('Error saving claim:', error);
         this.loading = false;
