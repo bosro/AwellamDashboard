@@ -18,8 +18,10 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
+
   @Output() toggleSidebar = new EventEmitter<void>();
   currentRoute = '';
+
   menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
@@ -177,7 +179,7 @@ export class SidebarComponent implements OnInit {
     router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      this.currentRoute = event.url;
+      // this.currentRoute = event.url;
       this.updateExpandedState();
     });
   }
