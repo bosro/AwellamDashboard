@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserManagementModule } from './user-management/user-management.module';
-import { TruckOpsModule } from './truck-ops/truck-ops.module';
 import { TransportModule } from './transport/transport.module';
 import { PurchasingModule } from './purchasing/purchasing.module';
 import { InventoryModule } from './inventory/inventory.module';

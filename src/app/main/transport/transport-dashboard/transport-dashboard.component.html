@@ -6,12 +6,12 @@
         <!-- <p class="mt-1 text-sm text-gray-600">Overview of transport operations</p> -->
       </div>
       <div class="flex space-x-3">
-        <button 
+        <!-- <button 
           [routerLink]="['/transport/trips/new']"
           class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           <i class="ri-add-line mr-2"></i>
           New Transport
-        </button>
+        </button> -->
       </div>
     </div>
   
@@ -83,7 +83,7 @@
         <div class="bg-white rounded-lg shadow p-6">
           <h2 class="text-lg font-medium mb-4">Trip Trends</h2>
           <div class="h-64">
-            <ngx-charts-line-chart
+            <!-- <ngx-charts-line-chart
               [results]="tripTrends"
               [xAxis]="true"
               [yAxis]="true"
@@ -92,7 +92,7 @@
               [showYAxisLabel]="true"
               xAxisLabel="Date"
               yAxisLabel="Trips">
-            </ngx-charts-line-chart>
+            </ngx-charts-line-chart> -->
           </div>
         </div>
   
@@ -100,7 +100,7 @@
         <div class="bg-white rounded-lg shadow p-6">
           <h2 class="text-lg font-medium mb-4">Fuel Consumption</h2>
           <div class="h-64">
-            <ngx-charts-bar-vertical
+            <!-- <ngx-charts-bar-vertical
               [results]="fuelConsumption"
               [xAxis]="true"
               [yAxis]="true"
@@ -108,7 +108,7 @@
               [showYAxisLabel]="true"
               xAxisLabel="Truck"
               yAxisLabel="Consumption (L)">
-            </ngx-charts-bar-vertical>
+            </ngx-charts-bar-vertical> -->
           </div>
         </div>
       </div>
@@ -127,7 +127,7 @@
               <div>
                 <p class="font-medium">{{schedule.truckRegistration}}</p>
                 <p class="text-sm text-gray-500">
-                  Due: {{schedule.maintenanceDate | date:'mediumDate'}}
+                  Due: {{schedule.maintenanceDate}}
                 </p>
               </div>
               <span class="text-sm">

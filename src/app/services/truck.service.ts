@@ -1,0 +1,33 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Truck, TruckResponse, TruckLoad } from '../shared/types/truck-operation.types';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TruckService {
+  private apiUrl = 'http://localhost:3000/api/trucks';
+
+  constructor(private http: HttpClient) {}
+
+  getTrucks(params?: any): Observable<TruckResponse> {
+    return this.http.get<TruckResponse>(`${this.apiUrl}/get`, { params });
+  }
+
+  getTruckById(id: string): Observable<{ message: string; truck: Truck }> {
+    return this.http.get<{ message: string; truck: Truck }>(`${this.apiUrl}/get/${id}`);
+  }
+
+  createTruck(data: Partial<Truck>): Observable<{ message: string; truck: Truck }> {
+    return this.http.post<{ message: string; truck: Truck }>(`${this.apiUrl}/create`, data);
+  }
+
+  updateTruck(id: string, data: Partial<Truck>): Observable<{ message: string; truck: Truck }> {
+    return this.http.put<{ message: string; truck: Truck }>(`${this.apiUrl}/edit/${id}`, data);
+  }
+
+  loadTruck(data: TruckLoad): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/load`, data);
+  }
+}
