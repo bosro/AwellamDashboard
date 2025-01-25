@@ -19,7 +19,7 @@ interface MenuItem {
 export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
   @Output() sidebarToggled = new EventEmitter<void>();
-  currentRoute: string = '';
+  // currentRoute: string = '';
 
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
@@ -182,7 +182,7 @@ export class SidebarComponent implements OnInit {
     router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      this.currentRoute = event.url;
+      // this.currentRoute = event.url;
       this.updateExpandedState();
     });
   }
