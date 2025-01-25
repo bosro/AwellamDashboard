@@ -1,264 +1,228 @@
-<div class="p-6 max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="mb-6">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-gray-900">
-          {{ isEditMode ? 'Edit Claim' : 'New Claim' }}
-        </h1>
-        <button 
-          routerLink="/claims"
-          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-          <i class="ri-arrow-left-line mr-2"></i>
-          Back to Claims
-        </button>
-      </div>
-    </div>
-  
-    <!-- Form -->
-    <form [formGroup]="claimForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Customer Information -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium mb-4">Customer Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Customer Name
-            </label>
-            <input 
-              type="text"
-              formControlName="customerName"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="claimForm.get('customerName')!.touched && 
-                                    claimForm.get('customerName')!.invalid"
-            >
-            <div *ngIf="claimForm.get('customerName')!.touched && 
-                        claimForm.get('customerName')!.invalid"
-                 class="mt-1 text-sm text-red-600">
-              Customer name is required
-            </div>
-          </div>
-  
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Sales Order Number
-            </label>
-            <input 
-              type="text"
-              formControlName="salesOrderNumber"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="claimForm.get('salesOrderNumber')!.touched && 
-                                    claimForm.get('salesOrderNumber')!.invalid"
-            >
-          </div>
-  
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Invoice Number
-            </label>
-            <input 
-              type="text"
-              formControlName="invoiceNumber"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="claimForm.get('invoiceNumber')!.touched && 
-                                    claimForm.get('invoiceNumber')!.invalid"
-            >
-          </div>
+<div *ngIf="isOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+  aria-modal="true">
+  <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="close()"></div>
+
+    <div class="relative transform rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full max-w-4xl">
+      <!-- Form Content -->
+      <div class="max-h-[90vh] overflow-y-auto px-4 py-5 sm:p-6">
+        <!-- Header -->
+        <div class="mb-6 flex justify-between items-center">
+          <h2 class="text-2xl font-semibold text-gray-900">
+            {{ isEditMode ? 'Edit Claim' : 'New Claim' }}
+          </h2>
+          <button (click)="close()" class="text-gray-400 hover:text-gray-500">
+            <i class="ri-close-line text-2xl"></i>
+          </button>
         </div>
-      </div>
-  
-      <!-- Product Details -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium mb-4">Product Details</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Product Type
-            </label>
-            <select 
-              formControlName="productType"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Product Type</option>
-              <option *ngFor="let type of productTypes" [value]="type">
-                {{type}}
-              </option>
-            </select>
-          </div>
-  
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Quantity
-            </label>
-            <input 
-              type="number"
-              formControlName="quantity"
-              min="1"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-          </div>
-        </div>
-      </div>
-  
-      <!-- Amount Calculation -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium mb-4">Amount Details</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Base Amount
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-gray-500">$</span>
-              <input 
-                type="number"
-                formControlName="amount"
-                min="0"
-                step="0.01"
-                class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-            </div>
-          </div>
-  
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              VAT Amount
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-gray-500">$</span>
-              <input 
-                type="number"
-                formControlName="vatAmount"
-                readonly
-                class="w-full pl-8 pr-4 py-2 bg-gray-50 border rounded-lg"
-              >
-            </div>
-          </div>
-  
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Total Amount
-            </label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-gray-500">$</span>
-              <input 
-                type="number"
-                formControlName="totalAmount"
-                readonly
-                class="w-full pl-8 pr-4 py-2 bg-gray-50 border rounded-lg font-semibold"
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Description and Notes -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium mb-4">Additional Information</h2>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea 
-              formControlName="description"
-              rows="3"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-  
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Notes
-            </label>
-            <textarea 
-              formControlName="notes"
-              rows="2"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Attachments -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium mb-4">Attachments</h2>
-        
-        <!-- Existing Attachments -->
-        <div *ngIf="existingAttachments.length > 0" class="mb-4">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">Current Attachments</h3>
-          <div class="space-y-2">
-            <div *ngFor="let attachment of existingAttachments; let i = index"
-                 class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span class="text-sm">{{attachment}}</span>
-              <button 
-                type="button"
-                (click)="removeExistingAttachment(i)"
-                class="text-red-600 hover:text-red-800">
-                <i class="ri-close-line"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-  
-        <!-- New Attachments -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Add Attachments
-          </label>
-          <div class="flex items-center justify-center w-full">
-            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-              <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                <i class="ri-upload-cloud-line text-3xl text-gray-400"></i>
-                <p class="mb-2 text-sm text-gray-500">
-                  <span class="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p class="text-xs text-gray-500">
-                  PDF, PNG, JPG up to 10MB each
-                </p>
+
+        <!-- Keep existing form content but remove the outer div.p-6 wrapper -->
+        <form [formGroup]="claimForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <!-- Customer Information -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium mb-4">Customer Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Customer Name
+                </label>
+                <input type="text" formControlName="customerName"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" [class.border-red-500]="claimForm.get('customerName')!.touched && 
+                                  claimForm.get('customerName')!.invalid">
+                <div *ngIf="claimForm.get('customerName')!.touched && 
+                      claimForm.get('customerName')!.invalid" class="mt-1 text-sm text-red-600">
+                  Customer name is required
+                </div>
               </div>
-              <input 
-                type="file" 
-                class="hidden"
-                multiple
-                (change)="onFileSelect($event)"
-                accept=".pdf,.png,.jpg,.jpeg"
-              >
-            </label>
-          </div>
-  
-          <!-- Selected Files -->
-          <div *ngIf="attachments.length > 0" class="mt-4 space-y-2">
-            <div *ngFor="let file of attachments; let i = index"
-                 class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span class="text-sm">{{file.name}}</span>
-              <button 
-                type="button"
-                (click)="removeAttachment(i)"
-                class="text-red-600 hover:text-red-800">
-                <i class="ri-close-line"></i>
-              </button>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Sales Order Number
+                </label>
+                <input type="text" formControlName="salesOrderNumber"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" [class.border-red-500]="claimForm.get('salesOrderNumber')!.touched && 
+                                  claimForm.get('salesOrderNumber')!.invalid">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Invoice Number
+                </label>
+                <input type="text" formControlName="invoiceNumber"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" [class.border-red-500]="claimForm.get('invoiceNumber')!.touched && 
+                                  claimForm.get('invoiceNumber')!.invalid">
+              </div>
             </div>
           </div>
-        </div>
+
+          <!-- Product Details -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium mb-4">Product Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Product Type
+                </label>
+                <select formControlName="productType"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select Product Type</option>
+                  <option *ngFor="let type of productTypes" [value]="type">
+                    {{type}}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Quantity
+                </label>
+                <input type="number" formControlName="quantity" min="1"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Amount Calculation -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium mb-4">Amount Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Base Amount
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2 text-gray-500">$</span>
+                  <input type="number" formControlName="amount" min="0" step="0.01"
+                    class="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  VAT Amount
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2 text-gray-500">$</span>
+                  <input type="number" formControlName="vatAmount" readonly
+                    class="w-full pl-8 pr-4 py-2 bg-gray-50 border rounded-lg">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Total Amount
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3 top-2 text-gray-500">$</span>
+                  <input type="number" formControlName="totalAmount" readonly
+                    class="w-full pl-8 pr-4 py-2 bg-gray-50 border rounded-lg font-semibold">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description and Notes -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium mb-4">Additional Information</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea formControlName="description" rows="3"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea formControlName="notes" rows="2"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attachments -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium mb-4">Attachments</h2>
+
+            <!-- Existing Attachments -->
+            <div *ngIf="existingAttachments.length > 0" class="mb-4">
+              <h3 class="text-sm font-medium text-gray-700 mb-2">Current Attachments</h3>
+              <div class="space-y-2">
+                <div *ngFor="let attachment of existingAttachments; let i = index"
+                  class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  <span class="text-sm">{{attachment}}</span>
+                  <button type="button" (click)="removeExistingAttachment(i)" class="text-red-600 hover:text-red-800">
+                    <i class="ri-close-line"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- New Attachments -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Add Attachments
+              </label>
+              <div class="flex items-center justify-center w-full">
+                <label
+                  class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <i class="ri-upload-cloud-line text-3xl text-gray-400"></i>
+                    <p class="mb-2 text-sm text-gray-500">
+                      <span class="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      PDF, PNG, JPG up to 10MB each
+                    </p>
+                  </div>
+                  <input type="file" class="hidden" multiple (change)="onFileSelect($event)"
+                    accept=".pdf,.png,.jpg,.jpeg">
+                </label>
+              </div>
+
+              <!-- Selected Files -->
+              <div *ngIf="attachments.length > 0" class="mt-4 space-y-2">
+                <div *ngFor="let file of attachments; let i = index"
+                  class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  <span class="text-sm">{{file.name}}</span>
+                  <button type="button" (click)="removeAttachment(i)" class="text-red-600 hover:text-red-800">
+                    <i class="ri-close-line"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <!-- <div class="flex justify-end space-x-4 pt-4">
+            <button type="button" routerLink="/claims" class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" [disabled]="claimForm.invalid || loading"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+              <div class="flex items-center">
+                <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
+                {{ isEditMode ? 'Update' : 'Create' }} Claim
+              </div>
+            </button>
+          </div> -->
+          <div class="flex justify-end space-x-4 pt-4 bg-gray-50 -mx-4 -mb-5 p-4">
+            <button type="button" (click)="close()" class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" [disabled]="claimForm.invalid || loading"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+              <div class="flex items-center">
+                <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
+                {{ isEditMode ? 'Update' : 'Create' }} Claim
+              </div>
+            </button>
+          </div>
+        </form>
       </div>
-  
-      <!-- Form Actions -->
-      <div class="flex justify-end space-x-4 pt-4">
-        <button 
-          type="button"
-          routerLink="/claims"
-          class="px-6 py-2 border rounded-lg hover:bg-gray-50">
-        Cancel
-      </button>
-      <button 
-        type="submit"
-        [disabled]="claimForm.invalid || loading"
-        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-        <div class="flex items-center">
-          <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
-          {{ isEditMode ? 'Update' : 'Create' }} Claim
-        </div>
-      </button>
     </div>
-  </form>
+  </div>
 </div>

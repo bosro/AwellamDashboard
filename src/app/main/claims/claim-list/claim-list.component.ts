@@ -17,6 +17,9 @@ export class ClaimsListComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   
+  showClaimModal = false;
+  selectedClaimId?: number;
+
   filterForm!: FormGroup;
   exportLoading = false;
 
@@ -33,7 +36,21 @@ export class ClaimsListComponent implements OnInit {
   }
 
 
+  
 
+  openNewClaimModal(): void {
+    this.selectedClaimId = undefined;
+    this.showClaimModal = true;
+  }
+
+  openEditClaimModal(id: number): void {
+    this.selectedClaimId = id;
+    this.showClaimModal = true;
+  }
+
+  onClaimSaved(): void {
+    this.loadClaims();
+  }
 
   toggleSelection(claimId: number): void {
     if (this.selectedClaims.has(claimId)) {
