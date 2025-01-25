@@ -8,13 +8,13 @@ import { ClaimsListComponent } from './claim-list/claim-list.component';
 const routes: Routes = [
   {
     path: '',
+    component: ClaimsListComponent,  // Add this
     children: [
-      {path: '', redirectTo: 'claims-list', pathMatch: 'full'},
-      { path: 'claims-list', component: ClaimsListComponent },
+      { path: '', redirectTo: 'claims-list', pathMatch: 'full' },
+      // Remove claims-list route since parent now handles it
       { path: 'new', component: ClaimFormComponent },
       { path: 'edit/:id', component: ClaimFormComponent },
       { path: 'details/:id', component: ClaimDetailsComponent },
-      // { path: 'report/:id', component: ClaimReportComponent },
       { path: 'approval', component: ClaimApprovalComponent }
     ]
   }

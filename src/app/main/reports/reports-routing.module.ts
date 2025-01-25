@@ -17,8 +17,8 @@ const routes: Routes = [
       { path: 'list', component: ReportListComponent },
       { path: 'generator', component: ReportGeneratorComponent },
       { path: 'viewer/:id', component: ReportViewerComponent },
-      { path: 'scheduled', component: ScheduledReportsComponent },
-      { path: 'templates', component: ReportTemplatesComponent }
+      // { path: 'scheduled', component: ScheduledReportsComponent },
+      // { path: 'templates', component: ReportTemplatesComponent }
     ]
   }
 ];

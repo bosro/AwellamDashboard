@@ -190,6 +190,11 @@ export class UserManagementComponent implements OnInit {
     this.showUserModal = true;
   }
 
+  onAdminSaved(): void {
+    this.showUserModal = false;
+    this.loadUsers();
+  }
+
   deleteUser(userId: number): void {
     if (confirm('Are you sure you want to delete this user?')) {
       this.authService.deleteUser(userId).subscribe({

@@ -50,11 +50,11 @@
         </div>
   
         <button 
-          (click)="openUserForm()"
-          class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          <i class="ri-user-add-line mr-2"></i>
-          Add Admin
-        </button>
+        (click)="showUserModal = true"
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <i class="ri-user-add-line mr-2"></i>
+        Add Admin
+      </button>
       </div>
     </div>
   
@@ -265,3 +265,12 @@
 </div>
 
   </div>
+
+
+ 
+  <app-admin-form-modal
+  [isOpen]="showUserModal"
+  [editingUser]="editingUser"
+  (closeModal)="showUserModal = false"
+  (saved)="onAdminSaved()">
+</app-admin-form-modal>

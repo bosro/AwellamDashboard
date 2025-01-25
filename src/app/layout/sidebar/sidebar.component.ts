@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -17,7 +17,8 @@ interface MenuItem {
   templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent implements OnInit {
-  isCollapsed = false;
+  @Input() isCollapsed = false;
+  @Output() toggleSidebar = new EventEmitter<void>();
   currentRoute = '';
   menuItems: MenuItem[] = [
     {
@@ -117,16 +118,16 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/generator',
           icon: 'ri-ai-generate-text'
         },
-        {
-          title: 'Report Schedule',
-          route: '/main/reports/scheduled',
-          icon: 'ri-calendar-2-line'
-        },
-        {
-          title: 'Report Templates',
-          route: '/main/reports/templates',
-          icon: 'ri-book-open-line'
-        }
+        // {
+        //   title: 'Report Schedule',
+        //   route: '/main/reports/scheduled',
+        //   icon: 'ri-calendar-2-line'
+        // },
+        // {
+        //   title: 'Report Templates',
+        //   route: '/main/reports/templates',
+        //   icon: 'ri-book-open-line'
+        // }
       ]
     },
     {
@@ -224,9 +225,9 @@ export class SidebarComponent implements OnInit {
     this.filterMenuByRole();
   }
 
-  toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
-  }
+  // toggleSidebar(): void {
+  //   this.isCollapsed = !this.isCollapsed;
+  // }
 
   toggleSubmenu(item: MenuItem): void {
     item.expanded = !item.expanded;
