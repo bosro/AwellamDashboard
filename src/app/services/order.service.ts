@@ -91,7 +91,7 @@ export class OrdersService {
   }
 
   deleteOrder(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/orders/${id}`);
   }
 
   createOrder(orderData: any): Observable<Order> {

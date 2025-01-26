@@ -66,6 +66,17 @@ export class DriverListComponent implements OnInit {
     return statusClasses[status] || '';
   }
 
+  // deleteDriver()
+
+  deleteDriver(id: string): void {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.driverService.deleteDriver(id).subscribe({
+        next: () => this.loadDrivers(),
+        error: (error) => console.error('Error deleting user:', error)
+      });
+    }
+  }
+
   clearFilters(): void {
     this.filterForm.reset();
   }
