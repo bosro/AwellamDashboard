@@ -10,6 +10,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { OrdersRoutingModule } from './order-routing.module';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { OrderEditComponent } from './order-edit/order-edit';
+import { SalesOrderListComponent } from './sales-list.component/sales-list.compoent';
 
 
 
@@ -19,7 +20,8 @@ import { OrderEditComponent } from './order-edit/order-edit';
     OrderDetailsComponent,
     OrderAnalyticsComponent,
     OrderProcessingComponent,
-    OrderEditComponent
+    OrderEditComponent,
+    SalesOrderListComponent
   ],
   imports: [
     CommonModule,

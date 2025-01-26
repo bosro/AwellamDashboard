@@ -3,11 +3,12 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
+
 @Component({
   selector: 'app-order-list',
-  templateUrl: './order-list.component.html'
+  templateUrl: './sales-list.component.html'
 })
-export class OrderListComponent implements OnInit {
+export class SalesOrderListComponent implements OnInit {
   orders: Order[] = [];
   loading = false;
   total = 0;
@@ -55,7 +56,7 @@ export class OrderListComponent implements OnInit {
     this.loading = true;
     this.ordersService.getOrders().subscribe({
       next: (response) => {
-        this.orders = response.orders;
+        this.orders = response.orders.filter(order => order.status === 'DELIVERED');
         this.loading = false;
       },
       error: (error) => {
