@@ -42,16 +42,26 @@ export class SidebarComponent implements OnInit {
           route: '/main/orders/analytics',
           icon: 'ri-pie-chart-2-line'
         },
+         {
+          title: 'Create Order',
+          route: '/main/orders/processing',
+          icon: 'ri-play-list-add-fill'
+        },
         {
           title: 'Order List',
           route: '/main/orders/list',
           icon: 'ri-file-list-2-line'
         },
         {
-          title: 'Create Order',
-          route: '/main/orders/processing',
-          icon: 'ri-play-list-add-fill'
-        }
+          title: 'Sales List',
+          route: '/main/orders/saleslist',
+          icon: 'ri-file-list-2-line'
+        },
+        // {
+        //   title: 'Create Order',
+        //   route: '/main/orders/processing',
+        //   icon: 'ri-play-list-add-fill'
+        // }
       ]
     },
     {
@@ -81,6 +91,7 @@ export class SidebarComponent implements OnInit {
           route: '/main/products/list',
           icon: 'ri-file-list-2-line'
         },
+        
         // {
         //   title: 'Product Categories',
         //   route: '/main/products/categories',
