@@ -160,6 +160,26 @@ export class SidebarComponent implements OnInit {
         // }
       ]
     },
+
+    {
+      title: 'Customers Management',
+      icon: 'ri-user-settings-line',
+      expanded: false,
+      // roles: ['admin', 'manager'],
+      children: [
+        {
+          title: 'Customers',
+          route: '/main/customers/list',
+          icon: 'ri-group-line'
+        },
+        {
+          title: 'Add Customer',
+          route: '/main/customers/new',
+          icon: 'i-user-add-line'
+        },
+       
+      ]
+    },
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
@@ -195,25 +215,25 @@ export class SidebarComponent implements OnInit {
     
     
 
-    {
-      title: 'Customers Management',
-      icon: 'ri-user-settings-line',
-      expanded: false,
-      // roles: ['admin', 'manager'],
-      children: [
-        {
-          title: 'Customers',
-          route: '/main/customers/list',
-          icon: 'ri-group-line'
-        },
-        {
-          title: 'Add Customer',
-          route: '/main/customers/new',
-          icon: 'i-user-add-line'
-        },
+    // {
+    //   title: 'Customers Management',
+    //   icon: 'ri-user-settings-line',
+    //   expanded: false,
+    //   // roles: ['admin', 'manager'],
+    //   children: [
+    //     {
+    //       title: 'Customers',
+    //       route: '/main/customers/list',
+    //       icon: 'ri-group-line'
+    //     },
+    //     {
+    //       title: 'Add Customer',
+    //       route: '/main/customers/new',
+    //       icon: 'i-user-add-line'
+    //     },
        
-      ]
-    },
+    //   ]
+    // },
 
   
     // {
@@ -222,7 +242,7 @@ export class SidebarComponent implements OnInit {
     //   route: '/main/customers-management',
     // },
     {
-      title: 'Admin Management',
+      title: 'Settings',
       icon: 'ri-user-settings-line',
       route: '/main/user-management',
     },
