@@ -5,7 +5,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface User {
-  id: number;
+  
+  _id: number;
   fullName: string;
   email: string;
   role: string;
@@ -144,7 +145,7 @@ export class UserManagementComponent implements OnInit {
     if (this.selectedUsers.size === this.users.length) {
       this.selectedUsers.clear();
     } else {
-      this.users.forEach(user => this.selectedUsers.add(user.id));
+      this.users.forEach(user => this.selectedUsers.add(user._id));
     }
   }
 

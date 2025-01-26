@@ -187,8 +187,8 @@
               <div class="flex items-center">
                 <input
                   type="checkbox"
-                  [checked]="selectedUsers.has(user.id)"
-                  (change)="toggleSelection(user.id)"
+                  [checked]="selectedUsers.has(user._id)"
+                  (change)="toggleSelection(user._id)"
                   class="w-4 h-4 text-blue-600 rounded">
               </div>
             </td>
@@ -218,7 +218,7 @@
               </button>
               <button
                 class="text-red-600 hover:text-red-900 ml-4"
-                (click)="deleteUser(user.id)">
+                (click)="deleteUser(user._id)">
                 Delete
               </button>
             </td>

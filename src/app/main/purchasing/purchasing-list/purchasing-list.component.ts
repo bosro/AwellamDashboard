@@ -67,6 +67,11 @@ export class PurchaseListComponent implements OnInit {
     return classes[status as keyof typeof classes] || '';
   }
 
+
+  newPurchase(){
+    this.router.navigate(['/main/purchasing/new/'])
+  }
+
   deletePurchase(id: number): void {
     if (confirm('Are you sure you want to delete this purchase?')) {
       this.loading = true;
