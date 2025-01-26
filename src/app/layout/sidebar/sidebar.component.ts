@@ -78,25 +78,17 @@ export class SidebarComponent implements OnInit {
           title: 'Disbursements',
           route: '/main/inventory/disbursement',
           icon: 'ri-exchange-funds-line'
-        }
-      ]
-    },
-    {
-      title: 'Products',
-      icon: 'ri-bar-chart-2-line',
-      expanded: false,
-      children: [
+        },
+        {
+          title: 'Purchasing List',
+          route: '/main/purchasing',
+          icon: 'ri-order-play-line'
+        },
         {
           title: 'Product List',
           route: '/main/products/list',
           icon: 'ri-file-list-2-line'
         },
-        
-        // {
-        //   title: 'Product Categories',
-        //   route: '/main/products/categories',
-        //   icon: 'ri-pie-chart-2-line'
-        // },
         {
           title: 'Product Inventory',
           route: '/main/products/inventory',
@@ -104,6 +96,29 @@ export class SidebarComponent implements OnInit {
         }
       ]
     },
+    // {
+    //   title: 'Products',
+    //   icon: 'ri-bar-chart-2-line',
+    //   expanded: false,
+    //   children: [
+    //     {
+    //       title: 'Product List',
+    //       route: '/main/products/list',
+    //       icon: 'ri-file-list-2-line'
+    //     },
+        
+    //     // {
+    //     //   title: 'Product Categories',
+    //     //   route: '/main/products/categories',
+    //     //   icon: 'ri-pie-chart-2-line'
+    //     // },
+    //     {
+    //       title: 'Product Inventory',
+    //       route: '/main/products/inventory',
+    //       icon: 'ri-file-list-3-line'
+    //     }
+    //   ]
+    // },
     {
       title: 'Transport',
       icon: 'ri-truck-line',
@@ -142,27 +157,27 @@ export class SidebarComponent implements OnInit {
       ]
     },
     
-    {
-      title: 'Purchasing',
-      icon: 'ri-shopping-cart-2-line',
-      expanded: false,
-      // roles: ['super_admin', 'manager'],
-      children: [
-        {
-          title: 'Orders',
-          route: '/main/purchasing',
-          icon: 'ri-order-play-line'
-        },
-        // {
-        //   title: 'Suppliers',
-        //   route: '/main/purchasing/suppliers',
-        //   icon: 'ri-store-2-line'
-        // }
-      ]
-    },
+    // {
+    //   title: 'Purchasing',
+    //   icon: 'ri-shopping-cart-2-line',
+    //   expanded: false,
+    //   // roles: ['super_admin', 'manager'],
+    //   children: [
+    //     {
+    //       title: 'Orders',
+    //       route: '/main/purchasing',
+    //       icon: 'ri-order-play-line'
+    //     },
+    //     {
+    //       title: 'Suppliers',
+    //       route: '/main/purchasing/suppliers',
+    //       icon: 'ri-store-2-line'
+    //     }
+    //   ]
+    // },
 
     {
-      title: 'Customers Management',
+      title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
       expanded: false,
       // roles: ['admin', 'manager'],
