@@ -54,6 +54,9 @@
     </div>
   </div>
 
+
+
+
   <!-- Filters -->
   <div class="bg-white rounded-lg shadow p-4 mb-6">
     <form [formGroup]="filterForm">
@@ -112,24 +115,48 @@
                 <i class="ri-eye-line text-lg"></i>
               </button>
               <button 
-                [matMenuTriggerFor]="menu"
-                class="text-gray-600 hover:text-gray-900">
-                <i class="ri-more-2-fill text-lg"></i>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="updateTruckStatus(truck._id, 'active')"
+            (click)="deleteTruck(truck._id)"
+              class="text-red-600 hover:text-red-900">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+              <!-- <mat-menu #menu="matMenu"> -->
+                <!-- <button mat-menu-item (click)="updateTruckStatus(truck._id, 'active')"
                         *ngIf="truck.status !== 'active'">
                   Activate
-                </button>
-                <button mat-menu-item (click)="updateTruckStatus(truck._id, 'maintenance')"
+                </button> -->
+                <!-- <button mat-menu-item (click)="updateTruckStatus(truck._id, 'maintenance')"
                         *ngIf="truck.status !== 'maintenance'">
                   Send to Maintenance
-                </button>
-              </mat-menu>
+                </button> -->
+              <!-- </mat-menu> -->
             </div>
           </td>
         </tr>
       </tbody>
     </table>
+
+
+
+
+
+    <tr *ngIf="trucks.length === 0 && !loading">
+      <td colspan="6" class="py-4 text-center text-gray-500">
+        No drivers found matching your criteria
+      </td>
+    </tr>
+  
+  
+    <tr *ngIf="loading">
+      <td colspan="6" class="py-4">
+        <div class="flex justify-center items-center">
+          <i class="ri-loader-4-line text-2xl animate-spin text-blue-600"></i>
+        </div>
+      </td>
+    </tr>
   </div>
+
+
+ 
+
+
 </div>

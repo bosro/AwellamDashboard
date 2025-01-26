@@ -13,7 +13,7 @@
             {{customer?.fullName}}
           </h1>
           <p class="mt-1 text-sm text-gray-600">
-            Customer since {{customer?.createdAt}}
+            Customer since {{customer?.createdAt  | date: 'MMMM d, y, h:mm a' }}
           </p>
         </div>
       </div>

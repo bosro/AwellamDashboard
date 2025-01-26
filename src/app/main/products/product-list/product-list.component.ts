@@ -88,8 +88,22 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  deleteProduct(productId: string): void{
-    this.productsService.deleteProduct
+  // deleteProduct(productId: string): void{
+  //   this.productsService.deleteProduct
+  // }
+
+  // deleteProduts(productId: string):void{
+  //   this.productsService.deleteProduct(productId).subscribe()
+
+  // }
+
+  deleteProduct(productId: string): void {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.productsService.deleteProduct(productId).subscribe({
+        next: () => this.loadProducts(),
+        error: (error) => console.error('Error deleting user:', error)
+      });
+    }
   }
 
 
