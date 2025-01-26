@@ -103,20 +103,20 @@ export class OrderProcessingComponent implements OnInit {
     this.subtotal = this.items.controls.reduce((total, control) => 
       total + (control.get('total')?.value || 0), 0);
     this.tax = this.subtotal * 0.1;
-    this.total = this.subtotal + this.tax + this.getShippingCost();
+    // this.total = this.subtotal + this.tax + this.getShippingCost();
   }
 
-  getShippingCost(): number {
-    return 10;
-  }
+  // getShippingCost(): number {
+  //   return 10;
+  // }
 
-  getSubtotal(): number {
-    return this.subtotal;
-  }
+  // getSubtotal(): number {
+  //   return this.subtotal;
+  // }
 
-  getTax(): number {
-    return this.tax;
-  }
+  // getTax(): number {
+  //   return this.tax;
+  // }
 
   getTotal(): number {
     return this.total;

@@ -44,20 +44,32 @@
                 <div>
                   <span class="font-medium" formControlName="name">{{item.get('name')?.value}}</span>
                   <div class="flex items-center mt-1">
-                    <input 
+                    <div class="px-4">
+                      <input 
                       type="number" 
                       formControlName="quantity"
-                      class="w-20 px-2 py-1 border rounded-md mr-2"
+                      class="w-30 px-3 py-1 border rounded-md mr-2"
+                      placeholder="Quantity"
                       min="1">
                     <span class="text-sm text-gray-600">
                       x ${{item.get('price')?.value}} = ${{item.get('total')?.value}}
                     </span>
+                    <button type="button" (click)="removeItem(i)" 
+                    class="text-red-600 hover:text-red-800">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+
+                    </div>
+                   
+                    <input 
+                    type="number" 
+                    formControlName="price"
+                    class="w-30 px-3 py-1 border rounded-md mr-2"
+                    placeholder="Price"
+                    min="1">
                   </div>
                 </div>
-                <button type="button" (click)="removeItem(i)" 
-                        class="text-red-600 hover:text-red-800">
-                  <i class="ri-delete-bin-line"></i>
-                </button>
+               
               </div>
             </div>
           </div>
@@ -143,21 +155,21 @@
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
         <div class="space-y-4">
-          <div class="flex justify-between text-sm">
+          <!-- <div class="flex justify-between text-sm">
             <span class="text-gray-600">Subtotal</span>
             <span class="text-gray-900">${{getSubtotal() | number:'1.2-2'}}</span>
-          </div>
-          <div class="flex justify-between text-sm">
+          </div> -->
+          <!-- <div class="flex justify-between text-sm">
             <span class="text-gray-600">Shipping</span>
             <span class="text-gray-900">${{getShippingCost() | number:'1.2-2'}}</span>
-          </div>
-          <div class="flex justify-between text-sm">
+          </div> -->
+          <!-- <div class="flex justify-between text-sm">
             <span class="text-gray-600">Tax</span>
             <span class="text-gray-900">${{getTax() | number:'1.2-2'}}</span>
-          </div>
+          </div> -->
           <div class="pt-4 flex justify-between text-lg font-semibold border-t">
             <span>Total</span>
-            <span>${{getTotal() | number:'1.2-2'}}</span>
+            <span>GHC {{getTotal() | number:'1.2-2'}}</span>
           </div>
         </div>
       </div>
