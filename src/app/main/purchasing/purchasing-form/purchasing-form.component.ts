@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PurchasingService } from '../../../services/purchasing.service';
-import { PurchaseStatus, StatusClassMap } from '../../../shared/types/purchase-types';
+import { Plant, PurchasingService } from '../../../services/purchasing.service';
+import { Product } from '../../../services/products.service';
 
 @Component({
   selector: 'app-purchase-form',
@@ -14,15 +14,9 @@ export class PurchaseFormComponent implements OnInit {
   isEditMode = false;
   loading = false;
   purchaseId!: number;
-
-  productTypes = ['42.5R', '32.5N']; // Add more as needed
-  locations = ['Plant A', 'Plant B', 'Plant C']; // Add more as needed
-
-  private readonly statusClasses: StatusClassMap = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800'
-  };
+  plants!: Plant[];
+  selectedPlant!: string;
+  products: { [key: string]: Product[] } = {}; // Store products by plant ID
 
   constructor(
     private fb: FormBuilder,
@@ -30,7 +24,13 @@ export class PurchaseFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.createForm();
+    this.purchaseForm = this.fb.group({
+      purchaseDate: [new Date().toISOString().split('T')[0], Validators.required],
+      paymentReference: ['', Validators.required],
+      salesOrderNumber: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
+      plantType: ['', Validators.required],
+      purchases: this.fb.array([this.createPurchaseGroup()])
+    });
   }
 
   ngOnInit(): void {
@@ -39,18 +39,27 @@ export class PurchaseFormComponent implements OnInit {
       this.isEditMode = true;
       this.loadPurchase();
     }
+    this.getPlants();
   }
 
-  private createForm(): void {
-    this.purchaseForm = this.fb.group({
-      purchaseDate: ['', Validators.required],
-      paymentReference: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
-      salesOrderNumber: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
-      productType: ['', Validators.required],
-      quantity: ['', [Validators.required, Validators.min(0)]],
-      location: ['', Validators.required],
-      status: ['pending']
+  private createPurchaseGroup(): FormGroup {
+    return this.fb.group({
+      plantId: ['', Validators.required],
+      productId: ['', Validators.required],
+      quantity: ['', [Validators.required, Validators.min(1)]]
     });
+  }
+
+  get purchases(): FormArray {
+    return this.purchaseForm.get('purchases') as FormArray;
+  }
+
+  addPurchase(): void {
+    this.purchases.push(this.createPurchaseGroup());
+  }
+
+  removePurchase(index: number): void {
+    this.purchases.removeAt(index);
   }
 
   private loadPurchase(): void {
@@ -67,6 +76,47 @@ export class PurchaseFormComponent implements OnInit {
     });
   }
 
+  private getPlants(): void {
+    this.loading = true;
+    this.purchasingService.getPlants().subscribe({
+      next: (response) => {
+        this.plants = response.plants;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading plants:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  getProducts(plantId: string, index: number): void {
+    if (!plantId) {
+      this.products[plantId] = []; // If no plant ID, reset the products array
+      return;
+    }
+
+    this.loading = true;
+    this.purchasingService.getProductByPlantId(plantId).subscribe({
+      next: (response) => {
+        this.products[plantId] = response.products; // Update products for the selected plant
+        this.purchases.at(index).get('productId')?.setValue(''); // Reset the product selection for the current purchase
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  onPlantChange(event: Event, index: number): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const plantId = selectElement.value;
+    this.selectedPlant = plantId; // This is now set to the selected plant ID
+    this.getProducts(plantId, index); // Pass the plantId to get the products for the selected plant
+  }
+
   getErrorMessage(controlName: string): string {
     const control = this.purchaseForm.get(controlName);
     if (!control?.touched || !control.errors) return '';
@@ -81,8 +131,6 @@ export class PurchaseFormComponent implements OnInit {
 
     if (control.errors['pattern']) {
       switch (controlName) {
-        case 'paymentReference':
-          return 'Must be in format PR followed by 11 digits';
         case 'salesOrderNumber':
           return 'Must be in format SOC followed by 9 digits';
         default:
@@ -125,10 +173,5 @@ export class PurchaseFormComponent implements OnInit {
         }
       });
     }
-  }
-
-  // Helper method to get status classes
-  getStatusClass(status: PurchaseStatus): string {
-    return this.statusClasses[status];
   }
 }

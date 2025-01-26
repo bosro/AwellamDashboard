@@ -10,6 +10,8 @@ import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.c
 import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DisbursementModalComponent } from './disbursement-modal/disbursement-modal.component';
+import { ProductsRoutingModule } from '../products/products-routing.module';
+import { PurchasingRoutingModule } from '../purchasing/purchasing-routing.module';
 
 
 @NgModule({
@@ -27,6 +29,8 @@ import { DisbursementModalComponent } from './disbursement-modal/disbursement-mo
     SharedModule,
     NgxChartsModule,
     InventoryRoutingModule,
+    ProductsRoutingModule,
+    PurchasingRoutingModule
 
   ]
 })

@@ -19,7 +19,7 @@ export interface ProductsResponse {
   products: Product[];
 }
 
-interface ProductResponse {
+export interface ProductResponse {
   message: string;
   product: Product;
 }
@@ -33,7 +33,7 @@ export class ProductsService {
   constructor(private http: HttpClient) {}
 
   getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(`${this.apiUrl}/`);
+    return this.http.get<ProductsResponse>(`${this.apiUrl}/get`);
   }
 
   getProductById(id: string): Observable<Product> {
