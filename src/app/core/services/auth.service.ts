@@ -22,7 +22,7 @@ import { UserFormData } from '../../main/user-management/user-edit-modal/user-ed
 export interface User {
   total: number;
   data: User[];
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   password: string;

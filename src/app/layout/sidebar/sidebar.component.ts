@@ -32,6 +32,68 @@ export class SidebarComponent implements OnInit {
       route: '/main/dashboard',
     },
     {
+      title: 'Orders',
+      icon: 'ri-file-list-3-line',
+      expanded: false,
+      // roles: ['admin', 'manager'],
+      children: [
+        {
+          title: 'Order Analytics',
+          route: '/main/orders/analytics',
+          icon: 'ri-pie-chart-2-line'
+        },
+        {
+          title: 'Order List',
+          route: '/main/orders/list',
+          icon: 'ri-file-list-2-line'
+        },
+        {
+          title: 'Create Order',
+          route: '/main/orders/processing',
+          icon: 'ri-play-list-add-fill'
+        }
+      ]
+    },
+    {
+      title: 'Inventory',
+      icon: 'ri-stock-line',
+      expanded: false,
+      children: [
+        {
+          title: 'Stock Overview',
+          route: '/main/inventory',
+          icon: 'ri-database-2-line'
+        },
+        {
+          title: 'Disbursements',
+          route: '/main/inventory/disbursement',
+          icon: 'ri-exchange-funds-line'
+        }
+      ]
+    },
+    {
+      title: 'Products',
+      icon: 'ri-bar-chart-2-line',
+      expanded: false,
+      children: [
+        {
+          title: 'Product List',
+          route: '/main/products/list',
+          icon: 'ri-file-list-2-line'
+        },
+        // {
+        //   title: 'Product Categories',
+        //   route: '/main/products/categories',
+        //   icon: 'ri-pie-chart-2-line'
+        // },
+        {
+          title: 'Product Inventory',
+          route: '/main/products/inventory',
+          icon: 'ri-file-list-3-line'
+        }
+      ]
+    },
+    {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
@@ -68,39 +130,23 @@ export class SidebarComponent implements OnInit {
         // }
       ]
     },
-    {
-      title: 'Inventory',
-      icon: 'ri-stock-line',
-      expanded: false,
-      children: [
-        {
-          title: 'Stock Overview',
-          route: '/main/inventory',
-          icon: 'ri-database-2-line'
-        },
-        {
-          title: 'Disbursements',
-          route: '/main/inventory/disbursement',
-          icon: 'ri-exchange-funds-line'
-        }
-      ]
-    },
+    
     {
       title: 'Purchasing',
       icon: 'ri-shopping-cart-2-line',
       expanded: false,
-      roles: ['admin', 'manager'],
+      // roles: ['super_admin', 'manager'],
       children: [
         {
           title: 'Orders',
           route: '/main/purchasing',
           icon: 'ri-order-play-line'
         },
-        {
-          title: 'Suppliers',
-          route: '/main/purchasing/suppliers',
-          icon: 'ri-store-2-line'
-        }
+        // {
+        //   title: 'Suppliers',
+        //   route: '/main/purchasing/suppliers',
+        //   icon: 'ri-store-2-line'
+        // }
       ]
     },
     {
@@ -135,51 +181,8 @@ export class SidebarComponent implements OnInit {
         // }
       ]
     },
-    {
-      title: 'Products',
-      icon: 'ri-bar-chart-2-line',
-      expanded: false,
-      children: [
-        {
-          title: 'Product List',
-          route: '/main/products/list',
-          icon: 'ri-file-list-2-line'
-        },
-        // {
-        //   title: 'Product Categories',
-        //   route: '/main/products/categories',
-        //   icon: 'ri-pie-chart-2-line'
-        // },
-        {
-          title: 'Product Inventory',
-          route: '/main/products/inventory',
-          icon: 'ri-file-list-3-line'
-        }
-      ]
-    },
-    {
-      title: 'Orders',
-      icon: 'ri-file-list-3-line',
-      expanded: false,
-      // roles: ['admin', 'manager'],
-      children: [
-        {
-          title: 'Order Analytics',
-          route: '/main/orders/analytics',
-          icon: 'ri-pie-chart-2-line'
-        },
-        {
-          title: 'Order List',
-          route: '/main/orders/list',
-          icon: 'ri-file-list-2-line'
-        },
-        {
-          title: 'Create Order',
-          route: '/main/orders/processing',
-          icon: 'ri-play-list-add-fill'
-        }
-      ]
-    },
+    
+    
 
     {
       title: 'Customers Management',
