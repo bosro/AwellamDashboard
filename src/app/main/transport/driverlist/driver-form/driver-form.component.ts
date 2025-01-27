@@ -79,7 +79,7 @@ export class DriverFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.driverForm.valid) {
+    if (this.driverForm.invalid) return 
       this.loading = true;
       const formData = this.driverForm.value;
 
@@ -97,5 +97,5 @@ export class DriverFormComponent implements OnInit {
         }
       });
     }
-  }
+  
 }

@@ -18,20 +18,25 @@ export class TruckFormComponent implements OnInit {
     private router: Router
   ) {
     this.truckForm = this.fb.group({
-      truckNumber: ['', [Validators.required]],
-      capacity: ['', [Validators.required, Validators.min(0)]],
-      status: ['active', Validators.required]
+      truckNumber: [''],
+      capacity: ['' ],
+      status: ['active' ]
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+
+
+  }
 
   onSubmit(): void {
-    if (this.truckForm.valid) {
+    if (this.truckForm.invalid) return 
       this.loading = true;
-      this.truckService.createTruck(this.truckForm.value).subscribe({
+
+      const formData = this.truckForm.value
+      this.truckService.createTruck(formData).subscribe({
         next: () => {
-          this.router.navigate(['/transport/trucks']);
+          this.router.navigate(['main/transport/trucks']);
         },
         error: (error) => {
           console.error('Error creating truck:', error);
@@ -39,5 +44,5 @@ export class TruckFormComponent implements OnInit {
         }
       });
     }
-  }
+  
 }
