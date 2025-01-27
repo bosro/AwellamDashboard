@@ -76,7 +76,7 @@
             <option value="">All Statuses</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-            <option value="maintenance">Maintenance</option>
+            <!-- <option value="maintenance">Maintenance</option> -->
           </select>
         </div>
       </div>
@@ -104,7 +104,7 @@
               {{truck.status}}
             </span>
           </td>
-          <td class="py-4 px-6">{{truck.capacity}} tons</td>
+          <td class="py-4 px-6">{{truck.capacity}} Products</td>
           <td class="py-4 px-6">{{truck.driver?.name || 'No driver assigned'}}</td>
           <td class="py-4 px-6">${{truck.expenses}}</td>
           <td class="py-4 px-6">
@@ -141,7 +141,7 @@
 
     <tr *ngIf="trucks.length === 0 && !loading">
       <td colspan="6" class="py-4 text-center text-gray-500">
-        No drivers found matching your criteria
+        No truck found matching your criteria
       </td>
     </tr>
   

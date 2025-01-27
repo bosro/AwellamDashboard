@@ -29,7 +29,7 @@
           </div>
         </div> -->
   
-        <div>
+        <!-- <div>
           <label class="block text-sm font-medium text-gray-700">Status</label>
           <select 
             formControlName="status"
@@ -38,7 +38,7 @@
             <option value="inactive">Inactive</option>
             <option value="maintenance">Maintenance</option>
           </select>
-        </div>
+        </div> -->
   
         <div class="flex justify-end space-x-3">
           <button 
@@ -49,7 +49,7 @@
           </button>
           <button 
             type="submit"
-            [disabled]="!truckForm.valid || loading"
+            [disabled]="truckForm.invalid || loading"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
             <span *ngIf="!loading">Add Truck</span>
             <i *ngIf="loading" class="ri-loader-4-line animate-spin"></i>

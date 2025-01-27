@@ -75,16 +75,6 @@ export class SidebarComponent implements OnInit {
           icon: 'ri-database-2-line'
         },
         {
-          title: 'Disbursements',
-          route: '/main/inventory/disbursement',
-          icon: 'ri-exchange-funds-line'
-        },
-        {
-          title: 'Purchasing List',
-          route: '/main/purchasing',
-          icon: 'ri-order-play-line'
-        },
-        {
           title: 'Product List',
           route: '/main/products/list',
           icon: 'ri-file-list-2-line'
@@ -93,7 +83,20 @@ export class SidebarComponent implements OnInit {
           title: 'Product Inventory',
           route: '/main/products/inventory',
           icon: 'ri-file-list-3-line'
-        }
+        },
+        {
+          title: 'Purchase Overview',
+          route: '/main/purchasing',
+          icon: 'ri-order-play-line'
+        },
+        {
+          title: 'Disbursements',
+          route: '/main/inventory/disbursement',
+          icon: 'ri-exchange-funds-line'
+        },
+      
+        
+       
       ]
     },
     // {
