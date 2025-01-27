@@ -1,2 +1,10 @@
 export interface Auth {
+
+
+
+
+
+
+
+    // cxccxcx
 }
