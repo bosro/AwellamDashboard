@@ -110,6 +110,7 @@ export class AuthService {
         const { tokens: { accessToken, refreshToken }, admin } = response;
         localStorage.setItem(this.TOKEN_KEY, accessToken);
         localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+        localStorage.setItem('admin', JSON.stringify(admin));
         this.currentUserSubject.next(admin);
         this.isAuthenticatedSubject.next(true); // Update authentication status
         console.log('Access Token:', accessToken);
