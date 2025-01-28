@@ -10,7 +10,9 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
-@Injectable()
+@Injectable({
+     providedIn: 'root'
+  })
 export class SecureHttpInterceptor implements HttpInterceptor {
   
   intercept(

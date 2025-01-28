@@ -1,87 +1,127 @@
-<div class="p-6">
-  <!-- Header -->
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
-      <!-- <p class="mt-1 text-sm text-gray-600">Overview of your transport operations</p> -->
+<!-- dashboard.component.html -->
+<div class="min-h-screen bg-gray-50">
+  <div class="p-4 sm:p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+      </div>
+      
+      <!-- Controls Section -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <!-- Date Range Selector -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Time Period:</label>
+          <select [(ngModel)]="selectedRange" 
+                  class="flex-1 sm:flex-none text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+            <option *ngFor="let range of dateRanges" [value]="range.value">
+              {{range.label}}
+            </option>
+          </select>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button (click)="exportDashboard('excel')" 
+                  class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+            <i class="ri-file-excel-line mr-2 text-green-600"></i>
+            <span class="whitespace-nowrap">Export Excel</span>
+          </button>
+          <button (click)="exportDashboard('pdf')" 
+                  class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+            <i class="ri-file-pdf-line mr-2 text-red-600"></i>
+            <span class="whitespace-nowrap">Export PDF</span>
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center space-x-4">
-      <!-- Date Range Selector -->
-      <div class="flex items-center space-x-2">
-        <label class="text-sm font-medium text-gray-700">Time Period:</label>
-        <select [(ngModel)]="selectedRange" class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-          <option *ngFor="let range of dateRanges" [value]="range.value">
-            {{range.label}}
-          </option>
-        </select>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Transport Metrics -->
+      <div *ngIf="metrics?.transport">
+        <app-metrics-card 
+          title="Active Drivers"
+          [value]="metrics.transport.activeDeliveries"
+          icon="ri-truck-line"
+          colorClass="bg-blue-100 text-blue-600"
+          [change]="10"
+          trend="up">
+        </app-metrics-card>
       </div>
 
-      <!-- Export Buttons -->
-      <div class="flex space-x-2">
-        <button (click)="exportDashboard('excel')" class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-          <i class="ri-file-excel-line mr-2 text-green-600"></i>
-          Export Excel
-        </button>
-        <button (click)="exportDashboard('pdf')" class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-          <i class="ri-file-pdf-line mr-2 text-red-600"></i>
-          Export PDF
-        </button>
+      <!-- Inventory Metrics -->
+      <div *ngIf="metrics?.inventory">
+        <app-metrics-card 
+          title="Low Stock Items"
+          [value]="metrics.inventory.lowStockItems"
+          icon="ri-store-2-line"
+          colorClass="bg-yellow-100 text-yellow-600"
+          [change]="5"
+          trend="down">
+        </app-metrics-card>
+      </div>
+
+      <!-- Maintenance Metrics -->
+      <div *ngIf="metrics?.maintenance">
+        <app-metrics-card 
+          title="Pending Maintenance"
+          [value]="metrics.maintenance.pendingMaintenance"
+          icon="ri-tools-line"
+          colorClass="bg-red-100 text-red-600"
+          [change]="3"
+          trend="up">
+        </app-metrics-card>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div *ngIf="metrics?.performance">
+        <app-metrics-card 
+          title="On-Time Delivery"
+          [value]="metrics.performance.onTimeDelivery"
+          icon="ri-time-line"
+          colorClass="bg-green-100 text-green-600"
+          [change]="2"
+          trend="up"
+          suffix="%">
+        </app-metrics-card>
       </div>
     </div>
-  </div>
 
-  <!-- Quick Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-    <!-- Transport Metrics -->
-    <div *ngIf="metrics && metrics.transport">
-      <app-metrics-card title="Active Drivers" [value]="metrics.transport.activeDeliveries" icon="ri-truck-line"
-        colorClass="bg-blue-100 text-blue-600" [change]="10" trend="up"></app-metrics-card>
-    </div>
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Revenue Chart -->
+      <div class="lg:col-span-2 bg-white rounded-lg shadow p-4 sm:p-6 min-h-[400px]">
+        <h2 class="text-lg font-semibold mb-4">Revenue Overview</h2>
+        <app-revenue-chart 
+          [data]="revenueData"
+          [loading]="loading">
+        </app-revenue-chart>
+      </div>
 
-    <!-- Inventory Metrics -->
-    <div *ngIf="metrics && metrics.inventory">
-      <app-metrics-card title="Low Stock Items" [value]="metrics.inventory.lowStockItems" icon="ri-store-2-line"
-        colorClass="bg-yellow-100 text-yellow-600" [change]="5" trend="down"></app-metrics-card>
-    </div>
+      <!-- Activity Log -->
+      <!-- <div class="bg-white rounded-lg shadow p-4 sm:p-6 min-h-[400px]">
+        <h2 class="text-lg font-semibold mb-4">Activity Log</h2>
+        <app-activity-log 
+          [activities]="activityLogs"
+          [loading]="loading">
+        </app-activity-log>
+      </div> -->
 
-    <!-- Maintenance Metrics -->
-    <div *ngIf="metrics && metrics.maintenance">
-      <app-metrics-card title="Pending Maintenance" [value]="metrics.maintenance.pendingMaintenance"
-        icon="ri-tools-line" colorClass="bg-red-100 text-red-600" [change]="3" trend="up"></app-metrics-card>
-    </div>
+      <!-- Delivery Map -->
+      <!-- <div class="lg:col-span-2 bg-white rounded-lg shadow p-4 sm:p-6 min-h-[400px]">
+        <h2 class="text-lg font-semibold mb-4">Delivery Map</h2>
+        <app-delivery-map></app-delivery-map>
+      </div> -->
 
-    <!-- Performance Metrics -->
-    <div *ngIf="metrics && metrics.performance">
-      <app-metrics-card title="On-Time Delivery" [value]="metrics.performance.onTimeDelivery" icon="ri-time-line"
-        colorClass="bg-green-100 text-green-600" [change]="2" trend="up" suffix="%"></app-metrics-card>
-    </div>
-  </div>
-
-  <!-- Main Content Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Revenue Chart -->
-    <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
-      <app-revenue-chart [data]="revenueData" [loading]="loading"></app-revenue-chart>
-    </div>
-
-    <!-- Activity Log -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <!-- <app-activity-log [activities]="activityLogs" [loading]="loading"></app-activity-log> -->
-    </div>
-
-    <!-- Delivery Map -->
-    <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
-      <!-- <app-delivery-map></app-delivery-map> -->
-    </div>
-
-    <!-- Alerts -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <!-- <app-alerts [alerts]="alerts" [loading]="loading"></app-alerts> -->
-    </div>
-
-    <!-- Inventory Status -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <!-- <app-inventory-status [data]="inventoryStatus" [loading]="loading"></app-inventory-status> -->
+      <!-- Alerts -->
+      <!-- <div class="bg-white rounded-lg shadow p-4 sm:p-6 min-h-[400px]">
+        <h2 class="text-lg font-semibold mb-4">Alerts</h2>
+        <app-alerts 
+          [alerts]="alerts"
+          [loading]="loading">
+        </app-alerts>
+      </div> -->
     </div>
   </div>
 </div>

@@ -1,60 +1,71 @@
 <div class="p-6">
-    <div class="mb-6">
-      <h1 class="text-2xl font-semibold">Add New Truck</h1>
-    </div>
-  
-    <div class="bg-white rounded-lg shadow p-6">
-      <form (ngSubmit)="onSubmit()" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Truck Number</label>
-          <input 
-            type="text" 
-            formControlName="truckNumber"
-            class="mt-1 block w-full rounded-md border p-2">
-          <div *ngIf="truckForm.get('truckNumber')?.touched && truckForm.get('truckNumber')?.errors?.['required']" 
-               class="mt-1 text-sm text-red-600">
-            Truck number is required
-          </div>
-        </div>
-  
-        <!-- <div>
-          <label class="block text-sm font-medium text-gray-700">Capacity (tons)</label>
-          <input 
-            type="number" 
-            formControlName="capacity"
-            class="mt-1 block w-full rounded-md border p-2">
-          <div *ngIf="truckForm.get('capacity')?.touched && truckForm.get('capacity')?.errors?.['required']" 
-               class="mt-1 text-sm text-red-600">
-            Capacity is required
-          </div>
-        </div> -->
-  
-        <!-- <div>
-          <label class="block text-sm font-medium text-gray-700">Status</label>
-          <select 
-            formControlName="status"
-            class="mt-1 block w-full rounded-md border p-2">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
-        </div> -->
-  
-        <div class="flex justify-end space-x-3">
-          <button 
-            type="button"
-            routerLink="/transport/trucks"
-            class="px-4 py-2 border rounded-lg hover:bg-gray-50">
-            Cancel
-          </button>
-          <button 
-            type="submit"
-            [disabled]="truckForm.invalid || loading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-            <span *ngIf="!loading">Add Truck</span>
-            <i *ngIf="loading" class="ri-loader-4-line animate-spin"></i>
-          </button>
-        </div>
-      </form>
-    </div>
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold">Add New Truck</h1>
   </div>
+
+  <div class="bg-white rounded-lg shadow p-6">
+    <!-- Link formGroup from component -->
+    <form [formGroup]="truckForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      
+      <!-- Truck Number -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Truck Number</label>
+        <input 
+          type="text" 
+          formControlName="truckNumber"
+          class="mt-1 block w-full rounded-md border p-2">
+        <div 
+          *ngIf="truckForm.get('truckNumber')?.touched && truckForm.get('truckNumber')?.errors?.['required']" 
+          class="mt-1 text-sm text-red-600">
+          Truck number is required
+        </div>
+      </div>
+
+      <!-- Capacity -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Capacity (tons)</label>
+        <input 
+          type="number" 
+          formControlName="capacity"
+          class="mt-1 block w-full rounded-md border p-2">
+        <div 
+          *ngIf="truckForm.get('capacity')?.touched && truckForm.get('capacity')?.errors?.['required']" 
+          class="mt-1 text-sm text-red-600">
+          Capacity is required
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Status</label>
+        <select 
+          formControlName="status"
+          class="mt-1 block w-full rounded-md border p-2">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="maintenance">Maintenance</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-end space-x-3">
+        <!-- Cancel Button -->
+        <button 
+          type="button"
+          routerLink="/transport/trucks"
+          class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+          Cancel
+        </button>
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          [disabled]="truckForm.invalid || loading"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          <span *ngIf="!loading">Add Truck</span>
+          <i *ngIf="loading" class="ri-loader-4-line animate-spin"></i>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
