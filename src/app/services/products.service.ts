@@ -19,7 +19,7 @@ export interface ProductsResponse {
   products: Product[];
 }
 
-interface ProductResponse {
+export interface ProductResponse {
   message: string;
   product: Product;
 }
@@ -33,7 +33,7 @@ export class ProductsService {
   constructor(private http: HttpClient) {}
 
   getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(`${this.apiUrl}/`);
+    return this.http.get<ProductsResponse>(`${this.apiUrl}/get`);
   }
 
   getProductById(id: string): Observable<Product> {
@@ -58,8 +58,8 @@ export class ProductsService {
     return this.http.patch<Product>(`${this.apiUrl}/${id}/toggle-stock`, {});
   }
 
-  deleteProduct(id: string, quantity: number): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/delete/${id}`, { quantity });
+  deleteProduct(id: string): Observable<Product> {
+    return this.http.delete<Product>(`${this.apiUrl}/delete/${id}`);
   }
 
   exportToExcel(products: Product[]): void {

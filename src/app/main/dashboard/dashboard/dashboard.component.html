@@ -2,24 +2,14 @@
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <div>
-      <!-- <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1> -->
-      <p class="mt-1 text-sm text-gray-600">Overview of your transport operations</p>
+      <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+      <!-- <p class="mt-1 text-sm text-gray-600">Overview of your transport operations</p> -->
     </div>
     <div class="flex items-center space-x-4">
       <!-- Date Range Selector -->
       <div class="flex items-center space-x-2">
         <label class="text-sm font-medium text-gray-700">Time Period:</label>
-        <!-- <select 
-            [(ngModel)]="selectedRange"
-            (change)="onDateRangeChange($event.target.value)"
-            class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-          >
-            <option *ngFor="let range of dateRanges" [value]="range.value">
-              {{range.label}}
-            </option>
-          </select> -->
-        <select [(ngModel)]="selectedRange"
-          class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <select [(ngModel)]="selectedRange" class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
           <option *ngFor="let range of dateRanges" [value]="range.value">
             {{range.label}}
           </option>
@@ -28,8 +18,7 @@
 
       <!-- Export Buttons -->
       <div class="flex space-x-2">
-        <button (click)="exportDashboard('excel')"
-          class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+        <button (click)="exportDashboard('excel')" class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
           <i class="ri-file-excel-line mr-2 text-green-600"></i>
           Export Excel
         </button>
@@ -42,11 +31,10 @@
   </div>
 
   <!-- Quick Stats -->
-  <!-- Quick Stats -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
     <!-- Transport Metrics -->
     <div *ngIf="metrics && metrics.transport">
-      <app-metrics-card title="Active Deliveries" [value]="metrics.transport.activeDeliveries" icon="ri-truck-line"
+      <app-metrics-card title="Active Drivers" [value]="metrics.transport.activeDeliveries" icon="ri-truck-line"
         colorClass="bg-blue-100 text-blue-600" [change]="10" trend="up"></app-metrics-card>
     </div>
 
@@ -77,56 +65,23 @@
     </div>
 
     <!-- Activity Log -->
-    <!-- <div class="bg-white rounded-lg shadow p-6">
-        <app-activity-log
-          [activities]="activityLogs"
-          [loading]="loading"
-        ></app-activity-log>
-      </div> -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <!-- <app-activity-log [activities]="activityLogs" [loading]="loading"></app-activity-log> -->
+    </div>
 
     <!-- Delivery Map -->
-    <!-- <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
-        <app-delivery-map></app-delivery-map>
-      </div> -->
+    <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
+      <!-- <app-delivery-map></app-delivery-map> -->
+    </div>
 
     <!-- Alerts -->
-    <!-- <div class="bg-white rounded-lg shadow p-6">
-        <app-alerts
-          [alerts]="alerts"
-          [loading]="loading"
-        ></app-alerts>
-      </div> -->
-
-    <!-- Performance Charts -->
-    <!-- <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow p-6">
-          <app-vehicle-utilization
-            [data]="vehicleUtilization"
-            [loading]="loading"
-          ></app-vehicle-utilization>
-        </div>
-  
-        <div class="bg-white rounded-lg shadow p-6">
-          <app-fuel-consumption
-            [data]="fuelConsumption"
-            [loading]="loading"
-          ></app-fuel-consumption>
-        </div>
-      </div> -->
-
-    <!-- Maintenance Schedule -->
-    <!-- <div class="md:col-span-2 bg-white rounded-lg shadow p-6">
-        <app-maintenance-schedule
-          [loading]="loading"
-        ></app-maintenance-schedule>
-      </div> -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <!-- <app-alerts [alerts]="alerts" [loading]="loading"></app-alerts> -->
+    </div>
 
     <!-- Inventory Status -->
-    <!-- <div class="bg-white rounded-lg shadow p-6">
-        <app-inventory-status
-          [data]="inventoryStatus"
-          [loading]="loading"
-        ></app-inventory-status>
-      </div> -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <!-- <app-inventory-status [data]="inventoryStatus" [loading]="loading"></app-inventory-status> -->
+    </div>
   </div>
 </div>

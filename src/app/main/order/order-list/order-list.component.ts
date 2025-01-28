@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { OrdersService } from '../../../services/order.service';
+import { Order, OrdersService } from '../../../services/order.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -8,7 +8,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './order-list.component.html'
 })
 export class OrderListComponent implements OnInit {
-  orders: any[] = [];
+  orders: Order[] = [];
   loading = false;
   total = 0;
   pageSize = 10;

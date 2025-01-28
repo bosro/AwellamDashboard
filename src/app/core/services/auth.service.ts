@@ -4,8 +4,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 // import { environment } from '../../environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
+// import { UsersResponse } from '../../main/user-management/user-management/user-management.component';
 import { environment } from '../../environments/environment';
+import { UserFormData } from '../../main/user-management/user-edit-modal/user-edit-modal.component';
 
 // export interface User {
 //   id: number;
@@ -21,7 +22,7 @@ import { environment } from '../../environments/environment';
 export interface User {
   total: number;
   data: User[];
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   password: string;
@@ -71,6 +72,11 @@ export interface UpdateUserDto {
   permissions?: string[];
 }
 
+export interface UsersResponse{
+  message:string;
+  admins: []
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -104,6 +110,7 @@ export class AuthService {
         const { tokens: { accessToken, refreshToken }, admin } = response;
         localStorage.setItem(this.TOKEN_KEY, accessToken);
         localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+        localStorage.setItem('admin', JSON.stringify(admin));
         this.currentUserSubject.next(admin);
         this.isAuthenticatedSubject.next(true); // Update authentication status
         console.log('Access Token:', accessToken);
@@ -194,8 +201,16 @@ export class AuthService {
   }
 
   createAdmin(data: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/add`, data);
+    return this.http.post(`${environment.apiUrl}/admin/add`, data);
   }
+
+  updateAdmin(id: string, userData: UserFormData): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/update/id`, userData);
+  }
+
+  // Admin(data: any): Observable<any> {
+  //   return this.http.post(`${environment.apiUrl}/add`, data);
+  // }
 
   editAdmin(id: number, data: any): Observable<any> {
     return this.http.put(`${environment.apiUrl}/edit/${id}`, data);

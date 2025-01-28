@@ -136,7 +136,7 @@ export class AdminFormModalComponent {
       const userData = this.adminForm.value;
 
       const request = this.editingUser 
-        ? this.authService.updateUser(this.editingUser._id, userData)
+        ? this.authService.updateUser(this.editingUser.id, userData)
         : this.authService.createAdmin(userData);
 
       request.subscribe({

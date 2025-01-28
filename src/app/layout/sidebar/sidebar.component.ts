@@ -18,14 +18,110 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
-  @Output() toggleSidebar = new EventEmitter<void>();
-  currentRoute = '';
+  @Output() sidebarToggled = new EventEmitter<void>();
+
+  // toggleSidebar() {
+  //   this.isCollapsed = !this.isCollapsed;
+  //   this.sidebarToggled.emit();
+  // }
+
   menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/main/dashboard',
     },
+    {
+      title: 'Orders',
+      icon: 'ri-file-list-3-line',
+      expanded: false,
+      // roles: ['admin', 'manager'],
+      children: [
+        {
+          title: 'Order Analytics',
+          route: '/main/orders/analytics',
+          icon: 'ri-pie-chart-2-line'
+        },
+         {
+          title: 'Create Order',
+          route: '/main/orders/processing',
+          icon: 'ri-play-list-add-fill'
+        },
+        {
+          title: 'Order List',
+          route: '/main/orders/list',
+          icon: 'ri-file-list-2-line'
+        },
+        {
+          title: 'Sales List',
+          route: '/main/orders/saleslist',
+          icon: 'ri-file-list-2-line'
+        },
+        // {
+        //   title: 'Create Order',
+        //   route: '/main/orders/processing',
+        //   icon: 'ri-play-list-add-fill'
+        // }
+      ]
+    },
+    {
+      title: 'Inventory',
+      icon: 'ri-stock-line',
+      expanded: false,
+      children: [
+        {
+          title: 'Stock Overview',
+          route: '/main/inventory',
+          icon: 'ri-database-2-line'
+        },
+        {
+          title: 'Product List',
+          route: '/main/products/list',
+          icon: 'ri-file-list-2-line'
+        },
+        {
+          title: 'Product Inventory',
+          route: '/main/products/inventory',
+          icon: 'ri-file-list-3-line'
+        },
+        {
+          title: 'Purchase Overview',
+          route: '/main/purchasing',
+          icon: 'ri-order-play-line'
+        },
+        {
+          title: 'Disbursements',
+          route: '/main/inventory/disbursement',
+          icon: 'ri-exchange-funds-line'
+        },
+      
+        
+       
+      ]
+    },
+    // {
+    //   title: 'Products',
+    //   icon: 'ri-bar-chart-2-line',
+    //   expanded: false,
+    //   children: [
+    //     {
+    //       title: 'Product List',
+    //       route: '/main/products/list',
+    //       icon: 'ri-file-list-2-line'
+    //     },
+        
+    //     // {
+    //     //   title: 'Product Categories',
+    //     //   route: '/main/products/categories',
+    //     //   icon: 'ri-pie-chart-2-line'
+    //     // },
+    //     {
+    //       title: 'Product Inventory',
+    //       route: '/main/products/inventory',
+    //       icon: 'ri-file-list-3-line'
+    //     }
+    //   ]
+    // },
     {
       title: 'Transport',
       icon: 'ri-truck-line',
@@ -63,39 +159,43 @@ export class SidebarComponent implements OnInit {
         // }
       ]
     },
+    
+    // {
+    //   title: 'Purchasing',
+    //   icon: 'ri-shopping-cart-2-line',
+    //   expanded: false,
+    //   // roles: ['super_admin', 'manager'],
+    //   children: [
+    //     {
+    //       title: 'Orders',
+    //       route: '/main/purchasing',
+    //       icon: 'ri-order-play-line'
+    //     },
+    //     {
+    //       title: 'Suppliers',
+    //       route: '/main/purchasing/suppliers',
+    //       icon: 'ri-store-2-line'
+    //     }
+    //   ]
+    // },
+
     {
-      title: 'Inventory',
-      icon: 'ri-stock-line',
+      title: 'Customers Mgt',
+      icon: 'ri-user-settings-line',
       expanded: false,
+      // roles: ['admin', 'manager'],
       children: [
         {
-          title: 'Stock Overview',
-          route: '/main/inventory',
-          icon: 'ri-database-2-line'
+          title: 'Customers',
+          route: '/main/customers/list',
+          icon: 'ri-group-line'
         },
         {
-          title: 'Disbursements',
-          route: '/main/inventory/disbursement',
-          icon: 'ri-exchange-funds-line'
-        }
-      ]
-    },
-    {
-      title: 'Purchasing',
-      icon: 'ri-shopping-cart-2-line',
-      expanded: false,
-      roles: ['admin', 'manager'],
-      children: [
-        {
-          title: 'Orders',
-          route: '/main/purchasing',
-          icon: 'ri-order-play-line'
+          title: 'Add Customer',
+          route: '/main/customers/new',
+          icon: 'i-user-add-line'
         },
-        {
-          title: 'Suppliers',
-          route: '/main/purchasing/suppliers',
-          icon: 'ri-store-2-line'
-        }
+       
       ]
     },
     {
@@ -130,71 +230,28 @@ export class SidebarComponent implements OnInit {
         // }
       ]
     },
-    {
-      title: 'Products',
-      icon: 'ri-bar-chart-2-line',
-      expanded: false,
-      children: [
-        {
-          title: 'Product List',
-          route: '/main/products/list',
-          icon: 'ri-file-list-2-line'
-        },
-        // {
-        //   title: 'Product Categories',
-        //   route: '/main/products/categories',
-        //   icon: 'ri-pie-chart-2-line'
-        // },
-        {
-          title: 'Product Inventory',
-          route: '/main/products/inventory',
-          icon: 'ri-file-list-3-line'
-        }
-      ]
-    },
-    {
-      title: 'Orders',
-      icon: 'ri-file-list-3-line',
-      expanded: false,
-      // roles: ['admin', 'manager'],
-      children: [
-        {
-          title: 'Order Analytics',
-          route: '/main/orders/analytics',
-          icon: 'ri-pie-chart-2-line'
-        },
-        {
-          title: 'Order List',
-          route: '/main/orders/list',
-          icon: 'ri-file-list-2-line'
-        },
-        {
-          title: 'Create Order',
-          route: '/main/orders/processing',
-          icon: 'ri-play-list-add-fill'
-        }
-      ]
-    },
+    
+    
 
-    {
-      title: 'Customers Management',
-      icon: 'ri-user-settings-line',
-      expanded: false,
-      // roles: ['admin', 'manager'],
-      children: [
-        {
-          title: 'Customers',
-          route: '/main/customers/list',
-          icon: 'ri-group-line'
-        },
-        {
-          title: 'Add Customer',
-          route: '/main/customers/new',
-          icon: 'i-user-add-line'
-        },
+    // {
+    //   title: 'Customers Management',
+    //   icon: 'ri-user-settings-line',
+    //   expanded: false,
+    //   // roles: ['admin', 'manager'],
+    //   children: [
+    //     {
+    //       title: 'Customers',
+    //       route: '/main/customers/list',
+    //       icon: 'ri-group-line'
+    //     },
+    //     {
+    //       title: 'Add Customer',
+    //       route: '/main/customers/new',
+    //       icon: 'i-user-add-line'
+    //     },
        
-      ]
-    },
+    //   ]
+    // },
 
   
     // {
@@ -203,7 +260,7 @@ export class SidebarComponent implements OnInit {
     //   route: '/main/customers-management',
     // },
     {
-      title: 'Admin Management',
+      title: 'Settings',
       icon: 'ri-user-settings-line',
       route: '/main/user-management',
     },
@@ -216,7 +273,7 @@ export class SidebarComponent implements OnInit {
     router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      this.currentRoute = event.url;
+      // this.currentRoute = event.url;
       this.updateExpandedState();
     });
   }
@@ -225,9 +282,9 @@ export class SidebarComponent implements OnInit {
     this.filterMenuByRole();
   }
 
-  // toggleSidebar(): void {
-  //   this.isCollapsed = !this.isCollapsed;
-  // }
+  toggleSidebar(): void {
+    this.isCollapsed = !this.isCollapsed;
+  }
 
   toggleSubmenu(item: MenuItem): void {
     item.expanded = !item.expanded;

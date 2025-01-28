@@ -10,17 +10,17 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   metrics!: DashboardMetrics;
-  activityLog:any[] = [];
-  alerts:any[] = [];
+  activityLog: any[] = [];
+  alerts: any[] = [];
   loading = true;
   private destroy$ = new Subject<void>();
 
   // Chart Data
-  revenueData:any[] = [];
-  deliveryPerformance:any[] = [];
-  inventoryStatus:any[] = [];
-  vehicleUtilization:any[] = [];
-  fuelConsumption:any[] = [];
+  revenueData: any[] = [];
+  deliveryPerformance: any[] = [];
+  inventoryStatus: any[] = [];
+  vehicleUtilization: any[] = [];
+  fuelConsumption: any[] = [];
 
   // Date Ranges
   dateRanges = [

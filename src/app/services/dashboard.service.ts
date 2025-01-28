@@ -1,116 +1,91 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
-
-export interface DashboardMetrics {
-  transport: {
-    activeDeliveries: number;
-    completedToday: number;
-    totalRevenue: number;
-    deliveryEfficiency: number;
-  };
-  inventory: {
-    totalItems: number;
-    lowStockItems: number;
-    stockValue: number;
-    recentDisbursements: number;
-  };
-  maintenance: {
-    pendingMaintenance: number;
-    maintenanceCosts: number;
-    upcomingServices: number;
-    completedServices: number;
-  };
-  claims: {
-    pendingClaims: number;
-    approvedClaims: number;
-    totalClaimValue: number;
-    processingTime: number;
-  };
-  performance: {
-    onTimeDelivery: number ;
-    fuelEfficiency: number;
-    vehicleUtilization: number;
-    customerSatisfaction: number;
-  };
-}
-
-export interface ActivityLog {
-  id: number;
-  type: string;
-  description: string;
-  timestamp: string;
-  status: string;
-  user: string;
-  module: string;
-}
+import { Observable, of } from 'rxjs';
+import { DashboardMetrics } from '../shared/types/dashboard.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = `${environment.apiUrl}/dashboard`;
-
-  constructor(private http: HttpClient) {}
-
   getMetrics(): Observable<DashboardMetrics> {
-    return this.http.get<DashboardMetrics>(`${this.apiUrl}/metrics`);
+    const metrics: DashboardMetrics = {
+      transport: {
+        activeDeliveries: 25
+      },
+      inventory: {
+        lowStockItems: 10
+      },
+      maintenance: {
+        pendingMaintenance: 5
+      },
+      performance: {
+        onTimeDelivery: 95
+      }
+    };
+    return of(metrics);
   }
 
-  getActivityLogs(params?: any): Observable<ActivityLog[]> {
-    return this.http.get<ActivityLog[]>(`${this.apiUrl}/activity-logs`, { params });
-  }
-
-  getRevenueChart(period: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/charts/revenue`, { 
-      params: { period } 
-    });
-  }
-
-  getDeliveryPerformance(params?: any): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/charts/delivery-performance`, { 
-      params 
-    });
-  }
-
-  getInventoryStatus(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/charts/inventory-status`);
-  }
-
-  getMaintenanceSchedule(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/maintenance-schedule`);
+  getActivityLogs(): Observable<any[]> {
+    const logs = [
+      { id: 1, message: 'Driver John Doe completed a delivery', timestamp: new Date() },
+      { id: 2, message: 'Low stock alert for item ABC123', timestamp: new Date() },
+      { id: 3, message: 'Maintenance scheduled for truck XYZ789', timestamp: new Date() }
+    ];
+    return of(logs);
   }
 
   getAlerts(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/alerts`);
+    const alerts = [
+      { id: 1, message: 'High fuel consumption detected', timestamp: new Date() },
+      { id: 2, message: 'Driver license expiring soon', timestamp: new Date() }
+    ];
+    return of(alerts);
+  }
+
+  getRevenueChart(range: string): Observable<any[]> {
+    const data = [
+      { date: '2023-01-01', revenue: 1000 },
+      { date: '2023-01-02', revenue: 1500 },
+      { date: '2023-01-03', revenue: 2000 }
+    ];
+    return of(data);
+  }
+
+  getDeliveryPerformance(): Observable<any[]> {
+    const data = [
+      { date: '2023-01-01', performance: 90 },
+      { date: '2023-01-02', performance: 85 },
+      { date: '2023-01-03', performance: 95 }
+    ];
+    return of(data);
+  }
+
+  getInventoryStatus(): Observable<any[]> {
+    const data = [
+      { item: 'ABC123', status: 'Low' },
+      { item: 'XYZ789', status: 'Normal' }
+    ];
+    return of(data);
   }
 
   getVehicleUtilization(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/vehicle-utilization`);
+    const data = [
+      { vehicle: 'Truck 1', utilization: 80 },
+      { vehicle: 'Truck 2', utilization: 75 }
+    ];
+    return of(data);
   }
 
-  getFuelConsumption(dateRange?: any): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/fuel-consumption`, {
-      params: dateRange
-    });
-  }
-
-  getCustomerSatisfaction(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/customer-satisfaction`);
+  getFuelConsumption(): Observable<any[]> {
+    const data = [
+      { date: '2023-01-01', consumption: 50 },
+      { date: '2023-01-02', consumption: 60 },
+      { date: '2023-01-03', consumption: 55 }
+    ];
+    return of(data);
   }
 
   exportDashboardReport(format: 'excel' | 'pdf'): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/export/${format}`, {
-      responseType: 'blob'
-    });
-  }
-
-  getUpcomingDeliveries(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/upcoming-deliveries`);
-  }
-
-  getPendingApprovals(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/pending-approvals`);
+    const blob = new Blob(['Mock report data'], { type: 'application/octet-stream' });
+    return of(blob);
   }
 }

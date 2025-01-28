@@ -47,6 +47,10 @@ export class InventoryFormComponent implements OnInit {
     });
   }
 
+  BacktoInventory(){
+    this.router.navigate(['main/inventory/']);
+  }
+
   // Type-safe helper methods for form validation
   hasError(controlName: string, errorType: string): boolean {
     const control = this.inventoryForm.get(controlName);

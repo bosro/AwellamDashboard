@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { InventoryItem, InventoryService } from '../../../services/inventory.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-
+import { Router } from '@angular/router';
 // 
 
 export type StockStatus = 'in-stock' | 'low-stock' | 'out-of-stock';
@@ -34,7 +34,8 @@ export class InventoryListComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.createFilterForm();
   }
@@ -99,6 +100,15 @@ export class InventoryListComponent implements OnInit {
     }
   }
 
+  newDisbursement(){
+    this.router.navigate(['main/inventory/disbursement/']);
+    //  [routerLink]="['main/inventory/disbursement']"
+  }
+
+
+  addInventory(){
+    this.router.navigate(['main/inventory/new/']);
+  }
   private createFilterForm(): void {
     this.filterForm = this.fb.group({
       searchTerm: [''],

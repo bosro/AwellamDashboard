@@ -52,6 +52,20 @@ export class CustomerListComponent implements OnInit {
   }
 
 
+  // deleteCustomer(){
+
+  // }
+
+  deleteCustomer(id: string): void {
+  
+    if (confirm('Are you sure you want to delete this customer?')) {
+      this.customersService.deleteCustomer(id).subscribe({
+        next: () => this.loadCustomers(),
+        error: (error) => console.error('Error deleting order:', error)
+      });
+    }
+  }
+
 
   private setupFilters(): void {
     this.filterForm.valueChanges

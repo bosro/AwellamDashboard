@@ -4,23 +4,32 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
-  _id?: string;
-  customerId: string;
+  _id: string;
+  customerId: {
+    _id: string;
+    fullName: string;
+    phoneNumber: number;
+  };
   orderItems: {
-    product: string;
+    product: {
+      _id: string;
+      name: string;
+    };
     quantity: number;
-    price: string;
+    price: number; // Changed to number
+    _id: string;
   }[];
   deliveryAddress: string;
-  totalAmount: string;
-  status?: string;
-  paymentStatus?: string;
-  deliveryStatus?: string;
-  orderNumber?: string;
-  date?: string;
+  totalAmount: number; // Changed to number
+  status: string;
+  paymentStatus: string;
+  deliveryStatus: string;
+  orderNumber: string;
+  date: string;
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface OrderResponse {
   message: string;
@@ -82,7 +91,7 @@ export class OrdersService {
   }
 
   deleteOrder(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/orders/${id}`);
   }
 
   createOrder(orderData: any): Observable<Order> {

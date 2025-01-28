@@ -1,37 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
-// import {transportService} from '../../../services/transport.service'
-import { Truck } from '../../../services/driver.service';
-
-
-// Use the previously defined Truck interface
-import {TruckResponse } from '../../../shared/types/truck-operation.types';
-import { TransportService } from '../../../services/driver.service';
-
+import { TruckService } from '../../../services/truck.service';
+import { Truck } from '../../../shared/types/truck-operation.types';
 @Component({
   selector: 'app-truck-management',
-  templateUrl: './truck-management.component.html',
-  styleUrls: ['./truck-management.component.scss']
+  templateUrl: './truck-management.component.html'
 })
 export class TruckManagementComponent implements OnInit {
-  trucks: Truck[] =[];
-  selectedTrucks: Set<string> = new Set(); // Changed to use _id
+  trucks: Truck[] = [];
+  selectedTrucks: Set<string> = new Set();
   loading = false;
   filterForm!: FormGroup;
 
   constructor(
-    private http: HttpClient,
     private fb: FormBuilder,
-    private transportService: TransportService ,
-    private router: Router // Inject TransportService
+    private truckService: TruckService,
+    private router: Router
   ) {}
+
   ngOnInit(): void {
     this.createFilterForm();
     this.loadTrucks();
+    this.filterForm.valueChanges.subscribe(() => {
+      this.loadTrucks();
+    });
   }
 
   createFilterForm(): void {
@@ -41,19 +34,13 @@ export class TruckManagementComponent implements OnInit {
     });
   }
 
-
-  viewDetails(truckId: string): void {
-    this.router.navigate(['/trips/:id', truckId]);
-  }
-
   loadTrucks(): void {
     this.loading = true;
-    const params = this.filterForm.value; // Use filter form values as params
-    this.transportService.getTrucks(params).subscribe({
+    const params = this.filterForm.value;
+    this.truckService.getTrucks(params).subscribe({
       next: (response) => {
         this.trucks = response.trucks;
         this.loading = false;
-        console.log(this.trucks)
       },
       error: (error) => {
         console.error('Error loading trucks:', error);
@@ -61,22 +48,14 @@ export class TruckManagementComponent implements OnInit {
       }
     });
   }
-  // Modify methods to use _id
-  toggleSelection(truckId: string): void {
-    if (this.selectedTrucks.has(truckId)) {
-      this.selectedTrucks.delete(truckId);
-    } else {
-      this.selectedTrucks.add(truckId);
-    }
-  }
 
-  // Update status method
   updateTruckStatus(truckId: string, status: Truck['status']): void {
-    // Implement API call to update truck status
-    console.log(`Updating truck ${truckId} to status ${status}`);
+    this.truckService.updateTruck(truckId, { status }).subscribe({
+      next: () => this.loadTrucks(),
+      error: (error) => console.error('Error updating truck status:', error)
+    });
   }
 
-  // Utility methods
   getOperationalCount(): number {
     return this.trucks.filter(truck => truck.status === 'active').length;
   }
@@ -85,7 +64,6 @@ export class TruckManagementComponent implements OnInit {
     return this.trucks.filter(truck => truck.status === 'maintenance').length;
   }
 
-  // Status and styling methods remain similar to previous implementation
   getStatusClass(status: Truck['status']): string {
     const classes: Record<Truck['status'], string> = {
       'active': 'bg-green-100 text-green-800',
@@ -94,4 +72,21 @@ export class TruckManagementComponent implements OnInit {
     };
     return classes[status] || '';
   }
+
+  viewTruckDetails(id: string): void {
+    this.router.navigate(['main/transport/trucks/details/', id]);
+  }
+
+  addTruck(): void {
+    this.router.navigate(['main/transport/trucks/new/']);
+  }
+  deleteTruck(id: string): void {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.truckService.deleteTruck(id).subscribe({
+        next: () => this.loadTrucks(),
+        error: (error) => console.error('Error deleting user:', error)
+      });
+    }
+  }
+  
 }

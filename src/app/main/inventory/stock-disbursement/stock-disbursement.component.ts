@@ -74,6 +74,10 @@ export class StockDisbursementComponent implements OnInit {
     }
   }
 
+  BacktoInventory(){
+    this.router.navigate(['main/inventory/']);
+  }
+
   private loadInventoryItems(): void {
     this.loading = true;
     this.inventoryService.getInventoryItems().subscribe({

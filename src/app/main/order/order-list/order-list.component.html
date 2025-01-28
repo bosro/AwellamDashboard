@@ -82,67 +82,79 @@
       <tr>
         <th scope="col" class="px-6 py-3">
           <div class="flex items-center">
-            <input
+            <p>Number</p>
+            <!-- <input
               type="checkbox"
               [checked]="selectedOrders.size === orders.length"
               (change)="toggleAllSelection()"
-              class="h-4 w-4 rounded border-gray-300 text-blue-600">
+              class="h-4 w-4 rounded border-gray-300 text-blue-600"> -->
           </div>
         </th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Ref</th>
+        
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+        
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+        <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th> -->
         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>
     <tbody class="bg-white divide-y divide-gray-200">
-      <tr *ngFor="let order of orders">
+      <tr *ngFor="let order of orders ;let i = index">
+
+
         <td class="px-6 py-4">
-          <div class="flex items-center">
+          <div >
+            {{i+1}}
+          </div>
+          <!-- <div class="flex items-center">
             <input
               type="checkbox"
               [checked]="selectedOrders.has(order._id)"
               (change)="toggleSelection(order._id)"
               class="h-4 w-4 rounded border-gray-300 text-blue-600">
-          </div>
-        </td>
-        <td class="px-6 py-4">
-          <div class="text-sm font-medium text-gray-900">{{order.orderNumber}}</div>
-          <div class="text-sm text-gray-500">{{order.orderItems.length}} items</div>
+          </div> -->
         </td>
         <td class="px-6 py-4">
           <div class="text-sm font-medium text-gray-900">{{order.customerId.fullName}}</div>
           <div class="text-sm text-gray-500">Phone: {{order.customerId.phoneNumber}}</div>
         </td>
         <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+          <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{order.orderNumber}}</div>
+          <!-- <div class="text-sm text-gray-500">{{order.orderItems.length}} items</div> -->
+        </td>
+       
+        <td class="px-6 py-4">
           <div class="text-sm text-gray-900">{{order.date | date:'mediumDate'}}</div>
           <div class="text-xs text-gray-500">{{order.date | date:'shortTime'}}</div>
         </td>
-        <td class="px-6 py-4">
-          <div class="text-sm font-medium text-gray-900">${{order.totalAmount}}</div>
-        </td>
+        <!-- <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+        </td> -->
         <td class="px-6 py-4">
           <span [ngClass]="getStatusClass(order.status)"
                 class="px-2 py-1 text-xs font-medium rounded-full">
             {{order.status}}
           </span>
         </td>
-        <td class="px-6 py-4">
+        <!-- <td class="px-6 py-4">
           <span [ngClass]="getPaymentStatusClass(order.paymentStatus)"
                 class="px-2 py-1 text-xs font-medium rounded-full">
             {{order.paymentStatus}}
           </span>
-        </td>
+        </td> -->
         <td class="px-6 py-4 text-right text-sm font-medium">
           <div class="flex justify-end space-x-3">
             <button 
   [routerLink]="['/main/orders/edit', order?._id]"
-  class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 mr-3">
-  <i class="ri-edit-line mr-2"></i>
-  Edit Order
+  class="  text-yellow-600 hover:text-yellow-700 ">
+  <i class="ri-edit-line "></i>
 </button>
             <button 
               [routerLink]="['/main/orders/details', order._id]"
