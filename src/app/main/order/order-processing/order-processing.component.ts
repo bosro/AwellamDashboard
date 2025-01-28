@@ -59,7 +59,7 @@ export class OrderProcessingComponent implements OnInit {
   private fetchProductsAndCustomers(): void {
     this.loading = true;
     forkJoin({
-      products: this.http.get<any>(`${this.apiUrl}/products`),
+      products: this.http.get<any>(`${this.apiUrl}/products/get`),
       customers: this.http.get<any>(`${this.apiUrl}/customers/get`)
     }).subscribe({
       next: ({ products, customers }) => {
