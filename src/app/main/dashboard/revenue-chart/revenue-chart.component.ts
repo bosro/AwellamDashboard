@@ -14,6 +14,7 @@ interface ChartData {
 export class RevenueChartComponent implements OnInit, OnChanges {
   @Input() data: any[] = [];
   @Input() loading = false;
+  @Input() metrics: any = {};
 
   filterForm!: FormGroup;
   chartData: ChartData[] = [];
@@ -47,13 +48,6 @@ export class RevenueChartComponent implements OnInit, OnChanges {
     { id: 'previousPeriod', name: 'Previous Period' },
     { id: 'lastYear', name: 'Last Year' }
   ];
-
-  metrics = {
-    totalRevenue: 0,
-    averageRevenue: 0,
-    growth: 0,
-    peakRevenue: 0
-  };
 
   constructor(private fb: FormBuilder) {
     this.createFilterForm();
@@ -93,9 +87,6 @@ export class RevenueChartComponent implements OnInit, OnChanges {
       name: this.formatDate(item.date, viewType),
       value: item.revenue
     }));
-
-    // Calculate metrics
-    this.calculateMetrics(processedData);
 
     // Add comparison data if selected
     if (showComparison) {
@@ -147,23 +138,6 @@ export class RevenueChartComponent implements OnInit, OnChanges {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  }
-
-  private calculateMetrics(data: any[]): void {
-    const values = data.map(item => item.value);
-    this.metrics = {
-      totalRevenue: values.reduce((a, b) => a + b, 0),
-      averageRevenue: values.reduce((a, b) => a + b, 0) / values.length,
-      peakRevenue: Math.max(...values),
-      growth: this.calculateGrowth(values)
-    };
-  }
-
-  private calculateGrowth(values: number[]): number {
-    if (values.length < 2) return 0;
-    const firstValue = values[0];
-    const lastValue = values[values.length - 1];
-    return ((lastValue - firstValue) / firstValue) * 100;
   }
 
   private getComparisonData(): any[] {

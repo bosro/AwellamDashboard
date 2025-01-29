@@ -1,37 +1,40 @@
 <div class="h-screen flex overflow-hidden bg-gray-100">
-    <!-- Sidebar -->
-    <app-sidebar [class.hidden]="!isSidebarOpen" class="md:flex"></app-sidebar>
-  
-    <!-- Main Content -->
-    <div class="flex flex-col w-0 flex-1 overflow-hidden">
-      <!-- Header -->
-      <app-header></app-header>
-  
-      <!-- Page Content -->
-      <main class="flex-1 relative overflow-y-auto focus:outline-none">
-        <!-- Page Title -->
-        <div class="py-6">
-          <div class="max-w-full mx-auto px-4 sm:px-6 md:px-8">
-            <!-- <h1 class="text-2xl font-semibold text-gray-900">{{pageTitle}}</h1> -->
-          </div>
-          
-          <!-- Content -->
-          <div class="max-w-full mx-auto px-4 sm:px-6 md:px-8">
-            <router-outlet></router-outlet>
-          </div>
+  <!-- Sidebar - Modified classes for better mobile handling -->
+  <app-sidebar 
+    [class.hidden]="!isSidebarOpen" 
+    class="fixed inset-y-0 left-0 z-40 lg:relative lg:flex lg:flex-shrink-0"
+  ></app-sidebar>
+
+  <!-- Main Content - Adjusted to handle sidebar state -->
+  <div class="flex flex-col flex-1 w-full overflow-hidden">
+    <!-- Header -->
+    <app-header></app-header>
+
+    <!-- Page Content -->
+    <main class="flex-1 relative overflow-y-auto focus:outline-none">
+      <!-- Page Title -->
+      <div class="py-6">
+        <div class="max-w-full mx-auto px-4 sm:px-6 md:px-8">
+          <!-- <h1 class="text-2xl font-semibold text-gray-900">{{pageTitle}}</h1> -->
         </div>
-      </main>
-  
-      <!-- Footer -->
-      <app-footer></app-footer>
-    </div>
+        
+        <!-- Content - Adjusted padding for mobile -->
+        <div class="max-w-full mx-auto px-4 sm:px-6 md:px-8">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <app-footer></app-footer>
   </div>
-  
-  <!-- Loading Overlay -->
-  <div *ngIf="loading" 
-       class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 flex items-center">
-      <i class="ri-loader-4-line animate-spin text-3xl text-blue-600 mr-3"></i>
-      <span class="text-gray-700">Loading...</span>
-    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div *ngIf="loading" 
+     class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 flex items-center">
+    <i class="ri-loader-4-line animate-spin text-3xl text-blue-600 mr-3"></i>
+    <span class="text-gray-700">Loading...</span>
   </div>
+</div>

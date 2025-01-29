@@ -110,6 +110,7 @@ const routes: Routes = [
     HeaderComponent,
     FooterComponent,
     SidebarComponent,
+    
   ],
   imports: [
     CommonModule,
