@@ -81,7 +81,7 @@ export class TruckManagementComponent implements OnInit {
     this.router.navigate(['main/transport/trucks/new/']);
   }
   deleteTruck(id: string): void {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm('Are you sure you want to delete this truck?')) {
       this.truckService.deleteTruck(id).subscribe({
         next: () => this.loadTrucks(),
         error: (error) => console.error('Error deleting user:', error)

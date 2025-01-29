@@ -25,9 +25,9 @@ export class OrderEditComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
-      driverId: ['', Validators.required],
-      status: ['', Validators.required],
-      deliveryAddress: ['', Validators.required]
+      assignedTruck: ['', Validators.required],
+      // status: ['', Validators.required],
+      price: ['', Validators.required]
     });
   }
 
@@ -45,9 +45,9 @@ export class OrderEditComponent implements OnInit {
       next: (response) => {
         this.order = response.order;
         this.orderForm.patchValue({
-          status: this.order.status,
-          deliveryAddress: this.order.deliveryAddress,
-          driverId: this.order.driverId?._id
+          // status: this.order.status,
+          price: this.order.price,
+          assignedTruck: this.order.driverId?._id
         });
         this.loading = false;
       },
@@ -61,7 +61,7 @@ export class OrderEditComponent implements OnInit {
   loadDrivers(): void {
     this.http.get<any>(`${environment.apiUrl}/driver/get`).subscribe({
       next: (response) => {
-        this.drivers = response.drivers;
+        this.drivers = response.drivers.filter((driver: any) => driver.status === 'active');
       },
       error: (error) => console.error('Error loading drivers:', error)
     });

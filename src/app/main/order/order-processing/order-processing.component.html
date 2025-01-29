@@ -13,63 +13,101 @@
   </div>
 
   <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- Product Search -->
+    <!-- Plant Selection -->
     <div class="bg-white rounded-lg shadow">
       <div class="p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Products</h2>
-        <div class="space-y-4">
-          <!-- Product Select -->
-          <div class="relative">
-            <label for="product" class="block text-sm font-medium text-gray-700 mb-1">Select Product</label>
-            <select
-              id="product"
-              formControlName="product"
-              (change)="onProductSelect($event)"
-              class="w-full pl-10 pr-4 py-2 border rounded-lg"
-              [disabled]="loading">
-              <option value="">Select a product</option>
-              <option *ngFor="let product of products" [value]="product._id">
-                {{product.name}} - ${{product.price}}
-              </option>
-            </select>
-            <div *ngIf="loading" class="text-sm text-gray-500 mt-1">Loading products...</div>
-          </div>
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Select Plant</h2>
+        <div class="relative">
+          <label for="plant" class="block text-sm font-medium text-gray-700 mb-1">Plant</label>
+          <select
+            id="plant"
+            formControlName="plant"
+            (change)="onPlantSelect($event)"
+            class="w-full pl-10 pr-4 py-2 border rounded-lg"
+            [disabled]="loading">
+            <option value="">Select a plant</option>
+            <option *ngFor="let plant of plants" [value]="plant._id">
+              {{plant.name}}
+            </option>
+          </select>
+          <div *ngIf="loading" class="text-sm text-gray-500 mt-1">Loading plants...</div>
+        </div>
+      </div>
+    </div>
 
-          <!-- Selected Products List -->
-          <div *ngIf="items.length > 0" class="mt-4">
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Selected Products</h3>
-            <div class="space-y-2">
-              <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" 
-                   class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <span class="font-medium" formControlName="name">{{item.get('name')?.value}}</span>
-                  <div class="flex items-center mt-1">
-                    <div class="px-4">
-                      <input 
-                      type="number" 
-                      formControlName="quantity"
-                      class="w-30 px-3 py-1 border rounded-md mr-2"
-                      placeholder="Quantity"
-                      min="1">
-                    <span class="text-sm text-gray-600">
-                      x ${{item.get('price')?.value}} = ${{item.get('total')?.value}}
-                    </span>
-                    <button type="button" (click)="removeItem(i)" 
-                    class="text-red-600 hover:text-red-800">
-              <i class="ri-delete-bin-line"></i>
-            </button>
+    <!-- Category Selection -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Select Category</h2>
+        <div class="relative">
+          <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <select
+            id="category"
+            formControlName="category"
+            (change)="onCategorySelect($event)"
+            class="w-full pl-10 pr-4 py-2 border rounded-lg"
+            [disabled]="loading || !orderForm.get('plant')?.value">
+            <option value="">Select a category</option>
+            <option *ngFor="let category of categories" [value]="category._id">
+              {{category.name}}
+            </option>
+          </select>
+          <div *ngIf="loading" class="text-sm text-gray-500 mt-1">Loading categories...</div>
+        </div>
+      </div>
+    </div>
 
-                    </div>
-                   
-                    <input 
-                    type="number" 
-                    formControlName="price"
-                    class="w-30 px-3 py-1 border rounded-md mr-2"
-                    placeholder="Price"
-                    min="1">
-                  </div>
-                </div>
-               
+    <!-- Product Selection -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Select Product</h2>
+        <div class="relative">
+          <label for="product" class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+          <select
+            id="product"
+            formControlName="product"
+            (change)="onProductSelect($event)"
+            class="w-full pl-10 pr-4 py-2 border rounded-lg"
+            [disabled]="loading || !orderForm.get('category')?.value">
+            <option value="">Select a product</option>
+            <option *ngFor="let product of products" [value]="product._id">
+              {{product.name}} - ${{product.price}}
+            </option>
+          </select>
+          <div *ngIf="loading" class="text-sm text-gray-500 mt-1">Loading products...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected Products List -->
+    <div *ngIf="items.length > 0" class="mt-4">
+      <h3 class="text-sm font-medium text-gray-700 mb-2">Selected Products</h3>
+      <div class="space-y-2">
+        <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" 
+             class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div>
+            <span class="font-medium" formControlName="name">{{item.get('name')?.value}}</span>
+            <div class="flex items-center mt-1">
+              <input 
+                type="number" 
+                formControlName="price"
+                class="w-30 px-3 py-1 border rounded-md mr-2"
+                placeholder="Price"
+                min="1">
+              <div class="px-4">
+                <input 
+                  type="number" 
+                  formControlName="quantity"
+                  class="w-30 px-3 py-1 border rounded-md mr-2"
+                  placeholder="Quantity"
+                  min="1">
+                <span class="text-sm text-gray-600">
+                  x GHC {{item.get('price')?.value}} = ${{item.get('total')?.value}}
+                </span>
+                <button type="button" (click)="removeItem(i)" 
+                        class="text-red-600 hover:text-red-800">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -109,30 +147,6 @@
               class="w-full px-4 py-2 border rounded-lg bg-gray-50"
               readonly>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              formControlName="email"
-              class="w-full px-4 py-2 border rounded-lg bg-gray-50"
-              readonly>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input
-              type="tel"
-              formControlName="phone"
-              class="w-full px-4 py-2 border rounded-lg bg-gray-50"
-              readonly>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-            <input
-              type="text"
-              formControlName="address"
-              class="w-full px-4 py-2 border rounded-lg bg-gray-50"
-              readonly>
-          </div>
         </div>
       </div>
     </div>
@@ -155,18 +169,6 @@
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
         <div class="space-y-4">
-          <!-- <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Subtotal</span>
-            <span class="text-gray-900">${{getSubtotal() | number:'1.2-2'}}</span>
-          </div> -->
-          <!-- <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Shipping</span>
-            <span class="text-gray-900">${{getShippingCost() | number:'1.2-2'}}</span>
-          </div> -->
-          <!-- <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Tax</span>
-            <span class="text-gray-900">${{getTax() | number:'1.2-2'}}</span>
-          </div> -->
           <div class="pt-4 flex justify-between text-lg font-semibold border-t">
             <span>Total</span>
             <span>GHC {{getTotal() | number:'1.2-2'}}</span>

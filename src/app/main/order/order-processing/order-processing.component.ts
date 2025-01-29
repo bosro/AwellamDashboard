@@ -5,7 +5,6 @@ import { OrdersService } from '../../../services/order.service';
 import { forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-// import 
 
 @Component({
   selector: 'app-order-processing',
@@ -17,6 +16,8 @@ export class OrderProcessingComponent implements OnInit {
   saving = false;
   products: any[] = [];
   customers: any[] = [];
+  plants: any[] = [];
+  categories: any[] = [];
   selectedProduct: any;
   selectedCustomer: any;
   quantity: number = 1;
@@ -33,6 +34,8 @@ export class OrderProcessingComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
+      plant: ['', Validators.required],
+      category: ['', Validators.required],
       product: ['', Validators.required],
       quantity: [1, [Validators.required, Validators.min(1)]],
       customer: this.fb.group({
@@ -40,7 +43,7 @@ export class OrderProcessingComponent implements OnInit {
         name: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         phone: ['', Validators.required],
-        address: ['', Validators.required]
+        address: ['', Validators.required],
       }),
       items: this.fb.array([]),
       notes: ['']
@@ -48,27 +51,62 @@ export class OrderProcessingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fetchProductsAndCustomers();
-    
+    this.fetchPlantsAndCustomers();
     this.orderForm.get('quantity')?.valueChanges.subscribe(value => {
       this.quantity = value;
       this.calculateTotal();
     });
   }
 
-  private fetchProductsAndCustomers(): void {
+  private fetchPlantsAndCustomers(): void {
     this.loading = true;
     forkJoin({
-      products: this.http.get<any>(`${this.apiUrl}/products/get`),
+      plants: this.http.get<any>(`${this.apiUrl}/plants/get`),
       customers: this.http.get<any>(`${this.apiUrl}/customers/get`)
     }).subscribe({
-      next: ({ products, customers }) => {
-        this.products = products.products;
+      next: ({ plants, customers }) => {
+        this.plants = plants.plants;
         this.customers = customers.customers;
       },
       error: (error) => console.error('Error fetching data:', error),
       complete: () => this.loading = false
     });
+  }
+
+  onPlantSelect(event: any): void {
+    const plantId = event.target.value;
+    if (plantId) {
+      this.loading = true;
+      this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
+        next: (response) => {
+          this.categories = response.categories;
+          this.orderForm.patchValue({ category: '' });
+        },
+        error: (error) => console.error('Error loading categories:', error),
+        complete: () => this.loading = false
+      });
+    } else {
+      this.categories = [];
+      this.orderForm.patchValue({ category: '' });
+    }
+  }
+
+  onCategorySelect(event: any): void {
+    const categoryId = event.target.value;
+    if (categoryId) {
+      this.loading = true;
+      this.http.get<any>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
+        next: (response) => {
+          this.products = response.products;
+          this.orderForm.patchValue({ product: '' });
+        },
+        error: (error) => console.error('Error loading products:', error),
+        complete: () => this.loading = false
+      });
+    } else {
+      this.products = [];
+      this.orderForm.patchValue({ product: '' });
+    }
   }
 
   get items(): FormArray {
@@ -81,11 +119,17 @@ export class OrderProcessingComponent implements OnInit {
       name: [product.name],
       quantity: [1, [Validators.required, Validators.min(1)]],
       price: [product.price],
-      total: [product.price]
+      total: [product.price],
     });
 
     itemGroup.get('quantity')?.valueChanges.subscribe(qty => {
       const price = itemGroup.get('price')?.value || 0;
+      itemGroup.patchValue({ total: (qty || 0) * price }, { emitEvent: false });
+      this.calculateOrderTotals();
+    });
+
+    itemGroup.get('price')?.valueChanges.subscribe(price => {
+      const qty = itemGroup.get('quantity')?.value || 0;
       itemGroup.patchValue({ total: (qty || 0) * price }, { emitEvent: false });
       this.calculateOrderTotals();
     });
@@ -103,20 +147,8 @@ export class OrderProcessingComponent implements OnInit {
     this.subtotal = this.items.controls.reduce((total, control) => 
       total + (control.get('total')?.value || 0), 0);
     this.tax = this.subtotal * 0.1;
-    // this.total = this.subtotal + this.tax + this.getShippingCost();
+    this.total = this.subtotal + this.tax;
   }
-
-  // getShippingCost(): number {
-  //   return 10;
-  // }
-
-  // getSubtotal(): number {
-  //   return this.subtotal;
-  // }
-
-  // getTax(): number {
-  //   return this.tax;
-  // }
 
   getTotal(): number {
     return this.total;
@@ -165,7 +197,11 @@ export class OrderProcessingComponent implements OnInit {
           price: item.price
         })),
         deliveryAddress: this.orderForm.value.customer.address,
-        totalAmount: this.getTotal()
+        totalAmount: this.getTotal(),
+        notes: this.orderForm.value.notes,
+        plantId: this.orderForm.value.plantId,
+        categoryId: this.orderForm.value.plantId,
+
       };
 
       this.ordersService.createOrder(orderData).subscribe({
