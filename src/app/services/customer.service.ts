@@ -3,6 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Customer, } from '../shared/types/customer.interface';
 import { environment } from '../environments/environment';
+import { Order } from './order.service';
+
+export interface OrderResponse {
+  message: string;
+  orders: Order[];
+}
 
 
 @Injectable({
@@ -39,8 +45,8 @@ export class CustomersService {
     return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 
-  getCustomerOrders(id: string, params?: any): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}/orders`, { params });
+  getCustomerOrders(id: string, params?: any): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/${id}/orders`, { params });
   }
 
 

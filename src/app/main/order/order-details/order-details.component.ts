@@ -33,6 +33,7 @@ interface Order {
   updatedAt: string;
   orderNumber: string;
   assignedTruck?: string | null;
+  assignedDriver?: string
 }
 
 interface OrderResponse {

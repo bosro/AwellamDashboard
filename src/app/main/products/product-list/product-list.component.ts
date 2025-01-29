@@ -14,7 +14,7 @@ interface Category {
   templateUrl: './product-list.component.html'
 })
 export class ProductListComponent implements OnInit {
-  products: Product[] = [];
+  products!: Product[];
   loading = false;
   total = 0;
   pageSize = 10;
@@ -77,7 +77,10 @@ export class ProductListComponent implements OnInit {
   
     this.productsService.getProducts().subscribe({
       next: (response) => {
-        this.products = response.products; // Use the 'products' field from the API response
+        this.products = response.products.map(product => ({
+          ...product,
+          categoryId: product.categoryId // Ensure categoryId is a string
+        })); // Use the 'products' field from the API response
         this.total = response.products.length; // Set total based on the array size if pagination is not provided in the API
         this.loading = false;
       },
@@ -98,7 +101,7 @@ export class ProductListComponent implements OnInit {
   // }
 
   deleteProduct(productId: string): void {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm('Are you sure you want to delete this product?')) {
       this.productsService.deleteProduct(productId).subscribe({
         next: () => this.loadProducts(),
         error: (error) => console.error('Error deleting user:', error)
@@ -158,7 +161,7 @@ toggleStock(productId: string): void {
       product._id,
       product.name,
       product.price,
-      product.description,
+      product.categoryId,
       product.inStock ? 'Yes' : 'No',
       product.image
     ]);

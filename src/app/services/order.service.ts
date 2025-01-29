@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
+items: any;
   _id: string;
   customerId: {
     _id: string;

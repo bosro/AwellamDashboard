@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomersService } from '../../../services/customer.service';
 import { Customer, } from '../../../shared/types/customer.interface';
+import { Order } from '../../../services/order.service';
+// import {OrderResponse} from  '../../../services/order.service'
 
 interface CustomerOrder {
   id: string;
@@ -12,6 +14,11 @@ interface CustomerOrder {
   items: OrderItem[];
   status: OrderStatus;
   discount?: number;
+}
+
+export interface OrderResponse {
+  message: string;
+  orders: Order[];
 }
 
 interface OrderItem {
@@ -59,7 +66,7 @@ export class CustomerDetailsComponent implements OnInit {
   loading = false;
   tabs: Array<'overview' | 'orders' | 'communications' | 'notes'> = ['overview', 'orders', 'communications', 'notes'];
   activeTab: 'overview' | 'orders' | 'communications' | 'notes' = 'overview';
-  orders: CustomerOrder[] = [];
+  // orders: CustomerOrder[] = [];
   communications: Communication[] = [];
   showNoteForm = false;
   showEmailForm = false;
@@ -68,6 +75,7 @@ export class CustomerDetailsComponent implements OnInit {
   showAddPaymentForm = false;
   noteForm: FormGroup;
   emailForm: FormGroup;
+  orders: Order[] = [];
   
 
   
@@ -198,18 +206,19 @@ export class CustomerDetailsComponent implements OnInit {
 
     // Load orders
     this.customersService.getCustomerOrders(this.customer._id).subscribe({
-      next: (orders: CustomerOrder[]) => {
-        this.orders = orders;
+      next: (response) => {
+        this.orders = response.orders;
         this.calculateMetrics();
+        // console.log(this.orders)
       }
     });
 
     // Load communications
-    this.customersService.getCommunicationHistory(this.customer._id).subscribe({
-      next: (communications) => {
-        this.communications = communications;
-      }
-    });
+    // this.customersService.getCommunicationHistory(this.customer._id).subscribe({
+    //   next: (communications) => {
+    //     this.communications = communications;
+    //   }
+    // });
   }
 
   private calculateMetrics(): void {
@@ -227,13 +236,13 @@ export class CustomerDetailsComponent implements OnInit {
     const orderDates = this.orders.map(o => new Date(o.createdAt));
     const lastPurchaseDate = new Date(Math.max(...orderDates.map(date => date.getTime())));
 
-    this.customerMetrics = {
-      lifetimeValue: this.orders.reduce((sum, order) => sum + order.total, 0),
-      averageOrderValue: this.orders.reduce((sum, order) => sum + order.total, 0) / this.orders.length,
-      orderFrequency: this.calculateOrderFrequency(this.orders),
-      lastPurchaseDate,
-      purchaseHistory: this.aggregatePurchaseHistory(this.orders)
-    };
+    // this.customerMetrics = {
+    //   lifetimeValue: this.orders.reduce((sum, order) => sum + order.total, 0),
+    //   averageOrderValue: this.orders.reduce((sum, order) => sum + order.total, 0) / this.orders.length,
+    //   orderFrequency: this.calculateOrderFrequency(this.orders),
+    //   lastPurchaseDate,
+    //   purchaseHistory: this.aggregatePurchaseHistory(this.orders)
+    // };
   }
 
   private calculateOrderFrequency(orders: CustomerOrder[]): number {

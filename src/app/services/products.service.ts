@@ -4,15 +4,21 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 
+
 export interface Product {
+  plantId: any;
   _id: string;
   name: string;
   price: number;
-  description: string;
+  categoryId: {
+    _id: string;
+    name: string;
+  };
   inStock: boolean;
   totalStock: number;
   image: string;
 }
+
 
 export interface ProductsResponse {
   message: string;

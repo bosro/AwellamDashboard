@@ -55,7 +55,7 @@ export class OrderListComponent implements OnInit {
     this.loading = true;
     this.ordersService.getOrders().subscribe({
       next: (response) => {
-        this.orders = response.orders;
+        this.orders = response.orders.filter(order => order.status === 'PENDING');
         this.loading = false;
       },
       error: (error) => {

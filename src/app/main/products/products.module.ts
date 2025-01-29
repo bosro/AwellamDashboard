@@ -8,6 +8,8 @@ import { ProductDetailsComponent } from './product-details/product-details.compo
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ObjectUrlPipe } from '../../shared/pipe/object-url.pipe';
 import { SharedModule } from '../../shared/shared.module';
+import { PlantFormComponent } from './product-form/plant-form.component';
+import { CategoryFormComponent } from './product-form/category-form.component';
 
 
 @NgModule({
@@ -15,6 +17,8 @@ import { SharedModule } from '../../shared/shared.module';
     ProductListComponent,
     ProductFormComponent,
     ProductDetailsComponent,
+    PlantFormComponent,
+    CategoryFormComponent,
     ObjectUrlPipe
   ],
   imports: [

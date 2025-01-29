@@ -27,7 +27,7 @@
         </span>
       </div>
       <div>
-        <h3 class="text-sm font-medium text-gray-500">Capacity</h3>
+        <h3 class="text-sm font-medium text-gray-500">Bags</h3>
         <p class="mt-1 text-lg">{{truck.capacity}}</p>
       </div>
       <div>
@@ -45,7 +45,7 @@
       <h3 class="text-lg font-medium mb-4">Load Truck</h3>
       <form [formGroup]="loadForm" (ngSubmit)="loadTruck()" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Capacity</label>
+          <label class="block text-sm font-medium text-gray-700">Bags</label>
           <input 
             type="number" 
             formControlName="capacity"
