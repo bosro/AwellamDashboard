@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 
 interface ChartData {
@@ -19,6 +19,8 @@ export class RevenueChartComponent implements OnInit, OnChanges {
   filterForm!: FormGroup;
   chartData: ChartData[] = [];
   view: [number, number] = [700, 300];
+  chartHeight = '400px';
+
 
   // Chart options
   legend = true;
@@ -33,10 +35,8 @@ export class RevenueChartComponent implements OnInit, OnChanges {
   timeline = true;
   showGridLines = true;
 
-  colorScheme = {
-    domain: '#3B82F6'
-    // domain: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444']
-  };
+  colorScheme = 'cool'
+  
 
   viewOptions = [
     { id: 'daily', name: 'Daily' },
@@ -49,18 +49,54 @@ export class RevenueChartComponent implements OnInit, OnChanges {
     { id: 'lastYear', name: 'Last Year' }
   ];
 
+
+
   constructor(private fb: FormBuilder) {
     this.createFilterForm();
+    this.updateChartDimensions();
   }
-
   ngOnInit(): void {
     this.processChartData();
+    this.updateChartDimensions();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && !changes['data'].firstChange) {
       this.processChartData();
     }
+  }
+
+  
+
+  private updateChartDimensions(): void {
+    // Get the container width
+    const containerWidth = window.innerWidth;
+    let chartWidth: number;
+    let chartHeight: number;
+
+    // Adjust dimensions based on screen size
+    if (containerWidth < 640) { // Mobile
+      chartWidth = containerWidth - 32; // Accounting for padding
+      chartHeight = 300;
+      this.legend = false;
+      this.showYAxisLabel = false;
+      this.showXAxisLabel = false;
+    } else if (containerWidth < 1024) { // Tablet
+      chartWidth = containerWidth - 48;
+      chartHeight = 350;
+      this.legend = true;
+      this.showYAxisLabel = true;
+      this.showXAxisLabel = true;
+    } else { // Desktop
+      chartWidth = containerWidth - 64;
+      chartHeight = 400;
+      this.legend = true;
+      this.showYAxisLabel = true;
+      this.showXAxisLabel = true;
+    }
+
+    this.view = [chartWidth, chartHeight];
+    this.chartHeight = `${chartHeight}px`;
   }
 
   private createFilterForm(): void {
@@ -154,9 +190,12 @@ export class RevenueChartComponent implements OnInit, OnChanges {
     console.log('Item clicked', event);
   }
 
-  onResize(event: any): void {
-    this.view = [event.target.innerWidth * 0.7, 300];
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateChartDimensions();
   }
+
 
   formatValue(value: number): string {
     return new Intl.NumberFormat('en-US', {

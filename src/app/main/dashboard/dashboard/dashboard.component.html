@@ -1,3 +1,4 @@
+
 <div class="p-6">
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
@@ -15,18 +16,23 @@
         </select>
       </div> -->
 
-      <!-- Export Buttons -->
-      <div class="flex space-x-2">
-        <button (click)="exportDashboard('excel')" class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-          <i class="ri-file-excel-line mr-2 text-green-600"></i>
-          Export Excel
-        </button>
-        <button (click)="exportDashboard('pdf')" class="flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-          <i class="ri-file-pdf-line mr-2 text-red-600"></i>
-          Export PDF
-        </button>
+
+        <!-- Export Buttons -->
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button (click)="exportDashboard('excel')" 
+                  class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+            <i class="ri-file-excel-line mr-2 text-green-600"></i>
+            <span class="whitespace-nowrap">Export Excel</span>
+          </button>
+          <button (click)="exportDashboard('pdf')" 
+                  class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+            <i class="ri-file-pdf-line mr-2 text-red-600"></i>
+            <span class="whitespace-nowrap">Export PDF</span>
+          </button>
+        </div>
       </div>
     </div>
+
   </div>
 
   <!-- Quick Stats -->
@@ -78,6 +84,7 @@
         <span [ngClass]="{'text-red-600': item.totalStock === 0}">{{ item.totalStock }}</span>
       </li>
     </ul>
+
   </div>
 
   <!-- Revenue Chart -->

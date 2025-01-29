@@ -1,16 +1,21 @@
+<!-- revenue-chart.component.html -->
 <div class="h-full">
   <!-- Header -->
+
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-lg font-medium text-gray-900">Revenue Overview</h2>
   </div>
 
   <!-- Metrics Summary -->
   <div class="grid grid-cols-4 gap-4 mb-6">
+
     <!-- Total Revenue -->
     <div class="bg-gray-50 rounded-lg p-4">
       <p class="text-sm text-gray-600">Total Revenue</p>
       <p class="text-xl font-semibold mt-1">
+
         {{ metrics.revenueMetrics.totalRevenue | currency:'GHC' }}
+
       </p>
     </div>
 
@@ -18,7 +23,9 @@
     <div class="bg-gray-50 rounded-lg p-4">
       <p class="text-sm text-gray-600">Average Revenue</p>
       <p class="text-xl font-semibold mt-1">
+
         {{ metrics.revenueMetrics.averageRevenue | currency:'GHC' }}
+
       </p>
     </div>
 
@@ -27,11 +34,13 @@
       <p class="text-sm text-gray-600">Growth</p>
       <div class="flex items-center mt-1">
         <p class="text-xl font-semibold" [class]="getGrowthClass()">
+
           {{ metrics.revenueMetrics.growth | number:'1.1-1' }}%
         </p>
         <i [class]="'ml-2 text-lg ' + 
                     (metrics.revenueMetrics.growth > 0 ? 'ri-arrow-up-line text-green-600' : 
                      metrics.revenueMetrics.growth < 0 ? 'ri-arrow-down-line text-red-600' : 
+
                      'ri-more-line text-gray-600')"></i>
       </div>
     </div>
@@ -40,13 +49,17 @@
     <div class="bg-gray-50 rounded-lg p-4">
       <p class="text-sm text-gray-600">Peak Revenue</p>
       <p class="text-xl font-semibold mt-1">
+
         {{ metrics.revenueMetrics.peakRevenue | currency:'GHC' }}
+
       </p>
     </div>
   </div>
 
   <!-- Chart -->
+
   <div class="relative h-[400px]">
+
     <!-- Loading State -->
     <div *ngIf="loading" 
          class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
@@ -58,7 +71,9 @@
       <ngx-charts-line-chart
         [results]="chartData"
         [view]="view"
+
         [scheme]="'forest'"
+
         [legend]="legend"
         [showXAxisLabel]="showXAxisLabel"
         [showYAxisLabel]="showYAxisLabel"
@@ -71,7 +86,9 @@
         [autoScale]="true"
         [gradient]="true"
         (select)="onSelect($event)"
+
         (window:resize)="onResize($event)"
+
       >
       </ngx-charts-line-chart>
     </div>
