@@ -72,6 +72,7 @@ interface OrdersResponse {
 })
 export class OrdersService {
   private readonly apiUrl = `${environment.apiUrl}/orders`;
+  private readonly apiUrll = `${environment.apiUrl}`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -97,5 +98,14 @@ export class OrdersService {
 
   createOrder(orderData: any): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/create`, orderData);
+  }
+
+  getOrderAnalytics(filters: any): Observable<any> {
+    const params = {
+      startDate: filters.dateRange.start,
+      endDate: filters.dateRange.end,
+      groupBy: filters.groupBy
+    };
+    return this.http.get<any>(`${this.apiUrll}/dashboard/order-dashboard`, { params });
   }
 }

@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, HostListener } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+// import { Router, NavigationEnd } from '@angular/router';
 
 interface MenuItem {
   title: string;
@@ -20,10 +21,8 @@ export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
   @Output() sidebarToggled = new EventEmitter<void>();
 
-  // toggleSidebar() {
-  //   this.isCollapsed = !this.isCollapsed;
-  //   this.sidebarToggled.emit();
-  // }
+  isSidebarOpen = false;
+  isMobile = false;
 
   menuItems: MenuItem[] = [
     {
@@ -265,7 +264,6 @@ export class SidebarComponent implements OnInit {
       route: '/main/user-management',
     },
   ];
-
   constructor(
     private authService: AuthService,
     private router: Router
@@ -273,17 +271,39 @@ export class SidebarComponent implements OnInit {
     router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      // this.currentRoute = event.url;
       this.updateExpandedState();
+      if (this.isMobile) {
+        this.isSidebarOpen = false;
+      }
     });
+    this.checkScreenSize();
   }
 
   ngOnInit(): void {
     this.filterMenuByRole();
   }
 
-  toggleSidebar(): void {
+  toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
+    this.sidebarToggled.emit();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any): void {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 1024;
+    if (!this.isMobile) {
+      this.isSidebarOpen = false;
+    } else {
+      this.isSidebarOpen = true;
+    }
+  }
+
+  toggleMobileSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
   toggleSubmenu(item: MenuItem): void {

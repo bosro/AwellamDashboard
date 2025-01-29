@@ -1,7 +1,18 @@
+<!-- Hamburger Button for Mobile -->
+<button 
+  (click)="toggleMobileSidebar()"
+  class="fixed top-4 left-4 z-50 p-2 rounded-md text-white bg-red-500 md:hidden"
+>
+  <i class="ri-menu-line text-xl"></i>
+</button>
+
 <aside 
   class="bg-[#1a237e] flex-shrink-0 transition-all duration-300"
   [class.w-64]="!isCollapsed"
-  [class.w-20]="isCollapsed">
+  [class.w-20]="isCollapsed"
+  [class.fixed]="isMobile"
+  [class.z-50]="isMobile"
+  [class.h-full]="isMobile">
   <div class="h-full flex flex-col">
     <!-- Sidebar Header -->
     <div class="h-30 flex items-center justify-between px-4 bg-[#ffffff]">
