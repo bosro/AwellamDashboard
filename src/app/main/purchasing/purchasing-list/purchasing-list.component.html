@@ -1,99 +1,100 @@
 <div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold text-gray-900">Purchases</h1>
-      <button 
-        (click)="newPurchase()"
-        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        <i class="ri-add-line mr-2"></i>
-        New Purchase
-      </button>
-    </div>
-  
-    <!-- Search and Filters -->
-    <div class="mb-6">
-      <div class="flex gap-4">
-        <div class="flex-1">
-          <div class="relative">
-            <input
-              type="text"
-              placeholder="Search purchases..."
-              [(ngModel)]="searchTerm"
-              (keyup.enter)="onSearch(searchTerm)"
-              class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-            <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
-          </div>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900">Purchases</h1>
+    <button 
+      (click)="newPurchase()"
+      class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+      <i class="ri-add-line mr-2"></i>
+      New Purchase
+    </button>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="mb-6">
+    <div class="flex gap-4">
+      <div class="flex-1">
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search purchases..."
+            [(ngModel)]="searchTerm"
+            (keyup.enter)="onSearch(searchTerm)"
+            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+          <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
         </div>
       </div>
     </div>
-  
-    <!-- Table -->
-    <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
-      <table class="w-full text-sm text-left text-gray-500">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-          <tr>
-            <th scope="col" class="py-3 px-6">Date</th>
-            <th scope="col" class="py-3 px-6">Payment Ref</th>
-            <th scope="col" class="py-3 px-6">Sales Order</th>
-            <th scope="col" class="py-3 px-6">Product Type</th>
-            <th scope="col" class="py-3 px-6">Quantity</th>
-            <th scope="col" class="py-3 px-6">Location</th>
-            <th scope="col" class="py-3 px-6">Status</th>
-            <th scope="col" class="py-3 px-6">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let purchase of purchases" 
-              class="bg-white border-b hover:bg-gray-50">
-            <td class="py-4 px-6">{{purchase.purchaseDate | date:'mediumDate'}}</td>
-            <td class="py-4 px-6">{{purchase.paymentReference}}</td>
-            <td class="py-4 px-6">{{purchase.salesOrderNumber}}</td>
-            <td class="py-4 px-6">{{purchase.productType}}</td>
-            <td class="py-4 px-6">{{purchase.quantity}}</td>
-            <td class="py-4 px-6">{{purchase.location}}</td>
-            <td class="py-4 px-6">
-              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(purchase.status)">
-                {{purchase.status}}
-              </span>
-            </td>
-            <td class="py-4 px-6">
-              <div class="flex items-center space-x-2">
-                <button 
-                  [routerLink]="['edit', purchase.id]"
-                  class="text-blue-600 hover:text-blue-900">
-                  <i class="ri-edit-line text-lg"></i>
-                </button>
-                <button 
-                  (click)="deletePurchase(purchase.id)"
-                  class="text-red-600 hover:text-red-900">
-                  <i class="ri-delete-bin-line text-lg"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <tr>
+          <th scope="col" class="py-3 px-6">Date</th>
+          <th scope="col" class="py-3 px-6">Payment Ref</th>
+          <th scope="col" class="py-3 px-6">Purchase Order</th>
+          <th scope="col" class="py-3 px-6">Product</th>
+          <th scope="col" class="py-3 px-6">Category</th>
+          <th scope="col" class="py-3 px-6">Quantity</th>
+          <th scope="col" class="py-3 px-6">Plant</th>
+          <th scope="col" class="py-3 px-6">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let purchase of purchases" class="bg-white border-b hover:bg-gray-50">
+          <td class="py-4 px-6">{{purchase.dateOfPurchase | date:'mediumDate'}}</td>
+          <td class="py-4 px-6">{{purchase.paymentReference}}</td>
+          <td class="py-4 px-6">{{purchase.purchaseOrderNumber}}</td>
+          <td class="py-4 px-6">{{purchase.productId?.name || 'N/A'}}</td>
+          <td class="py-4 px-6">{{purchase.categoryId?.name || 'N/A'}}</td>
+          <td class="py-4 px-6">{{purchase.quantity}}</td>
+          <td class="py-4 px-6">{{purchase.plantId?.name || 'N/A'}}</td>
+          <td class="py-4 px-6">
+            <div class="flex items-center space-x-2">
+
+              <button 
+              (click)="viewDetails(purchase)"
+              class="text-blue-600 hover:text-blue-900">
+              <i class="ri-eye-line text-lg"></i>
+            </button>
+              <!-- <button 
+              [routerLink]="['main/purchasing/edit', purchase._id]"
+                class="text-blue-600 hover:text-blue-900">
+                <i class="ri-edit-line text-lg"></i>
+              </button> -->
+              <button 
+                (click)="deletePurchase(purchase._id)"
+                class="text-red-600 hover:text-red-900">
+                <i class="ri-delete-bin-line text-lg"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex items-center justify-between mt-4">
+    <div class="text-sm text-gray-700">
+      Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
     </div>
-  
-    <!-- Pagination -->
-    <div class="flex items-center justify-between mt-4">
-      <div class="text-sm text-gray-700">
-        Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
-      </div>
-      <div class="flex items-center space-x-2">
-        <button 
-          [disabled]="currentPage === 1"
-          (click)="onPageChange(currentPage - 1)"
-          class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
-          <i class="ri-arrow-left-s-line"></i>
-        </button>
-        <button 
-          [disabled]="currentPage * pageSize >= total"
-          (click)="onPageChange(currentPage + 1)"
-          class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
-          <i class="ri-arrow-right-s-line"></i>
-        </button>
-      </div>
+    <div class="flex items-center space-x-2">
+      <button 
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+        class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      <button 
+        [disabled]="currentPage * pageSize >= total"
+        (click)="onPageChange(currentPage + 1)"
+        class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
     </div>
   </div>
+</div>

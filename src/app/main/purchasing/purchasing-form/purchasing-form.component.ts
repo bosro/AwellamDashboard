@@ -13,7 +13,7 @@ export class PurchaseFormComponent implements OnInit {
   purchaseForm!: FormGroup;
   isEditMode = false;
   loading = false;
-  purchaseId!: number;
+  purchaseId!: string;
   plants!: Plant[];
   categories: { [key: string]: any[] } = {}; // Store categories by plant ID
   products: { [key: string]: Product[] } = {}; // Store products by category ID
@@ -157,8 +157,8 @@ export class PurchaseFormComponent implements OnInit {
 
     if (control.errors['pattern']) {
       switch (controlName) {
-        case 'PurchaseOrderNumber':
-          return 'Must be in format PON followed by 9 digits';
+        case 'salesOrderNumber':
+          return 'Must be in format followed by 9 digits';
         default:
           return 'Invalid format';
       }

@@ -4,13 +4,12 @@ import { PurchasingService, Purchase } from '../../../services/purchasing.servic
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-purchase-list',
+  selector: 'app-purchase-detail',
   templateUrl: './purchasing-detail.component.html'
 })
-
 export class PurchaseDetailComponent implements OnInit {
   purchases: Purchase[] = [];
-  selectedPurchases: Set<number> = new Set();
+  selectedPurchases: Set<string> = new Set();
   loading = false;
   total = 0;
   currentPage = 1;
@@ -36,8 +35,7 @@ export class PurchaseDetailComponent implements OnInit {
     this.setupFilterSubscription();
   }
 
-
-   private createFilterForm(): void {
+  private createFilterForm(): void {
     this.filterForm = this.fb.group({
       searchTerm: [''],
       dateRange: this.fb.group({
@@ -72,7 +70,7 @@ export class PurchaseDetailComponent implements OnInit {
 
     this.purchasingService.getPurchases(params).subscribe({
       next: (response) => {
-        this.purchases = response.data;
+        this.purchases = response.purchases;
         this.total = response.total;
         this.loading = false;
       },
@@ -83,7 +81,7 @@ export class PurchaseDetailComponent implements OnInit {
     });
   }
 
-  toggleSelection(purchaseId: number): void {
+  toggleSelection(purchaseId: string): void {
     if (this.selectedPurchases.has(purchaseId)) {
       this.selectedPurchases.delete(purchaseId);
     } else {
@@ -96,8 +94,8 @@ export class PurchaseDetailComponent implements OnInit {
       this.selectedPurchases.clear();
     } else {
       this.purchases.forEach(purchase => {
-        if (purchase.id !== undefined) {
-          this.selectedPurchases.add(purchase.id);
+        if (purchase._id !== undefined) {
+          this.selectedPurchases.add(purchase._id);
         }
       });
     }
@@ -125,7 +123,6 @@ export class PurchaseDetailComponent implements OnInit {
       });
   }
 
-
   bulkUpdateStatus(status: string): void {
     if (this.selectedPurchases.size === 0) return;
 
@@ -138,7 +135,7 @@ export class PurchaseDetailComponent implements OnInit {
       });
   }
 
-  deletePurchase(id: number): void {
+  deletePurchase(id: string): void {
     if (confirm('Are you sure you want to delete this purchase?')) {
       this.purchasingService.deletePurchase(id).subscribe({
         next: () => {
@@ -151,7 +148,6 @@ export class PurchaseDetailComponent implements OnInit {
       });
     }
   }
-
 
   onPageChange(page: number): void {
     this.currentPage = page;

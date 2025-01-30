@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { PurchasingService, Purchase } from '../../../services/purchasing.service';
 import { Router } from '@angular/router';
+import { PurchasingService } from '../../../services/purchasing.service';
+import { Purchase, PurchaseResponse } from '../../../services/purchasing.service';
 
 @Component({
   selector: 'app-purchase-list',
@@ -35,8 +36,8 @@ export class PurchaseListComponent implements OnInit {
     };
 
     this.purchasingService.getPurchases(params).subscribe({
-      next: (response) => {
-        this.purchases = response.data;
+      next: (response: PurchaseResponse) => {
+        this.purchases = response.purchases;
         this.total = response.total;
         this.loading = false;
       },
@@ -58,21 +59,19 @@ export class PurchaseListComponent implements OnInit {
     this.loadPurchases();
   }
 
-  getStatusClass(status: string): string {
-    const classes = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      completed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800'
-    };
-    return classes[status as keyof typeof classes] || '';
+  newPurchase(): void {
+    this.router.navigate(['/main/purchasing/new/']);
   }
 
-
-  newPurchase(){
-    this.router.navigate(['/main/purchasing/new/'])
+  viewDetails(purchase: Purchase): void {
+    this.router.navigate(['main/purchasing/details', purchase._id]);
   }
 
-  deletePurchase(id: number): void {
+  // EditDetails(purchase: Purchase): void {
+  //   this.router.navigate(['main/purchasing/details', purchase._id]);
+  // }
+
+  deletePurchase(id: string): void {
     if (confirm('Are you sure you want to delete this purchase?')) {
       this.loading = true;
       this.purchasingService.deletePurchase(id).subscribe({
