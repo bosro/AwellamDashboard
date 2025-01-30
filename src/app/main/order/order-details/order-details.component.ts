@@ -33,7 +33,10 @@ interface Order {
   updatedAt: string;
   orderNumber: string;
   assignedTruck?: string | null;
-  assignedDriver?: string
+  assignedDriver?: {
+    _id: string,
+    name: string
+  }
 }
 
 interface OrderResponse {
@@ -63,6 +66,10 @@ interface OrderResponse {
     createdAt: string;
     updatedAt: string;
     orderNumber: string;
+    assignedDriver:{
+      _id: string,
+      name: string
+    }
   };
 }
 

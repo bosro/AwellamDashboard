@@ -112,30 +112,47 @@
             </div>
           </td>
           <td class="px-6 py-4">
-            <div class="text-sm font-medium text-gray-900">{{order.orderNumber}}</div>
-            <div class="text-sm text-gray-500">{{order.orderItems.length}} items</div>
-          </td>
-          <td class="px-6 py-4">
             <div class="text-sm font-medium text-gray-900">{{order.customerId.fullName}}</div>
             <!-- <div class="text-sm text-gray-500">Phone: {{order.customerId.phoneNumber}}</div> -->
           </td>
           <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+            <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div>
+          </td>
+
+          <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{ order.totalAmount}}</div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{order.orderNumber}}</div>
+            <div class="text-sm text-gray-500">{{order.orderItems.length}} items</div>
+          </td>
+           <!-- <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{ order.totalAmount}}</div>
+          </td> -->
+          <!-- <td class="px-6 py-4">
+            <div class="text-sm font-medium text-gray-900">{{order.customerId.fullName}}</div>
+            <div class="text-sm text-gray-500">Phone: {{order.customerId.phoneNumber}}</div>
+          </td> -->
+          <td class="px-6 py-4">
             <div class="text-sm text-gray-900">{{order.date | date:'mediumDate'}}</div>
             <div class="text-xs text-gray-500">{{order.date | date:'shortTime'}}</div>
           </td>
-          <td class="px-6 py-4">
+          <!-- <td class="px-6 py-4">
             <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
-          </td>
-          <td class="px-6 py-4">
-            <span [ngClass]="getStatusClass(order.status)"
-                  class="px-2 py-1 text-xs font-medium rounded-full">
-              {{order.status}}
-            </span>
-          </td>
+          </td> -->
+          
           <td class="px-6 py-4">
             <span [ngClass]="getPaymentStatusClass(order.paymentStatus)"
                   class="px-2 py-1 text-xs font-medium rounded-full">
                   GH₵{{order.paymentStatus}}
+            </span>
+          </td>
+
+          <td class="px-6 py-4">
+            <span [ngClass]="getStatusClass(order.status)"
+                  class="px-2 py-1 text-xs font-medium rounded-full">
+              {{order.status}}
             </span>
           </td>
           <td class="px-6 py-4 text-right text-sm font-medium">

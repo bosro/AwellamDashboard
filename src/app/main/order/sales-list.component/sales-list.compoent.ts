@@ -88,10 +88,12 @@ export class SalesOrderListComponent implements OnInit {
   }
 
   deleteOrder(id: string): void {
+    if (confirm('Are you sure you want to delete this order?')) {
     this.ordersService.deleteOrder(id).subscribe({
       next: () => this.loadOrders(),
       error: (error) => console.error('Error deleting order:', error)
     });
+    }
   }
 
   toggleStatus(id: string): void {

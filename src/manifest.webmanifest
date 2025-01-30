@@ -1,0 +1,29 @@
+{
+    "name": "AwellamDashboard",
+    "short_name": "Awellam",
+    "theme_color": "#1976d2",
+    "background_color": "#fafafa",
+    "display": "standalone",
+    "scope": "./",
+    "start_url": "./",
+    "icons": [
+      {
+        "src": "../public/assets/images/logo.png",
+        "sizes": "72x72",
+        "type": "image/png",
+        "purpose": "maskable any"
+      },
+      {
+        "src": "../public/assets/images/logo.png",
+        "sizes": "96x96",
+        "type": "image/png",
+        "purpose": "maskable any"
+      },
+      {
+        "src": "../public/assets/images/logo.png",
+        "sizes": "128x128",
+        "type": "image/png",
+        "purpose": "maskable any"
+      }
+    ]
+  }

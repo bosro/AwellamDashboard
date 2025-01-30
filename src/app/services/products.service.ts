@@ -48,12 +48,12 @@ export class ProductsService {
     );
   }
 
-  createProduct(productData: FormData): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/create`, productData);
+  createProduct(productData: any): Observable<Product> {
+    return this.http.post<any>(`${this.apiUrl}/create`, productData);
   }
 
-  updateProduct(id: string, productData: FormData): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/edit/${id}`, productData);
+  updateProduct(id: string, productData: any): Observable<Product> {
+    return this.http.put<any>(`${this.apiUrl}/edit/${id}`, productData);
   }
 
   addStock(id: string, quantity: number): Observable<Product> {
