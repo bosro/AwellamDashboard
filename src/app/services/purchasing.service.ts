@@ -33,7 +33,7 @@ export interface Plants{
 })
 export class PurchasingService {
   private apiUrl = `${environment.apiUrl}/purchase`;
-
+  private apiUrll =`${environment.apiUrl}`
   constructor(private http: HttpClient) {}
 
   getPurchases(params?: any): Observable<{ data: Purchase[], total: number }> {
@@ -48,6 +48,13 @@ export class PurchasingService {
     return this.http.post<Purchase>(this.apiUrl, purchase);
   }
 
+  getCategoriesByPlantId(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrll}/category/plants/${id}`);
+  }
+
+  getProductsByCategoryId(id: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrll}/products/category/${id}`);
+}
   //  getProducts(): Observable<ProductsResponse> {
   //     return this.http.get<ProductsResponse>(`${this.apiUrl}/`);
   //   }

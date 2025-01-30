@@ -17,6 +17,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { FormGroup } from '@angular/forms';
 import { TruckFormComponent } from './truck-management/truck-form.component';
+import { LoadTruckComponent } from './truck-management/load-truck.component';
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
 
@@ -29,6 +30,7 @@ import { TruckFormComponent } from './truck-management/truck-form.component';
     TruckManagementComponent,
     TruckDetailsComponent,
     TruckFormComponent,
+    LoadTruckComponent
     // MetricsCardComponent 
     // MaintenanceHistoryComponent,
     // MaintenanceDetailsModalComponent,
