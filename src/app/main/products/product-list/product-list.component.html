@@ -196,7 +196,7 @@
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Status</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Stocks</th>
         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>
@@ -226,7 +226,7 @@
         </div>
         <td class="px-6 py-4 text-sm text-gray-500">{{product.categoryId.name}}</td>
         <td class="px-6 py-4">
-          <div class="text-sm text-gray-900">${{product.price}}</div>
+          <div class="text-sm text-gray-900">GHC {{product.price}}</div>
         </td>
         <td class="px-6 py-4">
           <div [ngClass]="{
@@ -237,7 +237,7 @@
           </div>
         </td>
         <td class="px-6 py-4">
-          <div class="text-sm text-gray-900">${{product.totalStock}}</div>
+          <div class="text-sm text-gray-900">{{product.totalStock}}</div>
         </td>
         <td class="px-6 py-4 text-right text-sm font-medium">
           <div class="flex justify-end space-x-3">
