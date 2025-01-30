@@ -6,6 +6,13 @@
     <div class="flex space-x-3">
       <button 
         class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        (click)='loadTruck()'
+        >
+        <i class="ri-add-line mr-2"></i>
+        Load Truck
+      </button>
+      <button 
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         (click)="addTruck()">
         <i class="ri-add-line mr-2"></i>
         Add New Truck
@@ -90,7 +97,7 @@
         <tr>
           <th scope="col" class="py-3 px-6">Truck Number</th>
           <th scope="col" class="py-3 px-6">Status</th>
-          <th scope="col" class="py-3 px-6">Capacity</th>
+          <th scope="col" class="py-3 px-6">Bags</th>
           <th scope="col" class="py-3 px-6">Driver</th>
           <th scope="col" class="py-3 px-6">Expenses</th>
           <th scope="col" class="py-3 px-6">Actions</th>

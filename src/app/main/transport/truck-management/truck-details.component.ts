@@ -13,7 +13,9 @@ export class TruckDetailsComponent implements OnInit {
   truck?: Truck;
   loading = false;
   showLoadForm = false;
+  showEditForm = false;
   loadForm: FormGroup;
+  editForm: FormGroup;
   products: any[] = [];
 
   constructor(
@@ -25,6 +27,14 @@ export class TruckDetailsComponent implements OnInit {
     this.loadForm = this.fb.group({
       capacity: ['', [Validators.required, Validators.min(0)]],
       productId: ['', Validators.required]
+    });
+
+    this.editForm = this.fb.group({
+      truckNumber: ['', Validators.required],
+      status: ['', Validators.required],
+      capacity: ['', [Validators.required, Validators.min(0)]],
+      driver: [''],
+      expenses: ['', [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -48,6 +58,7 @@ export class TruckDetailsComponent implements OnInit {
     this.truckService.getTruckById(id).subscribe({
       next: (response) => {
         this.truck = response.truck;
+        this.editForm.patchValue(this.truck);
         this.loading = false;
       },
       error: (error) => {
@@ -71,6 +82,23 @@ export class TruckDetailsComponent implements OnInit {
           this.loadTruckDetails(this.truck!._id);
         },
         error: (error) => console.error('Error loading truck:', error)
+      });
+    }
+  }
+
+  updateTruck(): void {
+    if (this.editForm.valid && this.truck) {
+      const updatedTruckData = this.editForm.value;
+
+      this.truckService.updateTruck(this.truck._id, updatedTruckData).subscribe({
+        next: () => {
+          alert('Truck updated successfully');
+          this.showEditForm = false;
+          this.loadTruckDetails(this.truck!._id);
+        },
+        error: (error) => {
+          console.error('Error updating truck:', error);
+        }
       });
     }
   }

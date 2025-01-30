@@ -80,6 +80,12 @@ export class TruckManagementComponent implements OnInit {
   addTruck(): void {
     this.router.navigate(['main/transport/trucks/new/']);
   }
+
+  loadTruck(): void {
+    this.router.navigate(['main/transport/trucks/load']);
+  }
+
+  
   deleteTruck(id: string): void {
     if (confirm('Are you sure you want to delete this truck?')) {
       this.truckService.deleteTruck(id).subscribe({

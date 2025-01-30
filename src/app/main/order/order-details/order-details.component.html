@@ -1,8 +1,16 @@
 <div class="p-6">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex  items-center mb-6">
+    <button 
+      routerLink="/main/orders/list"
+      class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+      <i class="ri-arrow-left-line mr-2"></i>
+      <!-- Back to List -->
+    </button>
     <div>
-      <h1 class="text-2xl font-semibold text-gray-900">
+      <p class="mt-1 text-2xl font-semibold  text-gray-900">{{order?.customerId?.fullName}}</p>
+      
+      <h1 class="text-sm  text-gray-900">
         Order #{{order?.orderNumber}}
       </h1>
       <p class="mt-1 text-sm text-gray-600">
