@@ -31,13 +31,13 @@ export class ProductFormComponent implements OnInit {
 
   private initForm(): void {
     this.productForm = this.fb.group({
-      name: [null, Validators.required],
-      price: [null, [Validators.required, Validators.min(0)]],
-      plantId: [null, Validators.required],
-      categoryId: [null, Validators.required],
+      name: ['', Validators.required],
+      price: ['', [Validators.required, Validators.min(0)]],
+      plantId: ['', Validators.required],
+      categoryId: ['', Validators.required],
       inStock: [true],
-      totalStock: [null, [Validators.required, Validators.min(0)]],
-      image: [null]
+      totalStock: ['', [Validators.required, Validators.min(0)]],
+      image: ['']
     });
   }
 
@@ -72,13 +72,13 @@ export class ProductFormComponent implements OnInit {
         .subscribe({
           next: (response) => {
             this.categories = response.categories;
-            this.productForm.patchValue({ categoryId: null });
+            this.productForm.patchValue({ categoryId: '' });
           },
           error: (error) => console.error('Error loading categories:', error)
         });
     } else {
       this.categories = [];
-      this.productForm.patchValue({ categoryId: null });
+      this.productForm.patchValue({ categoryId: '' });
     }
   }
 
@@ -87,27 +87,32 @@ export class ProductFormComponent implements OnInit {
       this.loading = true;
       const formValue = this.productForm.value;
       
-      const productData = new FormData();
-      // Add form fields to FormData
-      Object.keys(formValue).forEach(key => {
-        if (formValue[key] !== null && formValue[key] !== undefined && key !== 'image') {
-          productData.append(key, formValue[key].toString());
-        }
-      });
-
-      // Add image if present
-      if (this.imageFile) {
-        productData.append('image', this.imageFile);
-      }
-
+      // Let's log the values to see what we're sending
+      console.log('Form Values:', formValue);
+      
+      // Create a regular object instead of FormData since your backend might 
+      // be expecting JSON data (as it works in Postman)
+      const productData = {
+        name: formValue.name,
+        price: Number(formValue.price), // Convert to number
+        plantId: formValue.plantId,
+        categoryId: formValue.categoryId,
+        totalStock: Number(formValue.totalStock), // Convert to number
+        inStock: formValue.inStock
+      };
+  
+      // Log the final payload
+      console.log('Payload:', productData);
+  
       const request$ = this.isEditMode
         ? this.productsService.updateProduct(this.route.snapshot.paramMap.get('id')!, productData)
         : this.productsService.createProduct(productData);
-
+  
       request$
         .pipe(finalize(() => this.loading = false))
         .subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Response:', response);
             this.router.navigate(['/main/products/list']);
           },
           error: (error) => {
@@ -118,7 +123,7 @@ export class ProductFormComponent implements OnInit {
     } else {
       Object.keys(this.productForm.controls).forEach(key => {
         const control = this.productForm.get(key);
-        if (control?.invalid) {
+        if (control) {
           control.markAsTouched();
         }
       });
@@ -139,7 +144,14 @@ export class ProductFormComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (product) => {
-          this.productForm.patchValue(product);
+          this.productForm.patchValue({
+            name: product.name,
+            price: product.price,
+            plantId: product.plantId,
+            categoryId: product.categoryId._id,
+            inStock: product.inStock,
+            totalStock: product.totalStock
+          });
           if (product.plantId) {
             this.onPlantChange({ target: { value: product.plantId } } as unknown as Event);
           }
