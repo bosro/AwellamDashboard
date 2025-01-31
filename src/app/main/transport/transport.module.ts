@@ -8,7 +8,7 @@ import { DriverListComponent } from './driverlist/driverlist.component';
 import { DriverDetailsComponent } from './driverlist/driver-details/driver-details.component';
 import { TruckManagementComponent } from './truck-management/truck-management.component';
 // import { TruckDetailsComponent } from './truck-details/truck-details.component';
-import { TruckDetailsComponent } from './truck-management/truck-details.component';
+import { TruckDetailComponent } from './truck-management/truck-details.component';
 // import { MaintenanceHistoryComponent } from './maintenance-history/maintenance-history.component';
 // import { MaintenanceDetailsModalComponent } from './maintenance-details-modal/maintenance-details-modal.component';
 // import { FuelAnalyticsComponent } from './fuel-analytics/fuel-analytics.component';
@@ -28,7 +28,7 @@ import { LoadTruckComponent } from './truck-management/load-truck.component';
     DriverFormComponent,
     DriverDetailsComponent,
     TruckManagementComponent,
-    TruckDetailsComponent,
+    TruckDetailComponent,
     TruckFormComponent,
     LoadTruckComponent
     // MetricsCardComponent 
@@ -45,7 +45,7 @@ import { LoadTruckComponent } from './truck-management/load-truck.component';
     MatMenuModule,
     NgxChartsModule,
     ReactiveFormsModule,
-    ReactiveFormsModule,
+    // ReactiveFormsModule,
 
   ]
 })

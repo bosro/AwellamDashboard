@@ -69,7 +69,7 @@ export class DriverListComponent implements OnInit {
   // deleteDriver()
 
   deleteDriver(id: string): void {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm('Are you sure you want to delete this driver?')) {
       this.driverService.deleteDriver(id).subscribe({
         next: () => this.loadDrivers(),
         error: (error) => console.error('Error deleting user:', error)

@@ -77,18 +77,18 @@
           Select Product
         </label>
         <select 
-          formControlName="product"
+          formControlName="productId"
           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [class.border-red-500]="loadTruckForm.get('product')!.touched && loadTruckForm.get('product')!.invalid"
+          [class.border-red-500]="loadTruckForm.get('productId')!.touched && loadTruckForm.get('productId')!.invalid"
         >
           <option value="">Select Product</option>
           <option *ngFor="let product of products" [value]="product._id">
             {{ product.name }}
           </option>
         </select>
-        <div *ngIf="loadTruckForm.get('product')?.touched && loadTruckForm.get('product')?.invalid"
+        <div *ngIf="loadTruckForm.get('productId')?.touched && loadTruckForm.get('productId')?.invalid"
      class="mt-1 text-sm text-red-600">
-  {{ getErrorMessage('product') }}
+  {{ getErrorMessage('productId') }}
   </div>
       </div>
   

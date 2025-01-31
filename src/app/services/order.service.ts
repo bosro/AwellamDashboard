@@ -20,6 +20,11 @@ items: any;
     price: number; // Changed to number
     _id: string;
   }[];
+  categoryId:{
+    _id: string,
+    name:string,
+  };
+  socNumber:String;
   deliveryAddress: string;
   totalAmount: number; // Changed to number
   status: string;

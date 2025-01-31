@@ -8,4 +8,5 @@ export interface Customer {
   balance: number;
   createdAt: string;
   updatedAt: string;
+  totalOrders :number
 }

@@ -45,6 +45,14 @@
         <h3 class="text-sm font-medium text-gray-500">Total Expenses</h3>
         <p class="mt-1 text-lg">${{truck.expenses.toFixed(2)}}</p>
       </div>
+      <div>
+        <h3 class="text-sm font-medium text-gray-500">Product</h3>
+        <p class="mt-1 text-lg">{{truck.productId?.name || 'N/A'}}</p>
+      </div>
+      <div>
+        <h3 class="text-sm font-medium text-gray-500">SOC Number</h3>
+        <p class="mt-1 text-lg">{{truck.socNumber || 'N/A'}}</p>
+      </div>
     </div>
 
     <!-- Edit Form -->
@@ -57,16 +65,6 @@
             type="text" 
             formControlName="truckNumber"
             class="mt-1 block w-full rounded-md border p-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Status</label>
-          <select 
-            formControlName="status"
-            class="mt-1 block w-full rounded-md border p-2">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Bags</label>
@@ -87,6 +85,24 @@
           <input 
             type="number" 
             formControlName="expenses"
+            class="mt-1 block w-full rounded-md border p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Product</label>
+          <select 
+            formControlName="productId"
+            class="mt-1 block w-full rounded-md border p-2">
+            <option value="">Choose a product</option>
+            <option *ngFor="let product of products" [value]="product._id">
+              {{product.name}} - {{product.description}}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">SOC Number</label>
+          <input 
+            type="text" 
+            formControlName="socNumber"
             class="mt-1 block w-full rounded-md border p-2">
         </div>
         <div class="flex justify-end space-x-3">
@@ -146,16 +162,16 @@
     </div>
 
     <!-- Current Load Info -->
-    <div *ngIf="truck.product" class="mt-6 p-4 bg-gray-50 rounded-lg">
+    <div *ngIf="truck.productId" class="mt-6 p-4 bg-gray-50 rounded-lg">
       <h3 class="text-lg font-medium mb-4">Current Load</h3>
       <div class="grid grid-cols-2 gap-4">
         <div>
           <h4 class="text-sm font-medium text-gray-500">Product</h4>
-          <p class="mt-1">{{truck.product.name}}</p>
+          <p class="mt-1">{{truck.productId.name}}</p>
         </div>
         <div>
           <h4 class="text-sm font-medium text-gray-500">Quantity</h4>
-          <p class="mt-1">{{truck.capacity}} </p>
+          <p class="mt-1">{{truck.capacity}}</p>
         </div>
       </div>
     </div>
