@@ -14,8 +14,9 @@ export class OrderEditComponent implements OnInit {
   loading = false;
   saving = false;
   orderId: string = '';
-  drivers: any[] = [];
+  trucks: any[] = [];
   order: any;
+// drivers: any;
 
   constructor(
     private fb: FormBuilder,
@@ -25,16 +26,16 @@ export class OrderEditComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
-      assignedTruck: ['', Validators.required],
-      // status: ['', Validators.required],
-      price: ['', Validators.required]
+      price: ['', Validators.required],
+      assignedTruck: ['']
     });
   }
 
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
-    this.loadDrivers();
+    // this.loadTrucks(this.order.productId?._id);
+    this.loadTrucks()
   }
 
   loadOrder(): void {
@@ -45,9 +46,8 @@ export class OrderEditComponent implements OnInit {
       next: (response) => {
         this.order = response.order;
         this.orderForm.patchValue({
-          // status: this.order.status,
           price: this.order.price,
-          assignedTruck: this.order.driverId?._id
+          assignedTruck: this.order.truckId?._id
         });
         this.loading = false;
       },
@@ -56,14 +56,16 @@ export class OrderEditComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
+  } 
+  
+  loadTrucks(): void {
 
-  loadDrivers(): void {
-    this.http.get<any>(`${environment.apiUrl}/driver/get`).subscribe({
+  // loadTrucks(productId: string): void {
+    this.http.get<any>(`${environment.apiUrl}/trucks/get`).subscribe({
       next: (response) => {
-        this.drivers = response.drivers.filter((driver: any) => driver.status === 'active');
+        this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
       },
-      error: (error) => console.error('Error loading drivers:', error)
+      error: (error) => console.error('Error loading trucks:', error)
     });
   }
 
@@ -72,9 +74,25 @@ export class OrderEditComponent implements OnInit {
       this.saving = true;
       const orderData = this.orderForm.value;
 
-      this.ordersService.editOrder(this.orderId, orderData).subscribe({
+      // Update the order price
+      this.ordersService.editOrder(this.orderId, { price: orderData.price }).subscribe({
         next: () => {
-          this.router.navigate(['/main/orders/details', this.orderId]);
+          // Assign the truck to the order if a truck is selected
+          if (orderData.assignedTruck) {
+            this.http.put(`${environment.apiUrl}/orders/${this.orderId}/assign-truck`, {
+              truckId: orderData.assignedTruck
+            }).subscribe({
+              next: () => {
+                this.router.navigate(['/main/orders/details', this.orderId]);
+              },
+              error: (error) => {
+                console.error('Error assigning truck:', error);
+                this.saving = false;
+              }
+            });
+          } else {
+            this.router.navigate(['/main/orders/details', this.orderId]);
+          }
         },
         error: (error) => {
           console.error('Error updating order:', error);

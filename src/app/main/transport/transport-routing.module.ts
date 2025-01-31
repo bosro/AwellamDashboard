@@ -10,7 +10,7 @@ import { TransportDashboardComponent } from './transport-dashboard/transport-das
 // import { MaintenanceDetailsModalComponent } from './maintenance-details-modal/maintenance-details-modal.component';
 // import { MaintenanceFormModalComponent } from './maintenance-form-modal/maintenance-form-modal.component';
 // import { TruckDetailsComponent } from './truck-details/truck-details.component';
-import { TruckDetailsComponent } from './truck-management/truck-details.component';
+import { TruckDetailComponent } from './truck-management/truck-details.component';
 import { TruckFormComponent } from './truck-management/truck-form.component';
 import { LoadTruckComponent } from './truck-management/load-truck.component';
 
@@ -26,7 +26,7 @@ const routes: Routes = [
       {path: 'drivers', component:DriverListComponent},
       { path: 'trucks', component: TruckManagementComponent },
       { path: 'trucks/new', component: TruckFormComponent },
-      { path: 'trucks/details/:id', component: TruckDetailsComponent },
+      { path: 'trucks/details/:id', component: TruckDetailComponent },
       {path:'trucks/load' , component: LoadTruckComponent}
     ]
   }

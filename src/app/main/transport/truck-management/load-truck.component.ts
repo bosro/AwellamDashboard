@@ -25,7 +25,7 @@ export class LoadTruckComponent implements OnInit {
       truckId: ['', Validators.required],
       capacity: ['', [Validators.required, Validators.min(1)]],
       socNumber: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
-      product: ['', Validators.required]
+      productId: ['', Validators.required]
     });
   }
 
@@ -38,7 +38,7 @@ export class LoadTruckComponent implements OnInit {
     this.loading = true;
     this.http.get<any>(`${this.apiUrl}/trucks/get`).subscribe({
       next: (response) => {
-        this.trucks = response.trucks;
+        this.trucks = response.trucks.filter((truck :any)=> truck.status  === 'inactive');
         this.loading = false;
       },
       error: (error) => {

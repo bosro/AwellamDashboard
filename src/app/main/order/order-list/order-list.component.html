@@ -122,11 +122,12 @@
           <!-- <div class="text-sm text-gray-500">Phone: {{order.customerId.phoneNumber}}</div> -->
         </td>
         <td class="px-6 py-4">
-          <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+          <div class="text-sm font-medium text-gray-900">{{ order.categoryId.name || 'N/A' }}</div>
           <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div>
         </td>
+
         <td class="px-6 py-4">
-          <div class="text-sm font-medium text-gray-900">{{order.orderNumber}}</div>
+          <div class="text-sm font-medium text-gray-900">{{order.socNumber || 'N/A'}}</div>
           <!-- <div class="text-sm text-gray-500">{{order.orderItems.length}} items</div> -->
         </td>
        

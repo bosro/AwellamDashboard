@@ -62,12 +62,19 @@ export class PurchaseDetailComponent implements OnInit {
 
   loadPurchases(): void {
     this.loading = true;
-    const params = {
+    const params: any = {
       page: this.currentPage,
       pageSize: this.pageSize,
       ...this.filterForm.value
     };
-
+  
+    // Flatten the dateRange object if it exists
+    if (params.dateRange) {
+      params.startDate = params.dateRange.start;
+      params.endDate = params.dateRange.end;
+      delete params.dateRange;
+    }
+  
     this.purchasingService.getPurchases(params).subscribe({
       next: (response) => {
         this.purchases = response.purchases;

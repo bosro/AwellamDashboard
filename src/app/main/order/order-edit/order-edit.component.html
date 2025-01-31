@@ -47,8 +47,8 @@
               formControlName="assignedTruck"
               class="w-full px-4 py-2 border rounded-lg">
               <option value="">Select a driver</option>
-              <option *ngFor="let driver of drivers" [value]="driver._id">
-                {{driver.name}} - {{driver.vehicleNumber}}
+              <option *ngFor="let driver of trucks" [value]="driver._id">
+                {{driver.driver?.name}} - {{driver.productId.name}}
               </option>
             </select>
           </div>
