@@ -29,7 +29,7 @@ export class CustomersService {
     return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`, { params: httpParams });
   }
 
-  
+
   getCustomerById(id: string): Observable<{ customer: Customer }> {
     return this.http.get<{ customer: Customer }>(`${this.apiUrl}/get/${id}`);
   }
@@ -72,6 +72,10 @@ export class CustomersService {
       responseType: 'blob'
     });
   }
+
+
+
+
 
   // Communication
   sendCustomerEmail(id: string, emailData: any): Observable<any> {
