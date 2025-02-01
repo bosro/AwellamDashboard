@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PurchasingService, Purchase } from '../../../services/purchasing.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-purchase-detail',
@@ -9,6 +9,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class PurchaseDetailComponent implements OnInit {
   purchases: Purchase[] = [];
+  filteredPurchases: Purchase[] = [];
   selectedPurchases: Set<string> = new Set();
   loading = false;
   total = 0;
@@ -56,36 +57,48 @@ export class PurchaseDetailComponent implements OnInit {
       )
       .subscribe(() => {
         this.currentPage = 1;
-        this.loadPurchases();
+        this.applyFilters();
       });
   }
 
   loadPurchases(): void {
     this.loading = true;
-    const params: any = {
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      ...this.filterForm.value
-    };
-  
-    // Flatten the dateRange object if it exists
-    if (params.dateRange) {
-      params.startDate = params.dateRange.start;
-      params.endDate = params.dateRange.end;
-      delete params.dateRange;
-    }
-  
-    this.purchasingService.getPurchases(params).subscribe({
-      next: (response) => {
-        this.purchases = response.purchases;
-        this.total = response.total;
-        this.loading = false;
-      },
-      error: (error: Error) => {
-        console.error('Error loading purchases:', error);
-        this.loading = false;
-      }
+    this.purchasingService.getPurchases({})
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.purchases = response.purchases;
+          this.total = this.purchases.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading purchases:', error);
+          this.loading = false;
+        }
+      });
+  }
+
+  applyFilters(): void {
+    const { searchTerm, dateRange, status, productType, location } = this.filterForm.value;
+
+    this.filteredPurchases = this.purchases.filter(purchase => {
+      const matchesSearch = !searchTerm || purchase.paymentReference.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDateRange = (!dateRange.start || new Date(purchase.dateOfPurchase) >= new Date(dateRange.start)) &&
+                               (!dateRange.end || new Date(purchase.dateOfPurchase) <= new Date(dateRange.end));
+      // const matchesStatus = !status || purchase.status === status;
+      // const matchesProductType = !productType || purchase.productType === productType;
+      // const matchesLocation = !location || purchase.location === location;
+
+      return matchesSearch && matchesDateRange ;
     });
+
+    this.total = this.filteredPurchases.length;
+    this.filteredPurchases = this.filteredPurchases.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.applyFilters();
   }
 
   toggleSelection(purchaseId: string): void {
@@ -154,11 +167,6 @@ export class PurchaseDetailComponent implements OnInit {
         }
       });
     }
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.loadPurchases();
   }
 
   getStatusClass(status: string): string {

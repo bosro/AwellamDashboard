@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductsService } from '../../../services/products.service';
-import { Product, ProductStatus } from '../../../shared/types/product.interface';
+import { Product } from '../../../shared/types/product.interface';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 
 interface Category {
   id: string;
@@ -14,20 +15,22 @@ interface Category {
   templateUrl: './product-list.component.html'
 })
 export class ProductListComponent implements OnInit {
-  products!: Product[];
+  products: Product[] = [];
+  filteredProducts: Product[] = [];
   loading = false;
   total = 0;
   pageSize = 10;
   currentPage = 1;
   selectedProducts = new Set<string>();
   filterForm: FormGroup;
-  exportDropdown = false; // Added missing property
-  categories: Category[] = []; // Added missing property
-  Math = Math; // Added for template usage
-  
+  exportDropdown = false;
+  categories: Category[] = [];
+  Math = Math;
+
   constructor(
     private productsService: ProductsService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private snackBar: MatSnackBar
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -42,17 +45,7 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     this.setupFilters();
     this.loadProducts();
-    // this.loadCategories();
   }
-
-  // private loadCategories(): void {
-  //   this.productsService.getCategories().subscribe({
-  //     next: (categories) => {
-  //       this.categories = categories;
-  //     },
-  //     error: (error) => console.error('Error loading categories:', error)
-  //   });
-  // }
 
   private setupFilters(): void {
     this.filterForm.valueChanges
@@ -62,71 +55,74 @@ export class ProductListComponent implements OnInit {
       )
       .subscribe(() => {
         this.currentPage = 1;
-        this.loadProducts();
+        this.applyFilters();
       });
   }
-
-  loadProducts(): void {
-    this.loading = true;
-  
-    const params = {
-      ...this.filterForm.value,
-      page: this.currentPage,
-      pageSize: this.pageSize
-    };
-  
-    this.productsService.getProducts().subscribe({
-      next: (response) => {
-        this.products = response.products.map(product => ({
-          ...product,
-          categoryId: product.categoryId // Ensure categoryId is a string
-        })); // Use the 'products' field from the API response
-        this.total = response.products.length; // Set total based on the array size if pagination is not provided in the API
-        this.loading = false;
+  toggleStock(productId: string): void {
+    this.productsService.toggleStock(productId).subscribe({
+      next: () => {
+        this.showSnackBar('Stock status toggled successfully');
+        this.loadProducts();
       },
       error: (error) => {
-        console.error('Error loading products:', error);
-        this.loading = false;
+        this.showSnackBar('Error toggling stock status', true);
+        console.error('Error toggling stock:', error);
       }
     });
   }
 
-  // deleteProduct(productId: string): void{
-  //   this.productsService.deleteProduct
-  // }
-
-  // deleteProduts(productId: string):void{
-  //   this.productsService.deleteProduct(productId).subscribe()
-
-  // }
-
   deleteProduct(productId: string): void {
     if (confirm('Are you sure you want to delete this product?')) {
       this.productsService.deleteProduct(productId).subscribe({
-        next: () => this.loadProducts(),
-        error: (error) => console.error('Error deleting user:', error)
+        next: () => {
+          this.showSnackBar('Product deleted successfully');
+          this.loadProducts();
+        },
+        error: (error) => {
+          this.showSnackBar('Error deleting product', true);
+          console.error('Error deleting product:', error);
+        }
       });
     }
   }
-
-
-  // In product-list.component.ts
-// exportToExcel(): void {
-//   this.productsService.exportToExcel(this.products);
-// }
-
-toggleStock(productId: string): void {
-  this.productsService.toggleStock(productId).subscribe({
-    next: () => this.loadProducts(),
-    error: (error) => console.error('Error toggling stock:', error)
-  });
-}
   
-  
+  loadProducts(): void {
+    this.loading = true;
+    this.productsService.getProducts({})
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.products = response.products;
+          this.total = this.products.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          this.showSnackBar('Error loading products', true);
+          console.error('Error loading products:', error);
+        }
+      });
+  }
+
+  applyFilters(): void {
+    const { search, category, status, minPrice, maxPrice, inStock } = this.filterForm.value;
+
+    this.filteredProducts = this.products.filter(product => {
+      const matchesSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = !category || product.categoryId === category;
+      const matchesMinPrice = !minPrice || product.price >= minPrice;
+      const matchesMaxPrice = !maxPrice || product.price <= maxPrice;
+      const matchesInStock = inStock === '' || product.inStock === (inStock === 'true');
+
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesInStock;
+    });
+
+    this.total = this.filteredProducts.length;
+    this.filteredProducts = this.filteredProducts.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+  }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.loadProducts();
+    this.applyFilters();
   }
 
   toggleSelection(productId: string): void {
@@ -145,8 +141,6 @@ toggleStock(productId: string): void {
     }
   }
 
-
-
   exportProducts(format: 'csv' | 'excel'): void {
     if (format === 'csv') {
       this.exportToCSV();
@@ -156,13 +150,14 @@ toggleStock(productId: string): void {
   }
 
   private exportToCSV(): void {
-    const headers = ['ID', 'Name', 'SKU', 'Price', 'Description', 'In Stock', 'Image'];
+    const headers = ['ID', 'Name', 'Price', 'Category', 'In Stock', 'Total Stock', 'Image'];
     const rows = this.products.map(product => [
       product._id,
       product.name,
       product.price,
-      product.categoryId,
+      product.categoryId.name,
       product.inStock ? 'Yes' : 'No',
+      product.totalStock,
       product.image
     ]);
 
@@ -181,14 +176,12 @@ toggleStock(productId: string): void {
     console.error('Excel export is not implemented yet.');
   }
 
-  // deleteProduct(productId: string): void {
-  //   if (confirm('Are you sure you want to delete this product?')) {
-  //     this.productsService.deleteProduct(productId).subscribe({
-  //       next: () => {
-  //         this.loadProducts();
-  //       },
-  //       error: (error) => console.error('Error deleting product:', error)
-  //     });
-  //   }
-  // }
+  showSnackBar(message: string, isError = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: isError ? ['error-snackbar'] : ['success-snackbar'],
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
+  }
 }

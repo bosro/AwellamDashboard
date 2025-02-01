@@ -17,6 +17,7 @@ export class SalesOrderListComponent implements OnInit {
   selectedOrders = new Set<string>(); // Selected orders
   filterForm: FormGroup;
 
+  Math= Math
   constructor(
     private ordersService: OrdersService,
     private fb: FormBuilder
@@ -83,9 +84,8 @@ export class SalesOrderListComponent implements OnInit {
       const matchesPaymentStatus = !filters.paymentStatus || order.paymentStatus === filters.paymentStatus;
 
       // Filter by date range
-      const matchesDateRange = !filters.dateRange.start || !filters.dateRange.end ||
-        (new Date(order.date) >= new Date(filters.dateRange.start) &&
-         new Date(order.date) <= new Date(filters.dateRange.end));
+      const matchesDateRange = (!filters.dateRange.start || new Date(order.date) >= new Date(filters.dateRange.start)) &&
+                               (!filters.dateRange.end || new Date(order.date) <= new Date(filters.dateRange.end));
 
       // Filter by amount range
       const matchesAmountRange = (!filters.minAmount || order.totalAmount >= filters.minAmount) &&
@@ -99,6 +99,7 @@ export class SalesOrderListComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
+    this.filterOrders();
   }
 
   toggleSelection(orderId: string): void {

@@ -8,7 +8,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = `${environment.apiUrl}/dashbaord/main-dashboard`;
+  private apiUrl = `${environment.apiUrl}/dashboard/main-dashboard`;
 
   constructor(private http: HttpClient) {}
 
