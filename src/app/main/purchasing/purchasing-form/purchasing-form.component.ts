@@ -184,7 +184,7 @@ export class PurchaseFormComponent implements OnInit {
 
       request.subscribe({
         next: () => {
-          this.router.navigate(['/purchases']);
+          this.router.navigate(['main/purchases/list']);
         },
         error: (error) => {
           console.error('Error saving purchase:', error);
