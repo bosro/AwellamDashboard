@@ -37,7 +37,7 @@ export class OrderEditComponent implements OnInit {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
     // this.loadTrucks(this.order.productId?._id);
-    this.getTrucks()
+    // this.getTrucks()
   }
 
   loadOrder(): void {
@@ -47,7 +47,9 @@ export class OrderEditComponent implements OnInit {
     this.ordersService.getOrderById(this.orderId).subscribe({
       next: (response) => {
         this.order = response.order;
-        this.categoryId=this.order.categoryId
+        this.categoryId=this.order?.categoryId
+
+        // console.log(this.categoryId)
 
       
         this.orderForm.patchValue({
@@ -55,6 +57,7 @@ export class OrderEditComponent implements OnInit {
           assignedTruck: this.order.truckId?._id
         });
         this.loading = false;
+        this.getTrucks();
       },
       error: (error) => {
         console.error('Error loading order:', error);
@@ -77,9 +80,9 @@ export class OrderEditComponent implements OnInit {
   private getTrucks(): void {
     const categoryId= this.categoryId
 
-    console.log(categoryId)
+    // console.log(categoryId)
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/trucks/get/${categoryId}`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${categoryId}`).subscribe({
       next: (response) => {
         this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
         this.loading = false;
