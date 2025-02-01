@@ -17,7 +17,7 @@ export class CustomerListComponent implements OnInit {
   currentPage = 1;
   selectedCustomers = new Set<string>();
   filterForm: FormGroup;
-
+Math= Math
   constructor(
     private customersService: CustomersService,
     private fb: FormBuilder
@@ -39,14 +39,14 @@ export class CustomerListComponent implements OnInit {
 
   private setupFilters(): void {
     // Listen for changes in the search input
-    this.filterForm.get('search')?.valueChanges
+    this.filterForm.valueChanges
       .pipe(
         debounceTime(300), // Wait 300ms after the user stops typing
         distinctUntilChanged() // Only trigger if the search term changes
       )
-      .subscribe((searchTerm) => {
+      .subscribe(() => {
         this.currentPage = 1; // Reset to the first page when searching
-        this.filterCustomers(searchTerm); // Filter customers based on the search term
+        this.applyFilters(); // Apply filters based on the search term
       });
   }
 
@@ -60,8 +60,8 @@ export class CustomerListComponent implements OnInit {
     this.customersService.getCustomers(params).subscribe({
       next: (response) => {
         this.customers = response.customers; // Store the full list of customers
-        this.filteredCustomers = response.customers; // Initialize filteredCustomers with all customers
         this.total = response.total || 0; // Ensure total is set properly
+        this.applyFilters(); // Apply filters after loading
         this.loading = false;
       },
       error: (error) => {
@@ -71,21 +71,24 @@ export class CustomerListComponent implements OnInit {
     });
   }
 
-  filterCustomers(searchTerm: string): void {
-    if (!searchTerm) {
-      // If the search term is empty, show all customers
-      this.filteredCustomers = this.customers;
-    } else {
-      // Filter customers by name (case-insensitive)
-      this.filteredCustomers = this.customers.filter(customer =>
-        customer.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  applyFilters(): void {
+    const { search, status, dateRange } = this.filterForm.value;
+
+    this.filteredCustomers = this.customers.filter(customer => {
+      const matchesSearch = !search || customer.fullName.toLowerCase().includes(search.toLowerCase());
+      // const matchesStatus = !status || customer.status === status;
+      const matchesDateRange = (!dateRange.start || new Date(customer.createdAt) >= new Date(dateRange.start)) &&
+                               (!dateRange.end || new Date(customer.createdAt) <= new Date(dateRange.end));
+
+      return matchesSearch  && matchesDateRange;
+    });
+
     this.total = this.filteredCustomers.length; // Update total for pagination
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
+    this.applyFilters();
   }
 
   toggleSelection(customerId: string): void {

@@ -172,7 +172,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let purchase of purchases" 
+        <tr *ngFor="let purchase of filteredPurchases" 
             class="bg-white border-b hover:bg-gray-50">
           <td class="p-4">
             <div class="flex items-center">
@@ -190,7 +190,11 @@
           <td class="py-4 px-6">{{purchase.productId?.name || 'N/A'}}</td>
           <td class="py-4 px-6">{{purchase.quantity}}</td>
           <td class="py-4 px-6">{{purchase.plantId?.name || 'N/A'}}</td>
-          <td class="py-4 px-6">{{purchase.plantId?.name || 'N/A'}}</td>
+          <!-- <td class="py-4 px-6">
+            <span [ngClass]="getStatusClass(purchase.status)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+              {{purchase.status}}
+            </span>
+          </td> -->
           <td class="py-4 px-6">
             <div class="flex items-center space-x-3">
               <a 
@@ -213,7 +217,7 @@
         </tr>
 
         <!-- No Results -->
-        <tr *ngIf="purchases.length === 0 && !loading">
+        <tr *ngIf="filteredPurchases.length === 0 && !loading">
           <td colspan="9" class="py-4 text-center text-gray-500">
             No purchases found matching your criteria
           </td>

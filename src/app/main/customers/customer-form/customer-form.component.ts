@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CustomersService } from '../../../services/customer.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-customer-form',
@@ -19,7 +20,8 @@ export class CustomerFormComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private customerService: CustomersService
+    private customerService: CustomersService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -35,6 +37,15 @@ export class CustomerFormComponent implements OnInit {
         email: ['', [Validators.required, Validators.email]],
         phoneNumber: ['', Validators.required]
       })
+    });
+  }
+
+  showSnackBar(message: string, isError = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: isError ? ['error-snackbar'] : ['success-snackbar'],
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
     });
   }
 
@@ -77,12 +88,16 @@ export class CustomerFormComponent implements OnInit {
       try {
         if (this.isEditMode) {
           await this.customerService.updateCustomer(this.currentCustomer._id, formData).toPromise();
+          this.showSnackBar('Customer added successfully');
         } else {
           await this.customerService.createCustomer(formData).toPromise();
+          this.showSnackBar('Customer updated successfully');
         }
         this.router.navigate(['/main/customers/list']);
-      } catch (error) {
+        this.showSnackBar('Customer added successfully');
+      } catch (error:any) {
         console.error('Error saving customer:', error);
+        this.showSnackBar(error, true);
       } finally {
         this.saving = false;
       }

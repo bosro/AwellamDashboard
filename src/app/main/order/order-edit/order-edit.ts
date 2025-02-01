@@ -16,6 +16,8 @@ export class OrderEditComponent implements OnInit {
   orderId: string = '';
   trucks: any[] = [];
   order: any;
+  categoryId: string= '';
+  private apiUrl = `${environment.apiUrl}`;
 // drivers: any;
 
   constructor(
@@ -35,7 +37,7 @@ export class OrderEditComponent implements OnInit {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
     // this.loadTrucks(this.order.productId?._id);
-    this.loadTrucks()
+    this.getTrucks()
   }
 
   loadOrder(): void {
@@ -45,6 +47,9 @@ export class OrderEditComponent implements OnInit {
     this.ordersService.getOrderById(this.orderId).subscribe({
       next: (response) => {
         this.order = response.order;
+        this.categoryId=this.order.categoryId
+
+      
         this.orderForm.patchValue({
           price: this.order.price,
           assignedTruck: this.order.truckId?._id
@@ -58,14 +63,31 @@ export class OrderEditComponent implements OnInit {
     });
   } 
   
-  loadTrucks(): void {
+  // loadTrucks(): void {
 
-  // loadTrucks(productId: string): void {
-    this.http.get<any>(`${environment.apiUrl}/trucks/get`).subscribe({
+  // // loadTrucks(productId: string): void {
+  //   this.http.get<any>(`${environment.apiUrl}/trucks/get`).subscribe({
+  //     next: (response) => {
+  //       this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
+  //     },
+  //     error: (error) => console.error('Error loading trucks:', error)
+  //   });
+  // }
+
+  private getTrucks(): void {
+    const categoryId= this.categoryId
+
+    console.log(categoryId)
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/trucks/get/${categoryId}`).subscribe({
       next: (response) => {
         this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
+        this.loading = false;
       },
-      error: (error) => console.error('Error loading trucks:', error)
+      error: (error) => {
+        console.error('Error loading trucks:', error);
+        this.loading = false;
+      },
     });
   }
 

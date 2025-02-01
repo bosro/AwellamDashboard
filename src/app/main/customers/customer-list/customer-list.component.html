@@ -40,7 +40,7 @@
                 <tr>
                     <th scope="col" class="px-6 py-3">
                         <div class="flex items-center">
-                            <input type="checkbox" [checked]="selectedCustomers.size === customers.length"
+                            <input type="checkbox" [checked]="selectedCustomers.size === filteredCustomers.length"
                                 (change)="toggleAllSelection()" class="h-4 w-4 rounded border-gray-300 text-blue-600">
                         </div>
                     </th>
@@ -52,7 +52,7 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <tr *ngFor="let customer of customers" [routerLink]="['/main/customers/details', customer._id]">
+                <tr *ngFor="let customer of filteredCustomers" [routerLink]="['/main/customers/details', customer._id]">
                     <td class="px-6 py-4">
                         <div class="flex items-center">
                             <input type="checkbox" [checked]="selectedCustomers.has(customer._id)"
@@ -110,7 +110,7 @@
                 </tr>
 
                 <!-- No Results -->
-                <tr *ngIf="!loading && customers.length === 0">
+                <tr *ngIf="!loading && filteredCustomers.length === 0">
                     <td colspan="9" class="px-6 py-4 text-center text-gray-500">
                         No customers found matching your criteria
                     </td>

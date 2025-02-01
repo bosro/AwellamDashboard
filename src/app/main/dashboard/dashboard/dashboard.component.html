@@ -1,4 +1,3 @@
-
 <div class="p-6">
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
@@ -6,33 +5,20 @@
       <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
     </div>
     <div class="flex items-center space-x-4">
-      <!-- Date Range Selector -->
-      <!-- <div class="flex items-center space-x-2">
-        <label class="text-sm font-medium text-gray-700">Time Period:</label>
-        <select [(ngModel)]="selectedRange" (change)="onDateRangeChange($event.target.value)" class="text-sm border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-          <option *ngFor="let range of dateRanges" [value]="range.value">
-            {{range.label}}
-          </option>
-        </select>
-      </div> -->
-
-
-        <!-- Export Buttons -->
-        <div class="flex gap-2 w-full sm:w-auto">
-          <button (click)="exportDashboard('excel')" 
-                  class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-            <i class="ri-file-excel-line mr-2 text-green-600"></i>
-            <span class="whitespace-nowrap">Export Excel</span>
-          </button>
-          <button (click)="exportDashboard('pdf')" 
-                  class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-            <i class="ri-file-pdf-line mr-2 text-red-600"></i>
-            <span class="whitespace-nowrap">Export PDF</span>
-          </button>
-        </div>
+      <!-- Export Buttons -->
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button (click)="exportDashboard('excel')" 
+                class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+          <i class="ri-file-excel-line mr-2 text-green-600"></i>
+          <span class="whitespace-nowrap">Export Excel</span>
+        </button>
+        <button (click)="exportDashboard('pdf')" 
+                class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 border rounded-lg hover:bg-gray-50">
+          <i class="ri-file-pdf-line mr-2 text-red-600"></i>
+          <span class="whitespace-nowrap">Export PDF</span>
+        </button>
       </div>
     </div>
-
   </div>
 
   <!-- Quick Stats -->
@@ -45,8 +31,7 @@
 
     <!-- Total Revenue -->
     <div>
-      
-      <app-metrics-card title="Total Revenue GHC" [value]="metrics.totalRevenue ? metrics.totalRevenue : 0 | currency:'GHC'" icon="ri-money-dollar-circle-line"
+      <app-metrics-card title="Total Revenue GHC" [value]="metrics.revenueMetrics?.totalRevenue " icon="ri-money-dollar-circle-line"
         colorClass="bg-green-100 text-green-600"></app-metrics-card>
     </div>
 
@@ -55,12 +40,6 @@
       <app-metrics-card title="Total Orders" [value]="metrics.totalOrders" icon="ri-shopping-cart-line"
         colorClass="bg-yellow-100 text-yellow-600"></app-metrics-card>
     </div>
-
-    <!-- Average Order Value -->
-    <!-- <div>
-      <app-metrics-card title="Average Order Value" [value]="metrics.averageOrderValue !== null ? (metrics.averageOrderValue | currency:'GHC') : 0" icon="ri-bar-chart-line"
-        colorClass="bg-purple-100 text-purple-600"></app-metrics-card>
-    </div> -->
 
     <!-- Conversion Rate -->
     <div>
@@ -78,17 +57,44 @@
   <!-- Lowest Stock Items -->
   <div class="bg-white rounded-lg shadow p-6 mb-6">
     <h2 class="text-xl font-semibold text-gray-900 mb-4">Lowest Stock Items</h2>
-    <ul>
-      <li *ngFor="let item of metrics.lowestStockItems" class="flex justify-between items-center py-2 border-b">
-        <span>{{ item._id }}</span>
-        <span [ngClass]="{'text-red-600': item.totalStock === 0}">{{ item.totalStock }}</span>
-      </li>
-    </ul>
-
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let item of metrics.lowestStockItems">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.name }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.price | currency:'GHC':'symbol':'1.2-2' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm" [ngClass]="{'text-red-600': item.totalStock === 0, 'text-green-600': item.totalStock > 0}">
+            {{ item.totalStock }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.updatedAt | date:'medium' }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Revenue Chart -->
-  <!-- <div class="bg-white rounded-lg shadow p-6">
-    <app-revenue-chart [data]="revenueData" [loading]="loading" [metrics]="metrics.revenueMetrics"></app-revenue-chart>
-  </div> -->
-<!-- </div> -->
+  <!-- Revenue Metrics -->
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Revenue Metrics</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <app-metrics-card title="Total Revenue" [value]="metrics.revenueMetrics?.totalRevenue ?? 0 " icon="ri-money-dollar-circle-line"
+          colorClass="bg-green-100 text-green-600"></app-metrics-card>
+      </div>
+      <div>
+        <app-metrics-card title="Average Revenue" [value]="metrics.revenueMetrics?.averageRevenue " icon="ri-bar-chart-line"
+          colorClass="bg-blue-100 text-blue-600"></app-metrics-card>
+      </div>
+      <div>
+        <app-metrics-card title="Growth" [value]="metrics.revenueMetrics?.growth" icon="ri-line-chart-line"
+          colorClass="bg-purple-100 text-purple-600" suffix="%"></app-metrics-card>
+      </div>
+    </div>
+  </div>
+</div>

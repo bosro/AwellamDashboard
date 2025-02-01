@@ -1,4 +1,3 @@
-<!-- src/app/components/driver-list/driver-list.component.html -->
 <div class="p-6">
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
@@ -79,7 +78,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let driver of drivers" 
+        <tr *ngFor="let driver of filteredDrivers" 
             class="bg-white border-b hover:bg-gray-50">
           <td class="py-4 px-6">{{driver.name}}</td>
           <td class="py-4 px-6">{{driver.phoneNumber}}</td>
@@ -103,7 +102,7 @@
                 <i class="ri-edit-line text-lg"></i>
               </button>
               <button 
-              (click)="deleteDriver(driver._id)"
+                (click)="deleteDriver(driver._id)"
                 class="text-red-600 hover:text-red-900">
                 <i class="ri-delete-bin-line"></i>
               </button>
@@ -112,7 +111,7 @@
         </tr>
 
         <!-- No Results -->
-        <tr *ngIf="drivers.length === 0 && !loading">
+        <tr *ngIf="filteredDrivers.length === 0 && !loading">
           <td colspan="6" class="py-4 text-center text-gray-500">
             No drivers found matching your criteria
           </td>
@@ -128,5 +127,26 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex items-center justify-between mt-4">
+    <div class="text-sm text-gray-700">
+      Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
+    </div>
+    <div class="flex items-center space-x-2">
+      <button 
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+        class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      <button 
+        [disabled]="currentPage * pageSize >= total"
+        (click)="onPageChange(currentPage + 1)"
+        class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+    </div>
   </div>
 </div>

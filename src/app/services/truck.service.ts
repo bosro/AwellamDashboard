@@ -31,6 +31,12 @@ export class TruckService {
   loadTruck(data: TruckLoad): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.apiUrl}/load`, data);
   }
+
+  unloadTruck(id: string): Observable<Truck> {
+    return this.http.put<Truck>(`${this.apiUrl}/unload/${id}`, {});
+  }
+
+ 
     deleteTruck(id: string): Observable<Truck> {
       return this.http.delete<Truck>(`${this.apiUrl}/trucks/${id}`);
     }

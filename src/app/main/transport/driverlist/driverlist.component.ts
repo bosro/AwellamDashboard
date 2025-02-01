@@ -1,10 +1,8 @@
-// src/app/components/driver-list/driver-list.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DriverService } from '../../../services/driver.service';
 import { Driver } from '../../../shared/types/driver-types';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-driver-list',
@@ -12,8 +10,15 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class DriverListComponent implements OnInit {
   drivers: Driver[] = [];
+  filteredDrivers: Driver[] = [];
   loading = false;
+  total = 0;
+  currentPage = 1;
+  pageSize = 10;
   filterForm!: FormGroup;
+// Math: any;
+
+Math = Math;
 
   constructor(
     private driverService: DriverService,
@@ -40,7 +45,8 @@ export class DriverListComponent implements OnInit {
         distinctUntilChanged()
       )
       .subscribe(() => {
-        this.loadDrivers();
+        this.currentPage = 1;
+        this.applyFilters();
       });
   }
 
@@ -49,6 +55,8 @@ export class DriverListComponent implements OnInit {
     this.driverService.getDrivers().subscribe({
       next: (response) => {
         this.drivers = response.drivers;
+        this.total = this.drivers.length;
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -58,6 +66,25 @@ export class DriverListComponent implements OnInit {
     });
   }
 
+  applyFilters(): void {
+    const { searchTerm, status } = this.filterForm.value;
+
+    this.filteredDrivers = this.drivers.filter(driver => {
+      const matchesSearch = !searchTerm || driver.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = !status || driver.status === status;
+
+      return matchesSearch && matchesStatus;
+    });
+
+    this.total = this.filteredDrivers.length;
+    this.filteredDrivers = this.filteredDrivers.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
   getStatusClass(status: string): string {
     const statusClasses: Record<string, string> = {
       'active': 'bg-green-100 text-green-800',
@@ -65,8 +92,6 @@ export class DriverListComponent implements OnInit {
     };
     return statusClasses[status] || '';
   }
-
-  // deleteDriver()
 
   deleteDriver(id: string): void {
     if (confirm('Are you sure you want to delete this driver?')) {
