@@ -5,9 +5,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
-// import 
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface Category {
   _id: string;
@@ -57,9 +55,37 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadInitialData();
     this.setupFilters();
-    this.loadProducts();
-    this.loadPlants();
+  }
+
+  private loadInitialData(): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
+      next: (response) => {
+        this.plants = response.plants;
+        this.loadProducts();
+      },
+      error: (error) => {
+        console.error('Error loading plants:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  private loadProducts(): void {
+    this.productsService.getProducts({}).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = this.products.length;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.loading = false;
+      }
+    });
   }
 
   private setupFilters(): void {
@@ -81,22 +107,20 @@ export class ProductListComponent implements OnInit {
         this.filterForm.patchValue({ category: '' });
       }
     });
-  }
 
-  private loadPlants(): void {
-    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
-      next: (response) => {
-        this.plants = response.plants;
-      },
-      error: (error) => {
-        console.error('Error loading plants:', error);
+    this.filterForm.get('category')?.valueChanges.subscribe(categoryId => {
+      if (categoryId) {
+        this.onCategorySelect(categoryId);
+      } else {
+        this.products = [];
+        this.applyFilters();
       }
     });
   }
 
-  private loadCategories(_id: string): void {
+  private loadCategories(plantId: string): void {
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/category/plants/${_id}`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
       next: (response) => {
         this.categories = response.categories;
         this.loading = false;
@@ -106,6 +130,57 @@ export class ProductListComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onCategorySelect(categoryId: string): void {
+    if (categoryId) {
+      this.loading = true;
+      this.http.get<any>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
+        next: (response) => {
+          this.products = response.products;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading products:', error);
+          this.loading = false;
+        }
+      });
+    } else {
+      this.products = [];
+      this.applyFilters();
+    }
+  }
+
+  applyFilters(): void {
+    const { search, plant, category, status, minPrice, maxPrice, inStock } = this.filterForm.value;
+
+    this.filteredProducts = this.products.filter(product => {
+      const matchesSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
+      const matchesPlant = !plant || product.plantId._id === plant;
+      const matchesCategory = !category || product.categoryId._id === category;
+      const matchesMinPrice = !minPrice || product.price >= minPrice;
+      const matchesMaxPrice = !maxPrice || product.price <= maxPrice;
+      const matchesInStock = inStock === '' || product.inStock === (inStock === 'true');
+
+      return matchesSearch && matchesPlant && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesInStock;
+    });
+
+    this.total = this.filteredProducts.length;
+    this.filteredProducts = this.filteredProducts.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
+  toggleSelection(productId: string): void {
+    if (this.selectedProducts.has(productId)) {
+      this.selectedProducts.delete(productId);
+    } else {
+      this.selectedProducts.add(productId);
+    }
   }
 
   toggleStock(productId: string): void {
@@ -134,98 +209,6 @@ export class ProductListComponent implements OnInit {
         }
       });
     }
-  }
-
-  loadProducts(): void {
-    this.loading = true;
-    this.productsService.getProducts({})
-      .pipe(finalize(() => this.loading = false))
-      .subscribe({
-        next: (response) => {
-          this.products = response.products;
-          this.total = this.products.length;
-          this.applyFilters();
-        },
-        error: (error) => {
-          this.showSnackBar('Error loading products', true);
-          console.error('Error loading products:', error);
-        }
-      });
-  }
-
-  applyFilters(): void {
-    const { search, plant, category, status, minPrice, maxPrice, inStock } = this.filterForm.value;
-
-    this.filteredProducts = this.products.filter(product => {
-      const matchesSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
-      const matchesPlant = !plant || product.plantId === plant;
-      const matchesCategory = !category || product.categoryId._id === category;
-      // const matchesStatus = !status || product.status === status;
-      const matchesMinPrice = !minPrice || product.price >= minPrice;
-      const matchesMaxPrice = !maxPrice || product.price <= maxPrice;
-      const matchesInStock = inStock === '' || product.inStock === (inStock === 'true');
-
-      return matchesSearch && matchesPlant && matchesCategory  && matchesMinPrice && matchesMaxPrice && matchesInStock;
-    });
-
-    this.total = this.filteredProducts.length;
-    this.filteredProducts = this.filteredProducts.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.applyFilters();
-  }
-
-  toggleSelection(productId: string): void {
-    if (this.selectedProducts.has(productId)) {
-      this.selectedProducts.delete(productId);
-    } else {
-      this.selectedProducts.add(productId);
-    }
-  }
-
-  toggleAllSelection(): void {
-    if (this.selectedProducts.size === this.products.length) {
-      this.selectedProducts.clear();
-    } else {
-      this.products.forEach(product => this.selectedProducts.add(product._id));
-    }
-  }
-
-  exportProducts(format: 'csv' | 'excel'): void {
-    if (format === 'csv') {
-      this.exportToCSV();
-    } else if (format === 'excel') {
-      this.exportToExcel();
-    }
-  }
-
-  private exportToCSV(): void {
-    const headers = ['ID', 'Name', 'Price', 'Category', 'In Stock', 'Total Stock', 'Image'];
-    const rows = this.products.map(product => [
-      product._id,
-      product.name,
-      product.price,
-      product.categoryId.name,
-      product.inStock ? 'Yes' : 'No',
-      product.totalStock,
-      product.image
-    ]);
-
-    const csvContent = [headers, ...rows].map(e => e.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'products-export.csv';
-    link.click();
-    window.URL.revokeObjectURL(url);
-  }
-
-  private exportToExcel(): void {
-    // Implement Excel export logic here
-    console.error('Excel export is not implemented yet.');
   }
 
   showSnackBar(message: string, isError = false) {
