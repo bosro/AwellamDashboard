@@ -34,7 +34,7 @@ export class CustomerFormComponent implements OnInit {
       personalInfo: this.fb.group({
         fullName: ['', Validators.required],
         address: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
+        email: ['', ],
         phoneNumber: ['', Validators.required]
       })
     });
@@ -118,7 +118,7 @@ export class CustomerFormComponent implements OnInit {
     const control = this.customerForm.get(path);
     if (control?.errors && control.touched) {
       if (control.errors['required']) return 'This field is required';
-      if (control.errors['email']) return 'Please enter a valid email address';
+      // if (control.errors['email']) return 'Please enter a valid email address';
     }
     return '';
   }

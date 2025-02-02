@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { OrdersService } from '../../../services/order.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-order-edit',
@@ -18,6 +19,7 @@ export class OrderEditComponent implements OnInit {
   order: any;
   categoryId: string= '';
   private apiUrl = `${environment.apiUrl}`;
+// item: any;
 // drivers: any;
 
   constructor(
@@ -78,17 +80,28 @@ export class OrderEditComponent implements OnInit {
   // }
 
   private getTrucks(): void {
-    const categoryId= this.categoryId
+    this.categoryId=this.order?.categoryId._id
 
     // console.log(categoryId)
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${categoryId}`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.categoryId}`).subscribe({
       next: (response) => {
         this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
         this.loading = false;
+        Swal.fire({
+          title: "Driver Fetched Succesfully!",
+          icon: "success",
+          draggable: true
+        });
       },
       error: (error) => {
         console.error('Error loading trucks:', error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "No drive found holding this product category or from this plant !",
+          // footer: '<a href="#">Why do I have this issue?</a>'
+        });
         this.loading = false;
       },
     });
@@ -108,11 +121,21 @@ export class OrderEditComponent implements OnInit {
               truckId: orderData.assignedTruck
             }).subscribe({
               next: () => {
+                Swal.fire({
+                  title: "Driver assigned Succesfully!",
+                  icon: "success",
+                  draggable: true
+                });
                 this.router.navigate(['/main/orders/details', this.orderId]);
               },
               error: (error) => {
                 console.error('Error assigning truck:', error);
                 this.saving = false;
+                Swal.fire({
+                  icon: "error",
+                  title: `${ error.error?.message }`,
+                  // footer: '<a href="#">Why do I have this issue?</a>'
+                });
               }
             });
           } else {

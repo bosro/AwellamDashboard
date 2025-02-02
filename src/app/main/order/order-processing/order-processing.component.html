@@ -95,45 +95,53 @@
       <!-- Selected Products List -->
       <div *ngIf="items.length > 0" class="bg-white rounded-lg shadow-sm border p-6">
         <h2 class="text-lg font-medium text-gray-900 mb-4">Selected Products</h2>
-        <div class="space-y-4">
+        <div class="space-y-4" formArrayName="items">
           <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" 
-               class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-            <div class="flex-1">
-              <div class="flex items-center justify-between">
-                <span class="font-medium text-gray-900">{{item.get('name')?.value}}</span>
-                <button type="button" (click)="removeItem(i)" 
-                        class="text-red-600 hover:text-red-800">
-                  <i class="ri-delete-bin-line"></i>
-                </button>
-              </div>
-              <div class="mt-2 flex items-center space-x-4">
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Price (GHC)</label>
-                  <input 
-                    type="number"
-                    formControlName="price"
-                    class="w-full px-3 py-2 border rounded-md"
-                    [class.border-red-500]="item.get('price')?.invalid && item.get('price')?.touched"
-                    min="0">
-                </div>
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-                  <input 
-                    type="number"
-                    formControlName="quantity"
-                    class="w-full px-3 py-2 border rounded-md"
-                    [class.border-red-500]="item.get('quantity')?.invalid && item.get('quantity')?.touched"
-                    min="1">
-                </div>
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
-                  <div class="px-3 py-2 bg-gray-100 rounded-md font-medium">
-                    GHC {{(item.get('quantity')?.value || 0) * (item.get('price')?.value || 0) | number:'1.2-2'}}
-                  </div>
-                </div>
-              </div>
+          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+       <div class="flex-1">
+         <div class="flex items-center justify-between">
+           <span class="font-medium text-gray-900">{{item.get('name')?.value}}</span>
+           <button type="button" (click)="removeItem(i)" 
+                   class="text-red-600 hover:text-red-800">
+             <i class="ri-delete-bin-line"></i>
+           </button>
+         </div>
+         <div class="mt-2 flex items-center space-x-4">
+           <!-- Quantity Input -->
+           <div class="flex-1">
+             <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+             <input 
+               type="number"
+               formControlName="quantity"
+               class="w-full px-3 py-2 border rounded-md"
+               [class.border-red-500]="item.get('quantity')?.invalid && item.get('quantity')?.touched"
+               min="1">
+           </div>
+           <!-- Price Input -->
+           <div class="flex-1">
+             <label class="block text-sm font-medium text-gray-700 mb-1">Price (GHC)</label>
+             <input 
+               type="number"
+               formControlName="price"
+               class="w-full px-3 py-2 border rounded-md"
+               [class.border-red-500]="item.get('price')?.invalid && item.get('price')?.touched"
+               min="0">
+           </div>
+
+           <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
+            <div class="px-3 py-2 bg-gray-100 rounded-md font-medium">
+              GHC {{getTotal()}}
             </div>
-          </div>
+            </div>
+           <!-- Total Display -->
+           <!-- <div class="flex-1">
+             <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
+             <input [value]="item.get('total')?.value" class="border p-2 rounded" readonly>
+           </div> -->
+         </div>
+       </div>
+     </div>
         </div>
       </div>
 
@@ -232,9 +240,14 @@
       <!-- Total with larger text -->
       <div class="pt-4 border-t flex justify-between items-center">
         <span class="text-lg font-medium text-gray-900">Total Amount</span>
-        <span class="text-2xl font-bold text-blue-600">
-          GHC {{getTotal() | number:'1.2-2'}}
-        </span>
+        <div>
+          
+          <span class="text-2xl font-bold text-blue-600">
+            GHC {{getTotal()}}
+          </span>
+          <!-- <label>Total</label> -->
+          <!-- <label>Total Order Amount: GHC {{ getTotal() }}</label> -->
+        </div>
       </div>
     </div>
   </div>

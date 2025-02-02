@@ -3,10 +3,19 @@ import { ProductsService } from '../../../services/products.service';
 import { Product } from '../../../shared/types/product.interface';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+// import 
 
 interface Category {
-  id: string;
+  _id: string;
+  name: string;
+}
+
+interface Plant {
+  _id: string;
   name: string;
 }
 
@@ -25,15 +34,20 @@ export class ProductListComponent implements OnInit {
   filterForm: FormGroup;
   exportDropdown = false;
   categories: Category[] = [];
+  plants: Plant[] = [];
   Math = Math;
+
+  private apiUrl = `${environment.apiUrl}`
 
   constructor(
     private productsService: ProductsService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {
     this.filterForm = this.fb.group({
       search: [''],
+      plant: [''],
       category: [''],
       status: [''],
       minPrice: [''],
@@ -45,6 +59,7 @@ export class ProductListComponent implements OnInit {
   ngOnInit(): void {
     this.setupFilters();
     this.loadProducts();
+    this.loadPlants();
   }
 
   private setupFilters(): void {
@@ -57,7 +72,42 @@ export class ProductListComponent implements OnInit {
         this.currentPage = 1;
         this.applyFilters();
       });
+
+    this.filterForm.get('plant')?.valueChanges.subscribe(plantId => {
+      if (plantId) {
+        this.loadCategories(plantId);
+      } else {
+        this.categories = [];
+        this.filterForm.patchValue({ category: '' });
+      }
+    });
   }
+
+  private loadPlants(): void {
+    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
+      next: (response) => {
+        this.plants = response.plants;
+      },
+      error: (error) => {
+        console.error('Error loading plants:', error);
+      }
+    });
+  }
+
+  private loadCategories(_id: string): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/category/plants/${_id}`).subscribe({
+      next: (response) => {
+        this.categories = response.categories;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.loading = false;
+      }
+    });
+  }
+
   toggleStock(productId: string): void {
     this.productsService.toggleStock(productId).subscribe({
       next: () => {
@@ -85,7 +135,7 @@ export class ProductListComponent implements OnInit {
       });
     }
   }
-  
+
   loadProducts(): void {
     this.loading = true;
     this.productsService.getProducts({})
@@ -104,16 +154,18 @@ export class ProductListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    const { search, category, status, minPrice, maxPrice, inStock } = this.filterForm.value;
+    const { search, plant, category, status, minPrice, maxPrice, inStock } = this.filterForm.value;
 
     this.filteredProducts = this.products.filter(product => {
       const matchesSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = !category || product.categoryId === category;
+      const matchesPlant = !plant || product.plantId === plant;
+      const matchesCategory = !category || product.categoryId._id === category;
+      // const matchesStatus = !status || product.status === status;
       const matchesMinPrice = !minPrice || product.price >= minPrice;
       const matchesMaxPrice = !maxPrice || product.price <= maxPrice;
       const matchesInStock = inStock === '' || product.inStock === (inStock === 'true');
 
-      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesInStock;
+      return matchesSearch && matchesPlant && matchesCategory  && matchesMinPrice && matchesMaxPrice && matchesInStock;
     });
 
     this.total = this.filteredProducts.length;
