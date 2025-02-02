@@ -1,4 +1,3 @@
-<!-- src/app/main/products/product-list/product-list.component.html -->
 <div class="p-6">
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
@@ -59,7 +58,17 @@
             formControlName="category"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
             <option value="">All Categories</option>
-            <!-- <option *ngFor="let category of categories" [value]="category._id">{{category.name}}</option> -->
+            <option *ngFor="let category of categories" [value]="category._id">{{category.name}}</option>
+          </select>
+        </div>
+        <div>
+          <label for="plant" class="block text-sm font-medium text-gray-700">Plant</label>
+          <select 
+            id="plant"
+            formControlName="plant"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            <option value="">All Plants</option>
+            <option *ngFor="let plant of plants" [value]="plant._id">{{plant.name}}</option>
           </select>
         </div>
         <div>
@@ -121,6 +130,7 @@
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plant</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Stocks</th>
@@ -142,8 +152,9 @@
             <div class="text-sm font-medium text-gray-900">{{product.name}}</div>
           </td>
           <td class="px-6 py-4 text-sm text-gray-500">{{product.categoryId.name}}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{product.plantId.name}}</td>
           <td class="px-6 py-4">
-            <div class="text-sm text-gray-900">${{product.price}}</div>
+            <div class="text-sm text-gray-900">GHC {{product.price}}</div>
           </td>
           <td class="px-6 py-4">
             <div [ngClass]="{
@@ -200,6 +211,8 @@
       </tbody>
     </table>
   </div>
+
+
 
   <!-- Pagination -->
   <div class="flex items-center justify-between mt-4">

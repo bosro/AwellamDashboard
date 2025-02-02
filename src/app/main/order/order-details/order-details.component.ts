@@ -32,10 +32,28 @@ interface Order {
   createdAt: string;
   updatedAt: string;
   orderNumber: string;
-  assignedTruck?: string | null;
+  assignedTruck?: {
+_id: string,
+name: string,
+driver:{
+  _id:string,
+  name: string,
+  phoneNumber: string
+}
+  }
   assignedDriver?: {
     _id: string,
     name: string
+  }
+ 
+  categoryId?: {
+    _id:string,
+    name: string,
+    plantId:{
+      _id: string,
+      name:string
+    }
+  
   }
 }
 
@@ -66,9 +84,17 @@ interface OrderResponse {
     createdAt: string;
     updatedAt: string;
     orderNumber: string;
-    assignedDriver:{
+    assignedDriver?: {
       _id: string,
       name: string
+    },
+    categoryId?: {
+      _id: string,
+      name: string,
+      plantId: {
+        _id: string,
+        name: string
+      }
     }
   };
 }
@@ -109,7 +135,10 @@ export class OrderDetailsComponent implements OnInit {
     this.loading = true;
     this.ordersService.getOrderById(id).subscribe({
       next: (response) => {
-        this.order = response.order;
+        this.order = {
+          ...response.order,
+          categoryId: response.order.categoryId || { _id: '', name: '', plantId: { _id: '', name: '' } }
+        };
         this.buildTimeline();
         this.loading = false;
       },
@@ -133,21 +162,21 @@ export class OrderDetailsComponent implements OnInit {
       },
       {
         date: this.order.paymentStatus === 'Paid' ? this.order.createdAt : null,
-        title: 'Payment Confirmed',
-        description: `Payment of $${this.order.totalAmount} was received`,
+        title: 'Order Confirmed',
+        description: 'Customer has confirmed order',
         icon: 'ri-bank-card-line',
         status: this.order.paymentStatus === 'Paid' ? 'completed' : 'pending'
       },
       {
         date: this.order.status === 'PROCESSING' ? this.order.updatedAt : null,
-        title: 'Processing',
-        description: 'Order is being prepared',
+        title: 'Assingned',
+        description: 'Driver has been Assigned',
         icon: 'ri-loader-4-line',
         status: this.getTimelineStatus('PROCESSING')
       },
       {
         date: this.order.deliveryStatus === 'SHIPPING' ? this.order.updatedAt : null,
-        title: 'Shipped',
+        title: 'Transported',
         description: 'Order is on the way',
         icon: 'ri-truck-line',
         status: this.getTimelineStatus('SHIPPING')

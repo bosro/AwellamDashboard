@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrdersService } from '../../../services/order.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, combineLatest } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
@@ -64,7 +64,6 @@ export class OrderProcessingComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching data:', error);
-        // Show error message to user
       },
       complete: () => this.loading = false
     });
@@ -117,32 +116,32 @@ export class OrderProcessingComponent implements OnInit {
     return this.orderForm.get('items') as FormArray;
   }
 
+  updateItemTotal(itemGroup: FormGroup): void {
+    const quantity = itemGroup.get('quantity')?.value || 0;
+    const price = itemGroup.get('price')?.value || 0;
+    const total = quantity * price;
+    itemGroup.patchValue({ total: total }, { emitEvent: false });
+  }
+
   addItem(product: any): void {
     const itemGroup = this.fb.group({
       productId: [product._id],
       name: [product.name],
       quantity: [1, [Validators.required, Validators.min(1)]],
       price: [product.price, [Validators.required, Validators.min(0)]],
-      total: [product.price]
+      total: [{ value: product.price, disabled: true }]
     });
 
-    // Listen to both quantity and price changes
-    itemGroup.get('quantity')?.valueChanges.subscribe(qty => {
+    // Subscribe to both quantity and price changes
+    combineLatest([
+      itemGroup.get('quantity')!.valueChanges,
+      itemGroup.get('price')!.valueChanges
+    ]).subscribe(() => {
       this.updateItemTotal(itemGroup);
-    });
-
-    itemGroup.get('price')?.valueChanges.subscribe(price => {
-      this.updateItemTotal(itemGroup);
+      this.calculateOrderTotals();
     });
 
     this.items.push(itemGroup);
-    this.calculateOrderTotals();
-  }
-
-  private updateItemTotal(itemGroup: FormGroup): void {
-    const quantity = itemGroup.get('quantity')?.value || 0;
-    const price = itemGroup.get('price')?.value || 0;
-    itemGroup.patchValue({ total: quantity * price }, { emitEvent: false });
     this.calculateOrderTotals();
   }
 
@@ -151,15 +150,18 @@ export class OrderProcessingComponent implements OnInit {
     this.calculateOrderTotals();
   }
 
-  private calculateOrderTotals(): any {
-    const subtotal = this.items.controls.reduce((total, control) => 
-      total + (control.get('total')?.value || 0), 0);
-    return subtotal;
+  private calculateOrderTotals(): number {
+    return this.items.controls.reduce((total, control) => {
+      const quantity = control.get('quantity')?.value || 0;
+      const price = control.get('price')?.value || 0;
+      return total + (quantity * price);
+    }, 0);
   }
 
   getTotal(): number {
     return this.calculateOrderTotals();
   }
+
 
   onProductSelect(event: any): void {
     const productId = event.target.value;
@@ -195,7 +197,7 @@ export class OrderProcessingComponent implements OnInit {
           product: item.productId,
           quantity: item.quantity,
           price: item.price,
-          total: item.total
+          total: item.quantity * item.price
         })),
         deliveryAddress: this.orderForm.value.customer.address,
         totalAmount: this.getTotal(),
