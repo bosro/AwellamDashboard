@@ -2,63 +2,121 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+interface Category {
+  _id: string;
+  name: string;
+}
+
+interface Plant {
+  _id: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-order-list',
   templateUrl: './sales-list.component.html'
 })
 export class SalesOrderListComponent implements OnInit {
-  orders: Order[] = []; // Full list of orders
-  filteredOrders: Order[] = []; // Orders to display after filtering
+  orders: Order[] = [];
+  filteredOrders: Order[] = [];
   loading = false;
-  total = 0; // Total number of filtered orders
-  pageSize = 10; // Number of orders per page
-  currentPage = 1; // Current page number
-  selectedOrders = new Set<string>(); // Selected orders
+  total = 0;
+  pageSize = 10;
+  currentPage = 1;
+  selectedOrders = new Set<string>();
   filterForm: FormGroup;
+  categories: Category[] = [];
+  plants: Plant[] = [];
+  Math = Math;
 
-  Math= Math
+  private apiUrl = `${environment.apiUrl}`;
+onPlantSelect: any;
+
   constructor(
     private ordersService: OrdersService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {
     this.filterForm = this.fb.group({
-      search: [''], // Search input
-      status: [''], // Status filter
-      paymentStatus: [''], // Payment status filter
+      search: [''],
+      status: [''],
+      paymentStatus: [''],
       dateRange: this.fb.group({
-        start: [''], // Start date
-        end: [''] // End date
+        start: [''],
+        end: ['']
       }),
-      minAmount: [''], // Minimum amount
-      maxAmount: [''] // Maximum amount
+      minAmount: [''],
+      maxAmount: [''],
+      plant: [''],
+      category: ['']
     });
   }
 
   ngOnInit(): void {
+    this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
   }
 
+  private loadInitialData(): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
+      next: (response) => {
+        this.plants = response.plants;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading plants:', error);
+        this.loading = false;
+      }
+    });
+  }
+
   private setupFilters(): void {
-    // Listen for changes in the filter form
     this.filterForm.valueChanges
       .pipe(
-        debounceTime(300), // Wait 300ms after the user stops typing
-        distinctUntilChanged() // Only trigger if the value changes
+        debounceTime(300),
+        distinctUntilChanged()
       )
       .subscribe(() => {
-        this.currentPage = 1; // Reset to the first page when filters change
-        this.filterOrders(); // Apply filters
+        this.currentPage = 1;
+        this.applyFilters();
       });
+
+    this.filterForm.get('plant')?.valueChanges.subscribe(plantId => {
+      if (plantId) {
+        this.loadCategories(plantId);
+      } else {
+        this.categories = [];
+        this.filterForm.patchValue({ category: '' });
+      }
+    });
+  }
+
+  private loadCategories(plantId: string): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
+      next: (response) => {
+        this.categories = response.categories;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.loading = false;
+      }
+    });
   }
 
   loadOrders(): void {
     this.loading = true;
     this.ordersService.getOrders().subscribe({
       next: (response) => {
-        this.orders = response.orders.filter(order => order.status === 'DELIVERED'); // Load only delivered orders
-        this.filterOrders(); // Apply filters after loading
+        this.orders = response.orders.filter(order => order.status === 'DELIVERED');
+        this.total = this.orders.length;
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -68,38 +126,37 @@ export class SalesOrderListComponent implements OnInit {
     });
   }
 
-  filterOrders(): void {
-    const filters = this.filterForm.value;
+  applyFilters(): void {
+    const { search, status, paymentStatus, dateRange, minAmount, maxAmount, plant, category } = this.filterForm.value;
 
     this.filteredOrders = this.orders.filter(order => {
-      // Search by customer name or order number
-      const matchesSearch = !filters.search ||
-        order.customerId.fullName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        order.orderNumber.toLowerCase().includes(filters.search.toLowerCase());
+      const matchesSearch = !search ||
+        order.customerId.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        order.orderNumber.toLowerCase().includes(search.toLowerCase());
 
-      // Filter by status
-      const matchesStatus = !filters.status || order.status === filters.status;
+      const matchesStatus = !status || order.status === status;
 
-      // Filter by payment status
-      const matchesPaymentStatus = !filters.paymentStatus || order.paymentStatus === filters.paymentStatus;
+      const matchesPaymentStatus = !paymentStatus || order.paymentStatus === paymentStatus;
 
-      // Filter by date range
-      const matchesDateRange = (!filters.dateRange.start || new Date(order.date) >= new Date(filters.dateRange.start)) &&
-                               (!filters.dateRange.end || new Date(order.date) <= new Date(filters.dateRange.end));
+      const matchesDateRange = (!dateRange.start || new Date(order.date) >= new Date(dateRange.start)) &&
+                               (!dateRange.end || new Date(order.date) <= new Date(dateRange.end));
 
-      // Filter by amount range
-      const matchesAmountRange = (!filters.minAmount || order.totalAmount >= filters.minAmount) &&
-        (!filters.maxAmount || order.totalAmount <= filters.maxAmount);
+      const matchesAmountRange = (!minAmount || order.totalAmount >= minAmount) &&
+        (!maxAmount || order.totalAmount <= maxAmount);
 
-      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange;
+      const matchesPlant = !plant || order.categoryId.plantId._id === plant;
+      const matchesCategory = !category || order.categoryId._id === category;
+
+      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange && matchesPlant && matchesCategory;
     });
 
-    this.total = this.filteredOrders.length; // Update total for pagination
+    this.total = this.filteredOrders.length;
+    this.filteredOrders = this.filteredOrders.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.filterOrders();
+    this.applyFilters();
   }
 
   toggleSelection(orderId: string): void {
@@ -135,9 +192,9 @@ export class SalesOrderListComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterForm.reset(); // Reset all filters
-    this.currentPage = 1; // Reset to the first page
-    this.filterOrders(); // Reapply filters
+    this.filterForm.reset();
+    this.currentPage = 1;
+    this.applyFilters();
   }
 
   getStatusClass(status: string): string {

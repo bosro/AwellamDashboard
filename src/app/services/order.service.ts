@@ -23,6 +23,10 @@ items: any;
   categoryId:{
     _id: string,
     name:string,
+    plantId:{
+      _id:string,
+      name:string
+    }
   };
   socNumber:String;
   deliveryAddress: string;

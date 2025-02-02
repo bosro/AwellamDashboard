@@ -19,7 +19,7 @@
           Export
           <i class="ri-arrow-down-s-line ml-2"></i>
         </button>
-        <div *ngIf="exportDropdown" 
+        <!-- <div *ngIf="exportDropdown" 
              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10 border">
           <button 
             (click)="exportProducts('csv')"
@@ -33,7 +33,7 @@
             <i class="ri-file-excel-line mr-2 text-green-600"></i>
             Export to Excel
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -66,12 +66,13 @@
           <select 
             id="plant"
             formControlName="plant"
+            
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
             <option value="">All Plants</option>
             <option *ngFor="let plant of plants" [value]="plant._id">{{plant.name}}</option>
           </select>
         </div>
-        <div>
+        <!-- <div>
           <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
           <select 
             id="status"
@@ -81,8 +82,8 @@
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-        </div>
-        <div>
+        </div> -->
+        <!-- <div>
           <label for="minPrice" class="block text-sm font-medium text-gray-700">Min Price</label>
           <input 
             id="minPrice"
@@ -99,7 +100,7 @@
             formControlName="maxPrice"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="Max Price">
-        </div>
+        </div> -->
         <div>
           <label for="inStock" class="block text-sm font-medium text-gray-700">In Stock</label>
           <select 

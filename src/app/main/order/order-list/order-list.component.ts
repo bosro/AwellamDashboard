@@ -2,6 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+interface Category {
+  _id: string;
+  name: string;
+}
+
+interface Plant {
+  _id: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-order-list',
@@ -16,11 +28,17 @@ export class OrderListComponent implements OnInit {
   currentPage = 1;
   selectedOrders = new Set<string>();
   filterForm: FormGroup;
+  categories: Category[] = [];
+  plants: Plant[] = [];
   Math = Math;
+
+  private apiUrl = `${environment.apiUrl}`;
+onPlantSelect: any;
 
   constructor(
     private ordersService: OrdersService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -31,13 +49,30 @@ export class OrderListComponent implements OnInit {
         end: ['']
       }),
       minAmount: [''],
-      maxAmount: ['']
+      maxAmount: [''],
+      plant: [''],
+      category: ['']
     });
   }
 
   ngOnInit(): void {
+    this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
+  }
+
+  private loadInitialData(): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
+      next: (response) => {
+        this.plants = response.plants;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading plants:', error);
+        this.loading = false;
+      }
+    });
   }
 
   private setupFilters(): void {
@@ -50,6 +85,29 @@ export class OrderListComponent implements OnInit {
         this.currentPage = 1;
         this.applyFilters();
       });
+
+    this.filterForm.get('plant')?.valueChanges.subscribe(plantId => {
+      if (plantId) {
+        this.loadCategories(plantId);
+      } else {
+        this.categories = [];
+        this.filterForm.patchValue({ category: '' });
+      }
+    });
+  }
+
+  private loadCategories(plantId: string): void {
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
+      next: (response) => {
+        this.categories = response.categories;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.loading = false;
+      }
+    });
   }
 
   loadOrders(): void {
@@ -69,7 +127,7 @@ export class OrderListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    const { search, status, paymentStatus, dateRange, minAmount, maxAmount } = this.filterForm.value;
+    const { search, status, paymentStatus, dateRange, minAmount, maxAmount, plant, category } = this.filterForm.value;
 
     this.filteredOrders = this.orders.filter(order => {
       const matchesSearch = !search ||
@@ -86,7 +144,10 @@ export class OrderListComponent implements OnInit {
       const matchesAmountRange = (!minAmount || order.totalAmount >= minAmount) &&
         (!maxAmount || order.totalAmount <= maxAmount);
 
-      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange;
+      const matchesPlant = !plant || order.categoryId.plantId._id === plant;
+      const matchesCategory = !category || order.categoryId._id === category;
+
+      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange && matchesPlant && matchesCategory;
     });
 
     this.total = this.filteredOrders.length;
