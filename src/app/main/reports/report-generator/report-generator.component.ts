@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ReportsService } from '../../../services/reports.service';
 import { ReportType } from '../../../shared/types/report.interface';
 
+
 @Component({
   selector: 'app-report-generator',
   templateUrl: './report-generator.component.html'
@@ -42,6 +43,11 @@ export class ReportGeneratorComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTemplates();
+  }
+
+
+  downloadReport(): void {
+    this.reportsService.getSalesReport();
   }
 
   private loadTemplates(): void {

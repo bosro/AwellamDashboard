@@ -8,8 +8,14 @@
                 <i class="ri-arrow-left-line mr-2"></i>
                 Back to Reports
             </button>
+            <button (click)='downloadReport()'
+                class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                <i class="ri-arrow-left-line mr-2"></i>
+                Generate Sales Report
+            </button>
         </div>
     </div>
+    downloadReport()
 
     <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <div class="bg-white rounded-lg shadow p-6">

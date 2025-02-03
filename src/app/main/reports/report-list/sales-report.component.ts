@@ -4,13 +4,13 @@ import { ReportsService } from '../../../services/reports.service';
 import * as XLSX from 'xlsx';
 
 @Component({
-  selector: 'app-claims-report',
-  templateUrl: './claims-report.component.html',
+  selector: 'app-sales-report',
+  templateUrl: './sales-report.component.html',
 })
-export class ClaimsReportComponent implements OnInit {
+export class SalesReportComponent implements OnInit {
   filterForm: FormGroup;
   loading = false;
-  claimsData: any[] = [];
+  salesData: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -24,19 +24,19 @@ export class ClaimsReportComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  generateClaimsReport(): void {
+  generateSalesReport(): void {
     if (this.filterForm.invalid) return;
 
     this.loading = true;
     const { startDate, endDate } = this.filterForm.value;
 
-    this.reportsService.getClaimsReport(startDate, endDate).subscribe({
+    this.reportsService.getSalesReport(startDate, endDate).subscribe({
       next: (blob: Blob) => {
         // Download the Excel file
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `claims-report-${startDate}-to-${endDate}.xlsx`;
+        link.download = `sales-report-${startDate}-to-${endDate}.xlsx`;
         link.click();
         window.URL.revokeObjectURL(url);
 
@@ -48,26 +48,14 @@ export class ClaimsReportComponent implements OnInit {
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const json = XLSX.utils.sheet_to_json(worksheet);
-
-          // Transform data to match the required format
-          this.claimsData = json.map((claim: any) => ({
-            DATE: new Date(claim.date).toLocaleDateString(),
-            DRIVER: claim.driver,
-            CATEGORY: claim.category,
-            DESTINATION: claim.destination,
-            SOC: claim.soc,
-            QTY: claim.quantity,
-            RATE: claim.rate,
-            'AMOUNT (100%)': claim.amount100,
-            'AMOUNT (95%)': claim.amount95,
-          }));
+          this.salesData = json;
         };
         reader.readAsArrayBuffer(blob);
 
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error generating claims report:', error);
+      error: (error:any) => {
+        console.error('Error generating sales report:', error);
         this.loading = false;
       },
     });

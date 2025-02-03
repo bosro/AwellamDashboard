@@ -37,7 +37,9 @@ export class ProductFormComponent implements OnInit {
       categoryId: ['', Validators.required],
       inStock: [true],
       totalStock: ['', [Validators.required, Validators.min(0)]],
-      image: ['']
+      image: [''],
+      destination:[''],
+      rates: ['']
     });
   }
 
@@ -98,7 +100,9 @@ export class ProductFormComponent implements OnInit {
         plantId: formValue.plantId,
         categoryId: formValue.categoryId,
         totalStock: Number(formValue.totalStock), // Convert to number
-        inStock: formValue.inStock
+        inStock: formValue.inStock,
+        destination: formValue.destination,
+        rates:formValue.rates
       };
   
       // Log the final payload
