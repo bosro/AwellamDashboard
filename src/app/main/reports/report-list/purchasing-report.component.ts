@@ -4,13 +4,13 @@ import { ReportsService } from '../../../services/reports.service';
 import * as XLSX from 'xlsx';
 
 @Component({
-  selector: 'app-claims-report',
-  templateUrl: './claims-report.component.html',
+  selector: 'app-purchasing-report',
+  templateUrl: './purchasing-report.component.html',
 })
-export class ClaimsReportComponent implements OnInit {
+export class PurchasingReportComponent implements OnInit {
   filterForm: FormGroup;
   loading = false;
-  claimsData: any[] = [];
+  purchasingData: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -24,19 +24,19 @@ export class ClaimsReportComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  generateClaimsReport(): void {
+  generatePurchasingReport(): void {
     if (this.filterForm.invalid) return;
 
     this.loading = true;
     const { startDate, endDate } = this.filterForm.value;
 
-    this.reportsService.getClaimsReport(startDate, endDate).subscribe({
+    this.reportsService.getPurchasingReport(startDate, endDate).subscribe({
       next: (blob: Blob) => {
         // Download the Excel file
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `claims-report-${startDate}-to-${endDate}.xlsx`;
+        link.download = `purchasing-report-${startDate}-to-${endDate}.xlsx`;
         link.click();
         window.URL.revokeObjectURL(url);
 
@@ -50,16 +50,13 @@ export class ClaimsReportComponent implements OnInit {
           const json = XLSX.utils.sheet_to_json(worksheet);
 
           // Transform data to match the required format
-          this.claimsData = json.map((claim: any) => ({
-            DATE: new Date(claim.date).toLocaleDateString(),
-            DRIVER: claim.driver,
-            CATEGORY: claim.category,
-            DESTINATION: claim.destination,
-            SOC: claim.soc,
-            QTY: claim.quantity,
-            RATE: claim.rate,
-            'AMOUNT (100%)': claim.amount100,
-            'AMOUNT (95%)': claim.amount95,
+          this.purchasingData = json.map((purchase: any) => ({
+            Date: new Date(purchase.dateOfPurchase).toLocaleDateString(),
+            Plant: purchase.plantId?.name || "N/A",
+            Category: purchase.categoryId?.name || "N/A",
+            Product: purchase.productId?.name || "N/A",
+            Quantity: purchase.quantity,
+            PaymentRef: purchase.paymentRef,
           }));
         };
         reader.readAsArrayBuffer(blob);
@@ -67,7 +64,7 @@ export class ClaimsReportComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error generating claims report:', error);
+        console.error('Error generating purchasing report:', error);
         this.loading = false;
       },
     });

@@ -208,15 +208,20 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       children: [
         {
-          title: 'Reports Lists',
+          title: 'Sales Report ',
           route: '/main/reports/list',
           icon: 'ri-list-view'
         },
         {
-          title: 'Report Generator',
-          route: '/main/reports/generator',
-          icon: 'ri-ai-generate-text'
+          title: 'Pruchase Report ',
+          route: '/main/reports/purchase-list',
+          icon: 'ri-list-view'
         },
+        // {
+        //   title: 'Report Generator',
+        //   route: '/main/reports/generator',
+        //   icon: 'ri-ai-generate-text'
+        // },
         // {
         //   title: 'Report Schedule',
         //   route: '/main/reports/scheduled',

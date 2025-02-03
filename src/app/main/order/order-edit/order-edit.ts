@@ -31,6 +31,7 @@ export class OrderEditComponent implements OnInit {
   ) {
     this.orderForm = this.fb.group({
       price: ['', Validators.required],
+      quantity: ['', Validators.required],
       assignedTruck: ['']
     });
   }
@@ -113,12 +114,14 @@ export class OrderEditComponent implements OnInit {
       const orderData = this.orderForm.value;
 
       // Update the order price
-      this.ordersService.editOrder(this.orderId, { price: orderData.price }).subscribe({
+      this.ordersService.editOrder(this.orderId, { price: orderData.price, quantity:orderData.quantity }).subscribe({
         next: () => {
           // Assign the truck to the order if a truck is selected
           if (orderData.assignedTruck) {
             this.http.put(`${environment.apiUrl}/orders/${this.orderId}/assign-truck`, {
-              truckId: orderData.assignedTruck
+              truckId: orderData.assignedTruck,
+              price:  orderData.price,
+              quantity:orderData.quantity
             }).subscribe({
               next: () => {
                 Swal.fire({

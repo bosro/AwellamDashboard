@@ -75,6 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadChartData();
   }
 
+
   exportDashboard(format: 'excel' | 'pdf'): void {
     this.dashboardService.exportDashboardReport(format).subscribe({
       next: (blob) => {
