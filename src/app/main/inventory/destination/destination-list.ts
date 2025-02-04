@@ -41,18 +41,32 @@ export class DestinationListComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (destinations) => {
-          console.log('Destinations fetched:', destinations);  // Debugging
-          this.destinations = destinations;  // Assign directly
+        //   console.log('Destinations fetched:', destinations);  // Debugging
+          if (destinations.length === 0) {
+            // console.log('No destinations found for this plant');
+            this.destinations = [];  // Clear previous destinations
+          } else {
+            this.destinations = destinations;  // Assign directly
+          }
           this.filterData();  // Filter the data if needed
         },
-        error: (error) => console.error('Error loading destinations:', error)
+        error: (error) => {
+          console.error('Error loading destinations:', error);
+          this.destinations = [];  // Clear previous destinations on error
+        }
       });
   }
   
 
   filterData(): void {
-    this.filteredDestinations = this.destinations;
-    console.log('Filtered Destinations:', this.filteredDestinations); // Debugging
+    if (this.destinations.length === 0) {
+      this.filteredDestinations = [];
+      console.log('No destinations found.'); // Debugging
+      // Optionally, you can update the UI to show a message indicating no destinations were found
+    } else {
+      this.filteredDestinations = this.destinations;
+      console.log('Filtered Destinations:', this.filteredDestinations); // Debugging
+    }
   }
   
 }

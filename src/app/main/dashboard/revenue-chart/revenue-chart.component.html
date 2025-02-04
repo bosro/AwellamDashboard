@@ -14,7 +14,7 @@
       <p class="text-sm text-gray-600">Total Revenue</p>
       <p class="text-xl font-semibold mt-1">
 
-        {{ metrics.revenueMetrics.totalRevenue | currency:'GHC' }}
+        {{ metrics.revenueMetrics.totalRevenue | currency:'GHC' | number: '1.2-2'  }}
 
       </p>
     </div>
@@ -24,7 +24,7 @@
       <p class="text-sm text-gray-600">Average Revenue</p>
       <p class="text-xl font-semibold mt-1">
 
-        {{ metrics.revenueMetrics.averageRevenue | currency:'GHC' }}
+        {{ metrics.revenueMetrics.averageRevenue | currency:'GHC' | number: '1.2-2' }}
 
       </p>
     </div>
