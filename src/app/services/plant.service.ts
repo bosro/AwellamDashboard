@@ -14,6 +14,13 @@ export interface Category {
   plantId: string;
 }
 
+export interface Destination{
+  _id: string;
+  destination: string;
+  rates: number;
+  plantId: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,11 +41,19 @@ export class PlantService {
     return this.http.post(`${this.apiUrl}/category/create`, data);
   }
 
+  createDestination(data: { name: string; plantId: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/destination/create`, data);
+  }
+
   getCategories(): Observable<{ categories: Category[] }> {
     return this.http.get<{ categories: Category[] }>(`${this.apiUrl}/categories`);
   }
 
   getCategoriesByPlant(plantId: string): Observable<{ categories: Category[] }> {
     return this.http.get<{ categories: Category[] }>(`${this.apiUrl}/category/plants/${plantId}`);
+  }
+
+  getDestinationsByPlant(plantId: string): Observable<{ destinations:  Destination[] }> {
+    return this.http.get<{ destinations: Destination[] }>(`${this.apiUrl}/destination/${plantId}/get`);
   }
 }

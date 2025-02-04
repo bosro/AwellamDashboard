@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductsService } from '../../../services/products.service';
-import { PlantService, Plant, Category } from '../../../services/plant.service';
+import { PlantService, Plant, Category, Destination } from '../../../services/plant.service';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -17,6 +17,7 @@ export class ProductFormComponent implements OnInit {
   imageFile?: File;
   plants: Plant[] = [];
   categories: Category[] = [];
+  destinations: Destination[]=[];
   selectedPlant?: string;
 
   constructor(
@@ -35,11 +36,10 @@ export class ProductFormComponent implements OnInit {
       price: ['', [Validators.required, Validators.min(0)]],
       plantId: ['', Validators.required],
       categoryId: ['', Validators.required],
+      destinationId: ['', Validators.required],
       inStock: [true],
       totalStock: ['', [Validators.required, Validators.min(0)]],
       image: [''],
-      destination:[''],
-      rates: ['']
     });
   }
 
@@ -78,6 +78,15 @@ export class ProductFormComponent implements OnInit {
           },
           error: (error) => console.error('Error loading categories:', error)
         });
+
+      this.plantService.getDestinationsByPlant(plantId)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: (response) => {
+            this.destinations = response.destinations;
+          },
+          error: (error) => console.error('Error loading destinations:', error)
+        });
     } else {
       this.categories = [];
       this.productForm.patchValue({ categoryId: '' });
@@ -101,8 +110,7 @@ export class ProductFormComponent implements OnInit {
         categoryId: formValue.categoryId,
         totalStock: Number(formValue.totalStock), // Convert to number
         inStock: formValue.inStock,
-        destination: formValue.destination,
-        rates:formValue.rates
+        destinationId: formValue.destinationId,
       };
   
       // Log the final payload
