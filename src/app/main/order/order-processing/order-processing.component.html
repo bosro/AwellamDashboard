@@ -78,7 +78,7 @@
               [disabled]="loading || !orderForm.get('category')?.value">
               <option value="">Select a product</option>
               <option *ngFor="let product of products" [value]="product._id">
-                {{product.name}} - GHC {{product.price}}
+                {{product.name}} - GHC {{product.price | number: '1.2-2' }}
               </option>
             </select>
             <div *ngIf="loading" class="mt-2 text-sm text-gray-500">
