@@ -133,6 +133,13 @@ export class LoadTruckComponent implements OnInit {
     });
   }
 
+
+  goBack(){
+    this.router.navigate(['/main/transport/trucks/'])
+  }
+
+
+  
   // Submit the form
   onSubmit(): void {
     if (this.loadTruckForm.valid) {

@@ -6,12 +6,13 @@
       <p class="mt-1 text-sm text-gray-600" *ngIf="driver">{{driver.name}} - {{driver.licenseNumber}}</p>
     </div>
     <div class="flex space-x-3">
-      <button 
-        routerLink="main/transport/drivers"
-        class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
-        <i class="ri-arrow-left-line mr-2"></i>
-        Back to List
-      </button>
+      <button
+          (click)="goBack()"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
       <button 
         *ngIf="driver"
         [routerLink]="[driver._id, 'edit']"

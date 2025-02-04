@@ -23,6 +23,10 @@ export class TruckFormComponent implements OnInit {
     });
   }
 
+  goBack(){
+    this.router.navigate(['/main/transport/trucks/'])
+  }
+
   ngOnInit(): void {}
 
   onSubmit(): void {

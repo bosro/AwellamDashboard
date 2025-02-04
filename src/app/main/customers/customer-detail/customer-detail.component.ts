@@ -86,6 +86,10 @@ export class CustomerDetailsComponent implements OnInit {
     lastPurchaseDate: null,
     purchaseHistory: []
   };
+
+  goBack(){
+    this.router.navigate(['/main/customers/list/"'])
+  }
   
   
 

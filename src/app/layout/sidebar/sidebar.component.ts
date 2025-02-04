@@ -29,11 +29,13 @@ export class SidebarComponent implements OnInit {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/main/dashboard',
+      roles: ['super_admin', 'Admin_support', 'Loading_officer', 'Stocks_Manager', 'Transport_officer']
     },
     {
       title: 'Orders',
       icon: 'ri-file-list-3-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_support', 'Loading_officer'],
       // roles: ['admin', 'manager'],
       children: [
         {
@@ -67,6 +69,7 @@ export class SidebarComponent implements OnInit {
       title: 'Inventory',
       icon: 'ri-stock-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_support', 'Stocks_Manager'],
       children: [
         {
           title: 'Stock Overview',
@@ -93,9 +96,6 @@ export class SidebarComponent implements OnInit {
           route: '/main/inventory/disbursement',
           icon: 'ri-exchange-funds-line'
         },
-      
-        
-       
       ]
     },
     // {
@@ -125,6 +125,7 @@ export class SidebarComponent implements OnInit {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_support', 'Transport_officer'],
       children: [
         {
           title: 'Dashboard',
@@ -182,6 +183,7 @@ export class SidebarComponent implements OnInit {
       title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_support'],
       // roles: ['admin', 'manager'],
       children: [
         {
@@ -200,6 +202,7 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
+      roles: ['super_admin', 'Admin_support'],
       // route: '/main/claims',
       children: [
         {
@@ -218,6 +221,7 @@ export class SidebarComponent implements OnInit {
       title: 'Reports',
       icon: 'ri-bar-chart-2-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_support'],
       children: [
         {
           title: 'Sales Report ',
@@ -247,8 +251,6 @@ export class SidebarComponent implements OnInit {
       ]
     },
     
-    
-
     // {
     //   title: 'Customers Management',
     //   icon: 'ri-user-settings-line',
@@ -269,7 +271,6 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
 
-  
     // {
     //   title: 'Customer Management',
     //   icon: 'ri-user-settings-line',
@@ -279,8 +280,10 @@ export class SidebarComponent implements OnInit {
       title: 'Settings',
       icon: 'ri-user-settings-line',
       route: '/main/user-management',
+      roles: ['super_admin']
     },
   ];
+
   constructor(
     private authService: AuthService,
     private router: Router
@@ -322,15 +325,36 @@ export class SidebarComponent implements OnInit {
   toggleMobileSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
+  
 
   toggleSubmenu(item: MenuItem): void {
     item.expanded = !item.expanded;
   }
 
   private filterMenuByRole(): void {
+    const userRole = this.authService.getUserRole();
+    
     this.menuItems = this.menuItems.filter(item => {
-      if (!item.roles) return true;
-      return this.authService.hasRole(item.roles);
+      if (!item.roles || !userRole) return false; // Only show items with explicit role permissions
+      return item.roles.includes(userRole);
+    });
+
+    // Filter children if they exist
+    this.menuItems.forEach(item => {
+      if (item.children) {
+        item.children = item.children.filter(child => {
+          if (!child.roles) return true; // Show child items without specific roles
+          return userRole ? child.roles.includes(userRole) : false;
+        });
+      }
+    });
+
+    // Remove menu items with no remaining children
+    this.menuItems = this.menuItems.filter(item => {
+      if (item.children) {
+        return item.children.length > 0;
+      }
+      return true;
     });
   }
 

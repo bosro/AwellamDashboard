@@ -60,6 +60,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       });
   }
 
+  fogotPassword(){
+    this.router.navigate(['/auth/reset-password'])
+  }
+
   private loadNotifications(): void {
     this.notificationService.getNotifications()
       .pipe(takeUntil(this.destroy$))
