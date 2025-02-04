@@ -15,14 +15,16 @@ interface MenuItem {
 
 @Component({
   selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html'
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-  @Input() isCollapsed = false;
   @Output() sidebarToggled = new EventEmitter<void>();
-
+  
   isSidebarOpen = false;
-  isMobile = false;
+  isCollapsed: boolean = false;
+  isMobileSidebarOpen: boolean = false;
+  isMobile: boolean = false;
 
   menuItems: MenuItem[] = [
     {
@@ -92,10 +94,16 @@ export class SidebarComponent implements OnInit {
           icon: 'ri-order-play-line'
         },
         {
+          title: 'Destinations',
+          route: '/main/inventory/destination',
+          icon: 'ri-exchange-funds-line'
+        },
+        {
           title: 'Disbursements',
           route: '/main/inventory/disbursement',
           icon: 'ri-exchange-funds-line'
         },
+        
       ]
     },
     // {
@@ -290,45 +298,45 @@ export class SidebarComponent implements OnInit {
   ) {
     router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
+    ).subscribe(() => {
       this.updateExpandedState();
       if (this.isMobile) {
-        this.isSidebarOpen = false;
+        this.isMobileSidebarOpen = false;
       }
     });
-    this.checkScreenSize();
   }
 
   ngOnInit(): void {
     this.filterMenuByRole();
-  }
-
-  toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
-    this.sidebarToggled.emit();
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any): void {
     this.checkScreenSize();
   }
 
-  private checkScreenSize(): void {
-    this.isMobile = window.innerWidth < 1024;
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkScreenSize();
     if (!this.isMobile) {
-      this.isSidebarOpen = false;
+      this.isMobileSidebarOpen = false;
+    }
+  }
+
+  toggleSidebar(): void {
+    if (this.isMobile) {
+      this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
     } else {
-      this.isSidebarOpen = true;
+      this.isCollapsed = !this.isCollapsed;
+      this.sidebarToggled.emit();
     }
   }
 
   toggleMobileSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
+    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
   }
-  
 
-  toggleSubmenu(item: MenuItem): void {
-    item.expanded = !item.expanded;
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768;
+    if (!this.isMobile) {
+      this.isMobileSidebarOpen = false;
+    }
   }
 
   private filterMenuByRole(): void {
@@ -368,18 +376,34 @@ export class SidebarComponent implements OnInit {
     });
   }
 
+  toggleSubmenu(item: MenuItem): void {
+    item.expanded = !item.expanded;
+  }
+
+  isMenuActive(item: MenuItem): boolean {
+    if (item.route) {
+      return this.router.isActive(item.route, false);
+    }
+    if (item.children) {
+      return item.children.some(child => 
+        child.route ? this.router.isActive(child.route, false) : false
+      );
+    }
+    return false;
+  }
+
   isActive(route: string | undefined): boolean {
     if (!route) return false;
     return this.router.isActive(route, false);
   }
 
-  isMenuActive(item: MenuItem): boolean {
-    if (item.route) {
-      return this.isActive(item.route);
-    }
-    if (item.children) {
-      return item.children.some(child => child.route ? this.isActive(child.route) : false);
-    }
-    return false;
-  }
+  // isMenuActive(item: MenuItem): boolean {
+  //   if (item.route) {
+  //     return this.isActive(item.route);
+  //   }
+  //   if (item.children) {
+  //     return item.children.some(child => child.route ? this.isActive(child.route) : false);
+  //   }
+  //   return false;
+  // }
 }

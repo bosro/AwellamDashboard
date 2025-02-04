@@ -1,0 +1,52 @@
+<div class="container mx-auto p-4">
+    <!-- Plant Selection Dropdown -->
+    <div class="mb-6">
+      <label for="plant" class="block text-sm font-medium text-gray-700">Select Plant:</label>
+      <select
+        id="plant"
+        [(ngModel)]="selectedPlant"
+        (change)="loadDestinations()"
+        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+      >
+        <option value="">Select a Plant</option>
+        <option *ngFor="let plant of plants" [value]="plant._id">{{ plant.name }}</option>
+      </select>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center p-6">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <span class="ml-3 text-gray-700">Loading...</span>
+    </div>
+  
+    <!-- Destinations Table -->
+    <div *ngIf="filteredDestinations.length > 0" class="overflow-x-auto bg-white shadow-sm rounded-lg">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Destination
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Rate
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let destination of filteredDestinations">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ destination.destination }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ destination.rates | currency }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- No Destinations Found -->
+    <div *ngIf="!loading && filteredDestinations.length === 0" class="text-center p-6">
+      <p class="text-gray-500">No destinations found.</p>
+    </div>
+  </div>

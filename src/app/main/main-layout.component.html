@@ -1,40 +1,31 @@
-<div class="h-screen flex overflow-hidden bg-gray-100">
-  <!-- Sidebar - Modified classes for better mobile handling -->
-  <app-sidebar 
-    [class.hidden]="!isSidebarOpen" 
-    class="fixed inset-y-0 left-0 z-40 lg:relative lg:flex lg:flex-shrink-0"
-  ></app-sidebar>
+<div class="h-screen flex overflow-hidden bg-[#f3f4f6]">
+  <!-- Sidebar -->
+  <app-sidebar></app-sidebar>
 
-  <!-- Main Content - Adjusted to handle sidebar state -->
+  <!-- Main Content -->
   <div class="flex flex-col flex-1 w-full overflow-hidden">
     <!-- Header -->
-    <app-header></app-header>
+    <app-header class="z-10 sticky top-0"></app-header>
 
-    <!-- Page Content -->
-    <main class="flex-1 relative overflow-y-auto focus:outline-none">
-      <!-- Page Title -->
-      <div class="py-6">
-        <div class="max-w-full mx-auto px-4 sm:px-6 md:px-8">
-          <!-- <h1 class="text-2xl font-semibold text-gray-900">{{pageTitle}}</h1> -->
-        </div>
-        
-        <!-- Content - Adjusted padding for mobile -->
-        <div class="max-w-full mx-auto px-4 sm:px-6 md:px-8">
-          <router-outlet></router-outlet>
+    <!-- Main Content -->
+    <main class="flex-1 relative overflow-y-auto focus:outline-none bg-[#f8fafc]">
+      <!-- Content Area -->
+      <div class="py-6 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)]">
+        <div class=" mx-auto">
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <router-outlet></router-outlet>
+          </div>
         </div>
       </div>
     </main>
-
-    <!-- Footer -->
-    <!-- <app-footer></app-footer> -->
   </div>
 </div>
 
 <!-- Loading Overlay -->
 <div *ngIf="loading" 
-     class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg p-6 flex items-center">
-    <i class="ri-loader-4-line animate-spin text-3xl text-blue-600 mr-3"></i>
-    <span class="text-gray-700">Loading...</span>
+     class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 shadow-xl flex items-center space-x-4">
+    <i class="ri-loader-4-line animate-spin text-3xl text-indigo-600"></i>
+    <span class="text-gray-700 font-medium">Loading...</span>
   </div>
 </div>

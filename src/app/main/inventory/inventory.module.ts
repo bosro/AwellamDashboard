@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { InventoryRoutingModule } from './inventory-routing.module';
 import { InventoryListComponent } from './inventory-list/inventory-list.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
 import { InventoryFormComponent } from './inventory-form/inventory-form.component';
 import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
@@ -12,6 +12,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DisbursementModalComponent } from './disbursement-modal/disbursement-modal.component';
 import { ProductsRoutingModule } from '../products/products-routing.module';
 import { PurchasingRoutingModule } from '../purchasing/purchasing-routing.module';
+import { DestinationListComponent } from './destination/destination-list';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { PurchasingRoutingModule } from '../purchasing/purchasing-routing.module
     InventoryFormComponent,
     InventoryDetailsComponent,
     StockDisbursementComponent,
-    DisbursementModalComponent
+    DisbursementModalComponent,
+    DestinationListComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +32,8 @@ import { PurchasingRoutingModule } from '../purchasing/purchasing-routing.module
     NgxChartsModule,
     InventoryRoutingModule,
     ProductsRoutingModule,
-    PurchasingRoutingModule
+    PurchasingRoutingModule,
+    FormsModule
 
   ]
 })

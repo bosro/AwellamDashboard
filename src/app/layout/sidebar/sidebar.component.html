@@ -1,23 +1,36 @@
 <!-- Hamburger Button for Mobile -->
 <button 
+  *ngIf="isMobile"
   (click)="toggleMobileSidebar()"
   class="fixed top-4 left-4 z-50 p-2 rounded-md text-white bg-red-500 md:hidden"
 >
   <i class="ri-menu-line text-xl"></i>
 </button>
 
+<!-- Backdrop -->
+<div 
+  *ngIf="isMobile && isMobileSidebarOpen"
+  class="fixed inset-0 bg-black bg-opacity-50 z-40"
+  (click)="toggleMobileSidebar()">
+</div>
+
+<!-- Sidebar -->
 <aside 
-  class="bg-[#1a237e] flex-shrink-0 transition-all duration-300"
-  [class.w-64]="!isCollapsed"
-  [class.w-20]="isCollapsed"
-  [class.fixed]="isMobile"
-  [class.z-50]="isMobile"
-  [class.h-full]="isMobile">
+[class.mobile-open]="isMobileSidebarOpen"
+class="bg-[#1a237e] flex-shrink-0 transition-all duration-300"
+[class.w-64]="!isCollapsed"
+[class.w-20]="isCollapsed"
+[class.fixed]="isMobile"
+[class.z-50]="isMobile"
+[class.h-screen]="true" 
+[class.overflow-y-auto]="true" 
+  >
+  
   <div class="h-full flex flex-col">
     <!-- Sidebar Header -->
-    <div class="h-30 flex items-center justify-between px-4 bg-[#ffffff]">
+    <div class="h-16 flex items-center justify-between px-4 bg-[#ffffff]">
       <div class="flex items-center" *ngIf="!isCollapsed">
-        <img src="assets/images/logo.png" alt="Logo" class="h-15 w-auto" style="border-radius: 50%;">
+        <img src="assets/images/logo.png" alt="Logo" class="h-12 w-auto rounded-full">
       </div>
       <button 
         (click)="toggleSidebar()"
@@ -26,6 +39,7 @@
         <i [class]="isCollapsed ? 'ri-menu-unfold-line' : 'ri-menu-fold-line'" class="text-xl"></i>
       </button>
     </div>
+
     <!-- Navigation Menu -->
     <nav class="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
       <ng-container *ngFor="let item of menuItems">
@@ -41,6 +55,7 @@
             <span *ngIf="!isCollapsed">{{item.title}}</span>
           </a>
         </ng-container>
+
         <!-- Menu Item with Submenu -->
         <div *ngIf="item.children" class="space-y-1">
           <button
@@ -49,14 +64,15 @@
             class="w-full group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-100 hover:bg-[#8b5cf6] hover:text-white transition-colors"
             [class.bg-[#6366f1]]="isMenuActive(item)"
           >
-           <span>
-            <i [class]="item.icon + ' text-xl'" class="mr-3"></i>
-            <span *ngIf="!isCollapsed" class="flex-1">{{item.title}}</span>
-           </span>
+            <span>
+              <i [class]="item.icon + ' text-xl'" class="mr-3"></i>
+              <span *ngIf="!isCollapsed" class="flex-1">{{item.title}}</span>
+            </span>
             <i *ngIf="!isCollapsed" 
                [class]="item.expanded ? 'ri-arrow-down-s-line' : 'ri-arrow-right-s-line'"
                class="text-xl ml-2 mt-1"></i>
           </button>
+
           <!-- Submenu -->
           <div *ngIf="item.expanded && !isCollapsed" 
                class="space-y-1 pl-10">
@@ -64,6 +80,7 @@
                [routerLink]="child.route"
                routerLinkActive="bg-[#6366f1] text-white"
                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-100 hover:bg-[#8b5cf6] hover:text-white transition-colors"
+               (click)="isMobile ? toggleMobileSidebar() : null"
             >
               <i [class]="child.icon + ' text-lg'" class="mr-3"></i>
               {{child.title}}
@@ -72,6 +89,7 @@
         </div>
       </ng-container>
     </nav>
+
     <!-- Sidebar Footer -->
     <div class="p-4 border-t border-[#6366f1]/30">
       <div *ngIf="!isCollapsed" class="flex items-center space-x-3">
@@ -79,10 +97,7 @@
           <i class="ri-question-line text-xl text-gray-100"></i>
         </div>
         <div class="flex-1">
-          <a 
-            href="#"
-            class="text-sm font-medium text-gray-100 hover:text-white"
-          >
+          <a href="#" class="text-sm font-medium text-gray-100 hover:text-white">
             Awellam Company 
           </a>
           <p class="text-xs text-gray-300">Support Center</p>

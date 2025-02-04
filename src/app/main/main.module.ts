@@ -22,7 +22,7 @@ const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    // canActivate: [AuthGuard],
+    canActivate: [AuthGuard],
     children: [
       { 
         path: '',
@@ -38,48 +38,48 @@ const routes: Routes = [
         path: 'transport',
         loadChildren: () =>
           import('./transport/transport.module').then((m) => m.TransportModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'inventory',
         loadChildren: () =>
           import('./inventory/inventory.module').then((m) => m.InventoryModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'purchasing',
         loadChildren: () =>
           import('./purchasing/purchasing.module').then((m) => m.PurchasingModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'claims',
         loadChildren: () =>
           import('./claims/claims.module').then((m) => m.ClaimsModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'user-management',
         loadChildren: () =>
           import('./user-management/user-management.module').then((m) => m.UserManagementModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'reports',
         loadChildren: () =>
           import('./reports/reports.module').then((m) => m.ReportsModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'products',
         loadChildren: () =>
           import('./products/products.module').then((m) => m.ProductsModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
       {
         path:'customers-management',
         loadChildren: ()=> import ('./customers/customer.module').then((m)=>m.CustomerModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
 //     ],
 //   },
@@ -89,14 +89,14 @@ const routes: Routes = [
       {
         path: 'orders',
         loadChildren: () => import('./order/order.module').then(m => m.OrderModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
         // canActivate: [RoleGuard],
         // data: { roles: ['admin', 'manager'] }
       },
       {
         path: 'customers',
         loadChildren: () => import('./customers/customers.module').then(m => m.CustomersModule),
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
         // canActivate: [RoleGuard],
         // data: { roles: ['admin'] }
       }
