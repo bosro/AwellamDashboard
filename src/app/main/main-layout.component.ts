@@ -14,18 +14,16 @@ type RouteConfig = {
   templateUrl: './main-layout.component.html'
 })
 export class MainLayoutComponent implements OnInit {
-  isSidebarOpen = false;
+  isSidebarOpen = false; // Sidebar is closed by default on smaller screens
   pageTitle = '';
   loading = false;
 
- 
   private readonly routes: RouteConfig[] = [
     { path: '/main/dashboard', title: 'Dashboard' },
     { path: '/main/transport', title: 'Transport Operations' },
     { path: '/main/inventory', title: 'Inventory Management' },
     { path: '/main/purchasing', title: 'Purchase Orders' },
     { path: '/main/claims', title: 'Claims Management' }
-    
   ];
 
   constructor(
@@ -33,15 +31,16 @@ export class MainLayoutComponent implements OnInit {
     private router: Router,
     private breakpointObserver: BreakpointObserver
   ) {
+    // Automatically open sidebar on larger screens
     this.breakpointObserver.observe([Breakpoints.Large, Breakpoints.XLarge])
       .subscribe(result => {
         this.isSidebarOpen = result.matches;
       });
 
+    // Close sidebar on navigation in mobile view
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
-      // Close sidebar on navigation in mobile view
       if (!this.breakpointObserver.isMatched([Breakpoints.Large, Breakpoints.XLarge])) {
         this.isSidebarOpen = false;
       }
@@ -50,17 +49,10 @@ export class MainLayoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Set initial sidebar state based on screen size
-    this.isSidebarOpen = this.breakpointObserver.isMatched([Breakpoints.Large, Breakpoints.XLarge]);
-    
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/auth/login']);
-      return;
-    }
     this.updatePageTitle();
   }
 
-
+  // Toggle sidebar visibility
   toggleSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
@@ -82,23 +74,4 @@ export class MainLayoutComponent implements OnInit {
 
     return partialMatch?.title || 'Dashboard';
   }
-
-  getAvailableTitles(): string[] {
-    return this.routes.map(route => route.title);
-  }
-
-  getAvailablePaths(): string[] {
-    return this.routes.map(route => route.path);
-  }
-
-  isValidRoute(path: string): boolean {
-    return this.routes.some(route => route.path === path);
-  }
-
-  getRouteTitle(path: string): string {
-    return this.routes.find(route => route.path === path)?.title || 'Dashboard';
-  }
-
- 
-
 }

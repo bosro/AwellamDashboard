@@ -4,6 +4,7 @@ import { InventoryListComponent } from './inventory-list/inventory-list.componen
 import { InventoryFormComponent } from './inventory-form/inventory-form.component';
 import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
 import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
+import { DestinationListComponent } from './destination/destination-list';
 
 
 const routes: Routes = [
@@ -15,6 +16,7 @@ const routes: Routes = [
       { path: 'new', component: InventoryFormComponent },
       { path: 'edit/:id', component: InventoryFormComponent },
       { path: 'details/:id', component: InventoryDetailsComponent },
+      { path: 'destination', component: DestinationListComponent },
       { path: 'disbursement', component: StockDisbursementComponent },
       // { path: 'low-stock', component: LowStockAlertsComponent }
     ]
