@@ -17,6 +17,7 @@ export interface Product {
   inStock: boolean;
   totalStock: number;
   image: string;
+  destinationId: any
 }
 
 

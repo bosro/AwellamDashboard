@@ -16,9 +16,11 @@ export class LoadTruckComponent implements OnInit {
   plants: any[] = [];
   categories: any[] = [];
   products: any[] = [];
+  destinations: any[] = [];
   loading = false;
   noCategoriesFound = false;
   noProductsFound = false;
+  isLoadOutsideTruckInvoice = false;
 
   private apiUrl = `${environment.apiUrl}`;
 
@@ -35,6 +37,7 @@ export class LoadTruckComponent implements OnInit {
       plantId: ['', Validators.required],
       categoryId: ['', Validators.required],
       productId: ['', Validators.required],
+      destinationId: [''] // Add destinationId form control
     });
   }
 
@@ -58,7 +61,7 @@ export class LoadTruckComponent implements OnInit {
     });
   }
 
-  // Fetch categories based on selected plant
+  // Fetch categories and destinations based on selected plant
   onPlantSelect(event: any): void {
     const plantId = event.target.value;
     if (plantId) {
@@ -73,6 +76,14 @@ export class LoadTruckComponent implements OnInit {
         },
         error: (error) => console.error('Error loading categories:', error),
         complete: () => (this.loading = false),
+      });
+
+      // Fetch destinations
+      this.http.get<any>(`${this.apiUrl}/destination/${plantId}/get`).subscribe({
+        next: (response) => {
+          this.destinations = response.destinations;
+        },
+        error: (error) => console.error('Error loading destinations:', error),
       });
     } else {
       this.categories = [];
@@ -101,6 +112,10 @@ export class LoadTruckComponent implements OnInit {
       this.noProductsFound = false;
       this.loadTruckForm.patchValue({ productId: '' });
     }
+  }
+
+  onLoadOutsideTruckInvoice(): void {
+    this.isLoadOutsideTruckInvoice = true;
   }
 
   // Fetch all trucks

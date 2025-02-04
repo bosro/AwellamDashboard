@@ -10,6 +10,7 @@ import { ObjectUrlPipe } from '../../shared/pipe/object-url.pipe';
 import { SharedModule } from '../../shared/shared.module';
 import { PlantFormComponent } from './product-form/plant-form.component';
 import { CategoryFormComponent } from './product-form/category-form.component';
+import { DestinationFormComponent } from './product-form/destination.form';
 
 
 @NgModule({
@@ -19,6 +20,7 @@ import { CategoryFormComponent } from './product-form/category-form.component';
     ProductDetailsComponent,
     PlantFormComponent,
     CategoryFormComponent,
+    DestinationFormComponent,
     ObjectUrlPipe
   ],
   imports: [

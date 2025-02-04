@@ -200,7 +200,19 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
-      route: '/main/claims',
+      // route: '/main/claims',
+      children: [
+        {
+          title: 'Awellam Invoices ',
+          route: '/main/claims',
+          icon: 'ri-list-view'
+        },
+        {
+          title: 'Outside Load Invoices  ',
+          route: '/main/reports/purchase-list',
+          icon: 'ri-list-view'
+        },
+      ]
     },
     {
       title: 'Reports',
