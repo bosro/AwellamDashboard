@@ -67,6 +67,11 @@ export class DriverFormComponent implements OnInit {
     });
   }
 
+  goBack(){
+    this.router.navigate(['/main/transport/drivers/'])
+  }
+
+
   private loadAvailableTrucks(): void {
     this.truckService.getTrucks().subscribe({
       next: (response) => {

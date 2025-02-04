@@ -111,6 +111,10 @@ export class TruckManagementComponent implements OnInit {
     return classes[status] || '';
   }
 
+  goBack(){
+    this.router.navigate(['/main/transport/trucks/'])
+  }
+
   viewTruckDetails(id: string): void {
     this.router.navigate(['main/transport/trucks/details/', id]);
   }

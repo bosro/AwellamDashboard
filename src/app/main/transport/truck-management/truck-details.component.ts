@@ -139,6 +139,10 @@ export class TruckDetailComponent implements OnInit {
     });
   }
 
+  goBack(){
+    this.router.navigate(['/main/transport/trucks/'])
+  }
+
   // loadTruck(): void {
   //   if (this.loadForm.valid) {
   //     this.truckService.loadTruck(this.loadForm.value).subscribe({
