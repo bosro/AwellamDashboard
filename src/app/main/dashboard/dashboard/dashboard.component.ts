@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DashboardService } from '../../../services/dashboard.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html'
@@ -24,7 +24,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
   selectedRange = 'week';
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService , private router: Router) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -36,6 +36,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  DriverList(){
+    this.router.navigate(['main/transport/drivers'])
+  }
+
+  OrderList(){
+    this.router.navigate(['main/orders/list'])
+  }
   private loadDashboardData(): void {
     this.loading = true;
 

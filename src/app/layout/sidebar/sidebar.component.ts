@@ -31,13 +31,13 @@ export class SidebarComponent implements OnInit {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/main/dashboard',
-      roles: ['super_admin', 'Admin_support', 'Loading_officer', 'Stocks_Manager', 'Transport_officer']
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer', 'Stocks_Manager', ]
     },
     {
       title: 'Orders',
       icon: 'ri-file-list-3-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_support', 'Loading_officer'],
+      roles: ['super_admin', 'Admin_Support', ],
       // roles: ['admin', 'manager'],
       children: [
         {
@@ -71,7 +71,7 @@ export class SidebarComponent implements OnInit {
       title: 'Inventory',
       icon: 'ri-stock-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_support', 'Stocks_Manager'],
+      roles: ['super_admin', 'Admin_Support', 'Stocks_Manager'],
       children: [
         {
           title: 'Stock Overview',
@@ -133,7 +133,7 @@ export class SidebarComponent implements OnInit {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_support', 'Transport_officer'],
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer'],
       children: [
         {
           title: 'Dashboard',
@@ -191,7 +191,7 @@ export class SidebarComponent implements OnInit {
       title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_support'],
+      roles: ['super_admin', 'Admin_Support'],
       // roles: ['admin', 'manager'],
       children: [
         {
@@ -210,7 +210,7 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
-      roles: ['super_admin', 'Admin_support'],
+      roles: ['super_admin', 'Admin_Support'],
       // route: '/main/claims',
       children: [
         {
@@ -229,7 +229,7 @@ export class SidebarComponent implements OnInit {
       title: 'Reports',
       icon: 'ri-bar-chart-2-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_support'],
+      roles: ['super_admin', 'Admin_Support'],
       children: [
         {
           title: 'Sales Report ',

@@ -88,7 +88,7 @@ export class CustomerDetailsComponent implements OnInit {
   };
 
   goBack(){
-    this.router.navigate(['/main/customers/list/"'])
+    this.router.navigate(['/main/customers/list/'])
   }
   
   

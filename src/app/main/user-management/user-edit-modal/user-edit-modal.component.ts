@@ -70,6 +70,7 @@ export class UserEditModalComponent implements OnInit {
       next: () => {
         this.loading = false;
         this.saved.emit();
+        window.location.reload();
       },
       error: (error: any) => {
         this.error = error?.error?.message || 'An error occurred';

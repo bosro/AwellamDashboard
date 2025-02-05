@@ -8,7 +8,7 @@ import { AuthService } from './core/services/auth.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'awellamDashBoard';
+  title = 'Awellam Management System';
   ngOnInit(): void {
     initFlowbite();
 
