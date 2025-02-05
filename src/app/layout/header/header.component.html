@@ -30,7 +30,7 @@
         </div>
 
         <!-- Notifications -->
-        <div class="ml-4 relative flex-shrink-0 z-50">
+        <!-- <div class="ml-4 relative flex-shrink-0 z-50">
           <button
             (click)="toggleNotifications()"
             class="bg-white rounded-full p-1 hover:bg-gray-100 relative"
@@ -42,7 +42,7 @@
             </span>
           </button>
 
-          <!-- Notifications dropdown -->
+          Notifications dropdown
           <div *ngIf="showNotifications"
                class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
             <div class="py-1">
@@ -67,7 +67,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Profile dropdown -->
         <div class="ml-4 relative flex-shrink-0">
@@ -91,12 +91,13 @@
                 <p class="text-sm font-medium text-gray-900">{{currentUser?.fullName}}</p>
                 <p class="text-xs text-gray-500">{{currentUser?.email}}</p>
               </div>
-              <a routerLink="/profile" 
+              <a 
                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                 <i class="ri-user-settings-line mr-2"></i>
                 Profile Settings
               </a>
-              <a routerLink="/auth/change-password" 
+              <a 
+              (click)="fogotPassword()"
                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                 <i class="ri-lock-password-line mr-2"></i>
                 Change Password

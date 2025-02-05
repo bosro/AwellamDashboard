@@ -13,10 +13,10 @@ export class PurchaseFormComponent implements OnInit {
   purchaseForm!: FormGroup;
   isEditMode = false;
   loading = false;
-  purchaseId!: number;
+  purchaseId!: string;
   plants!: Plant[];
-  selectedPlant!: string;
-  products: { [key: string]: Product[] } = {}; // Store products by plant ID
+  categories: { [key: string]: any[] } = {}; // Store categories by plant ID
+  products: { [key: string]: Product[] } = {}; // Store products by category ID
 
   constructor(
     private fb: FormBuilder,
@@ -27,8 +27,7 @@ export class PurchaseFormComponent implements OnInit {
     this.purchaseForm = this.fb.group({
       purchaseDate: [new Date().toISOString().split('T')[0], Validators.required],
       paymentReference: ['', Validators.required],
-      salesOrderNumber: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
-      plantType: ['', Validators.required],
+      salesOrderNumber: ['', [Validators.required]],
       purchases: this.fb.array([this.createPurchaseGroup()])
     });
   }
@@ -45,6 +44,7 @@ export class PurchaseFormComponent implements OnInit {
   private createPurchaseGroup(): FormGroup {
     return this.fb.group({
       plantId: ['', Validators.required],
+      categoryId: ['', Validators.required],
       productId: ['', Validators.required],
       quantity: ['', [Validators.required, Validators.min(1)]]
     });
@@ -90,16 +90,37 @@ export class PurchaseFormComponent implements OnInit {
     });
   }
 
-  getProducts(plantId: string, index: number): void {
+  getCategories(plantId: string, index: number): void {
     if (!plantId) {
-      this.products[plantId] = []; // If no plant ID, reset the products array
+      this.categories[plantId] = []; // If no plant ID, reset the categories array
       return;
     }
 
     this.loading = true;
-    this.purchasingService.getProductByPlantId(plantId).subscribe({
+    this.purchasingService.getCategoriesByPlantId(plantId).subscribe({
       next: (response) => {
-        this.products[plantId] = response.products; // Update products for the selected plant
+        this.categories[plantId] = response.categories; // Update categories for the selected plant
+        this.purchases.at(index).get('categoryId')?.setValue(''); // Reset the category selection for the current purchase
+        this.products = {}; // Reset products
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  getProducts(categoryId: string, index: number): void {
+    if (!categoryId) {
+      this.products[categoryId] = []; // If no category ID, reset the products array
+      return;
+    }
+
+    this.loading = true;
+    this.purchasingService.getProductsByCategoryId(categoryId).subscribe({
+      next: (response) => {
+        this.products[categoryId] = response.products; // Update products for the selected category
         this.purchases.at(index).get('productId')?.setValue(''); // Reset the product selection for the current purchase
         this.loading = false;
       },
@@ -113,8 +134,13 @@ export class PurchaseFormComponent implements OnInit {
   onPlantChange(event: Event, index: number): void {
     const selectElement = event.target as HTMLSelectElement;
     const plantId = selectElement.value;
-    this.selectedPlant = plantId; // This is now set to the selected plant ID
-    this.getProducts(plantId, index); // Pass the plantId to get the products for the selected plant
+    this.getCategories(plantId, index); // Fetch categories for the selected plant
+  }
+
+  onCategoryChange(event: Event, index: number): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const categoryId = selectElement.value;
+    this.getProducts(categoryId, index); // Fetch products for the selected category
   }
 
   getErrorMessage(controlName: string): string {
@@ -132,7 +158,7 @@ export class PurchaseFormComponent implements OnInit {
     if (control.errors['pattern']) {
       switch (controlName) {
         case 'salesOrderNumber':
-          return 'Must be in format SOC followed by 9 digits';
+          return 'Must be in format followed by 9 digits';
         default:
           return 'Invalid format';
       }
@@ -158,7 +184,7 @@ export class PurchaseFormComponent implements OnInit {
 
       request.subscribe({
         next: () => {
-          this.router.navigate(['/purchases']);
+          this.router.navigate(['main/purchases/list']);
         },
         error: (error) => {
           console.error('Error saving purchase:', error);

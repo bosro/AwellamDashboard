@@ -38,6 +38,10 @@ export class DriverDetailsComponent implements OnInit {
     });
   }
 
+  goBack(){
+    this.router.navigate(['/main/transport/drivers/'])
+  }
+
   getStatusClass(status: string): string {
     const statusClasses: Record<string, string> = {
       'active': 'bg-green-100 text-green-800',

@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, HostListener } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+// import { Router, NavigationEnd } from '@angular/router';
 
 interface MenuItem {
   title: string;
@@ -14,27 +15,29 @@ interface MenuItem {
 
 @Component({
   selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html'
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-  @Input() isCollapsed = false;
   @Output() sidebarToggled = new EventEmitter<void>();
-
-  // toggleSidebar() {
-  //   this.isCollapsed = !this.isCollapsed;
-  //   this.sidebarToggled.emit();
-  // }
+  
+  isSidebarOpen = false;
+  isCollapsed: boolean = false;
+  isMobileSidebarOpen: boolean = false;
+  isMobile: boolean = false;
 
   menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/main/dashboard',
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer', 'Stocks_Manager', ]
     },
     {
       title: 'Orders',
       icon: 'ri-file-list-3-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_Support', ],
       // roles: ['admin', 'manager'],
       children: [
         {
@@ -68,12 +71,13 @@ export class SidebarComponent implements OnInit {
       title: 'Inventory',
       icon: 'ri-stock-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_Support', 'Stocks_Manager'],
       children: [
-        {
-          title: 'Stock Overview',
-          route: '/main/inventory',
-          icon: 'ri-database-2-line'
-        },
+        // {
+        //   title: 'Stock Overview',
+        //   route: '/main/inventory',
+        //   icon: 'ri-database-2-line'
+        // },
         {
           title: 'Product List',
           route: '/main/products/list',
@@ -90,13 +94,16 @@ export class SidebarComponent implements OnInit {
           icon: 'ri-order-play-line'
         },
         {
-          title: 'Disbursements',
-          route: '/main/inventory/disbursement',
+          title: 'Destinations',
+          route: '/main/inventory/destination',
           icon: 'ri-exchange-funds-line'
         },
-      
+        // {
+        //   title: 'Disbursements',
+        //   route: '/main/inventory/disbursement',
+        //   icon: 'ri-exchange-funds-line'
+        // },
         
-       
       ]
     },
     // {
@@ -126,11 +133,18 @@ export class SidebarComponent implements OnInit {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer'],
       children: [
         {
           title: 'Dashboard',
           route: '/main/transport/dashboard',
           icon: 'ri-speed-up-line'
+        },
+
+        {
+          title: 'Stock Overview',
+          route: '/main/transport/inventory-list',
+          icon: 'ri-database-2-line'
         },
         // {
         //   title: 'Operations',
@@ -146,6 +160,11 @@ export class SidebarComponent implements OnInit {
           title: 'Drivers',
           route: '/main/transport/drivers',
           icon: 'ri-caravan-line'
+        },
+        {
+          title: 'Disbursements',
+          route: '/main/transport/disbursement',
+          icon: 'ri-exchange-funds-line'
         },
         // {
         //   title: 'Fuel Analytics',
@@ -183,6 +202,7 @@ export class SidebarComponent implements OnInit {
       title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_Support'],
       // roles: ['admin', 'manager'],
       children: [
         {
@@ -201,23 +221,42 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
-      route: '/main/claims',
+      roles: ['super_admin', 'Admin_Support'],
+      // route: '/main/claims',
+      children: [
+        {
+          title: 'Awellam Invoices ',
+          route: '/main/claims',
+          icon: 'ri-list-view'
+        },
+        {
+          title: 'Outside Load Invoices  ',
+          route: '/main/reports/purchase-list',
+          icon: 'ri-list-view'
+        },
+      ]
     },
     {
       title: 'Reports',
       icon: 'ri-bar-chart-2-line',
       expanded: false,
+      roles: ['super_admin', 'Admin_Support'],
       children: [
         {
-          title: 'Reports Lists',
+          title: 'Sales Report ',
           route: '/main/reports/list',
           icon: 'ri-list-view'
         },
         {
-          title: 'Report Generator',
-          route: '/main/reports/generator',
-          icon: 'ri-ai-generate-text'
+          title: 'Pruchase Report ',
+          route: '/main/reports/purchase-list',
+          icon: 'ri-list-view'
         },
+        // {
+        //   title: 'Report Generator',
+        //   route: '/main/reports/generator',
+        //   icon: 'ri-ai-generate-text'
+        // },
         // {
         //   title: 'Report Schedule',
         //   route: '/main/reports/scheduled',
@@ -231,8 +270,6 @@ export class SidebarComponent implements OnInit {
       ]
     },
     
-    
-
     // {
     //   title: 'Customers Management',
     //   icon: 'ri-user-settings-line',
@@ -253,7 +290,6 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
 
-  
     // {
     //   title: 'Customer Management',
     //   icon: 'ri-user-settings-line',
@@ -263,6 +299,7 @@ export class SidebarComponent implements OnInit {
       title: 'Settings',
       icon: 'ri-user-settings-line',
       route: '/main/user-management',
+      roles: ['super_admin']
     },
   ];
 
@@ -272,28 +309,71 @@ export class SidebarComponent implements OnInit {
   ) {
     router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      // this.currentRoute = event.url;
+    ).subscribe(() => {
       this.updateExpandedState();
+      if (this.isMobile) {
+        this.isMobileSidebarOpen = false;
+      }
     });
   }
 
   ngOnInit(): void {
     this.filterMenuByRole();
+    this.checkScreenSize();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkScreenSize();
+    if (!this.isMobile) {
+      this.isMobileSidebarOpen = false;
+    }
   }
 
   toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
+    if (this.isMobile) {
+      this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+    } else {
+      this.isCollapsed = !this.isCollapsed;
+      this.sidebarToggled.emit();
+    }
   }
 
-  toggleSubmenu(item: MenuItem): void {
-    item.expanded = !item.expanded;
+  toggleMobileSidebar(): void {
+    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768;
+    if (!this.isMobile) {
+      this.isMobileSidebarOpen = false;
+    }
   }
 
   private filterMenuByRole(): void {
+    const userRole = this.authService.getUserRole();
+    
     this.menuItems = this.menuItems.filter(item => {
-      if (!item.roles) return true;
-      return this.authService.hasRole(item.roles);
+      if (!item.roles || !userRole) return false; // Only show items with explicit role permissions
+      return item.roles.includes(userRole);
+    });
+
+    // Filter children if they exist
+    this.menuItems.forEach(item => {
+      if (item.children) {
+        item.children = item.children.filter(child => {
+          if (!child.roles) return true; // Show child items without specific roles
+          return userRole ? child.roles.includes(userRole) : false;
+        });
+      }
+    });
+
+    // Remove menu items with no remaining children
+    this.menuItems = this.menuItems.filter(item => {
+      if (item.children) {
+        return item.children.length > 0;
+      }
+      return true;
     });
   }
 
@@ -307,18 +387,34 @@ export class SidebarComponent implements OnInit {
     });
   }
 
+  toggleSubmenu(item: MenuItem): void {
+    item.expanded = !item.expanded;
+  }
+
+  isMenuActive(item: MenuItem): boolean {
+    if (item.route) {
+      return this.router.isActive(item.route, false);
+    }
+    if (item.children) {
+      return item.children.some(child => 
+        child.route ? this.router.isActive(child.route, false) : false
+      );
+    }
+    return false;
+  }
+
   isActive(route: string | undefined): boolean {
     if (!route) return false;
     return this.router.isActive(route, false);
   }
 
-  isMenuActive(item: MenuItem): boolean {
-    if (item.route) {
-      return this.isActive(item.route);
-    }
-    if (item.children) {
-      return item.children.some(child => child.route ? this.isActive(child.route) : false);
-    }
-    return false;
-  }
+  // isMenuActive(item: MenuItem): boolean {
+  //   if (item.route) {
+  //     return this.isActive(item.route);
+  //   }
+  //   if (item.children) {
+  //     return item.children.some(child => child.route ? this.isActive(child.route) : false);
+  //   }
+  //   return false;
+  // }
 }

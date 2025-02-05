@@ -1,3 +1,4 @@
+
 <div class="p-6">
   <div class="mb-6">
     <div class="flex justify-between items-center">
@@ -30,7 +31,12 @@
               type="text"
               formControlName="name"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': productForm.get('name')?.touched && productForm.get('name')?.invalid}"
             >
+            <div *ngIf="productForm.get('name')?.touched && productForm.get('name')?.invalid" 
+                 class="text-red-500 text-sm mt-1">
+              Name is required
+            </div>
           </div>
 
           <!-- Price -->
@@ -42,51 +48,109 @@
               type="number"
               formControlName="price"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': productForm.get('price')?.touched && productForm.get('price')?.invalid}"
             >
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Plant Type*
-            </label>
- <select 
-          formControlName="plantType"
-          (change)="onPlantChange($event)" 
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">Select Plant</option>
-          <option *ngFor="let plant of plants" [value]="plant._id">
-            {{ plant.name }}
-          </option>
-        </select>
-
+            <div *ngIf="productForm.get('price')?.touched && productForm.get('price')?.invalid" 
+                 class="text-red-500 text-sm mt-1">
+              Valid price is required
+            </div>
           </div>
 
-         
+              <!-- Plant Selection -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Plant *
+                </label>
+                <select 
+                  formControlName="plantId"
+                  (change)="onPlantChange($event)"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="{'border-red-500': productForm.get('plantId')?.touched && productForm.get('plantId')?.invalid}"
+                >
+                  <option value="">Select Plant</option>
+                  <option *ngFor="let plant of plants" [value]="plant._id">
+                    {{ plant.name }}
+                  </option>
+                </select>
+                <div *ngIf="productForm.get('plantId')?.touched && productForm.get('plantId')?.invalid" 
+                     class="text-red-500 text-sm mt-1">
+                  Plant selection is required
+                </div>
+                <button 
+                routerLink="/main/products/plants/create"
+                class="mt-2 text-blue-600 hover:underline">
+                Create New Plant
+              </button>
+              </div>
 
-          <!-- Description -->
-          <!-- <div class="md:col-span-2">
+        
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Destination *
+              </label>
+              <select 
+                formControlName="destinationId"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': productForm.get('destinationId')?.touched && productForm.get('destinationId')?.invalid}"
+              >
+                <option value="">Select Destination</option>
+                <option *ngFor="let destination of destinations" [value]="destination._id">
+                  {{ destination.destination }}
+                </option>
+              </select>
+              <div *ngIf="productForm.get('destinationId')?.touched && productForm.get('destinationId')?.invalid" 
+                   class="text-red-500 text-sm mt-1">
+                Destination selection is required
+              </div>
+            <button 
+            routerLink="/main/products/destination/create"
+            class="mt-2 text-blue-600 hover:underline">
+            Create New Destination
+          </button>
+          </div>
+
+          <!-- <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Description *
+              Rates
             </label>
-            <textarea 
-              formControlName="description"
-              rows="4"
+            <input 
+              type="number"
+              formControlName="rates"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            ></textarea>
+              [ngClass]="{'border-red-500': productForm.get('rates')?.touched && productForm.get('rates')?.invalid}"
+            >
+            <div *ngIf="productForm.get('price')?.touched && productForm.get('rates')?.invalid" 
+                 class="text-red-500 text-sm mt-1">
+              Valid rates is required
+            </div>
           </div> -->
 
-          <!-- In Stock -->
+      
+
+          <!-- Category Selection -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              In Stock *
+              Category *
             </label>
             <select 
-              formControlName="inStock"
+              formControlName="categoryId"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': productForm.get('categoryId')?.touched && productForm.get('categoryId')?.invalid}"
             >
-              <option [value]="true">Yes</option>
-              <option [value]="false">No</option>
+              <option value="">Select Category</option>
+              <option *ngFor="let category of categories" [value]="category._id">
+                {{ category.name }}
+              </option>
             </select>
+            <div *ngIf="productForm.get('categoryId')?.touched && productForm.get('categoryId')?.invalid" 
+                 class="text-red-500 text-sm mt-1">
+              Category selection is required
+            </div>
+            <button 
+            routerLink="/main/products/categories/create"
+            class="mt-2 text-blue-600 hover:underline">
+            Create New Category
+          </button>
           </div>
 
           <!-- Total Stock -->
@@ -98,25 +162,45 @@
               type="number"
               formControlName="totalStock"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': productForm.get('totalStock')?.touched && productForm.get('totalStock')?.invalid}"
             >
+            <div *ngIf="productForm.get('totalStock')?.touched && productForm.get('totalStock')?.invalid" 
+                 class="text-red-500 text-sm mt-1">
+              Valid stock quantity is required
+            </div>
           </div>
 
-          <!-- Image -->
+          <!-- In Stock -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              In Stock
+            </label>
+            <select 
+              formControlName="inStock"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option [ngValue]="true">Yes</option>
+              <option [ngValue]="false">No</option>
+            </select>
+          </div>
+
+          <!-- Image Upload -->
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Image *
+              Image
             </label>
             <input 
               type="file"
               (change)="onImageUpload($event)"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              accept="image/*"
             >
           </div>
         </div>
       </div>
 
       <!-- Form Actions -->
-      <div class="flex justify-end space-x-4">
+      <div class="flex justify-end space-x-4 mt-6">
         <button 
           type="button"
           routerLink="/main/products/list"
@@ -125,7 +209,8 @@
         </button>
         <button 
           type="submit"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          [disabled]="loading || !productForm.valid"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
           {{ isEditMode ? 'Update' : 'Create' }} Product
         </button>
       </div>

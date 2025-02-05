@@ -60,6 +60,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       });
   }
 
+  fogotPassword(){
+    this.router.navigate(['/auth/reset-password'])
+  }
+
   private loadNotifications(): void {
     this.notificationService.getNotifications()
       .pipe(takeUntil(this.destroy$))
@@ -115,20 +119,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
         });
     }
   }
-
   logout(): void {
+    console.log("Logging out...");
     this.authService.logout()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          console.log("Logout successful");
           localStorage.clear(); // Clear everything from local storage
-          this.router.navigate(['/auth/login']);
+          window.location.reload(); // Reload the page to check the state again
         },
         error: (error) => {
           console.error('Error during logout:', error);
         }
       });
   }
+  
 
   ngOnDestroy(): void {
     this.destroy$.next();

@@ -7,15 +7,22 @@ import { ProductsResponse} from './products.service';
 type PurchaseStatus = 'pending' | 'completed' | 'cancelled';
 
 export interface Purchase {
-  id: number;
-  purchaseDate: string;
+  _id: string;
+  dateOfPurchase: string;
   paymentReference: string;
-  salesOrderNumber: string;
-  productType: string;
+  purchaseOrderNumber: string;
+  productId: { _id: string; name: string } | null;
+  categoryId: { _id: string; name: string } | null;
   quantity: number;
-  location: string;
-  // status: 'pending' | 'completed' | 'cancelled';
-  status: PurchaseStatus;
+  plantId: { _id: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PurchaseResponse {
+  message: string;
+  purchases: Purchase[];
+  total: number;
 }
 
 export interface Plant{
@@ -33,24 +40,28 @@ export interface Plants{
 })
 export class PurchasingService {
   private apiUrl = `${environment.apiUrl}/purchase`;
-
+  private apiUrll =`${environment.apiUrl}`
   constructor(private http: HttpClient) {}
 
-  getPurchases(params?: any): Observable<{ data: Purchase[], total: number }> {
-    return this.http.get<{ data: Purchase[], total: number }>(this.apiUrl, { params });
+  getPurchases(params?: any): Observable<PurchaseResponse> {
+    return this.http.get<PurchaseResponse>(`${this.apiUrl}/get`, { params });
   }
 
-  getPurchaseById(id: number): Observable<Purchase> {
+  getPurchaseById(id: string): Observable<Purchase> {
     return this.http.get<Purchase>(`${this.apiUrl}/${id}`);
   }
 
-  createPurchase(purchase: Omit<Purchase, 'id'>): Observable<Purchase> {
-    return this.http.post<Purchase>(this.apiUrl, purchase);
+  createPurchase(purchase: Omit<Purchase, '_id'>): Observable<Purchase> {
+    return this.http.post<Purchase>(`${this.apiUrl}/create`, purchase);
   }
 
-  //  getProducts(): Observable<ProductsResponse> {
-  //     return this.http.get<ProductsResponse>(`${this.apiUrl}/`);
-  //   }
+  getCategoriesByPlantId(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrll}/category/plants/${id}`);
+  }
+
+  getProductsByCategoryId(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrll}/products/category/${id}`);
+  }
 
   getPlants(): Observable<Plants> {
     return this.http.get<Plants>(`${this.apiUrl}/getplants`);
@@ -60,22 +71,21 @@ export class PurchasingService {
     return this.http.get<ProductsResponse>(`${this.apiUrl}/getproducts/${id}`);
   }
 
-
-  updatePurchase(id: number, purchase: Partial<Purchase>): Observable<Purchase> {
+  updatePurchase(id: string, purchase: Partial<Purchase>): Observable<Purchase> {
     return this.http.patch<Purchase>(`${this.apiUrl}/${id}`, purchase);
   }
 
-  deletePurchase(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deletePurchase(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrll}/purchase/delete/${id}`);
   }
 
-  exportPurchases(ids: number[], format: 'excel' | 'pdf'): Observable<Blob> {
+  exportPurchases(ids: string[], format: 'excel' | 'pdf'): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/export`, { ids, format }, {
       responseType: 'blob'
     });
   }
 
-  bulkUpdateStatus(ids: number[], status: string): Observable<void> {
+  bulkUpdateStatus(ids: string[], status: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/bulk-update-status`, { ids, status });
   }
 

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
+items: any;
   _id: string;
   customerId: {
     _id: string;
@@ -19,6 +20,15 @@ export interface Order {
     price: number; // Changed to number
     _id: string;
   }[];
+  categoryId:{
+    _id: string,
+    name:string,
+    plantId:{
+      _id:string,
+      name:string
+    }
+  };
+  socNumber:String;
   deliveryAddress: string;
   totalAmount: number; // Changed to number
   status: string;
@@ -39,6 +49,7 @@ export interface OrderResponse {
 interface OrdersResponse {
   message: string;
   order: {
+    categoryId: { _id: string; name: string; plantId: { _id: string; name: string; }; };
     _id: string;
     status: string;
     customerId: {
@@ -71,6 +82,7 @@ interface OrdersResponse {
 })
 export class OrdersService {
   private readonly apiUrl = `${environment.apiUrl}/orders`;
+  private readonly apiUrll = `${environment.apiUrl}`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -96,5 +108,14 @@ export class OrdersService {
 
   createOrder(orderData: any): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/create`, orderData);
+  }
+
+  getOrderAnalytics(filters: any): Observable<any> {
+    const params = {
+      startDate: filters.dateRange.start,
+      endDate: filters.dateRange.end,
+      groupBy: filters.groupBy
+    };
+    return this.http.get<any>(`${this.apiUrll}/dashboard/order-dashboard`, { params });
   }
 }

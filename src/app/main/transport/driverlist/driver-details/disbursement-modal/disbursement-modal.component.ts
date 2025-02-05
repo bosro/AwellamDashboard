@@ -1,7 +1,7 @@
 // disbursement-modal.component.ts
 import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { InventoryItem } from '../../../shared/types/inventory-types';
+import { InventoryItem } from '../../../../../shared/types/inventory-types';
 
 @Component({
   selector: 'app-disbursement-modal',

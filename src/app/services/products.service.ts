@@ -1,18 +1,25 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 
+
 export interface Product {
+  plantId: any;
   _id: string;
   name: string;
   price: number;
-  description: string;
+  categoryId: {
+    _id: string;
+    name: string;
+  };
   inStock: boolean;
   totalStock: number;
   image: string;
+  destinationId: any
 }
+
 
 export interface ProductsResponse {
   message: string;
@@ -32,8 +39,16 @@ export class ProductsService {
 
   constructor(private http: HttpClient) {}
 
-  getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(`${this.apiUrl}/get`);
+  getProducts(params: any): Observable<ProductsResponse> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          httpParams = httpParams.set(key, params[key]);
+        }
+      });
+    }
+    return this.http.get<ProductsResponse>(`${this.apiUrl}/get`, { params: httpParams });
   }
 
   getProductById(id: string): Observable<Product> {
@@ -42,12 +57,12 @@ export class ProductsService {
     );
   }
 
-  createProduct(productData: FormData): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/create`, productData);
+  createProduct(productData: any): Observable<Product> {
+    return this.http.post<any>(`${this.apiUrl}/create`, productData);
   }
 
-  updateProduct(id: string, productData: FormData): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/edit/${id}`, productData);
+  updateProduct(id: string, productData: any): Observable<Product> {
+    return this.http.put<any>(`${this.apiUrl}/edit/${id}`, productData);
   }
 
   addStock(id: string, quantity: number): Observable<Product> {

@@ -1,12 +1,32 @@
 <div class="p-6">
   <div class="mb-6 flex justify-between items-center">
+    <button
+          (click)="goBack()"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
     <h1 class="text-2xl font-semibold">Truck Details</h1>
-    <button 
-      *ngIf="truck?.status === 'inactive'"
-      (click)="showLoadForm = !showLoadForm"
-      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-      Load Truck
-    </button>
+    <div>
+      <button 
+        *ngIf="truck?.status === 'active'"
+        (click)="unloadTruck(truck._id)"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        Unload Truck
+      </button>
+      <button 
+        *ngIf="truck?.status === 'inactive'"
+        (click)='loadTruck()'
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        Load Truck
+      </button>
+      <button 
+        (click)="showEditForm = !showEditForm"
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 ml-2">
+        {{ showEditForm ? 'Cancel Edit' : 'Edit Truck' }}
+      </button>
+    </div>
   </div>
   
   <div *ngIf="loading" class="flex justify-center p-4">
@@ -15,7 +35,7 @@
 
   <div *ngIf="truck && !loading" class="bg-white rounded-lg shadow p-6">
     <!-- Truck Details -->
-    <div class="grid grid-cols-2 gap-6">
+    <div *ngIf="!showEditForm" class="grid grid-cols-2 gap-6">
       <div>
         <h3 class="text-sm font-medium text-gray-500">Truck Number</h3>
         <p class="mt-1 text-lg">{{truck.truckNumber}}</p>
@@ -27,7 +47,7 @@
         </span>
       </div>
       <div>
-        <h3 class="text-sm font-medium text-gray-500">Capacity</h3>
+        <h3 class="text-sm font-medium text-gray-500">Bags</h3>
         <p class="mt-1 text-lg">{{truck.capacity}}</p>
       </div>
       <div>
@@ -38,6 +58,81 @@
         <h3 class="text-sm font-medium text-gray-500">Total Expenses</h3>
         <p class="mt-1 text-lg">${{truck.expenses.toFixed(2)}}</p>
       </div>
+      <div>
+        <h3 class="text-sm font-medium text-gray-500">Product</h3>
+        <p class="mt-1 text-lg">{{truck.productId?.name || 'N/A'}}</p>
+      </div>
+      <div>
+        <h3 class="text-sm font-medium text-gray-500">SOC Number</h3>
+        <p class="mt-1 text-lg">{{truck.socNumber || 'N/A'}}</p>
+      </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div *ngIf="showEditForm" class="mt-6 p-4 border rounded-lg">
+      <h3 class="text-lg font-medium mb-4">Edit Truck</h3>
+      <form [formGroup]="editForm" (ngSubmit)="updateTruck()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Truck Number</label>
+          <input 
+            type="text" 
+            formControlName="truckNumber"
+            class="mt-1 block w-full rounded-md border p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Bags</label>
+          <input 
+            type="number" 
+            formControlName="capacity"
+            class="mt-1 block w-full rounded-md border p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Driver</label>
+          <input 
+            type="text" 
+            formControlName="driver"
+            class="mt-1 block w-full rounded-md border p-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Total Expenses</label>
+          <input 
+            type="number" 
+            formControlName="expenses"
+            class="mt-1 block w-full rounded-md border p-2">
+        </div>
+        <!-- <div>
+          <label class="block text-sm font-medium text-gray-700">Product</label>
+          <select 
+            formControlName="productId"
+            class="mt-1 block w-full rounded-md border p-2">
+            <option value="">Choose a product</option>
+            <option *ngFor="let product of products" [value]="product._id">
+              {{product.name}} - {{product.description}}
+            </option>
+          </select>
+        </div> -->
+        <!-- <div>
+          <label class="block text-sm font-medium text-gray-700">SOC Number</label>
+          <input 
+            type="text" 
+            formControlName="socNumber"
+            class="mt-1 block w-full rounded-md border p-2">
+        </div> -->
+        <div class="flex justify-end space-x-3">
+          <button 
+            type="button"
+            (click)="showEditForm = false"
+            class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+            Cancel
+          </button>
+          <button 
+            type="submit"
+            [disabled]="!editForm.valid"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
+            Update Truck
+          </button>
+        </div>
+      </form>
     </div>
 
     <!-- Load Form -->
@@ -45,7 +140,7 @@
       <h3 class="text-lg font-medium mb-4">Load Truck</h3>
       <form [formGroup]="loadForm" (ngSubmit)="loadTruck()" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Capacity</label>
+          <label class="block text-sm font-medium text-gray-700">Bags</label>
           <input 
             type="number" 
             formControlName="capacity"
@@ -80,16 +175,16 @@
     </div>
 
     <!-- Current Load Info -->
-    <div *ngIf="truck.product" class="mt-6 p-4 bg-gray-50 rounded-lg">
+    <div *ngIf="truck.productId" class="mt-6 p-4 bg-gray-50 rounded-lg">
       <h3 class="text-lg font-medium mb-4">Current Load</h3>
       <div class="grid grid-cols-2 gap-4">
         <div>
           <h4 class="text-sm font-medium text-gray-500">Product</h4>
-          <p class="mt-1">{{truck.product.name}}</p>
+          <p class="mt-1">{{truck.productId.name}}</p>
         </div>
         <div>
           <h4 class="text-sm font-medium text-gray-500">Quantity</h4>
-          <p class="mt-1">{{truck.capacity}} </p>
+          <p class="mt-1">{{truck.capacity}}</p>
         </div>
       </div>
     </div>

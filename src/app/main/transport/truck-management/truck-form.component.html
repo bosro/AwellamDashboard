@@ -1,6 +1,13 @@
 <div class="p-6">
   <div class="mb-6">
     <h1 class="text-2xl font-semibold">Add New Truck</h1>
+    <button
+          (click)="goBack()"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
   </div>
 
   <div class="bg-white rounded-lg shadow p-6">
@@ -23,7 +30,7 @@
 
       <!-- Capacity -->
       <div>
-        <label class="block text-sm font-medium text-gray-700">Capacity (tons)</label>
+        <label class="block text-sm font-medium text-gray-700">Bags</label>
         <input 
           type="number" 
           formControlName="capacity"
@@ -31,12 +38,12 @@
         <div 
           *ngIf="truckForm.get('capacity')?.touched && truckForm.get('capacity')?.errors?.['required']" 
           class="mt-1 text-sm text-red-600">
-          Capacity is required
+          Bag is required
         </div>
       </div>
 
       <!-- Status -->
-      <div>
+      <!-- <div>
         <label class="block text-sm font-medium text-gray-700">Status</label>
         <select 
           formControlName="status"
@@ -45,7 +52,7 @@
           <option value="inactive">Inactive</option>
           <option value="maintenance">Maintenance</option>
         </select>
-      </div>
+      </div> -->
 
       <!-- Buttons -->
       <div class="flex justify-end space-x-3">

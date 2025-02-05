@@ -3,11 +3,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductsService } from '../../../services/products.service';
 
 
-interface Product {
+export interface Product {
   _id: string;
   name: string;
   price: number;
-  description: string;
+  categoryId: {
+    _id: string;
+    name: string;
+  };
   inStock: boolean;
   totalStock: number;
   image: string;

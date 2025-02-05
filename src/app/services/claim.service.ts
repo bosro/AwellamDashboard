@@ -36,18 +36,16 @@ export class ClaimsService {
   constructor(private http: HttpClient) {}
 
   // Claims CRUD Operations
-  getClaims(params?: any): Observable<{ data: Claim[], total: number }> {
-    return this.http.get<{ data: Claim[], total: number }>(
-      `${this.apiUrl}`, 
-      { params }
-    );
+  getClaims(params: any): Observable<{ data: Claim[], total: number }> {
+    return this.http.get<{ data: Claim[], total: number }>(`${this.apiUrl}/get/claims-report`, { params });
+  }
   }
 
 
 
-  createClaim(claim: Omit<Claim, 'id'>): Observable<Claim> {
-    return this.http.post<Claim>(`${this.apiUrl}`, claim);
-  }
+  // createClaim(claim: Omit<Claim, 'id'>): Observable<Claim> {
+  //   return this.http.post<Claim>(`${this.apiUrl}`, claim);
+  // }
 
  
   // deleteClaim(id: number): Observable<void> {
@@ -57,71 +55,70 @@ export class ClaimsService {
   
 
   // VAT Calculations
-  calculateVAT(amount: number): Observable<{ vatAmount: number, totalAmount: number }> {
-    return this.http.post<{ vatAmount: number, totalAmount: number }>(
-      `${this.apiUrl}/calculate-vat`,
-      { amount }
-    );
-  }
+  // calculateVAT(amount: number): Observable<{ vatAmount: number, totalAmount: number }> {
+  //   return this.http.post<{ vatAmount: number, totalAmount: number }>(
+  //     `${this.apiUrl}/calculate-vat`,
+  //     { amount }
+  //   );
+  // }
 
 
-  // Batch Operations
+  // // Batch Operations
+  // // batchProcessClaims(claimIds: number[], action: string): Observable<void> {
+  // //   return this.http.post<void>(`${this.apiUrl}/batch-process`, {
+  // //     claimIds,
+  // //     action
+  // //   });
+  // // }
+
+  // // File Upload
+  // uploadAttachments(claimId: number, files: File[]): Observable<string[]> {
+  //   const formData = new FormData();
+  //   files.forEach(file => formData.append('files', file));
+
+  //   return this.http.post<string[]>(
+  //     `${this.apiUrl}/${claimId}/attachments`,
+  //     formData
+  //   );
+  // }
+
+  // // Analytics
+  // getClaimsAnalytics(params: any): Observable<any> {
+  //   return this.http.get(`${this.apiUrl}/analytics`, { params });
+  // }
+
+
+
+  // // getClaims(params: ClaimsFilter): Observable<ClaimsResponse> {
+  // //   return this.http.get<ClaimsResponse>(this.apiUrl, { params: params as any });
+  // // }
+
   // batchProcessClaims(claimIds: number[], action: string): Observable<void> {
-  //   return this.http.post<void>(`${this.apiUrl}/batch-process`, {
-  //     claimIds,
-  //     action
-  //   });
+  //   return this.http.post<void>(`${this.apiUrl}/batch-process`, { claimIds, action });
   // }
 
-  // File Upload
-  uploadAttachments(claimId: number, files: File[]): Observable<string[]> {
-    const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-
-    return this.http.post<string[]>(
-      `${this.apiUrl}/${claimId}/attachments`,
-      formData
-    );
-  }
-
-  // Analytics
-  getClaimsAnalytics(params: any): Observable<any> {
-    return this.http.get(`${this.apiUrl}/analytics`, { params });
-  }
-
-
-
-  // getClaims(params: ClaimsFilter): Observable<ClaimsResponse> {
-  //   return this.http.get<ClaimsResponse>(this.apiUrl, { params: params as any });
+  // generateReport(claimId: number): Observable<Blob> {
+  //   return this.http.get(`${this.apiUrl}/${claimId}/report`, { responseType: 'blob' });
   // }
 
-  batchProcessClaims(claimIds: number[], action: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/batch-process`, { claimIds, action });
-  }
+  // generateBatchReport(claimIds: number[]): Observable<Blob> {
+  //   return this.http.post(`${this.apiUrl}/batch-report`, { claimIds }, { responseType: 'blob' });
+  // }
 
-  generateReport(claimId: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${claimId}/report`, { responseType: 'blob' });
-  }
-
-  generateBatchReport(claimIds: number[]): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/batch-report`, { claimIds }, { responseType: 'blob' });
-  }
-
-  deleteClaim(claimId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${claimId}`);
-  }
+  // deleteClaim(claimId: number): Observable<void> {
+  //   return this.http.delete<void>(`${this.apiUrl}/${claimId}`);
+  // }
 
 
-  getClaimById(id: number | undefined): Observable<Claim> {
-    return this.http.get<Claim>(`${this.apiUrl}/${id}`);
-  }
+  // getClaimById(id: number | undefined): Observable<Claim> {
+  //   return this.http.get<Claim>(`${this.apiUrl}/${id}`);
+  // }
 
-  updateClaim(id: number, updates: Partial<Claim>): Observable<Claim> {
-    return this.http.patch<Claim>(`${this.apiUrl}/${id}`, updates);
-  }
+  // updateClaim(id: number, updates: Partial<Claim>): Observable<Claim> {
+  //   return this.http.patch<Claim>(`${this.apiUrl}/${id}`, updates);
+  // }
 
-  generateClaimReport(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${id}/report`, { responseType: 'blob' });
-  }
+  // generateClaimReport(id: number): Observable<Blob> {
+  //   return this.http.get(`${this.apiUrl}/${id}/report`, { responseType: 'blob' });
+  // }
   
-}

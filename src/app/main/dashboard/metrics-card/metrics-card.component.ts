@@ -6,7 +6,7 @@ import { Component, Input } from '@angular/core';
 })
 export class MetricsCardComponent {
   @Input() title!: string;
-  @Input() value!: number;
+  @Input() value!: string;
   @Input() icon!: string;
   @Input() colorClass!: string;
   @Input() change!: number;

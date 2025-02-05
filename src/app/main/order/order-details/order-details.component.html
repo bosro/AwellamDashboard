@@ -1,8 +1,16 @@
 <div class="p-6">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex  items-center mb-6">
+    <button 
+      routerLink="/main/orders/list"
+      class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
+      <i class="ri-arrow-left-line mr-2"></i>
+      <!-- Back to List -->
+    </button>
     <div>
-      <h1 class="text-2xl font-semibold text-gray-900">
+      <p class="mt-1 text-2xl font-semibold  text-gray-900">{{order?.customerId?.fullName}}</p>
+      
+      <h1 class="text-sm  text-gray-900">
         Order #{{order?.orderNumber}}
       </h1>
       <p class="mt-1 text-sm text-gray-600">
@@ -35,7 +43,7 @@
           <div [ngClass]="{
             'bg-blue-600 text-white': step.status === 'current',
             'bg-green-500 text-white': step.status === 'completed',
-            'bg-gray-200 text-gray-500': step.status === 'pending'
+            'bg-yellow-200 text-yellow-500': step.status === 'pending'
           }" class="h-12 w-12 rounded-full flex items-center justify-center">
             <i [class]="step.icon"></i>
           </div>
@@ -63,13 +71,13 @@
                   <div>
                     <div class="flex justify-between">
                       <h3 class="text-sm font-medium text-gray-900">
-                        {{item.product.name}}
+                        {{item?.product?.name}}
                       </h3>
                       <p class="ml-4 text-sm font-medium text-gray-900">
-                        GH₵{{item.price}}
+                        GH₵{{item?.price   | number: '1.2-2'}}
                       </p>
                     </div>
-                    <p class="mt-1 text-sm text-gray-500">Product {{item.product._id}}</p>
+                    <!-- <p class="mt-1 text-sm text-gray-500">Product {{item.product._id}}</p> -->
                   </div>
                   <div class="flex-1 flex items-end justify-between">
                     <p class="text-sm text-gray-500">Qty {{item.quantity}}</p>
@@ -82,7 +90,7 @@
         <div class="border-t border-gray-200 px-6 py-4">
           <div class="flex justify-between text-lg font-semibold">
             <span>Total</span>
-            <span>GH₵{{order?.totalAmount}}</span>
+            <span>GH₵{{order?.totalAmount  | number: '1.2-2'}}</span>
           </div>
         </div>
       </div>
@@ -111,17 +119,17 @@
       <!-- Payment Info -->
       <div class="bg-white rounded-lg shadow">
         <div class="p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Payment Information</h2>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Plant Information</h2>
           <div class="space-y-4">
             <div>
-              <h3 class="text-sm font-medium text-gray-500">Payment Status</h3>
-              <span [ngClass]="{
+              <h3 class="text-sm font-medium text-gray-500">{{order?.categoryId?.plantId?.name}}</h3>
+              <!-- <span [ngClass]="{
                 'bg-green-100 text-green-800': order?.paymentStatus === 'Paid',
                 'bg-yellow-100 text-yellow-800': order?.paymentStatus === 'Unpaid',
                 'bg-red-100 text-red-800': order?.paymentStatus === 'Failed'
               }" class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full">
                 {{order?.paymentStatus}}
-              </span>
+              </span> -->
             </div>
           </div>
         </div>
@@ -143,8 +151,9 @@
               </span>
             </div>
             <div *ngIf="order?.assignedTruck">
-              <h3 class="text-sm font-medium text-gray-500">Assigned Truck</h3>
-              <p class="mt-1 text-sm text-gray-900">{{order?.assignedTruck}}</p>
+              <h3 class="text-sm font-medium text-gray-500">Assigned Driver</h3>
+              <p *ngIf="order?.assignedTruck && order?.assignedTruck?.driver?.name" class="mt-1 text-sm text-gray-900">{{order?.assignedTruck?.driver?.name}}</p>
+              <p *ngIf="order?.assignedTruck && order?.assignedTruck?.driver?.name" class="mt-1 text-sm text-gray-900">{{order?.assignedTruck?.driver?.phoneNumber}}</p>
             </div>
           </div>
         </div>

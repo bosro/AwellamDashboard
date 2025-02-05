@@ -2,7 +2,14 @@ export interface Product {
   _id: string;
   name: string;
   price: number;
-  description: string;
+  categoryId: {
+    _id: string;
+    name: string;
+  };
+  plantId: {
+    _id: string,
+    name:string
+  }
   inStock: boolean;
   image: string;
 totalStock:number

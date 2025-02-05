@@ -24,7 +24,7 @@ export class UserEditModalComponent implements OnInit {
   loading = false;
   error: string | null = null;
   showPassword = false;
-  roles = ['super_admin', 'transapot', 'User']; // Example roles, replace with actual roles
+  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support']; // Example roles, replace with actual roles
 
   constructor(
     private fb: FormBuilder,
@@ -42,7 +42,8 @@ export class UserEditModalComponent implements OnInit {
     this.userForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: [''],
+      password: ['' ,Validators.required],
+      phoneNumber:[''],
       role: ['', Validators.required]
     });
   }
@@ -69,6 +70,7 @@ export class UserEditModalComponent implements OnInit {
       next: () => {
         this.loading = false;
         this.saved.emit();
+        window.location.reload();
       },
       error: (error: any) => {
         this.error = error?.error?.message || 'An error occurred';
