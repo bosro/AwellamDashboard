@@ -71,10 +71,10 @@
                   <div>
                     <div class="flex justify-between">
                       <h3 class="text-sm font-medium text-gray-900">
-                        {{item.product.name}}
+                        {{item?.product?.name}}
                       </h3>
                       <p class="ml-4 text-sm font-medium text-gray-900">
-                        GH₵{{item.price}}
+                        GH₵{{item?.price   | number: '1.2-2'}}
                       </p>
                     </div>
                     <!-- <p class="mt-1 text-sm text-gray-500">Product {{item.product._id}}</p> -->
@@ -90,7 +90,7 @@
         <div class="border-t border-gray-200 px-6 py-4">
           <div class="flex justify-between text-lg font-semibold">
             <span>Total</span>
-            <span>GH₵{{order?.totalAmount}}</span>
+            <span>GH₵{{order?.totalAmount  | number: '1.2-2'}}</span>
           </div>
         </div>
       </div>

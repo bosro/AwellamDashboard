@@ -211,7 +211,7 @@ export class AuthService {
   }
 
   updateAdmin(id: string, userData: UserFormData): Observable<any> {
-    return this.http.put(`${environment.apiUrl}/update/id`, userData);
+    return this.http.put(`${environment.apiUrl}/admin/edit/${id}`, userData);
   }
 
   // Admin(data: any): Observable<any> {
