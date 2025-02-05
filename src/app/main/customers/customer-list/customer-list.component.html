@@ -122,23 +122,21 @@
     <!-- Pagination -->
     <div class="flex items-center justify-between mt-4">
         <div class="text-sm text-gray-700">
-            Showing {{ getMinValue() }} to {{ getMaxValue() }} of {{ total }} entries
+          Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
         </div>
         <div class="flex items-center space-x-2">
-            <button
-                [disabled]="currentPage === 1"
-                (click)="onPageChange(currentPage - 1)"
-                class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50"
-            >
-                <i class="ri-arrow-left-s-line"></i>
-            </button>
-            <button
-                [disabled]="currentPage * pageSize >= total"
-                (click)="onPageChange(currentPage + 1)"
-                class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50"
-            >
-                <i class="ri-arrow-right-s-line"></i>
-            </button>
+          <button 
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+            class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          <button 
+            [disabled]="currentPage * pageSize >= total"
+            (click)="onPageChange(currentPage + 1)"
+            class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
         </div>
-    </div>
+      </div>
 </div>
