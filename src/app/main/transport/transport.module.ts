@@ -12,12 +12,17 @@ import { TruckDetailComponent } from './truck-management/truck-details.component
 // import { MaintenanceHistoryComponent } from './maintenance-history/maintenance-history.component';
 // import { MaintenanceDetailsModalComponent } from './maintenance-details-modal/maintenance-details-modal.component';
 // import { FuelAnalyticsComponent } from './fuel-analytics/fuel-analytics.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { FormGroup } from '@angular/forms';
 import { TruckFormComponent } from './truck-management/truck-form.component';
 import { LoadTruckComponent } from './truck-management/load-truck.component';
+import { InventoryListComponent } from './inventory-list/inventory-list.component';
+import { InventoryFormComponent } from './inventory-form/inventory-form.component';
+import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
+import { DisbursementModalComponent } from './driverlist/driver-details/disbursement-modal/disbursement-modal.component';
+import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
 
@@ -30,7 +35,15 @@ import { LoadTruckComponent } from './truck-management/load-truck.component';
     TruckManagementComponent,
     TruckDetailComponent,
     TruckFormComponent,
-    LoadTruckComponent
+    LoadTruckComponent,
+    InventoryListComponent,
+    InventoryFormComponent,
+    StockDisbursementComponent,
+    // InventoryListComponent,
+    // InventoryFormComponent,
+    InventoryDetailsComponent,
+    // StockDisbursementComponent,
+    DisbursementModalComponent,
     // MetricsCardComponent 
     // MaintenanceHistoryComponent,
     // MaintenanceDetailsModalComponent,
@@ -45,7 +58,8 @@ import { LoadTruckComponent } from './truck-management/load-truck.component';
     MatMenuModule,
     NgxChartsModule,
     ReactiveFormsModule,
-    // ReactiveFormsModule,
+    FormsModule,
+    ReactiveFormsModule,
 
   ]
 })

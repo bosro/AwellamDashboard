@@ -61,6 +61,10 @@ onPlantSelect: any;
     this.loadOrders();
   }
 
+
+  EditOrder(){
+    
+  }
   private loadInitialData(): void {
     this.loading = true;
     this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({

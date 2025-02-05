@@ -16,52 +16,45 @@ export class CustomerListComponent implements OnInit {
   pageSize = 10;
   currentPage = 1;
   selectedCustomers = new Set<string>();
-  filterForm: FormGroup;
-Math= Math
+  filterForm!: FormGroup;
+  Math = Math;
+
   constructor(
     private customersService: CustomersService,
     private fb: FormBuilder
-  ) {
-    this.filterForm = this.fb.group({
-      search: [''], // Search input control
-      status: [''],
-      dateRange: this.fb.group({
-        start: [''],
-        end: ['']
-      })
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
+    this.createFilterForm();
     this.setupFilters();
     this.loadCustomers();
   }
 
+  private createFilterForm(): void {
+    this.filterForm = this.fb.group({
+      search: [''] // Search input control
+    });
+  }
+
   private setupFilters(): void {
-    // Listen for changes in the search input
     this.filterForm.valueChanges
       .pipe(
-        debounceTime(300), // Wait 300ms after the user stops typing
+        debounceTime(300), // Wait 300ms after user stops typing
         distinctUntilChanged() // Only trigger if the search term changes
       )
       .subscribe(() => {
-        this.currentPage = 1; // Reset to the first page when searching
-        this.applyFilters(); // Apply filters based on the search term
+        this.currentPage = 1; // Reset to first page when searching
+        this.applyFilters();
       });
   }
 
   loadCustomers(): void {
     this.loading = true;
-    const params = {
-      page: this.currentPage,
-      pageSize: this.pageSize
-    };
-
-    this.customersService.getCustomers(params).subscribe({
+    this.customersService.getCustomers().subscribe({
       next: (response) => {
-        this.customers = response.customers; // Store the full list of customers
-        this.total = response.total || 0; // Ensure total is set properly
-        this.applyFilters(); // Apply filters after loading
+        this.customers = response.customers || [];
+        this.total = response.total || this.customers.length; // Ensure total is set properly
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -72,23 +65,23 @@ Math= Math
   }
 
   applyFilters(): void {
-    const { search, status, dateRange } = this.filterForm.value;
+    const { search } = this.filterForm.value;
+    this.filteredCustomers = this.customers.filter(customer =>
+      !search || customer.fullName.toLowerCase().includes(search.toLowerCase())
+    );
+    this.total = this.filteredCustomers.length;
+    this.paginateCustomers();
+  }
 
-    this.filteredCustomers = this.customers.filter(customer => {
-      const matchesSearch = !search || customer.fullName.toLowerCase().includes(search.toLowerCase());
-      // const matchesStatus = !status || customer.status === status;
-      const matchesDateRange = (!dateRange.start || new Date(customer.createdAt) >= new Date(dateRange.start)) &&
-                               (!dateRange.end || new Date(customer.createdAt) <= new Date(dateRange.end));
-
-      return matchesSearch  && matchesDateRange;
-    });
-
-    this.total = this.filteredCustomers.length; // Update total for pagination
+  paginateCustomers(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredCustomers = this.filteredCustomers.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.applyFilters();
+    this.paginateCustomers();
   }
 
   toggleSelection(customerId: string): void {
@@ -103,9 +96,7 @@ Math= Math
     if (this.selectedCustomers.size === this.filteredCustomers.length) {
       this.selectedCustomers.clear();
     } else {
-      this.filteredCustomers.forEach(customer => {
-        this.selectedCustomers.add(customer._id);
-      });
+      this.filteredCustomers.forEach(customer => this.selectedCustomers.add(customer._id));
     }
   }
 

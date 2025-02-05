@@ -109,13 +109,13 @@
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC Ref</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+        <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th> -->
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>
     <tbody class="bg-white divide-y divide-gray-200">
-      <tr *ngFor="let order of filteredOrders">
+      <tr *ngFor="let order of filteredOrders" [routerLink]="['/main/orders/edit', order?._id]">
         <td class="px-6 py-4">
           <div class="flex items-center">
             <input
@@ -144,12 +144,12 @@
           <div class="text-sm text-gray-900">{{order.date | date:'mediumDate'}}</div>
           <div class="text-xs text-gray-500">{{order.date | date:'shortTime'}}</div>
         </td>
-        <td class="px-6 py-4">
+        <!-- <td class="px-6 py-4">
           <span [ngClass]="getPaymentStatusClass(order.paymentStatus)"
                 class="px-2 py-1 text-xs font-medium rounded-full">
             GH₵{{order.paymentStatus}}
           </span>
-        </td>
+        </td> -->
         <td class="px-6 py-4">
           <span [ngClass]="getStatusClass(order.status)"
                 class="px-2 py-1 text-xs font-medium rounded-full">

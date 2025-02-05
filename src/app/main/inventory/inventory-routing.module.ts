@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { InventoryListComponent } from './inventory-list/inventory-list.component';
-import { InventoryFormComponent } from './inventory-form/inventory-form.component';
-import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
-import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
+import { InventoryListComponent } from '../transport/inventory-list/inventory-list.component';
+import { InventoryFormComponent } from '../transport/inventory-form/inventory-form.component';
+import { InventoryDetailsComponent } from '../transport/inventory-detail/inventory-detail.component';
+import { StockDisbursementComponent } from '../transport/stock-disbursement/stock-disbursement.component';
 import { DestinationListComponent } from './destination/destination-list';
 
 

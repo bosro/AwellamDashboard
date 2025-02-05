@@ -19,15 +19,11 @@ export class CustomersService {
 
   constructor(private http: HttpClient) {}
 
-  getCustomers(params?: any): Observable<{ customers: Customer[]; total: number }> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        httpParams = httpParams.set(key, params[key]);
-      });
+  getCustomers(): Observable<{ customers: Customer[]; total: number }> {
+    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`);
     }
-    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`, { params: httpParams });
-  }
+    
+  
 
 
   getCustomerById(id: string): Observable<{ customer: Customer }> {

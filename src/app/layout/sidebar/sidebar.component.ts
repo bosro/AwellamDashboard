@@ -73,11 +73,11 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       roles: ['super_admin', 'Admin_Support', 'Stocks_Manager'],
       children: [
-        {
-          title: 'Stock Overview',
-          route: '/main/inventory',
-          icon: 'ri-database-2-line'
-        },
+        // {
+        //   title: 'Stock Overview',
+        //   route: '/main/inventory',
+        //   icon: 'ri-database-2-line'
+        // },
         {
           title: 'Product List',
           route: '/main/products/list',
@@ -98,11 +98,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/inventory/destination',
           icon: 'ri-exchange-funds-line'
         },
-        {
-          title: 'Disbursements',
-          route: '/main/inventory/disbursement',
-          icon: 'ri-exchange-funds-line'
-        },
+        // {
+        //   title: 'Disbursements',
+        //   route: '/main/inventory/disbursement',
+        //   icon: 'ri-exchange-funds-line'
+        // },
         
       ]
     },
@@ -140,6 +140,12 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/dashboard',
           icon: 'ri-speed-up-line'
         },
+
+        {
+          title: 'Stock Overview',
+          route: '/main/transport/inventory-list',
+          icon: 'ri-database-2-line'
+        },
         // {
         //   title: 'Operations',
         //   route: '/main/transport/trips',
@@ -154,6 +160,11 @@ export class SidebarComponent implements OnInit {
           title: 'Drivers',
           route: '/main/transport/drivers',
           icon: 'ri-caravan-line'
+        },
+        {
+          title: 'Disbursements',
+          route: '/main/transport/disbursement',
+          icon: 'ri-exchange-funds-line'
         },
         // {
         //   title: 'Fuel Analytics',
