@@ -146,6 +146,7 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/inventory-list',
           icon: 'ri-database-2-line'
         },
+
         // {
         //   title: 'Operations',
         //   route: '/main/transport/trips',
@@ -165,6 +166,11 @@ export class SidebarComponent implements OnInit {
           title: 'Disbursements',
           route: '/main/transport/disbursement',
           icon: 'ri-exchange-funds-line'
+        },
+        {
+          title: 'Payment Ref /SOCs ',
+          route: '/main/transport/paymentrefs',
+          icon: 'ri-database-2-line'
         },
         // {
         //   title: 'Fuel Analytics',

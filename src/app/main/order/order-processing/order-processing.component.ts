@@ -23,6 +23,8 @@ export class OrderProcessingComponent implements OnInit {
   selectedCustomer: any;
   noProductsFound = false;
   noCategoriesFound = false;
+  filterForm!: FormGroup;
+  filteredCustomers: any[] = [];
 
   private apiUrl = `${environment.apiUrl}`;
 
@@ -50,6 +52,22 @@ export class OrderProcessingComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchPlantsAndCustomers();
+
+    this.filterForm.get('search')?.valueChanges.subscribe(searchTerm => {
+      this.filterCustomers(searchTerm);
+    });
+  }
+
+
+   filterCustomers(searchTerm: string): void {
+    if (!searchTerm) {
+      this.customers = this.customers;
+    } else {
+      this.customers = this.customers.filter(customer =>
+        customer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.phoneNumber.includes(searchTerm)
+      );
+    }
   }
 
   private fetchPlantsAndCustomers(): void {
@@ -61,6 +79,7 @@ export class OrderProcessingComponent implements OnInit {
       next: ({ plants, customers }) => {
         this.plants = plants.plants;
         this.customers = customers.customers;
+        // this.filteredCustomers = this.customers;
       },
       error: (error) => {
         console.error('Error fetching data:', error);

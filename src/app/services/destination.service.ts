@@ -4,6 +4,7 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Destination {
+  _id: string;
   plant: string;
   bales: number;
   destination: string;
