@@ -27,10 +27,10 @@ export class ReportsService {
     );
   }
 
-  getClaimsReport(startDate: string, endDate: string): Observable<Blob> {
+  getClaimsReport(startDate: string, endDate: string ,destinationId:string): Observable<Blob> {
     return this.http.post(
       `${this.apiUrl}/claims-report`, // Reuse the same endpoint
-      { startDate, endDate },
+      { startDate, endDate ,destinationId},
       { responseType: 'blob' }
     );
   }

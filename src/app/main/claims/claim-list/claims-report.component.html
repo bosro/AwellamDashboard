@@ -31,6 +31,32 @@
           />
         </div>
 
+        <!-- Select Plant -->
+        <div>
+          <label for="plant" class="block text-sm font-medium text-gray-700">Select Plant:</label>
+          <select
+            id="plant"
+            (change)="onPlantSelect($event)"
+            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select a Plant</option>
+            <option *ngFor="let plant of plants" [value]="plant._id">{{ plant.name }}</option>
+          </select>
+        </div>
+        
+        <!-- Select Destination -->
+        <div>
+          <label for="destination" class="block text-sm font-medium text-gray-700">Select Destination:</label>
+          <select
+            id="destination"
+            formControlName="destinationId"
+            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select a Destination</option>
+            <option *ngFor="let destination of destinations" [value]="destination._id">{{ destination.destination }}</option>
+          </select>
+        </div>
+
         <!-- Generate Report Button -->
         <div class="flex items-end">
           <button
@@ -51,7 +77,7 @@
   </div>
 
   <!-- Claims Report Table -->
-  <div *ngIf="claimsData" class="bg-white rounded-lg shadow">
+  <div *ngIf="claimsData.length > 0" class="bg-white rounded-lg shadow">
     <h2 class="text-xl font-semibold text-gray-900 p-4">Claims Report Data</h2>
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
