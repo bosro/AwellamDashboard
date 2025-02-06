@@ -18,8 +18,10 @@ import { InventoryFormComponent } from './inventory-form/inventory-form.componen
 import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
 import { DestinationListComponent } from '../inventory/destination/destination-list';
 import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
-import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
-import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
+import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
+import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
+// import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
+// import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
 
 const routes: Routes = [
   {
@@ -41,8 +43,8 @@ const routes: Routes = [
       { path: 'details/:id', component: InventoryDetailsComponent },
       { path: 'destination', component: DestinationListComponent },
       { path: 'disbursement', component: StockDisbursementComponent },
-      {path:'paymentrefs', component: PaymentRefListComponent},
-      {path:'payment-ref/:id' , component:PaymentRefDetailComponent}
+      {path:'paymentrefs', component: PaymentListComponent},
+      {path:'payment-ref/:id' , component: PaymentDetailComponent}
     ],
   },
 ];

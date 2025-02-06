@@ -1,97 +1,169 @@
 export interface Plant {
-    id: number;
-    name: string;
-  }
-  
-  export interface Category {
-    id: number;
-    name: string;
-    plantId: number;
-  }
-  
-  export interface Product {
-    id: number;
-    name: string;
-    categoryId: number;
-  }
-  
-  export interface SOC {
-    id?: number;
-    soNumber: string;
-    plantId: number;
-    plantName: string; // Added to match dummy data
-    categoryId: number;
-    categoryName: string; // Added to match dummy data
-    productId: number;
-    productName: string; // Added to match dummy data
+  _id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+export interface CreateSocRequest {
+  socNumber: string;
+  quantity: number;
+  plantId: string;
+  categoryId: string;
+  productId: string;
+  orderType: string;
+}
+
+export interface SocResponse {
+  message: string;
+  socNumber: {
+    socNumber: string;
     quantity: number;
+    plantId: string;
+    categoryId: string;
+    productId: string;
     orderType: string;
-    driverId?: number;
-    paymentRefId?: string; // Made optional to match dummy data
+    status: string;
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface AssignDriverResponse {
+  message: string;
+  soc: {
+    _id: string;
+    status: string;
+    driverId: string;
+    updatedAt: string;
+  };
+}
+
+export interface Category {
+  _id: string;
+  name: string;
+  plantId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum OrderType {
+  GUARANTEE_ORDER = "GUARANTEE ORDER",
+  SPECIAL_GUARANTEE_ORDER = "SPECIAL GUARANTEE ORDER",
+  NORMAL_CHEQUE_ORDER = "NORMAL CHÈQUE ORDER",
+  CASH_ORDER = "CASH ORDER"
+}
+
+export interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  inStock: boolean;
+  totalStock: number;
+  categoryId: string;
+  plantId: string;
+  destination: string;
+  rates: number;
+}
+
+export interface SocNumber {
+  _id: string;
+  socNumber: string;
+  quantity: number;
+  plantId: Plant;
+  categoryId: Category;
+  productId: Product;
+  status: string;
+  orderType: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentReference {
+  truckId(truckId: any, socId: string): unknown;
+  _id: string;
+  paymentRef: string;
+  plantId: Plant;
+  socNumbers: SocNumber[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+
+
+export interface PaymentResponse {
+  message: string;
+  paymentReferences: PaymentReference[];
+}
+
+export interface PaymentDetailResponse {
+  message: string;
+  paymentReference: PaymentReference;
+}
+
+// src/app/services/payment.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+// import { PaymentReference, Plant, Category, Product } from '../models/interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PaymentService {
+  private apiUrl = 'http://127.0.0.1:3000/api';
+
+  constructor(private http: HttpClient) {}
+
+  getPaymentReferences(): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/get`);
+  }
+
+  getPaymentReferenceDetails(id: string): Observable<PaymentDetailResponse> {
+    return this.http.get<PaymentDetailResponse>(`${this.apiUrl}/payment/get/${id}`);
+  }
+
+
+  assignSocToDriver(truckId: string, socId: string): Observable<AssignDriverResponse> {
+    return this.http.post<AssignDriverResponse>(
+      `${this.apiUrl}/soc/trucks/${truckId}/assign-soc/${socId}`,
+      {}
+    );
+  }
+
+
+  createSoc(paymentRefId: string, socData: CreateSocRequest): Observable<SocResponse> {
+    return this.http.post<SocResponse>(
+      `${this.apiUrl}/soc/create/${paymentRefId}`,
+      socData
+    );
   }
   
-  export interface PaymentRef {
-    id: string;
-    paymentField: string; // Added to match dummy data
-    plantId: number;
-    plant: Plant;
-    createdAt: Date;
-    socs?: SOC[];
+
+  getPlants(): Observable<{ plants: Plant[] }> {
+    return this.http.get<{ plants: Plant[] }>(`${this.apiUrl}/plants/get`);
   }
-  
-  export interface Driver {
-    id: number;
-    name: string;
+
+  getCategoriesByPlant(plantId: string): Observable<{ categories: Category[] }> {
+    return this.http.get<{ categories: Category[] }>(`${this.apiUrl}/category/plants/${plantId}`);
   }
-  
-  // src/app/services/api.service.ts
-  import { Injectable } from '@angular/core';
-  import { HttpClient } from '@angular/common/http';
-  import { Observable } from 'rxjs';
-//   import { Plant, Category, Product, SOC, PaymentRef, Driver } from '../interfaces/models';
-  
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ApiService {
-    private baseUrl = 'api/v1'; // Replace with your API base URL
-  
-    constructor(private http: HttpClient) {}
-  
-    getPaymentRefs(): Observable<PaymentRef[]> {
-      return this.http.get<PaymentRef[]>(`${this.baseUrl}/payment-refs`);
-    }
-  
-    getPaymentRefDetails(id: string): Observable<PaymentRef> {
-      return this.http.get<PaymentRef>(`${this.baseUrl}/payment-refs/${id}`);
-    }
-  
-    getPlants(): Observable<Plant[]> {
-      return this.http.get<Plant[]>(`${this.baseUrl}/plants`);
-    }
-  
-    getCategories(plantId: number): Observable<Category[]> {
-      return this.http.get<Category[]>(`${this.baseUrl}/plants/${plantId}/categories`);
-    }
-  
-    getProducts(categoryId: number): Observable<Product[]> {
-      return this.http.get<Product[]>(`${this.baseUrl}/categories/${categoryId}/products`);
-    }
-  
-    getDrivers(): Observable<Driver[]> {
-      return this.http.get<Driver[]>(`${this.baseUrl}/drivers`);
-    }
-  
-    assignDriver(socId: number, driverId: number): Observable<SOC> {
-      return this.http.patch<SOC>(`${this.baseUrl}/socs/${socId}/assign-driver`, { driverId });
-    }
-  
-    createPaymentRef(plantId: number): Observable<PaymentRef> {
-      return this.http.post<PaymentRef>(`${this.baseUrl}/payment-refs`, { plantId });
-    }
-  
-    createSOC(soc: Omit<SOC, 'id'>): Observable<SOC> {
-      return this.http.post<SOC>(`${this.baseUrl}/socs`, soc);
-    }
+
+  getProductsByCategory(categoryId: string): Observable<{ products: Product[] }> {
+    return this.http.get<{ products: Product[] }>(`${this.apiUrl}/products/category/${categoryId}`);
   }
-  
+  createPaymentReference(data: {
+    paymentRef: string;
+    plantId: string;
+    orderType: OrderType;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/payment/create`, data);
+  }
+
+
+  createSocNumber(paymentRefId: string, socData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/soc/create/${paymentRefId}`, socData);
+  }
+}
