@@ -1,0 +1,167 @@
+<div class="container mx-auto p-4">
+    <div *ngIf="loading" class="flex items-center justify-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+    </div>
+  
+    <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{error}}
+    </div>
+  
+    <div *ngIf="paymentRef" class="space-y-6">
+      <!-- Header Section -->
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <a routerLink="/payments" class="text-blue-500 hover:text-blue-600 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+              Back to Payment References
+            </a>
+            <h1 class="text-3xl font-bold mt-4">Payment Reference Details</h1>
+          </div>
+          <button (click)="showCreateForm = !showCreateForm"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create New SOC
+          </button>
+        </div>
+  
+        <div class="grid grid-cols-2 gap-6">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-500">Reference Number</div>
+            <div class="text-lg font-semibold">{{paymentRef.paymentRef}}</div>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-500">Plant</div>
+            <div class="text-lg font-semibold">{{paymentRef.plantId.name}}</div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Create SOC Form -->
+      <div *ngIf="showCreateForm" class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Create New SOC</h2>
+        <form [formGroup]="socForm" (ngSubmit)="onSubmitSoc()" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">SOC Number</label>
+              <input type="text" formControlName="socNumber"
+                     class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+              <input type="number" formControlName="quantity"
+                     class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+  
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Plant</label>
+              <select formControlName="plantId" (change)="onPlantSelect($event)"
+                      class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Plant</option>
+                <option *ngFor="let plant of plants" [value]="plant._id">{{plant.name}}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select formControlName="categoryId" (change)="onCategorySelect($event)"
+                      class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Category</option>
+                <option *ngFor="let category of categories" [value]="category._id">{{category.name}}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+              <select formControlName="productId"
+                      class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Product</option>
+                <option *ngFor="let product of products" [value]="product._id">{{product.name}}</option>
+              </select>
+            </div>
+          </div>
+  
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
+            <select formControlName="orderType"
+                    class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+              <option value="">Select Order Type</option>
+              <option value="GUARANTEE ORDER">Guarantee Order</option>
+              <option value="SPECIAL GUARANTEE ORDER">Special Guarantee Order</option>
+              <option value="NORMAL CHÈQUE ORDER">Normal Chèque Order</option>
+              <option value="CASH ORDER">Cash Order</option>
+            </select>
+          </div>
+  
+          <div class="flex justify-end gap-3">
+            <button type="button" (click)="showCreateForm = false"
+                    class="px-4 py-2 border rounded-lg hover:bg-gray-100">
+              Cancel
+            </button>
+            <button type="submit" [disabled]="!socForm.valid"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg disabled:opacity-50">
+              Create SOC
+            </button>
+          </div>
+        </form>
+      </div>
+  
+      <!-- Active SOCs -->
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Active SOC Numbers ({{getActiveSocs().length}})</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC Number</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Type</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let soc of getActiveSocs()">
+                <td class="px-6 py-4 whitespace-nowrap">{{soc.socNumber}}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{soc.quantity}}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{soc.orderType}}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                        [ngClass]="{'bg-green-100 text-green-800': soc.status === 'active',
+                                  'bg-gray-100 text-gray-800': soc.status === 'inactive'}">
+                    {{soc.status}}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{soc.createdAt | date:'short'}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button (click)="assignDriver(soc._id)"
+                          class="text-indigo-600 hover:text-indigo-900">
+                    Assign Driver
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  
+      <!-- Inactive SOCs -->
+      <div *ngIf="getInactiveSocs().length > 0" class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Inactive SOC Numbers ({{getInactiveSocs().length}})</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <!-- Similar structure to active SOCs table -->
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>

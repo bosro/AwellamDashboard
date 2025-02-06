@@ -23,8 +23,9 @@ import { InventoryFormComponent } from './inventory-form/inventory-form.componen
 import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
 import { DisbursementModalComponent } from './driverlist/driver-details/disbursement-modal/disbursement-modal.component';
 import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
-import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
-import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
+import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
+import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
+
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
 
@@ -41,13 +42,16 @@ import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.com
     InventoryListComponent,
     InventoryFormComponent,
     StockDisbursementComponent,
+    PaymentDetailComponent,
+    PaymentListComponent,
+    // PaymentListComponent,
     // InventoryListComponent,
     // InventoryFormComponent,
     InventoryDetailsComponent,
     // StockDisbursementComponent,
     DisbursementModalComponent,
-    PaymentRefListComponent,
-    PaymentRefDetailComponent
+// PaymentRefListComponent,
+// PaymentRefDetailComponent
     // MetricsCardComponent 
     // MaintenanceHistoryComponent,
     // MaintenanceDetailsModalComponent,
