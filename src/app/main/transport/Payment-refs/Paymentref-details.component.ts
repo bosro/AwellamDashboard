@@ -5,8 +5,7 @@ import { PaymentReference, Plant, Category, Product } from '../../../services/pa
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 // import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-payment-detail',
