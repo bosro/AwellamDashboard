@@ -41,8 +41,12 @@ export class TruckService {
     return this.http.post(`${this.apiUrll}/soc/trucks/${truckId}/assign-soc/${socId}`, {});
   }
 
-  unloadTruck(id: string): Observable<Truck> {
-    return this.http.put<Truck>(`${this.apiUrl}/unload/${id}`, {});
+  // unloadTruck(id: string): Observable<Truck> {
+  //   return this.http.put<Truck>(`${this.apiUrl}/unload/${id}`, {});
+  // }
+
+  unloadTruck(truckId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${truckId}/unload`, {});
   }
 
  
