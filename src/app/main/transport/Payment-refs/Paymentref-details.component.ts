@@ -6,6 +6,8 @@ import { PaymentReference, Plant, Category, Product } from '../../../services/pa
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { environment } from '../../../environments/environment';
+import { TruckService } from '../../../services/truck.service';
+import { Truck ,TruckResponse} from '../../../shared/types/truck-operation.types';
 
 @Component({
   selector: 'app-payment-detail',
@@ -26,7 +28,8 @@ export class PaymentDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private paymentService: PaymentService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private truckService: TruckService
   ) {
     this.initializeForm();
   }
@@ -260,25 +263,85 @@ export class PaymentDetailComponent implements OnInit {
     return this.paymentRef?.socNumbers.filter(soc => soc.status === 'inactive') || [];
   }
 
-  async assignDriver(socId: string): Promise<void> {
+  async loadAvailableTrucks(): Promise<Truck[]> {
     try {
-      const result = await Swal.fire({
-        title: 'Assign Driver',
-        text: 'Are you sure you want to assign a driver to this SOC?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, assign',
-        cancelButtonText: 'Cancel'
-      });
-
-      if (result.isConfirmed) {
-        // Implement driver assignment logic here
-        Swal.fire('Success', 'Driver assigned successfully', 'success');
-        this.loadPaymentDetails(this.paymentRef!._id);
+      const response = await this.truckService.getInactiveTrucks().toPromise();
+      if (response) {
+        // Filter trucks with status 'inactive'
+        return response.trucks.filter((truck: Truck) => truck.status === 'inactive');
+      } else {
+        throw new Error('Failed to load trucks');
       }
     } catch (error) {
-      console.error('Error assigning driver:', error);
-      Swal.fire('Error', 'Failed to assign driver', 'error');
+      console.error('Error loading trucks:', error);
+      throw error;
+    }
+  }
+
+  async assignDriver(socId: string): Promise<void> {
+    try {
+      // First load available trucks
+      const trucks = await this.loadAvailableTrucks();
+      
+      if (trucks.length === 0) {
+        Swal.fire('Warning', 'No available trucks found', 'warning');
+        return;
+      }
+
+      // Create truck selection options
+      const truckOptions = trucks.reduce((acc, truck) => {
+        acc[truck._id] = `${truck.truckNumber} ${truck.driver ? `(Driver: ${truck.driver.name})` : ''}`;
+        return acc;
+      }, {} as { [key: string]: string });
+
+      // Show truck selection dialog
+      const { value: selectedTruckId, isConfirmed } = await Swal.fire({
+        title: 'Select Truck',
+        input: 'select',
+        inputOptions: truckOptions,
+        inputPlaceholder: 'Select a truck',
+        showCancelButton: true,
+        inputValidator: (value) => {
+          return new Promise((resolve) => {
+            if (!value) {
+              resolve('You need to select a truck');
+            } else {
+              resolve(null);
+            }
+          });
+        },
+        confirmButtonText: 'Assign',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        preConfirm: (truckId) => {
+          return this.truckService.assignSocToTruck(truckId, socId)
+            .toPromise()
+            .catch(error => {
+              const errorMessage = error.error?.message || 'Assignment failed';
+              Swal.showValidationMessage(
+                `Assignment failed: ${errorMessage}`
+              );
+            });
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+      });
+
+      if (isConfirmed) {
+        await Swal.fire({
+          title: 'Success!',
+          text: 'Truck assigned successfully',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        
+        // Reload payment details to refresh the SOC list
+        this.loadPaymentDetails(this.paymentRef!._id);
+      }
+
+    } catch (error) {
+      console.error('Error in truck assignment:', error);
+      Swal.fire('Error', 'Failed to complete truck assignment', 'error');
     }
   }
 }
