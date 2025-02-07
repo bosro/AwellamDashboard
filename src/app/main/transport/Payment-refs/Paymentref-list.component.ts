@@ -7,11 +7,15 @@ export enum OrderType {
 
 // src/app/components/payment-list/payment-list.component.ts
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaymentService } from '../../../services/payment.service';
 import { PaymentReference, Plant } from '../../../services/payment.service';
 // import { OrderType } from '../../../models/enums';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { Category } from '../../../shared/types/product.interface';
+import { Product } from '../../../services/products.service';
 
 @Component({
   selector: 'app-payment-list',
@@ -27,10 +31,16 @@ export class PaymentListComponent implements OnInit {
   orderTypes = Object.values(OrderType);
   submitting = false;
 
+
+  private readonly apiUrl = `${environment.apiUrl}`
+  categories!: Category[];
+  products!: Product[];
+
   constructor(
     private paymentService: PaymentService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {
     this.paymentForm = this.fb.group({
       paymentRef: ['', [Validators.required, Validators.minLength(5)]],
@@ -39,19 +49,54 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
+
+
   ngOnInit(): void {
     this.loadPayments();
     this.loadPlants();
   }
 
   loadPlants(): void {
-    this.paymentService.getPlants().subscribe({
+    this.loading = true;
+    this.http.get<{ plants: Plant[] }>(`${this.apiUrl}/plants/get`).subscribe({
       next: (response) => {
         this.plants = response.plants;
+        this.loading = false;
       },
       error: (error) => {
         console.error('Error loading plants:', error);
         this.error = 'Failed to load plants';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadCategories(plantId: string): void {
+    this.loading = true;
+    this.http.get<{ categories: Category[] }>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
+      next: (response) => {
+        this.categories = response.categories;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.error = 'Failed to load categories';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadProducts(categoryId: string): void {
+    this.loading = true;
+    this.http.get<{ products: Product[] }>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.error = 'Failed to load products';
+        this.loading = false;
       }
     });
   }
