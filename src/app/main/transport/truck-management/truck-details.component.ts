@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TruckService } from '../../../services/truck.service';
-import { ProductsService } from '../../../services/products.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,34 +9,13 @@ import Swal from 'sweetalert2';
 })
 export class TruckDetailComponent implements OnInit {
   truck: any;
-  products: any[] = [];
   loading = true;
-  showEditForm = false;
-  showLoadForm = false;
-  editForm: FormGroup;
-  loadForm: FormGroup;
 
   constructor(
-    private fb: FormBuilder,
     private route: ActivatedRoute,
     private truckService: TruckService,
-    private productService: ProductsService,
     private router: Router
-  ) {
-    this.editForm = this.fb.group({
-      truckNumber: [''],
-      capacity: [''],
-      driver: [''],
-      expenses: [''],
-      productId: [''],
-      socNumber: ['']
-    });
-
-    this.loadForm = this.fb.group({
-      capacity: [''],
-      productId: ['']
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     const truckId = this.route.snapshot.paramMap.get('id');
@@ -47,14 +24,12 @@ export class TruckDetailComponent implements OnInit {
     } else {
       console.error('Truck ID is null');
     }
-    this.loadProducts();
   }
 
   loadTruckDetails(truckId: string): void {
     this.truckService.getTruckById(truckId).subscribe({
       next: (response) => {
         this.truck = response.truck;
-        this.editForm.patchValue(this.truck);
         this.loading = false;
       },
       error: (error) => {
@@ -64,31 +39,9 @@ export class TruckDetailComponent implements OnInit {
     });
   }
 
-  loadProducts(): void {
-    this.productService.getProducts({}).subscribe({
-      next: (response) => {
-        this.products = response.products;
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-      }
-    });
+  goBack() {
+    this.router.navigate(['/main/transport/trucks/']);
   }
-
-  updateTruck(): void {
-    if (this.editForm.valid) {
-      this.truckService.updateTruck(this.truck._id, this.editForm.value).subscribe({
-        next: () => {
-          this.showEditForm = false;
-          this.loadTruckDetails(this.truck._id);
-        },
-        error: (error) => {
-          console.error('Error updating truck:', error);
-        }
-      });
-    }
-  }
-
 
   unloadTruck(truckId: string): void {
     // Show a confirmation dialog before unloading
@@ -103,7 +56,7 @@ export class TruckDetailComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.loading = true;
-  
+
         // Make the HTTP request to unload the truck
         this.truckService.unloadTruck(truckId).subscribe({
           next: () => {
@@ -113,52 +66,29 @@ export class TruckDetailComponent implements OnInit {
               title: 'Truck Unloaded!',
               text: 'The truck has been unloaded successfully.',
             });
-  
-            // Optionally, refresh the truck list or navigate to another page
-            this.loading = false;
-            this.router.navigate(['/main/transport/trucks']); // Example navigation
+
+            // Optionally, refresh the truck details or navigate to another page
+            this.loadTruckDetails(truckId); // Refresh the details
           },
-          error: (error:any) => {
+          error: (error) => {
             // Error handling
             this.loading = false;
-  
+
             // Extract the error message dynamically
             const errorMessage = error.error?.message || 'An unexpected error occurred while unloading the truck.';
-  
+
             // Display the error message in SweetAlert
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
               text: errorMessage,
             });
-  
+
             console.error('Error unloading truck:', error);
           }
         });
       }
     });
-  }
-
-  goBack(){
-    this.router.navigate(['/main/transport/trucks/'])
-  }
-
-  // loadTruck(): void {
-  //   if (this.loadForm.valid) {
-  //     this.truckService.loadTruck(this.loadForm.value).subscribe({
-  //       next: () => {
-  //         this.showLoadForm = false;
-  //         this.loadTruckDetails(this.truck._id);
-  //       },
-  //       error: (error) => {
-  //         console.error('Error loading truck:', error);
-  //       }
-  //     });
-  //   }
-  // }
-
-  loadTruck(): void {
-    this.router.navigate(['main/transport/trucks/load']);
   }
 
   getStatusClass(status: 'active' | 'inactive' | 'maintenance'): string {
