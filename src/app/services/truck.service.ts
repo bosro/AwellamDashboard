@@ -9,6 +9,7 @@ import { environment } from '../environments/environment';
 })
 export class TruckService {
   private apiUrl = `${environment.apiUrl}/trucks`;
+  private apiUrll = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
@@ -30,6 +31,14 @@ export class TruckService {
 
   loadTruck(data: TruckLoad): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.apiUrl}/load`, data);
+  }
+
+  getInactiveTrucks(): Observable<{ trucks: Truck[] }> {
+    return this.http.get<{ trucks: Truck[] }>(`${this.apiUrl}/get`);
+  }
+
+  assignSocToTruck(truckId: string, socId: string): Observable<any> {
+    return this.http.post(`${this.apiUrll}/soc/trucks/${truckId}/assign-soc/${socId}`, {});
   }
 
   unloadTruck(id: string): Observable<Truck> {
