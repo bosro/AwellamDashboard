@@ -22,7 +22,7 @@ import { UserFormData } from '../../main/user-management/user-edit-modal/user-ed
 export interface User {
   total: number;
   data: User[];
-  _id: string;
+  id: string;
   fullName: string;
   email: string;
   password: string;
@@ -110,12 +110,19 @@ export class AuthService {
         const { tokens: { accessToken, refreshToken }, admin } = response;
         localStorage.setItem(this.TOKEN_KEY, accessToken);
         localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+        localStorage.setItem('admin', JSON.stringify(admin));
+        localStorage.setItem('userRole', admin.role); // Store user role in local storage
         this.currentUserSubject.next(admin);
         this.isAuthenticatedSubject.next(true); // Update authentication status
         console.log('Access Token:', accessToken);
         console.log('Refresh Token:', refreshToken);
       })
     );
+  }
+
+
+  getUserRole(): string | null {
+    return localStorage.getItem('userRole');
   }
 
   public getUser(): Observable<User> {
@@ -204,7 +211,7 @@ export class AuthService {
   }
 
   updateAdmin(id: string, userData: UserFormData): Observable<any> {
-    return this.http.put(`${environment.apiUrl}/update/id`, userData);
+    return this.http.put(`${environment.apiUrl}/admin/edit/${id}`, userData);
   }
 
   // Admin(data: any): Observable<any> {

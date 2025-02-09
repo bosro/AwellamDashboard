@@ -4,12 +4,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Driver, DriverResponse, CreateDriverDto, UpdateDriverDto } from '../shared/types/driver-types';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DriverService {
-  private apiUrl = 'http://localhost:3000/api/driver';
+ private apiUrl = `${environment.apiUrl}/driver`;;
 
   constructor(private http: HttpClient) {}
 
@@ -28,4 +29,8 @@ export class DriverService {
   updateDriver(id: string, driverData: UpdateDriverDto): Observable<{message: string, driver: Driver}> {
     return this.http.put<{message: string, driver: Driver}>(`${this.apiUrl}/edit/${id}`, driverData);
   }
+
+   deleteDriver(id: string): Observable<Driver> {
+        return this.http.delete<Driver>(`${this.apiUrl}/delete/${id}`);
+      }
 }

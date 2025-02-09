@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CustomersService } from '../../../services/customer.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-customer-form',
@@ -19,7 +20,8 @@ export class CustomerFormComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private customerService: CustomersService
+    private customerService: CustomersService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -32,9 +34,18 @@ export class CustomerFormComponent implements OnInit {
       personalInfo: this.fb.group({
         fullName: ['', Validators.required],
         address: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
+        email: ['', ],
         phoneNumber: ['', Validators.required]
       })
+    });
+  }
+
+  showSnackBar(message: string, isError = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: isError ? ['error-snackbar'] : ['success-snackbar'],
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
     });
   }
 
@@ -77,12 +88,16 @@ export class CustomerFormComponent implements OnInit {
       try {
         if (this.isEditMode) {
           await this.customerService.updateCustomer(this.currentCustomer._id, formData).toPromise();
+          this.showSnackBar('Customer added successfully');
         } else {
           await this.customerService.createCustomer(formData).toPromise();
+          this.showSnackBar('Customer updated successfully');
         }
         this.router.navigate(['/main/customers/list']);
-      } catch (error) {
+        this.showSnackBar('Customer added successfully');
+      } catch (error:any) {
         console.error('Error saving customer:', error);
+        this.showSnackBar(error, true);
       } finally {
         this.saving = false;
       }
@@ -103,7 +118,7 @@ export class CustomerFormComponent implements OnInit {
     const control = this.customerForm.get(path);
     if (control?.errors && control.touched) {
       if (control.errors['required']) return 'This field is required';
-      if (control.errors['email']) return 'Please enter a valid email address';
+      // if (control.errors['email']) return 'Please enter a valid email address';
     }
     return '';
   }

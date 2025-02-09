@@ -13,7 +13,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   declarations: [
     DashboardComponent,
     MetricsCardComponent,
-    RevenueChartComponent
+    RevenueChartComponent,
+    
   ],
   imports: [
     CommonModule,

@@ -33,6 +33,14 @@
           class="mt-1 block w-full px-3 py-2 border rounded-md"
           [class.border-red-500]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
       </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+        <input 
+          type="number"
+          formControlName="phoneNumber"
+          class="mt-1 block w-full px-3 py-2 border rounded-md"
+          [class.border-red-500]="userForm.get('email')?.invalid && userForm.get('phoneNumber')?.touched">
+      </div>
 
       <div *ngIf="!user">
         <label class="block text-sm font-medium text-gray-700">Password</label>

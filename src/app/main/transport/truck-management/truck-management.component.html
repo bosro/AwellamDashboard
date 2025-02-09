@@ -1,19 +1,36 @@
 <div class="p-6">
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex justify-between items-center mb-6 max-[430px]:flex-col justify-center  max-[430px]:flex">
     <div>
       <h1 class="text-2xl font-semibold text-gray-900">Truck Management</h1>
     </div>
-    <div class="flex space-x-3">
+    <div class="flex space-x-3 max-[430px]:flex-col">
+      <button
+          (click)="goBack()"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors mt-2"
+        >
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
       <button 
-        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
+      (click)='loadTruck()'>
+      <i class="ri-add-line mr-2"></i>
+       Outside Load Invoices
+    </button>
+      <!-- <button 
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
+        (click)='loadTruck()'>
+        <i class="ri-add-line mr-2"></i>
+        Load Awellam Load Invoices
+      </button> -->
+      <button 
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
         (click)="addTruck()">
         <i class="ri-add-line mr-2"></i>
         Add New Truck
       </button>
     </div>
   </div>
-
-  
 
   <!-- Fleet Overview -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -87,23 +104,23 @@
         <tr>
           <th scope="col" class="py-3 px-6">Truck Number</th>
           <th scope="col" class="py-3 px-6">Status</th>
-          <th scope="col" class="py-3 px-6">Capacity</th>
+          <th scope="col" class="py-3 px-6">Bags</th>
           <th scope="col" class="py-3 px-6">Driver</th>
           <th scope="col" class="py-3 px-6">Expenses</th>
           <th scope="col" class="py-3 px-6">Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let truck of trucks" class="bg-white border-b hover:bg-gray-50">
+        <tr *ngFor="let truck of filteredTrucks" class="bg-white border-b hover:bg-gray-50">
           <td class="py-4 px-6 font-medium text-gray-900">{{truck.truckNumber}}</td>
           <td class="py-4 px-6">
             <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(truck.status)">
               {{truck.status}}
             </span>
           </td>
-          <td class="py-4 px-6">{{truck.capacity}} tons</td>
+          <td class="py-4 px-6">{{truck.capacity}} Products</td>
           <td class="py-4 px-6">{{truck.driver?.name || 'No driver assigned'}}</td>
-          <td class="py-4 px-6">${{truck.expenses}}</td>
+          <td class="py-4 px-6">GHC {{truck.expenses}}</td>
           <td class="py-4 px-6">
             <div class="flex items-center space-x-3">
               <button 
@@ -112,24 +129,51 @@
                 <i class="ri-eye-line text-lg"></i>
               </button>
               <button 
-                [matMenuTriggerFor]="menu"
-                class="text-gray-600 hover:text-gray-900">
-                <i class="ri-more-2-fill text-lg"></i>
+                (click)="deleteTruck(truck._id)"
+                class="text-red-600 hover:text-red-900">
+                <i class="ri-delete-bin-line"></i>
               </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="updateTruckStatus(truck._id, 'active')"
-                        *ngIf="truck.status !== 'active'">
-                  Activate
-                </button>
-                <button mat-menu-item (click)="updateTruckStatus(truck._id, 'maintenance')"
-                        *ngIf="truck.status !== 'maintenance'">
-                  Send to Maintenance
-                </button>
-              </mat-menu>
+            </div>
+          </td>
+        </tr>
+
+        <!-- No Results -->
+        <tr *ngIf="filteredTrucks.length === 0 && !loading">
+          <td colspan="6" class="py-4 text-center text-gray-500">
+            No trucks found matching your criteria
+          </td>
+        </tr>
+
+        <!-- Loading State -->
+        <tr *ngIf="loading">
+          <td colspan="6" class="py-4">
+            <div class="flex justify-center items-center">
+              <i class="ri-loader-4-line text-2xl animate-spin text-blue-600"></i>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex items-center justify-between mt-4">
+    <div class="text-sm text-gray-700">
+      Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
+    </div>
+    <div class="flex items-center space-x-2">
+      <button 
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+        class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      <button 
+        [disabled]="currentPage * pageSize >= total"
+        (click)="onPageChange(currentPage + 1)"
+        class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+    </div>
   </div>
 </div>

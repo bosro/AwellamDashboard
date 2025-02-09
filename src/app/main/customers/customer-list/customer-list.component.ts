@@ -9,74 +9,52 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './customer-list.component.html'
 })
 export class CustomerListComponent implements OnInit {
-  customers: Customer[] = [];
+  customers: Customer[] = []; // Full list of customers
+  filteredCustomers: Customer[] = []; // Customers to display after filtering
   loading = false;
   total = 0;
   pageSize = 10;
   currentPage = 1;
   selectedCustomers = new Set<string>();
-  filterForm: FormGroup;
-  segments: any[] = [];
-  showStatusDropdown = false;
-  showSegmentDropdown = false;
-  showExportDropdown = false;
-
+  filterForm!: FormGroup;
+  Math = Math;
 
   constructor(
     private customersService: CustomersService,
     private fb: FormBuilder
-  ) {
-    this.filterForm = this.fb.group({
-      search: [''],
-      status: [''],
-      dateRange: this.fb.group({
-        start: [''],
-        end: ['']
-      })
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
+    this.createFilterForm();
     this.setupFilters();
     this.loadCustomers();
   }
 
-
-
-  getMinValue(): number {
-    return (this.currentPage - 1) * this.pageSize + 1;
+  private createFilterForm(): void {
+    this.filterForm = this.fb.group({
+      search: [''] // Search input control
+    });
   }
-
-  getMaxValue(): number {
-    return Math.min(this.currentPage * this.pageSize, this.total);
-  }
-
-
 
   private setupFilters(): void {
     this.filterForm.valueChanges
       .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
+        debounceTime(300), // Wait 300ms after user stops typing
+        distinctUntilChanged() // Only trigger if the search term changes
       )
       .subscribe(() => {
-        this.currentPage = 1;
-        this.loadCustomers();
+        this.currentPage = 1; // Reset to first page when searching
+        this.applyFilters();
       });
   }
 
   loadCustomers(): void {
     this.loading = true;
-    const params = {
-      ...this.filterForm.value,
-      page: this.currentPage,
-      pageSize: this.pageSize
-    };
-
-    this.customersService.getCustomers(params).subscribe({
+    this.customersService.getCustomers().subscribe({
       next: (response) => {
-        this.customers = response.customers;
-        this.total = response.total;
+        this.customers = response.customers || [];
+        this.total = response.total || this.customers.length; // Ensure total is set properly
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -86,9 +64,24 @@ export class CustomerListComponent implements OnInit {
     });
   }
 
+  applyFilters(): void {
+    const { search } = this.filterForm.value;
+    this.filteredCustomers = this.customers.filter(customer =>
+      !search || customer.fullName.toLowerCase().includes(search.toLowerCase())
+    );
+    this.total = this.filteredCustomers.length;
+    this.paginateCustomers();
+  }
+
+  paginateCustomers(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredCustomers = this.filteredCustomers.slice(startIndex, endIndex);
+  }
+
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.loadCustomers();
+    this.paginateCustomers();
   }
 
   toggleSelection(customerId: string): void {
@@ -100,16 +93,31 @@ export class CustomerListComponent implements OnInit {
   }
 
   toggleAllSelection(): void {
-    if (this.selectedCustomers.size === this.customers.length) {
+    if (this.selectedCustomers.size === this.filteredCustomers.length) {
       this.selectedCustomers.clear();
     } else {
-      this.customers.forEach(customer => {
-        this.selectedCustomers.add(customer._id);
-      });
+      this.filteredCustomers.forEach(customer => this.selectedCustomers.add(customer._id));
     }
   }
 
   getFullName(customer: Customer): string {
     return customer.fullName;
+  }
+
+  getMinValue(): number {
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  getMaxValue(): number {
+    return Math.min(this.currentPage * this.pageSize, this.total);
+  }
+
+  deleteCustomer(id: string): void {
+    if (confirm('Are you sure you want to delete this customer?')) {
+      this.customersService.deleteCustomer(id).subscribe({
+        next: () => this.loadCustomers(),
+        error: (error) => console.error('Error deleting customer:', error)
+      });
+    }
   }
 }

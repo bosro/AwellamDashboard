@@ -1,16 +1,16 @@
-// user-management.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface User {
-  id: number;
+  _id: string;
   fullName: string;
   email: string;
   role: string;
   status: 'active' | 'inactive';
   lastLogin?: string;
+  phoneNumber?: string;
 }
 
 interface UserMetrics {
@@ -38,23 +38,27 @@ interface UserFilters {
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
-  selectedUsers: Set<number> = new Set();
+  selectedUsers: Set<string> = new Set();
   loading = false;
   metrics!: UserMetrics;
   filterForm!: FormGroup;
-  showUserModal = false;
+  // showUserModal = false;
   editingUser: User | null = null;
   currentPage = 1;
   pageSize = 10;
   total = 0;
+  error: string | null = null;
+  showUserModal: boolean = false;
+
+  // @Input() user: any;
   
-  roles = ['transport', 'super_admin', 'customer', 'finance'];
+  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support'];
 
   roleClasses: Record<string, string> = {
-    transport: 'bg-purple-100 text-purple-800',
+    Loading_officer: 'bg-purple-100 text-purple-800',
     super_admin: 'bg-blue-100 text-blue-800', 
-    customer: 'bg-yellow-100 text-yellow-800',
-    finance: 'bg-green-100 text-green-800'
+    Stocks_Manager: 'bg-yellow-100 text-yellow-800',
+    Admin_Support: 'bg-green-100 text-green-800'
   };
 
   constructor(
@@ -93,6 +97,8 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
+    this.error = null;
+    
     const filters: UserFilters = {
       ...this.filterForm.value,
       page: this.currentPage,
@@ -100,17 +106,39 @@ export class UserManagementComponent implements OnInit {
     };
 
     this.authService.getAdmins(filters).subscribe({
-      next: (response) => {
-        this.users = response.admins;
-        // this.total = response.total || 0;
+      next: (response: any) => {
+        this.users = response.admins.map((user: any) => ({
+          _id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+          status: user.status || 'inactive',
+          lastLogin: user.lastLogin || 'Not logged in',
+          phoneNumber: user.phoneNumber
+        }));
+        this.total = response.total || this.users.length;
         this.calculateMetrics();
         this.loading = false;
       },
       error: (error) => {
         console.error('Error loading users:', error);
+        this.error = 'Failed to load users. Please try again.';
         this.loading = false;
       }
     });
+  }
+
+
+  // openUserForm(user: any): void {
+
+  //   this.editingUser = user;
+
+  //   this.showUserModal = true;
+  // }
+
+  openUserForm(user?: User): void {
+    this.editingUser = user || null;
+    this.showUserModal = true;
   }
 
   private calculateMetrics(): void {
@@ -132,7 +160,7 @@ export class UserManagementComponent implements OnInit {
     };
   }
 
-  toggleSelection(userId: number): void {
+  toggleSelection(userId: string): void {
     if (this.selectedUsers.has(userId)) {
       this.selectedUsers.delete(userId);
     } else {
@@ -144,56 +172,71 @@ export class UserManagementComponent implements OnInit {
     if (this.selectedUsers.size === this.users.length) {
       this.selectedUsers.clear();
     } else {
-      this.users.forEach(user => this.selectedUsers.add(user.id));
+      this.users.forEach(user => this.selectedUsers.add(user._id));
     }
   }
 
-  updateUserStatus(userId: number, status: 'active' | 'inactive'): void {
-    this.authService.updateUserStatus(userId, status).subscribe({
-      next: () => this.loadUsers(),
-      error: (error) => console.error('Error updating user status:', error)
-    });
-  }
+  // updateUserStatus(userId: string, status: 'active' | 'inactive'): void {
+  //   this.authService.updateUserStatus(userId, status).subscribe({
+  //     next: () => {
+  //       this.loadUsers();
+  //       this.selectedUsers.clear();
+  //     },
+  //     error: (error) => {
+  //       console.error('Error updating user status:', error);
+  //       this.error = 'Failed to update user status.';
+  //     }
+  //   });
+  // }
 
-  bulkUpdateStatus(status: 'active' | 'inactive'): void {
-    const updates = Array.from(this.selectedUsers).map(userId =>
-      this.authService.updateUserStatus(userId, status)
-    );
+  // bulkUpdateStatus(status: 'active' | 'inactive'): void {
+  //   if (this.selectedUsers.size === 0) return;
 
-    Promise.all(updates)
-      .then(() => {
-        this.selectedUsers.clear();
-        this.loadUsers();
-      })
-      .catch(error => console.error('Error in bulk status update:', error));
-  }
+  //   const updates = Array.from(this.selectedUsers).map(userId =>
+  //     this.authService.updateUserStatus(userId, status)
+  //   );
 
-  openUserForm(user?: User): void {
-    this.editingUser = user || null;
-    this.showUserModal = true;
-  }
+  //   Promise.all(updates)
+  //     .then(() => {
+  //       this.selectedUsers.clear();
+  //       this.loadUsers();
+  //     })
+  //     .catch(error => {
+  //       console.error('Error in bulk status update:', error);
+  //       this.error = 'Failed to update users status.';
+  //     });
+  // }
 
-  onAdminSaved(): void {
-    this.showUserModal = false;
-    this.loadUsers();
-  }
-
-  deleteUser(userId: number): void {
-    if (confirm('Are you sure you want to delete this user?')) {
-      this.authService.deleteUser(userId).subscribe({
-        next: () => this.loadUsers(),
-        error: (error) => console.error('Error deleting user:', error)
-      });
-    }
-  }
+  // openUserForm(user?: User): void {
+  //   this.editingUser = user || null;
+  //   this.showUserModal = true;
+  // }
 
   onUserSaved(): void {
     this.loadUsers();
     this.showUserModal = false;
+    this.editingUser = null;
+  }
+
+  closeUserModal(): void {
+    this.showUserModal = false;
+    this.editingUser = null;
   }
 
   clearFilters(): void {
     this.filterForm.reset();
+    this.currentPage = 1;
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadUsers();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.loadUsers();
   }
 
   getRoleClass(role: string): string {
@@ -202,5 +245,13 @@ export class UserManagementComponent implements OnInit {
 
   getStatusClass(status: string): string {
     return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  }
+
+  hasSelectedUsers(): boolean {
+    return this.selectedUsers.size > 0;
+  }
+
+  getSelectedCount(): number {
+    return this.selectedUsers.size;
   }
 }

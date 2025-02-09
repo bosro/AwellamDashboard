@@ -7,23 +7,25 @@ import { User } from './mock.interface';
   providedIn: 'root'
 })
 export class AuthService {
-  mockUser: User = {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    profileImage: 'assets/images/logo.jpeg'
-  };
+  private currentUserSubject: BehaviorSubject<User | null>;
+  currentUser: Observable<User | null>;
 
-  private currentUserSubject = new BehaviorSubject<User | null>(this.mockUser);
-  currentUser = this.currentUserSubject.asObservable();
+  constructor() {
+    const admin = localStorage.getItem('admin');
+    const initialUser = admin ? JSON.parse(admin) : null;
+    this.currentUserSubject = new BehaviorSubject<User | null>(initialUser);
+    this.currentUser = this.currentUserSubject.asObservable();
+  }
 
   getUser(): Observable<User> {
-    return of(this.mockUser).pipe(delay(500)); // Simulate API delay
+    const admin = localStorage.getItem('admin');
+    const user = admin ? JSON.parse(admin) : null;
+    return of(user).pipe(delay(500)); // Simulate API delay
   }
 
   logout(): Observable<void> {
     this.currentUserSubject.next(null);
+    localStorage.removeItem('admin');
     return of(void 0).pipe(delay(500)); // Simulate API delay
   }
 }

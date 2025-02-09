@@ -3,15 +3,23 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TruckService } from '../../../services/truck.service';
 import { Truck } from '../../../shared/types/truck-operation.types';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+
 @Component({
   selector: 'app-truck-management',
   templateUrl: './truck-management.component.html'
 })
 export class TruckManagementComponent implements OnInit {
   trucks: Truck[] = [];
+  filteredTrucks: Truck[] = [];
   selectedTrucks: Set<string> = new Set();
   loading = false;
+  total = 0;
+  currentPage = 1;
+  pageSize = 10;
   filterForm!: FormGroup;
+
+  Math= Math
 
   constructor(
     private fb: FormBuilder,
@@ -22,9 +30,7 @@ export class TruckManagementComponent implements OnInit {
   ngOnInit(): void {
     this.createFilterForm();
     this.loadTrucks();
-    this.filterForm.valueChanges.subscribe(() => {
-      this.loadTrucks();
-    });
+    this.setupFilterSubscription();
   }
 
   createFilterForm(): void {
@@ -34,12 +40,25 @@ export class TruckManagementComponent implements OnInit {
     });
   }
 
+  private setupFilterSubscription(): void {
+    this.filterForm.valueChanges
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged()
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.applyFilters();
+      });
+  }
+
   loadTrucks(): void {
     this.loading = true;
-    const params = this.filterForm.value;
-    this.truckService.getTrucks(params).subscribe({
+    this.truckService.getTrucks().subscribe({
       next: (response) => {
         this.trucks = response.trucks;
+        this.total = this.trucks.length;
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -47,6 +66,25 @@ export class TruckManagementComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  applyFilters(): void {
+    const { searchTerm, status } = this.filterForm.value;
+
+    this.filteredTrucks = this.trucks.filter(truck => {
+      const matchesSearch = !searchTerm || truck.truckNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = !status || truck.status === status;
+
+      return matchesSearch && matchesStatus;
+    });
+
+    this.total = this.filteredTrucks.length;
+    this.filteredTrucks = this.filteredTrucks.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.applyFilters();
   }
 
   updateTruckStatus(truckId: string, status: Truck['status']): void {
@@ -73,6 +111,10 @@ export class TruckManagementComponent implements OnInit {
     return classes[status] || '';
   }
 
+  goBack(){
+    this.router.navigate(['/main/transport/trucks/'])
+  }
+
   viewTruckDetails(id: string): void {
     this.router.navigate(['main/transport/trucks/details/', id]);
   }
@@ -81,5 +123,16 @@ export class TruckManagementComponent implements OnInit {
     this.router.navigate(['main/transport/trucks/new/']);
   }
 
-  
+  loadTruck(): void {
+    this.router.navigate(['main/transport/trucks/load']);
+  }
+
+  deleteTruck(id: string): void {
+    if (confirm('Are you sure you want to delete this truck?')) {
+      this.truckService.deleteTruck(id).subscribe({
+        next: () => this.loadTrucks(),
+        error: (error) => console.error('Error deleting truck:', error)
+      });
+    }
+  }
 }

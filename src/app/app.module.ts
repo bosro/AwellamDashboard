@@ -7,13 +7,10 @@ import { AppComponent } from './app.component';
 import { RouterModule } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MainModule } from './main/main.module';
-import {  provideHttpClient } from '@angular/common/http';
-import { MainLayoutComponent } from './main/main-layout.component';
-// import { InjectionService } from '';
-import { HeaderComponent } from './layout/header/header.component';
-import { FooterComponent } from './layout/footer/footer.component';
-import { SidebarComponent } from './layout/sidebar/sidebar.component';
+import {  HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SecureHttpInterceptor } from './core/interceptors/auth';
+
 
 @NgModule({
   declarations: [
@@ -34,6 +31,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   providers: [
     provideAnimationsAsync(),
     provideHttpClient(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: SecureHttpInterceptor,
+      multi: true
+    }
     // InjectionService,
   ],
   bootstrap: [AppComponent]

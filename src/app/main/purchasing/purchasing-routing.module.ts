@@ -14,6 +14,7 @@ const routes: Routes = [
       { path: 'new', component: PurchaseFormComponent },
       { path: 'edit/:id', component: PurchaseFormComponent },
       { path: 'details/:id', component: PurchaseDetailComponent },
+      // {path: ''}
     ]
   }
 ];

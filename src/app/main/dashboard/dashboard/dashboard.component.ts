@@ -1,26 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DashboardService } from '../../../mock/mock-dashboard.service';
-import { DashboardMetrics } from '../../../mock/mock-dashboard.interface';
+import { DashboardService } from '../../../services/dashboard.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  metrics!: DashboardMetrics;
-  activityLog:any[] = [];
-  alerts:any[] = [];
+  metrics: any = {};
   loading = true;
   private destroy$ = new Subject<void>();
 
   // Chart Data
-  revenueData:any[] = [];
-  deliveryPerformance:any[] = [];
-  inventoryStatus:any[] = [];
-  vehicleUtilization:any[] = [];
-  fuelConsumption:any[] = [];
+  revenueData: any[] = [];
 
   // Date Ranges
   dateRanges = [
@@ -31,7 +24,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ];
   selectedRange = 'week';
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private dashboardService: DashboardService , private router: Router) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -43,11 +36,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  DriverList(){
+    this.router.navigate(['main/transport/drivers'])
+  }
+
+  OrderList(){
+    this.router.navigate(['main/orders/list'])
+  }
   private loadDashboardData(): void {
     this.loading = true;
 
-    // Load main metrics
-    this.dashboardService.getMetrics()
+    this.dashboardService.getDashboardData()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -55,20 +54,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: (error) => {
-          console.error('Error loading metrics:', error);
+          console.error('Error loading dashboard data:', error);
           this.loading = false;
         }
       });
-
-    // Load activity logs
-    this.dashboardService.getActivityLogs()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(logs => this.activityLog = logs);
-
-    // Load alerts
-    this.dashboardService.getAlerts()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(alerts => this.alerts = alerts);
 
     this.loadChartData();
   }
@@ -77,22 +66,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.dashboardService.getRevenueChart(this.selectedRange)
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => this.revenueData = data);
-
-    this.dashboardService.getDeliveryPerformance()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => this.deliveryPerformance = data);
-
-    this.dashboardService.getInventoryStatus()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => this.inventoryStatus = data);
-
-    this.dashboardService.getVehicleUtilization()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => this.vehicleUtilization = data);
-
-    this.dashboardService.getFuelConsumption()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(data => this.fuelConsumption = data);
   }
 
   private setupAutoRefresh(): void {
@@ -109,6 +82,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadChartData();
   }
 
+
   exportDashboard(format: 'excel' | 'pdf'): void {
     this.dashboardService.exportDashboardReport(format).subscribe({
       next: (blob) => {
@@ -120,17 +94,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
         window.URL.revokeObjectURL(url);
       }
     });
-  }
-
-  getPerformanceStatus(value: number, threshold: number = 80): string {
-    if (value >= threshold) return 'success';
-    if (value >= threshold - 20) return 'warning';
-    return 'danger';
-  }
-
-  getTrendIcon(current: number, previous: number): string {
-    if (current > previous) return 'ri-arrow-up-line text-green-500';
-    if (current < previous) return 'ri-arrow-down-line text-red-500';
-    return 'ri-more-line text-gray-500';
   }
 }

@@ -8,15 +8,25 @@ import { DriverListComponent } from './driverlist/driverlist.component';
 import { DriverDetailsComponent } from './driverlist/driver-details/driver-details.component';
 import { TruckManagementComponent } from './truck-management/truck-management.component';
 // import { TruckDetailsComponent } from './truck-details/truck-details.component';
-import { TruckDetailsComponent } from './truck-management/truck-details.component';
+import { TruckDetailComponent } from './truck-management/truck-details.component';
 // import { MaintenanceHistoryComponent } from './maintenance-history/maintenance-history.component';
 // import { MaintenanceDetailsModalComponent } from './maintenance-details-modal/maintenance-details-modal.component';
 // import { FuelAnalyticsComponent } from './fuel-analytics/fuel-analytics.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { FormGroup } from '@angular/forms';
 import { TruckFormComponent } from './truck-management/truck-form.component';
+import { LoadTruckComponent } from './truck-management/load-truck.component';
+import { InventoryListComponent } from './inventory-list/inventory-list.component';
+import { InventoryFormComponent } from './inventory-form/inventory-form.component';
+import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
+import { DisbursementModalComponent } from './driverlist/driver-details/disbursement-modal/disbursement-modal.component';
+import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
+import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
+import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
+
+// import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
 
 @NgModule({
@@ -26,8 +36,23 @@ import { TruckFormComponent } from './truck-management/truck-form.component';
     DriverFormComponent,
     DriverDetailsComponent,
     TruckManagementComponent,
-    TruckDetailsComponent,
-    TruckFormComponent
+    TruckDetailComponent,
+    TruckFormComponent,
+    LoadTruckComponent,
+    InventoryListComponent,
+    InventoryFormComponent,
+    StockDisbursementComponent,
+    PaymentDetailComponent,
+    PaymentListComponent,
+    // PaymentListComponent,
+    // InventoryListComponent,
+    // InventoryFormComponent,
+    InventoryDetailsComponent,
+    // StockDisbursementComponent,
+    DisbursementModalComponent,
+// PaymentRefListComponent,
+// PaymentRefDetailComponent
+    // MetricsCardComponent 
     // MaintenanceHistoryComponent,
     // MaintenanceDetailsModalComponent,
     // MaintenanceFormModalComponent,
@@ -41,6 +66,7 @@ import { TruckFormComponent } from './truck-management/truck-form.component';
     MatMenuModule,
     NgxChartsModule,
     ReactiveFormsModule,
+    FormsModule,
     ReactiveFormsModule,
 
   ]

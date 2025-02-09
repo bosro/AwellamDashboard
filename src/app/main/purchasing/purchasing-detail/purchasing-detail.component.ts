@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PurchasingService, Purchase } from '../../../services/purchasing.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-purchase-list',
+  selector: 'app-purchase-detail',
   templateUrl: './purchasing-detail.component.html'
 })
-
 export class PurchaseDetailComponent implements OnInit {
   purchases: Purchase[] = [];
-  selectedPurchases: Set<number> = new Set();
+  filteredPurchases: Purchase[] = [];
+  selectedPurchases: Set<string> = new Set();
   loading = false;
   total = 0;
   currentPage = 1;
@@ -36,8 +36,7 @@ export class PurchaseDetailComponent implements OnInit {
     this.setupFilterSubscription();
   }
 
-
-   private createFilterForm(): void {
+  private createFilterForm(): void {
     this.filterForm = this.fb.group({
       searchTerm: [''],
       dateRange: this.fb.group({
@@ -58,32 +57,51 @@ export class PurchaseDetailComponent implements OnInit {
       )
       .subscribe(() => {
         this.currentPage = 1;
-        this.loadPurchases();
+        this.applyFilters();
       });
   }
 
   loadPurchases(): void {
     this.loading = true;
-    const params = {
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      ...this.filterForm.value
-    };
-
-    this.purchasingService.getPurchases(params).subscribe({
-      next: (response) => {
-        this.purchases = response.data;
-        this.total = response.total;
-        this.loading = false;
-      },
-      error: (error: Error) => {
-        console.error('Error loading purchases:', error);
-        this.loading = false;
-      }
-    });
+    this.purchasingService.getPurchases({})
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.purchases = response.purchases;
+          this.total = this.purchases.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading purchases:', error);
+          this.loading = false;
+        }
+      });
   }
 
-  toggleSelection(purchaseId: number): void {
+  applyFilters(): void {
+    const { searchTerm, dateRange, status, productType, location } = this.filterForm.value;
+
+    this.filteredPurchases = this.purchases.filter(purchase => {
+      const matchesSearch = !searchTerm || purchase.paymentReference.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDateRange = (!dateRange.start || new Date(purchase.dateOfPurchase) >= new Date(dateRange.start)) &&
+                               (!dateRange.end || new Date(purchase.dateOfPurchase) <= new Date(dateRange.end));
+      // const matchesStatus = !status || purchase.status === status;
+      // const matchesProductType = !productType || purchase.productType === productType;
+      // const matchesLocation = !location || purchase.location === location;
+
+      return matchesSearch && matchesDateRange ;
+    });
+
+    this.total = this.filteredPurchases.length;
+    this.filteredPurchases = this.filteredPurchases.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
+  toggleSelection(purchaseId: string): void {
     if (this.selectedPurchases.has(purchaseId)) {
       this.selectedPurchases.delete(purchaseId);
     } else {
@@ -96,8 +114,8 @@ export class PurchaseDetailComponent implements OnInit {
       this.selectedPurchases.clear();
     } else {
       this.purchases.forEach(purchase => {
-        if (purchase.id !== undefined) {
-          this.selectedPurchases.add(purchase.id);
+        if (purchase._id !== undefined) {
+          this.selectedPurchases.add(purchase._id);
         }
       });
     }
@@ -125,7 +143,6 @@ export class PurchaseDetailComponent implements OnInit {
       });
   }
 
-
   bulkUpdateStatus(status: string): void {
     if (this.selectedPurchases.size === 0) return;
 
@@ -138,7 +155,7 @@ export class PurchaseDetailComponent implements OnInit {
       });
   }
 
-  deletePurchase(id: number): void {
+  deletePurchase(id: string): void {
     if (confirm('Are you sure you want to delete this purchase?')) {
       this.purchasingService.deletePurchase(id).subscribe({
         next: () => {
@@ -150,12 +167,6 @@ export class PurchaseDetailComponent implements OnInit {
         }
       });
     }
-  }
-
-
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.loadPurchases();
   }
 
   getStatusClass(status: string): string {

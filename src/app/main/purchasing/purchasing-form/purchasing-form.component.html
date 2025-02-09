@@ -1,157 +1,166 @@
 <div class="p-6 max-w-3xl mx-auto">
-    <div class="mb-6">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-gray-900">
-          {{ isEditMode ? 'Edit Purchase' : 'New Purchase' }}
-        </h1>
-        <button 
-          routerLink="/purchases"
-          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-          <i class="ri-arrow-left-line mr-2"></i>
-          Back to List
-        </button>
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold text-gray-900">
+        {{ isEditMode ? 'Edit Purchase' : 'New Purchase' }}
+      </h1>
+      <button 
+        routerLink="/purchases"
+        class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <i class="ri-arrow-left-line mr-2"></i>
+        Back to List
+      </button>
+    </div>
+  </div>
+
+  <form [formGroup]="purchaseForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Purchase Date -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Purchase Date
+      </label>
+      <input 
+        type="date"
+        formControlName="purchaseDate"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="purchaseForm.get('purchaseDate')!.touched && purchaseForm.get('purchaseDate')!.invalid"
+      >
+      <div *ngIf="purchaseForm.get('purchaseDate')?.touched && purchaseForm.get('purchaseDate')?.invalid"
+   class="mt-1 text-sm text-red-600">
+{{ getErrorMessage('purchaseDate') }}
+</div>
+    </div>
+
+    <!-- Payment Reference -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Payment Reference
+      </label>
+      <div class="relative">
+        <span class="absolute top-2 text-gray-500"></span>
+        <input 
+          type="text"
+          formControlName="paymentReference"
+          placeholder="PR20250893287"
+          class="w-full pl-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="purchaseForm.get('paymentReference')!.touched && purchaseForm.get('paymentReference')!.invalid"
+        >
+      </div>
+      <div *ngIf="purchaseForm.get('paymentReference')?.touched && purchaseForm.get('paymentReference')?.invalid"
+   class="mt-1 text-sm text-red-600">
+{{ getErrorMessage('paymentReference') }}
+</div>
+    </div>
+
+    <!-- Sales Order Number -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Purchase Order Number
+      </label>
+      <div class="relative">
+        <span class="absolute  top-2 text-gray-500"></span>
+        <input 
+          type="text"
+          formControlName="salesOrderNumber"
+          placeholder="PON 250076567"
+          class="w-full pl-12  py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          [class.border-red-500]="purchaseForm.get('salesOrderNumber')!.touched && purchaseForm.get('salesOrderNumber')!.invalid"
+        >
+      </div>
+      <div *ngIf="purchaseForm.get('salesOrderNumber')?.touched && purchaseForm.get('salesOrderNumber')?.invalid"
+   class="mt-1 text-sm text-red-600">
+{{ getErrorMessage('salesOrderNumber') }}
+</div>
+    </div>
+
+    <!-- Purchases -->
+    <div formArrayName="purchases">
+      <div *ngFor="let purchase of purchases.controls; let i = index" [formGroupName]="i" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-medium text-gray-900">Purchase {{ i + 1 }}</h2>
+          <button type="button" (click)="removePurchase(i)" class="text-red-600 hover:text-red-800">
+            <i class="ri-delete-bin-line"></i> Remove
+          </button>
+        </div>
+
+        <!-- Plant -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Plant
+          </label>
+          <select 
+            formControlName="plantId"
+            (change)="onPlantChange($event, i)" 
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select Plant</option>
+            <option *ngFor="let plant of plants" [value]="plant._id">
+              {{ plant.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Category
+          </label>
+          <select 
+            formControlName="categoryId"
+            (change)="onCategoryChange($event, i)" 
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select Category</option>
+            <option *ngFor="let category of categories[purchase.get('plantId')?.value]" [value]="category._id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Product -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Product
+          </label>
+          <select 
+            formControlName="productId"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select Product</option>
+            <option *ngFor="let product of products[purchase.get('categoryId')?.value]" [value]="product._id">
+              {{product.name}}
+            </option>
+          </select>
+        </div>
+
+        <!-- Quantity -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Quantity
+          </label>
+          <input 
+            type="number"
+            formControlName="quantity"
+            min="1"
+            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+        </div>
       </div>
     </div>
-  
-    <form [formGroup]="purchaseForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Purchase Date -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Purchase Date
-        </label>
-        <input 
-          type="date"
-          formControlName="purchaseDate"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [class.border-red-500]="purchaseForm.get('purchaseDate')!.touched && purchaseForm.get('purchaseDate')!.invalid"
-        >
-        <div *ngIf="purchaseForm.get('purchaseDate')?.touched && purchaseForm.get('purchaseDate')?.invalid"
-     class="mt-1 text-sm text-red-600">
-  {{ getErrorMessage('purchaseDate') }}
-</div>
-      </div>
-  
-      <!-- Payment Reference -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Payment Reference
-        </label>
-        <div class="relative">
-          <span class="absolute left-3 top-2 text-gray-500">PR</span>
-          <input 
-            type="text"
-            formControlName="paymentReference"
-            placeholder="20250893287"
-            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            [class.border-red-500]="purchaseForm.get('paymentReference')!.touched && purchaseForm.get('paymentReference')!.invalid"
-          >
+
+    <div class="flex justify-end space-x-4 pt-4">
+      <button type="button" (click)="addPurchase()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+        <i class="ri-add-line"></i> Add Purchase
+      </button>
+      <button 
+        type="submit"
+        [disabled]="purchaseForm.invalid || loading"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+        <div class="flex items-center">
+          <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
+          {{ isEditMode ? 'Update' : 'Create' }} Purchase
         </div>
-        <div *ngIf="purchaseForm.get('paymentReference')?.touched && purchaseForm.get('paymentReference')?.invalid"
-     class="mt-1 text-sm text-red-600">
-  {{ getErrorMessage('paymentReference') }}
+      </button>
+    </div>
+  </form>
 </div>
-      </div>
-  
-      <!-- Sales Order Number -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Sales Order Number
-        </label>
-        <div class="relative">
-          <span class="absolute left-3 top-2 text-gray-500">SOC</span>
-          <input 
-            type="text"
-            formControlName="salesOrderNumber"
-            placeholder="250076567"
-            class="w-full pl-12 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            [class.border-red-500]="purchaseForm.get('salesOrderNumber')!.touched && purchaseForm.get('salesOrderNumber')!.invalid"
-          >
-        </div>
-        <div *ngIf="purchaseForm.get('salesOrderNumber')?.touched && purchaseForm.get('salesOrderNumber')?.invalid"
-     class="mt-1 text-sm text-red-600">
-  {{ getErrorMessage('salesOrderNumber') }}
-</div>
-      </div>
-  
-      <!-- Product Type -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Product Type
-        </label>
-        <select 
-          formControlName="productType"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [class.border-red-500]="purchaseForm.get('productType')!.touched && purchaseForm.get('productType')!.invalid"
-        >
-          <option value="">Select Product Type</option>
-          <option *ngFor="let type of productTypes" [value]="type">
-            {{type}}
-          </option>
-        </select>
-        <div *ngIf="purchaseForm.get('productType')?.touched && purchaseForm.get('productType')?.invalid"
-        class="mt-1 text-sm text-red-600">
-     {{ getErrorMessage('productType') }}
-   </div>
-   
-      </div>
-  
-      <!-- Quantity -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Quantity
-        </label>
-        <input 
-          type="number"
-          formControlName="quantity"
-          min="0"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [class.border-red-500]="purchaseForm.get('quantity')!.touched && purchaseForm.get('quantity')!.invalid"
-        >
-        <div *ngIf="purchaseForm.get('quantity')?.touched && purchaseForm.get('quantity')?.invalid"
-        class="mt-1 text-sm text-red-600">
-     {{ getErrorMessage('quantity') }}
-   </div>
-   
-      </div>
-  
-      <!-- Location -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Location
-        </label>
-        <select 
-          formControlName="location"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [class.border-red-500]="purchaseForm.get('location')!.touched && purchaseForm.get('location')!.invalid"
-        >
-          <option value="">Select Location</option>
-          <option *ngFor="let loc of locations" [value]="loc">
-            {{loc}}
-          </option>
-        </select>
-        <div *ngIf="purchaseForm.get('location')?.touched && purchaseForm.get('location')?.invalid"
-     class="mt-1 text-sm text-red-600">
-  {{ getErrorMessage('location') }}
-</div>
-      </div>
-  
-      <!-- Form Actions -->
-      <div class="flex justify-end space-x-4 pt-4">
-        <button 
-          type="button"
-          routerLink="/purchases"
-          class="px-6 py-2 border rounded-lg hover:bg-gray-50 transition-colors">
-          Cancel
-        </button>
-        <button 
-          type="submit"
-          [disabled]="purchaseForm.invalid || loading"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
-          <div class="flex items-center">
-            <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
-            {{ isEditMode ? 'Update' : 'Create' }} Purchase
-          </div>
-        </button>
-      </div>
-    </form>
-  </div>

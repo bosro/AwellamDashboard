@@ -4,23 +4,45 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
-  _id?: string;
-  customerId: string;
+items: any;
+  _id: string;
+  customerId: {
+    _id: string;
+    fullName: string;
+    phoneNumber: number;
+  };
   orderItems: {
-    product: string;
+    product: {
+      _id: string;
+      name: string;
+    };
     quantity: number;
-    price: string;
+    price: number; // Changed to number
+    _id: string;
   }[];
+  categoryId:{
+    _id: string,
+    name:string,
+    plantId:{
+      _id:string,
+      name:string
+    }
+  };
+  socNumber:{
+    _id: string,
+    socNumber: string
+  };
   deliveryAddress: string;
-  totalAmount: string;
-  status?: string;
-  paymentStatus?: string;
-  deliveryStatus?: string;
-  orderNumber?: string;
-  date?: string;
+  totalAmount: number; // Changed to number
+  status: string;
+  paymentStatus: string;
+  deliveryStatus: string;
+  orderNumber: string;
+  date: string;
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface OrderResponse {
   message: string;
@@ -30,6 +52,7 @@ export interface OrderResponse {
 interface OrdersResponse {
   message: string;
   order: {
+    categoryId: { _id: string; name: string; plantId: { _id: string; name: string; }; };
     _id: string;
     status: string;
     customerId: {
@@ -62,6 +85,7 @@ interface OrdersResponse {
 })
 export class OrdersService {
   private readonly apiUrl = `${environment.apiUrl}/orders`;
+  private readonly apiUrll = `${environment.apiUrl}`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -82,10 +106,19 @@ export class OrdersService {
   }
 
   deleteOrder(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/orders/${id}`);
   }
 
   createOrder(orderData: any): Observable<Order> {
     return this.http.post<Order>(`${this.apiUrl}/create`, orderData);
+  }
+
+  getOrderAnalytics(filters: any): Observable<any> {
+    const params = {
+      startDate: filters.dateRange.start,
+      endDate: filters.dateRange.end,
+      groupBy: filters.groupBy
+    };
+    return this.http.get<any>(`${this.apiUrll}/dashboard/order-dashboard`, { params });
   }
 }

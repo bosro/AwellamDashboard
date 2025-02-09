@@ -1,11 +1,9 @@
-
-// user-edit-modal.component.ts
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService, } from '../../../core/services/auth.service';
-import { User } from '../user-management/user-management.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface UserFormData {
+  _id: string;
   fullName: string;
   email: string;
   password?: string;
@@ -14,19 +12,19 @@ export interface UserFormData {
 
 @Component({
   selector: 'app-user-edit-modal',
-  templateUrl: './user-edit-modal.component.html'
+  templateUrl: './user-edit-modal.component.html',
+  styleUrls: ['./user-edit-modal.component.scss']
 })
 export class UserEditModalComponent implements OnInit {
-  @Input() user: User | null = null;
   @Input() show = false;
+  @Input() user: any;
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
-
   userForm!: FormGroup;
   loading = false;
+  error: string | null = null;
   showPassword = false;
-  error = '';
-  roles = ['transport', 'super_admin', 'customer', 'finance'];
+  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support']; // Example roles, replace with actual roles
 
   constructor(
     private fb: FormBuilder,
@@ -34,24 +32,28 @@ export class UserEditModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.createForm();
+    this.initForm();
     if (this.user) {
-      this.userForm.patchValue({
-        fullName: this.user.fullName,
-        email: this.user.email,
-        role: this.user.role
-      });
+      this.userForm.patchValue(this.user);
     }
   }
 
-
-  private createForm(): void {
+  private initForm(): void {
     this.userForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', this.user ? [] : [Validators.required, Validators.minLength(8)]],
+      password: ['' ,Validators.required],
+      phoneNumber:[''],
       role: ['', Validators.required]
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  closeModal(): void {
+    this.close.emit();
   }
 
   onSubmit(): void {
@@ -61,28 +63,19 @@ export class UserEditModalComponent implements OnInit {
     const userData: UserFormData = this.userForm.value;
 
     const request = this.user
-      ? this.authService.updateAdmin(this.user.id.toString(), userData)
+      ? this.authService.updateAdmin(this.user._id, userData)
       : this.authService.createAdmin(userData);
 
     request.subscribe({
       next: () => {
         this.loading = false;
         this.saved.emit();
+        window.location.reload();
       },
-      error: (error:any) => {
+      error: (error: any) => {
         this.error = error?.error?.message || 'An error occurred';
         this.loading = false;
       }
     });
-  }
-
-  closeModal(): void {
-    this.userForm.reset();
-    this.error = '';
-    this.close.emit();
-  }
-
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
   }
 }

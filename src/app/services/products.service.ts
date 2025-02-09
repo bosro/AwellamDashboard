@@ -1,25 +1,35 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+
 
 
 export interface Product {
   _id: string;
   name: string;
-  price: number;
-  description: string;
+costprice: number;
   inStock: boolean;
-  totalStock: number;
   image: string;
+  plantId:{
+    _id: string;
+    name: string
+  };
+  destinationId: {
+    _id:string,
+    rates: number,
+    cost: number,
+    destination: string
+  }
 }
+
 
 export interface ProductsResponse {
   message: string;
   products: Product[];
 }
 
-interface ProductResponse {
+export interface ProductResponse {
   message: string;
   product: Product;
 }
@@ -32,22 +42,29 @@ export class ProductsService {
 
   constructor(private http: HttpClient) {}
 
-  getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(`${this.apiUrl}/`);
+  getProducts(params: any): Observable<ProductsResponse> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          httpParams = httpParams.set(key, params[key]);
+        }
+      });
+    }
+    return this.http.get<ProductsResponse>(`${this.apiUrl}/get`, { params: httpParams });
   }
 
   getProductById(id: string): Observable<Product> {
-    return this.http.get<ProductResponse>(`${this.apiUrl}/${id}`).pipe(
-      map(response => response.product)
-    );
+    return this.http.get<{ message: string, product: Product }>(`${this.apiUrl}/${id}`)
+      .pipe(map(response => response.product));
   }
 
-  createProduct(productData: FormData): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/create`, productData);
+  createProduct(productData: any): Observable<Product> {
+    return this.http.post<any>(`${this.apiUrl}/create`, productData);
   }
 
-  updateProduct(id: string, productData: FormData): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/edit/${id}`, productData);
+  updateProduct(id: string, productData: any): Observable<Product> {
+    return this.http.put<any>(`${this.apiUrl}/edit/${id}`, productData);
   }
 
   addStock(id: string, quantity: number): Observable<Product> {
@@ -58,8 +75,8 @@ export class ProductsService {
     return this.http.patch<Product>(`${this.apiUrl}/${id}/toggle-stock`, {});
   }
 
-  deleteProduct(id: string, quantity: number): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/delete/${id}`, { quantity });
+  deleteProduct(id: string): Observable<Product> {
+    return this.http.delete<Product>(`${this.apiUrl}/delete/${id}`);
   }
 
   exportToExcel(products: Product[]): void {

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { OrdersService } from '../../../services/order.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-order-edit',
@@ -14,8 +15,10 @@ export class OrderEditComponent implements OnInit {
   loading = false;
   saving = false;
   orderId: string = '';
-  drivers: any[] = [];
+  trucks: any[] = [];
   order: any;
+  productId: string = '';
+  private apiUrl = `${environment.apiUrl}`;
 
   constructor(
     private fb: FormBuilder,
@@ -25,16 +28,15 @@ export class OrderEditComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
-      driverId: ['', Validators.required],
-      status: ['', Validators.required],
-      deliveryAddress: ['', Validators.required]
+      price: ['', Validators.required],
+      quantity: ['', Validators.required],
+      assignedTruck: ['']
     });
   }
 
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
-    this.loadDrivers();
   }
 
   loadOrder(): void {
@@ -44,12 +46,14 @@ export class OrderEditComponent implements OnInit {
     this.ordersService.getOrderById(this.orderId).subscribe({
       next: (response) => {
         this.order = response.order;
+        this.productId = this.order?.orderItems[0].product?._id;
+
         this.orderForm.patchValue({
-          status: this.order.status,
-          deliveryAddress: this.order.deliveryAddress,
-          driverId: this.order.driverId?._id
+          price: this.order.price,
+          assignedTruck: this.order.truckId?._id
         });
         this.loading = false;
+        this.getTrucks();
       },
       error: (error) => {
         console.error('Error loading order:', error);
@@ -58,12 +62,29 @@ export class OrderEditComponent implements OnInit {
     });
   }
 
-  loadDrivers(): void {
-    this.http.get<any>(`${environment.apiUrl}/driver/get`).subscribe({
+  private getTrucks(): void {
+    if (!this.productId) return;
+
+    this.loading = true;
+    this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.productId}`).subscribe({
       next: (response) => {
-        this.drivers = response.drivers;
+        this.trucks = response.trucks;
+        this.loading = false;
+        Swal.fire({
+          title: "Driver Fetched Successfully!",
+          icon: "success",
+          draggable: true
+        });
       },
-      error: (error) => console.error('Error loading drivers:', error)
+      error: (error) => {
+        console.error('Error loading trucks:', error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "No driver found holding this product category or from this plant!",
+        });
+        this.loading = false;
+      },
     });
   }
 
@@ -72,9 +93,36 @@ export class OrderEditComponent implements OnInit {
       this.saving = true;
       const orderData = this.orderForm.value;
 
-      this.ordersService.editOrder(this.orderId, orderData).subscribe({
+      // Update the order price
+      this.ordersService.editOrder(this.orderId, { price: orderData.price, quantity: orderData.quantity }).subscribe({
         next: () => {
-          this.router.navigate(['/main/orders/details', this.orderId]);
+          // Assign the truck to the order if a truck is selected
+          if (orderData.assignedTruck) {
+            this.http.put(`${environment.apiUrl}/orders/${this.orderId}/assign-truck`, {
+              truckId: orderData.assignedTruck,
+              price: orderData.price,
+              quantity: orderData.quantity
+            }).subscribe({
+              next: () => {
+                Swal.fire({
+                  title: "Driver assigned Successfully!",
+                  icon: "success",
+                  draggable: true
+                });
+                this.router.navigate(['/main/orders/details', this.orderId]);
+              },
+              error: (error) => {
+                console.error('Error assigning truck:', error);
+                this.saving = false;
+                Swal.fire({
+                  icon: "error",
+                  title: `${error.error?.message}`,
+                });
+              }
+            });
+          } else {
+            this.router.navigate(['/main/orders/details', this.orderId]);
+          }
         },
         error: (error) => {
           console.error('Error updating order:', error);

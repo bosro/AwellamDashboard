@@ -10,8 +10,18 @@ import { TransportDashboardComponent } from './transport-dashboard/transport-das
 // import { MaintenanceDetailsModalComponent } from './maintenance-details-modal/maintenance-details-modal.component';
 // import { MaintenanceFormModalComponent } from './maintenance-form-modal/maintenance-form-modal.component';
 // import { TruckDetailsComponent } from './truck-details/truck-details.component';
-import { TruckDetailsComponent } from './truck-management/truck-details.component';
+import { TruckDetailComponent } from './truck-management/truck-details.component';
 import { TruckFormComponent } from './truck-management/truck-form.component';
+import { LoadTruckComponent } from './truck-management/load-truck.component';
+import { InventoryListComponent } from './inventory-list/inventory-list.component';
+import { InventoryFormComponent } from './inventory-form/inventory-form.component';
+import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
+import { DestinationListComponent } from '../inventory/destination/destination-list';
+import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
+import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
+import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
+// import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
+// import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
 
 const routes: Routes = [
   {
@@ -22,15 +32,24 @@ const routes: Routes = [
       { path: 'drivers/new', component: DriverFormComponent },
       { path: 'drivers/:id', component: DriverDetailsComponent },
       { path: 'drivers/:id/edit', component: DriverFormComponent },
-      {path: 'drivers', component:DriverListComponent},
+      { path: 'drivers', component: DriverListComponent },
       { path: 'trucks', component: TruckManagementComponent },
       { path: 'trucks/new', component: TruckFormComponent },
-      { path: 'trucks/details/:id', component: TruckDetailsComponent },
-    ]
-  }
+      { path: 'trucks/details/:id', component: TruckDetailComponent },
+      { path: 'trucks/load', component: LoadTruckComponent },
+      { path: 'inventory-list', component: InventoryListComponent },
+      { path: 'new', component: InventoryFormComponent },
+      { path: 'edit/:id', component: InventoryFormComponent },
+      { path: 'details/:id', component: InventoryDetailsComponent },
+      { path: 'destination', component: DestinationListComponent },
+      { path: 'disbursement', component: StockDisbursementComponent },
+      {path:'paymentrefs', component: PaymentListComponent},
+      {path:'payment-ref/:id' , component: PaymentDetailComponent}
+    ],
+  },
 ];
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class TransportRoutingModule { }
+export class TransportRoutingModule {}

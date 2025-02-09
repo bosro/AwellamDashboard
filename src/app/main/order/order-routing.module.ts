@@ -5,6 +5,8 @@ import { OrderDetailsComponent } from './order-details/order-details.component';
 import { OrderProcessingComponent } from './order-processing/order-processing.component';
 import { OrderAnalyticsComponent } from './order-analytics/order-analytics.component';
 import { OrderEditComponent } from './order-edit/order-edit';
+import { SalesOrderListComponent } from './sales-list.component/sales-list.compoent';
+import { OutSideOrdersTableComponent } from './outsideLoad/outsideLoadOrder';
 
 const routes: Routes = [
   {
@@ -12,6 +14,8 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: 'list', component: OrderListComponent },
+      {path:'saleslist', component: SalesOrderListComponent},
+      {path:'outsideload', component: OutSideOrdersTableComponent},
       { path: 'details/:id', component: OrderDetailsComponent },
       { path: 'processing', component: OrderProcessingComponent },
       { path: 'analytics', component: OrderAnalyticsComponent },

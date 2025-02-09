@@ -1,0 +1,214 @@
+<div class="p-6 max-w-3xl mx-auto">
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold text-gray-900"> Outside Load Invoices </h1>
+      <div class="flex space-x-3">
+        <button
+          (click)="goBack()"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
+        <!-- <button
+          (click)="onLoadOutsideTruckInvoice()"
+          class="flex items-center px-4 py-2 text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
+        >
+          Load Outside Truck Invoice
+        </button> -->
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="loadTruckForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Truck -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Select Truck </label>
+      <select
+        formControlName="truckId"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('truckId')!.touched && loadTruckForm.get('truckId')!.invalid"
+      >
+        <option value="">Select Truck</option>
+        <option *ngFor="let truck of trucks" [value]="truck._id">
+          {{ truck.truckNumber }} - {{ truck.driver?.name }}
+        </option>
+      </select>
+      <div
+        *ngIf="loadTruckForm.get('truckId')?.touched && loadTruckForm.get('truckId')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('truckId') }}
+      </div>
+    </div>
+
+    <!-- Plant -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Select Plant </label>
+      <select
+        formControlName="plantId"
+        (change)="onPlantSelect($event)"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('plantId')!.touched && loadTruckForm.get('plantId')!.invalid"
+      >
+        <option value="">Select Plant</option>
+        <option *ngFor="let plant of plants" [value]="plant._id">
+          {{ plant.name }}
+        </option>
+      </select>
+      <div
+        *ngIf="loadTruckForm.get('plantId')?.touched && loadTruckForm.get('plantId')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('plantId') }}
+      </div>
+    </div>
+
+    <!-- Conditionally Render Destination -->
+    <div *ngIf="isLoadOutsideTruckInvoice">
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Select Destination </label>
+      <select
+        formControlName="destinationId"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('destinationId')!.touched && loadTruckForm.get('destinationId')!.invalid"
+      >
+        <option value="">Select Destination</option>
+        <option *ngFor="let destination of destinations" [value]="destination._id">
+          {{ destination.destination }}
+        </option>
+      </select>
+      <div
+        *ngIf="loadTruckForm.get('destinationId')?.touched && loadTruckForm.get('destinationId')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('destinationId') }}
+      </div>
+    </div>
+
+    <!-- Category -->
+    <!-- <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Select Category </label>
+      <select
+        formControlName="categoryId"
+        (change)="onCategorySelect($event)"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('categoryId')!.touched && loadTruckForm.get('categoryId')!.invalid"
+      >
+        <option value="">Select Category</option>
+        <option *ngFor="let category of categories" [value]="category._id">
+          {{ category.name }}
+        </option>
+      </select>
+      <div
+        *ngIf="loadTruckForm.get('categoryId')?.touched && loadTruckForm.get('categoryId')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('categoryId') }}
+      </div>
+    </div> -->
+
+    <!-- Product -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Select Product </label>
+      <select
+        formControlName="productId"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('productId')!.touched && loadTruckForm.get('productId')!.invalid"
+      >
+        <option value="">Select Product</option>
+        <option *ngFor="let product of products" [value]="product._id">
+          {{ product.name }}
+        </option>
+      </select>
+      <div
+        *ngIf="loadTruckForm.get('productId')?.touched && loadTruckForm.get('productId')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('productId') }}
+      </div>
+    </div>
+
+    <!-- Number of Bags -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Number of Bags </label>
+      <input
+        type="number"
+        formControlName="capacity"
+        min="1"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('capacity')!.touched && loadTruckForm.get('capacity')!.invalid"
+      />
+      <div
+        *ngIf="loadTruckForm.get('capacity')?.touched && loadTruckForm.get('capacity')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('capacity') }}
+      </div>
+    </div>
+
+    <!-- SOC Number -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> SOC Number </label>
+      <input
+        type="text"
+        formControlName="socNumber"
+        placeholder="SOC123456789"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('socNumber')!.touched && loadTruckForm.get('socNumber')!.invalid"
+      />
+      <div
+        *ngIf="loadTruckForm.get('socNumber')?.touched && loadTruckForm.get('socNumber')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('socNumber') }}
+      </div>
+    </div>
+
+    <!-- <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Amount Received </label>
+      <input
+        type="number"
+        formControlName="amountReceived"
+        placeholder="GhC 0.00"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('amountReceived')!.touched && loadTruckForm.get('amountReceived')!.invalid"
+      />
+      <div
+        *ngIf="loadTruckForm.get('amountReceived')?.touched && loadTruckForm.get('amountReceived')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('amountReceived') }}
+      </div>
+    </div> -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> Customer Name</label>
+      <input
+        type="text"
+        formControlName="customerName"
+        placeholder="Enter Customer's Name"
+        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        [class.border-red-500]="loadTruckForm.get('customerName')!.touched && loadTruckForm.get('customerName')!.invalid"
+      />
+      <div
+        *ngIf="loadTruckForm.get('customerName')?.touched && loadTruckForm.get('customerName')?.invalid"
+        class="mt-1 text-sm text-red-600"
+      >
+        {{ getErrorMessage('customerName') }}
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end space-x-4 pt-4">
+      <button
+        type="submit"
+        [disabled]="loadTruckForm.invalid || loading"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+      >
+        <div class="flex items-center">
+          <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
+          Load Truck
+        </div>
+      </button>
+    </div>
+  </form>
+</div>

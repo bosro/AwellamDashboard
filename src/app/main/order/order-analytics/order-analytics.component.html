@@ -1,235 +1,164 @@
-<!-- order-analytics.component.html -->
 <div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-semibold text-gray-900">Order Analytics</h1>
-        <!-- <p class="mt-1 text-sm text-gray-600">Track your order performance and trends</p> -->
-      </div>
-      <div class="flex space-x-3">
-        <!-- <button 
-          (click)="exportAnalytics('excel')"
-          class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
-          <i class="ri-file-excel-line mr-2 text-green-600"></i>
-          Export Excel
-        </button> -->
-      </div>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Sales Order</h1>
     </div>
-  
-    <!-- Filters -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-      <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div formGroupName="dateRange" class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-          <div class="flex space-x-2">
-            <input
-              type="date"
-              formControlName="start"
-              class="flex-1 px-4 py-2 border rounded-lg"
-            >
-            <input
-              type="date"
-              formControlName="end"
-              class="flex-1 px-4 py-2 border rounded-lg"
-            >
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Group By</label>
-          <select
-            formControlName="groupBy"
-            class="w-full px-4 py-2 border rounded-lg"
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4" style="overflow-x: auto;">
+      <div formGroupName="dateRange" class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+        <div class="flex space-x-2">
+          <input
+            type="date"
+            formControlName="start"
+            class="flex-1 px-4 py-2 border rounded-lg"
           >
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-          </select>
-        </div>
-      </form>
-    </div>
-  
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
-      <!-- Total Orders -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600">Total Orders</p>
-            <p class="mt-1 text-2xl font-semibold text-gray-900">
-              {{summary.totalOrders}}
-            </p>
-          </div>
-          <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-            <i class="ri-shopping-cart-line text-xl"></i>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span [ngClass]="{
-            'text-green-600': orderGrowth > 0,
-            'text-red-600': orderGrowth < 0
-          }">
-            <i [class]="orderGrowth > 0 ? 'ri-arrow-up-line' : 'ri-arrow-down-line'"></i>
-            {{Math.abs(orderGrowth)}}%
-          </span>
-          <span class="text-gray-500 ml-2">vs. previous period</span>
+          <input
+            type="date"
+            formControlName="end"
+            class="flex-1 px-4 py-2 border rounded-lg"
+          >
         </div>
       </div>
-  
-      <!-- Total Revenue -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-            <p class="mt-1 text-2xl font-semibold text-gray-900">
-              ${{summary.totalRevenue}}
-            </p>
-          </div>
-          <div class="h-12 w-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-            <i class="ri-money-dollar-circle-line text-xl"></i>
-          </div>
-        </div>
-        <div class="mt-4 flex items-center text-sm">
-          <span [ngClass]="{
-            'text-green-600': revenueGrowth > 0,
-            'text-red-600': revenueGrowth < 0
-          }">
-            <i [class]="revenueGrowth > 0 ? 'ri-arrow-up-line' : 'ri-arrow-down-line'"></i>
-            {{Math.abs(revenueGrowth)}}%
-          </span>
-          <span class="text-gray-500 ml-2">vs. previous period</span>
-        </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Group By</label>
+        <select
+          formControlName="groupBy"
+          class="w-full px-4 py-2 border rounded-lg"
+        >
+          <option value="day">Day</option>
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+        </select>
       </div>
-  
-      <!-- Average Order Value -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600">Avg. Order Value</p>
-            <p class="mt-1 text-2xl font-semibold text-gray-900">
-              ${{summary.averageOrderValue}}
-            </p>
-          </div>
-          <div class="h-12 w-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
-            <i class="ri-stack-line text-xl"></i>
-          </div>
+    </form>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+    <!-- Total Orders -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Total Orders</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">
+            {{summary.totalOrders}}
+          </p>
         </div>
-      </div>
-  
-      <!-- Conversion Rate -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600">Conversion Rate</p>
-            <p class="mt-1 text-2xl font-semibold text-gray-900">
-              {{summary.conversionRate}}%
-            </p>
-          </div>
-          <div class="h-12 w-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center">
-            <i class="ri-percent-line text-xl"></i>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Repeat Customer Rate -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600">Repeat Customers</p>
-            <p class="mt-1 text-2xl font-semibold text-gray-900">
-              {{summary.repeatCustomerRate}}%
-            </p>
-          </div>
-          <div class="h-12 w-12 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center">
-            <i class="ri-user-heart-line text-xl"></i>
-          </div>
+        <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+          <i class="ri-shopping-cart-line text-xl"></i>
         </div>
       </div>
     </div>
-  
-    <!-- Charts Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Revenue Chart -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Revenue Trend</h2>
-        <div class="h-80">
-          <!-- Add your preferred charting component here -->
-          <ngx-charts-line-chart
-            [results]="revenueChartData"
-            [scheme]="'forest'"
-            [gradient]="true"
-            [xAxis]="true"
-            [yAxis]="true"
-            [legend]="true"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-            xAxisLabel="Date"
-            yAxisLabel="Revenue">
-          </ngx-charts-line-chart>
+
+    <!-- Total Revenue -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">
+            GHC{{summary.totalRevenue}}
+          </p>
+        </div>
+        <div class="h-12 w-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+          <i class="ri-money-dollar-circle-line text-xl"></i>
         </div>
       </div>
-  
-      <!-- Order Status Distribution -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Status Distribution</h2>
-        <div class="h-80">
-          <ngx-charts-pie-chart
-            [results]="orderStatusData"
-            [scheme]="'forest'"
-            [gradient]="false"
-            [legend]="true"
-            [labels]="true"
-            [doughnut]="true">
-          </ngx-charts-pie-chart>
+    </div>
+
+    <!-- Average Order Value -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Avg. Order Value</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">
+            GHC {{summary.averageOrderValue}}
+          </p>
+        </div>
+        <div class="h-12 w-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+          <i class="ri-stack-line text-xl"></i>
         </div>
       </div>
-  
-      <!-- Top Products -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Top Products</h2>
-        <div class="flow-root">
-          <ul role="list" class="-my-5 divide-y divide-gray-200">
-            <li *ngFor="let product of topProducts" class="py-4">
-              <div class="flex items-center space-x-4">
-                <div class="flex-shrink-0">
-                  <img [src]="product.image" 
-                       class="h-8 w-8 rounded-full" 
-                       [alt]="product.name">
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">
-                    {{product.name}}
-                  </p>
-                  <p class="text-sm text-gray-500">
-                    {{product.orders}} orders
-                  </p>
-                </div>
-                <div>
-                  <span class="text-sm font-medium text-gray-900">
-                    ${{product.revenue}}
-                  </span>
-                </div>
-              </div>
-            </li>
-          </ul>
+    </div>
+
+    <!-- Conversion Rate -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Conversion Rate</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">
+            {{summary.conversionRate}}%
+          </p>
+        </div>
+        <div class="h-12 w-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center">
+          <i class="ri-percent-line text-xl"></i>
         </div>
       </div>
-  
-      <!-- Sales by Region -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Sales by Region</h2>
-        <div class="h-80">
-          <ngx-charts-bar-vertical
-            [results]="salesByRegion"
-            [scheme]="'forest'"
-            [gradient]="false"
-            [xAxis]="true"
-            [yAxis]="true"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-            xAxisLabel="Region"
-            yAxisLabel="Sales">
-          </ngx-charts-bar-vertical>
+    </div>
+
+    <!-- Repeat Customers -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Repeat Customers</p>
+          <p class="mt-1 text-2xl font-semibold text-gray-900">
+            {{summary.totalRepeatCustomers}}
+          </p>
+        </div>
+        <div class="h-12 w-12 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center">
+          <i class="ri-user-heart-line text-xl"></i>
         </div>
       </div>
     </div>
   </div>
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Delivery Status Counts</h2>
+    <ul>
+      <li *ngFor="let status of summary.deliveryStatusCounts" class="flex justify-between items-center py-2 border-b">
+        <span>{{ status.status }}</span>
+        <span>{{ status.count }}</span>
+      </li>
+    </ul>
+  </div>
+  
+
+  <!-- Charts Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Revenue Chart -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Revenue Trend</h2>
+      <div class="h-80">
+        <ngx-charts-line-chart
+          [results]="revenueChartData"
+      
+          [gradient]="true"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="true"
+          [showXAxisLabel]="true"
+          [showYAxisLabel]="true"
+          xAxisLabel="Date"
+          yAxisLabel="Revenue">
+        </ngx-charts-line-chart>
+      </div>
+    </div>
+
+    <!-- Order Status Distribution -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Order Status Distribution</h2>
+      <div class="h-80">
+        <ngx-charts-pie-chart
+          [results]="orderStatusData"
+          [gradient]="false"
+          [legend]="true"
+          [labels]="true"
+          [doughnut]="true">
+        </ngx-charts-pie-chart>
+      </div>
+    </div>
+  </div>
+</div>

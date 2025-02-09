@@ -41,20 +41,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     // Subscribe to user changes
     this.authService.currentUser
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(user => {
-      this.currentUser = user ?? undefined; // Already handled in the code.
-    });
-  
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user ?? undefined;
+      });
   }
-
 
   private loadUserData(): void {
     this.authService.getUser()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (user) => {
-          this.currentUser = user;
+        next: (admin) => {
+          this.currentUser = admin;
         },
         error: (error) => {
           console.error('Error loading user data:', error);
@@ -62,7 +60,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       });
   }
 
-  
+  fogotPassword(){
+    this.router.navigate(['/auth/reset-password'])
+  }
+
   private loadNotifications(): void {
     this.notificationService.getNotifications()
       .pipe(takeUntil(this.destroy$))
@@ -103,39 +104,40 @@ export class HeaderComponent implements OnInit, OnDestroy {
     
     if (unreadIds.length > 0) {
       this.notificationService.markAsRead(unreadIds)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.notifications = this.notifications.map(n => ({
-            ...n,
-            read: unreadIds.includes(n.id) ? true : n.read
-          }));
-          this.updateUnreadCount();
-        },
-        error: (error) => {
-          console.error('Error marking notifications as read:', error);
-        }
-      });
-    
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.notifications = this.notifications.map(n => ({
+              ...n,
+              read: unreadIds.includes(n.id) ? true : n.read
+            }));
+            this.updateUnreadCount();
+          },
+          error: (error) => {
+            console.error('Error marking notifications as read:', error);
+          }
+        });
     }
   }
-
   logout(): void {
+    console.log("Logging out...");
     this.authService.logout()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.router.navigate(['/auth/login']);
+          console.log("Logout successful");
+          localStorage.clear(); // Clear everything from local storage
+          window.location.reload(); // Reload the page to check the state again
         },
         error: (error) => {
           console.error('Error during logout:', error);
         }
       });
   }
+  
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
 }

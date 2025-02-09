@@ -1,11 +1,13 @@
+// order-processing.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrdersService } from '../../../services/order.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, combineLatest } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-// import 
+import { PaymentService } from '../../../services/payment.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-order-processing',
@@ -17,12 +19,14 @@ export class OrderProcessingComponent implements OnInit {
   saving = false;
   products: any[] = [];
   customers: any[] = [];
+  plants: any[] = [];
+  categories: any[] = [];
   selectedProduct: any;
   selectedCustomer: any;
-  quantity: number = 1;
-  total: number = 0;
-  subtotal: number = 0;
-  tax: number = 0;
+  noProductsFound = false;
+  noCategoriesFound = false;
+  filterForm!: FormGroup;
+  filteredCustomers: any[] = [];
 
   private apiUrl = `${environment.apiUrl}`;
 
@@ -30,17 +34,18 @@ export class OrderProcessingComponent implements OnInit {
     private fb: FormBuilder,
     private ordersService: OrdersService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private paymentService: PaymentService
   ) {
     this.orderForm = this.fb.group({
-      product: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
+      plant: ['', Validators.required],
+
       customer: this.fb.group({
         id: ['', Validators.required],
         name: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         phone: ['', Validators.required],
-        address: ['', Validators.required]
+        address: ['', Validators.required],
       }),
       items: this.fb.array([]),
       notes: ['']
@@ -48,31 +53,77 @@ export class OrderProcessingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fetchProductsAndCustomers();
-    
-    this.orderForm.get('quantity')?.valueChanges.subscribe(value => {
-      this.quantity = value;
-      this.calculateTotal();
+    this.fetchPlantsAndCustomers();
+
+    this.filterForm.get('search')?.valueChanges.subscribe(searchTerm => {
+      this.filterCustomers(searchTerm);
     });
   }
 
-  private fetchProductsAndCustomers(): void {
+
+   filterCustomers(searchTerm: string): void {
+    if (!searchTerm) {
+      this.customers = this.customers;
+    } else {
+      this.customers = this.customers.filter(customer =>
+        customer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.phoneNumber.includes(searchTerm)
+      );
+    }
+  }
+
+  private fetchPlantsAndCustomers(): void {
     this.loading = true;
     forkJoin({
-      products: this.http.get<any>(`${this.apiUrl}/products`),
+      plants: this.http.get<any>(`${this.apiUrl}/plants/get`),
       customers: this.http.get<any>(`${this.apiUrl}/customers/get`)
     }).subscribe({
-      next: ({ products, customers }) => {
-        this.products = products.products;
+      next: ({ plants, customers }) => {
+        this.plants = plants.plants;
         this.customers = customers.customers;
+        this.filteredCustomers = this.customers;
       },
-      error: (error) => console.error('Error fetching data:', error),
+      error: (error) => {
+        console.error('Error fetching data:', error);
+      },
       complete: () => this.loading = false
     });
   }
 
+  onPlantSelect(event: any): void {
+    const plantId = event.target.value;
+    if (plantId) {
+      this.loading = true;
+
+      this.paymentService.getProductByPlant(plantId).subscribe({
+              next: (response) => {
+                this.products = response.products;
+                this.loading = false
+              },
+              error: (error) => {
+                console.error('Error loading products:', error);
+                Swal.fire('Error', 'Failed to load products', 'error');
+              },
+            });
+    
+    } else {
+      // this.categories = [];
+      // this.noCategoriesFound = false;
+      // this.orderForm.patchValue({ category: '', product: '' });
+    }
+  }
+
+  
+
   get items(): FormArray {
     return this.orderForm.get('items') as FormArray;
+  }
+
+  updateItemTotal(itemGroup: FormGroup): void {
+    const quantity = itemGroup.get('quantity')?.value || 0;
+    const price = itemGroup.get('price')?.value || 0;
+    const total = quantity * price;
+    itemGroup.patchValue({ total: total }, { emitEvent: false });
   }
 
   addItem(product: any): void {
@@ -80,13 +131,16 @@ export class OrderProcessingComponent implements OnInit {
       productId: [product._id],
       name: [product.name],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      price: [product.price],
-      total: [product.price]
+      price: [product.price, [Validators.required, Validators.min(0)]],
+      total: [{ value: product.price, disabled: true }]
     });
 
-    itemGroup.get('quantity')?.valueChanges.subscribe(qty => {
-      const price = itemGroup.get('price')?.value || 0;
-      itemGroup.patchValue({ total: (qty || 0) * price }, { emitEvent: false });
+    // Subscribe to both quantity and price changes
+    combineLatest([
+      itemGroup.get('quantity')!.valueChanges,
+      itemGroup.get('price')!.valueChanges
+    ]).subscribe(() => {
+      this.updateItemTotal(itemGroup);
       this.calculateOrderTotals();
     });
 
@@ -99,34 +153,23 @@ export class OrderProcessingComponent implements OnInit {
     this.calculateOrderTotals();
   }
 
-  private calculateOrderTotals(): void {
-    this.subtotal = this.items.controls.reduce((total, control) => 
-      total + (control.get('total')?.value || 0), 0);
-    this.tax = this.subtotal * 0.1;
-    this.total = this.subtotal + this.tax + this.getShippingCost();
-  }
-
-  getShippingCost(): number {
-    return 10;
-  }
-
-  getSubtotal(): number {
-    return this.subtotal;
-  }
-
-  getTax(): number {
-    return this.tax;
+  private calculateOrderTotals(): number {
+    return this.items.controls.reduce((total, control) => {
+      const quantity = control.get('quantity')?.value || 0;
+      const price = control.get('price')?.value || 0;
+      return total + (quantity * price);
+    }, 0);
   }
 
   getTotal(): number {
-    return this.total;
+    return this.calculateOrderTotals();
   }
+
 
   onProductSelect(event: any): void {
     const productId = event.target.value;
     this.selectedProduct = this.products.find(product => product._id === productId);
     if (this.selectedProduct) {
-      this.calculateTotal();
       this.addItem(this.selectedProduct);
     }
   }
@@ -147,12 +190,6 @@ export class OrderProcessingComponent implements OnInit {
     }
   }
 
-  calculateTotal(): void {
-    if (this.selectedProduct && this.quantity) {
-      this.total = this.selectedProduct.price * this.quantity;
-    }
-  }
-
   onSubmit(): void {
     if (this.orderForm.valid && this.items.length > 0) {
       this.saving = true;
@@ -162,10 +199,13 @@ export class OrderProcessingComponent implements OnInit {
         orderItems: this.items.value.map((item: any) => ({
           product: item.productId,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          total: item.quantity * item.price
         })),
-        deliveryAddress: this.orderForm.value.customer.address,
-        totalAmount: this.getTotal()
+        // deliveryAddress: this.orderForm.value.customer.address,
+        totalAmount: this.getTotal(),
+        notes: this.orderForm.value.notes,
+        plantId: this.orderForm.value.plant,
       };
 
       this.ordersService.createOrder(orderData).subscribe({
@@ -173,7 +213,7 @@ export class OrderProcessingComponent implements OnInit {
           this.router.navigate(['main/orders/list']);
           this.saving = false;
         },
-        error: (error:any) => {
+        error: (error) => {
           console.error('Error creating order:', error);
           this.saving = false;
         }

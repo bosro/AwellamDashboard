@@ -1,22 +1,23 @@
-// admin-form-modal.component.ts
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService, User } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-form-modal',
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
+    <div *ngIf="visible" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="flex min-h-screen items-center justify-center p-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" (click)="close()"></div>
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" (click)="onClose()"></div>
 
+        <!-- Modal -->
         <div class="relative w-full max-w-2xl bg-white rounded-lg shadow-xl">
           <div class="flex items-center justify-between p-4 border-b">
             <h3 class="text-xl font-semibold text-gray-900">
-              {{editingUser ? 'Edit' : 'Add'}} Admin
+              {{user ? 'Edit' : 'Add'}} Admin
             </h3>
-            <button (click)="close()" class="text-gray-400 hover:text-gray-500">
-              <i class="ri-close-line text-2xl"></i>
+            <button (click)="onClose()" class="text-gray-400 hover:text-gray-500">
+              <span class="text-2xl">&times;</span>
             </button>
           </div>
 
@@ -25,9 +26,11 @@ import { AuthService, User } from '../../../core/services/auth.service';
               <!-- Full Name -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" formControlName="fullName" 
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                       [class.border-red-500]="isFieldInvalid('fullName')">
+                <input 
+                  type="text" 
+                  formControlName="fullName"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="{'border-red-500': isFieldInvalid('fullName')}">
                 <div *ngIf="isFieldInvalid('fullName')" class="mt-1 text-sm text-red-600">
                   Full name is required
                 </div>
@@ -36,54 +39,70 @@ import { AuthService, User } from '../../../core/services/auth.service';
               <!-- Email -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" formControlName="email" 
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                       [class.border-red-500]="isFieldInvalid('email')">
+                <input 
+                  type="email" 
+                  formControlName="email"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="{'border-red-500': isFieldInvalid('email')}">
                 <div *ngIf="isFieldInvalid('email')" class="mt-1 text-sm text-red-600">
                   Valid email is required
                 </div>
               </div>
 
-              <!-- Password -->
-              <div *ngIf="!editingUser">
+              <!-- Password (only for new admin) -->
+              <div *ngIf="!user">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <div class="relative">
-                  <input [type]="showPassword ? 'text' : 'password'" 
-                         formControlName="password"
-                         class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                         [class.border-red-500]="isFieldInvalid('password')">
-                  <button type="button" 
-                          (click)="showPassword = !showPassword"
-                          class="absolute right-3 top-2.5 text-gray-400">
-                    <i [class]="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
-                  </button>
-                </div>
+                <input 
+                  type="password" 
+                  formControlName="password"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="{'border-red-500': isFieldInvalid('password')}">
                 <div *ngIf="isFieldInvalid('password')" class="mt-1 text-sm text-red-600">
                   Password must be at least 8 characters
                 </div>
               </div>
 
+              <!-- Phone Number -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <input 
+                  type="tel" 
+                  formControlName="phoneNumber"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+              </div>
+
               <!-- Role -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select formControlName="role" 
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                  <option *ngFor="let role of roles" [value]="role.id">{{role.name}}</option>
+                <select 
+                  formControlName="role"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <option value="Loading_officer">Loading Officer</option>
+                  <option value="super_admin">Super Admin</option>
+                  <option value="Stocks_Manager">Stocks Manager</option>
+                  <option value="Admin_Support">Admin Support</option>
                 </select>
               </div>
             </div>
 
+            <!-- Error Message -->
+            <div *ngIf="error" class="text-red-600 text-sm">
+              {{ error }}
+            </div>
+
+            <!-- Form Actions -->
             <div class="flex justify-end space-x-4 pt-4">
-              <button type="button" 
-                      (click)="close()"
-                      class="px-6 py-2 border rounded-lg hover:bg-gray-50">
+              <button 
+                type="button"
+                (click)="onClose()"
+                class="px-6 py-2 border rounded-lg hover:bg-gray-50">
                 Cancel
               </button>
-              <button type="submit"
-                      [disabled]="adminForm.invalid || loading"
-                      class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-                <i *ngIf="loading" class="ri-loader-4-line animate-spin mr-2"></i>
-                {{editingUser ? 'Update' : 'Create'}} Admin
+              <button 
+                type="submit"
+                [disabled]="adminForm.invalid || loading"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                {{loading ? 'Saving...' : (user ? 'Update' : 'Create')}}
               </button>
             </div>
           </form>
@@ -92,70 +111,111 @@ import { AuthService, User } from '../../../core/services/auth.service';
     </div>
   `
 })
-export class AdminFormModalComponent {
-  @Input() isOpen = false;
-  @Input() editingUser: User | null = null;
-  @Output() closeModal = new EventEmitter<void>();
+export class AdminFormModalComponent implements OnInit {
+  @Input() visible: boolean = false;
+  @Input() user: any;
+  @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
   adminForm: FormGroup;
-  loading = false;
-  showPassword = false;
-  roles = [
-    { id: 'admin', name: 'Administrator' },
-    { id: 'manager', name: 'Manager' },
-    { id: 'operator', name: 'Operator' }
-  ];
+  loading: boolean = false;
+  error: string | null = null;
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
     this.adminForm = this.createForm();
+  }
+
+  ngOnInit() {
+    this.initializeForm();
+  }
+
+  ngOnChanges() {
+    if (this.visible) {
+      this.initializeForm();
+    }
   }
 
   private createForm(): FormGroup {
     return this.fb.group({
-      fullName: ['', [Validators.required]],
+      fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      role: ['admin', Validators.required]
+      phoneNumber: [''],
+      role: ['Loading_officer', Validators.required]
     });
+  }
+
+  private initializeForm(): void {
+    if (this.user) {
+      // Remove password validation for editing
+      this.adminForm.get('password')?.clearValidators();
+      this.adminForm.get('password')?.updateValueAndValidity();
+      
+      this.adminForm.patchValue({
+        fullName: this.user.fullName,
+        email: this.user.email,
+        phoneNumber: this.user.phoneNumber,
+        role: this.user.role
+      });
+    } else {
+      this.adminForm.reset({
+        role: 'Loading_officer'
+      });
+      // Restore password validation for new admin
+      this.adminForm.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
+      this.adminForm.get('password')?.updateValueAndValidity();
+    }
   }
 
   isFieldInvalid(field: string): boolean {
     const control = this.adminForm.get(field);
-    return !!(control && control.invalid && control.touched);
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  close(): void {
-    this.closeModal.emit();
-    this.adminForm.reset();
+  onClose(): void {
+    this.error = null;
+    this.close.emit();
   }
 
   onSubmit(): void {
-    if (this.adminForm.valid) {
-      this.loading = true;
-      const userData = this.adminForm.value;
-
-      const request = this.editingUser 
-        ? this.authService.updateUser(this.editingUser._id, userData)
-        : this.authService.createAdmin(userData);
-
-      request.subscribe({
-        next: () => {
-          this.saved.emit();
-          this.close();
-        },
-        error: (error) => {
-          console.error('Error saving admin:', error);
-          this.loading = false;
-        }
-      });
-    } else {
+    if (this.adminForm.invalid) {
       Object.keys(this.adminForm.controls).forEach(key => {
         const control = this.adminForm.get(key);
         if (control?.invalid) {
           control.markAsTouched();
         }
       });
+      return;
     }
+
+    this.loading = true;
+    this.error = null;
+
+    const userData = this.adminForm.value;
+    
+    // Remove password if editing
+    if (this.user) {
+      delete userData.password;
+    }
+
+    const request = this.user
+      ? this.authService.updateAdmin(this.user._id, userData)
+      : this.authService.createAdmin(userData);
+
+    request.subscribe({
+      next: () => {
+        this.loading = false;
+        this.saved.emit();
+        this.onClose();
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = error.message || 'An error occurred while saving the admin';
+        console.error('Error saving admin:', error);
+      }
+    });
   }
 }

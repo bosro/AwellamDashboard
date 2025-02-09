@@ -3,6 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Customer, } from '../shared/types/customer.interface';
 import { environment } from '../environments/environment';
+import { Order } from './order.service';
+
+export interface OrderResponse {
+  message: string;
+  orders: Order[];
+}
 
 
 @Injectable({
@@ -13,15 +19,12 @@ export class CustomersService {
 
   constructor(private http: HttpClient) {}
 
-  getCustomers(params?: any): Observable<{ customers: Customer[]; total: number }> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        httpParams = httpParams.set(key, params[key]);
-      });
+  getCustomers(): Observable<{ customers: Customer[]; total: number }> {
+    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`);
     }
-    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`, { params: httpParams });
-  }
+    
+  
+
 
   getCustomerById(id: string): Observable<{ customer: Customer }> {
     return this.http.get<{ customer: Customer }>(`${this.apiUrl}/get/${id}`);
@@ -39,8 +42,8 @@ export class CustomersService {
     return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 
-  getCustomerOrders(id: string, params?: any): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}/orders`, { params });
+  getCustomerOrders(id: string, params?: any): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/${id}/orders`, { params });
   }
 
 
@@ -65,6 +68,10 @@ export class CustomersService {
       responseType: 'blob'
     });
   }
+
+
+
+
 
   // Communication
   sendCustomerEmail(id: string, emailData: any): Observable<any> {

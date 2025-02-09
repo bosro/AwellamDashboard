@@ -1,0 +1,85 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">Sales Report</h1>
+      <p class="mt-1 text-sm text-gray-600">Generate and download sales reports</p>
+    </div>
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <form [formGroup]="filterForm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Start Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+          <input
+            type="date"
+            formControlName="startDate"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+
+        <!-- End Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+          <input
+            type="date"
+            formControlName="endDate"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div>
+
+        <!-- Generate Report Button -->
+        <div class="flex items-end">
+          <button
+            (click)="generateSalesReport()"
+            [disabled]="!filterForm.valid || loading"
+            class="w-full md:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+            <i class="ri-file-excel-line mr-2"></i>
+            Generate Report
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-8">
+    <i class="ri-loader-4-line text-2xl animate-spin text-blue-600"></i>
+  </div>
+
+  <!-- Sales Report Table -->
+  <div *ngIf="salesData" class="bg-white rounded-lg shadow overflow-auto">
+    <h2 class="text-xl font-semibold text-gray-900 p-4">Sales Report Data</h2>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plant</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Driver</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Soc Number</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let row of salesData">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Date }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Customer }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Plant }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Category }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Product }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Quantity }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Price }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.Driver }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.SocNumber }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

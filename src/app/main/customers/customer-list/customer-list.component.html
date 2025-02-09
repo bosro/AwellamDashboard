@@ -1,17 +1,15 @@
-<!-- customer-list.component.html -->
 <div class="p-6">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 flex-col  max-[430px]:flex">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">Customers</h1>
-            <!-- <p class="mt-1 text-sm text-gray-600">Manage your customer database</p> -->
         </div>
-        <div class="flex space-x-3">
-            <!-- <button [routerLink]="['/customers/segments']"
+        <div class="flex space-x-3 mt-4">
+            <button [routerLink]="['/customers/segments']"
                 class="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">
                 <i class="ri-group-line mr-2"></i>
-                Segments
-            </button> -->
+                Debtors List
+            </button>
             <button [routerLink]="['/main/customers/new']"
                 class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 <i class="ri-add-line mr-2"></i>
@@ -19,8 +17,6 @@
             </button>
         </div>
     </div>
-
-
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
@@ -34,75 +30,29 @@
                     <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
                 </div>
             </div>
-
-
-            <!-- Type Filter -->
-
-            <!-- Segment Filter -->
-            <!-- <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Segment</label>
-                <select formControlName="segment" class="w-full px-4 py-2 border rounded-lg">
-                    <option value="">All Segments</option>
-                    <option *ngFor="let segment of segments" [value]="segment.id">
-                        {{segment.name}}
-                    </option>
-                </select>
-            </div> -->
-
-            <!-- Registration Date Range -->
-            <!-- <div formGroupName="dateRange">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Registration Date</label>
-                <div class="flex space-x-2">
-                    <input type="date" formControlName="start" class="flex-1 px-4 py-2 border rounded-lg">
-                    <input type="date" formControlName="end" class="flex-1 px-4 py-2 border rounded-lg">
-                </div>
-            </div> -->
-
-            <!-- Total Spent Range -->
-            <!-- <div class="flex space-x-2">
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Min Spent</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2 text-gray-500">$</span>
-                        <input type="number" formControlName="minSpent" class="w-full pl-8 pr-4 py-2 border rounded-lg">
-                    </div>
-                </div>
-                <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Spent</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2 text-gray-500">$</span>
-                        <input type="number" formControlName="maxSpent" class="w-full pl-8 pr-4 py-2 border rounded-lg">
-                    </div>
-                </div>
-            </div> -->
         </form>
     </div>
 
     <!-- Customers Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th scope="col" class="px-6 py-3">
                         <div class="flex items-center">
-                            <input type="checkbox" [checked]="selectedCustomers.size === customers.length"
+                            <input type="checkbox" [checked]="selectedCustomers.size === filteredCustomers.length"
                                 (change)="toggleAllSelection()" class="h-4 w-4 rounded border-gray-300 text-blue-600">
                         </div>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer
-                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                    <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th> -->
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance
-                    </th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions
-                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <tr *ngFor="let customer of customers">
+                <tr *ngFor="let customer of filteredCustomers" [routerLink]="['/main/customers/details', customer._id]">
                     <td class="px-6 py-4">
                         <div class="flex items-center">
                             <input type="checkbox" [checked]="selectedCustomers.has(customer._id)"
@@ -112,19 +62,12 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
-                            <!-- <div class="h-10 w-10 flex-shrink-0">
-                                <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-lg font-medium text-gray-600">
-                                        {{customer.fullName}}
-                                    </span>
-                                </div>
-                            </div> -->
                             <div class="ml-4">
                                 <div class="text-sm font-medium text-gray-900">
                                     {{getFullName(customer)}}
                                 </div>
                                 <div class="text-sm text-gray-500">
-                                    Joined {{customer.createdAt}}
+                                    Joined {{ customer.createdAt | date: 'MMMM d, y, h:mm a' }}
                                 </div>
                             </div>
                         </div>
@@ -133,20 +76,11 @@
                         <div class="text-sm text-gray-900">{{customer.email}}</div>
                         <div class="text-sm text-gray-500">{{customer.phoneNumber}}</div>
                     </td>
-                 
-
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">Active</div>
-                    </td>
-           
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">10</div>
+                        <div class="text-sm text-gray-900">{{customer.totalOrders || 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">$4545</div>
-                        <div class="text-xs text-gray-500">
-                            Avg: 232
-                        </div>
+                        <div class="text-sm text-gray-900">GHC {{customer.balance}}</div>
                     </td>
                     <td class="px-6 py-4 text-right text-sm font-medium">
                         <div class="flex justify-end space-x-3">
@@ -158,7 +92,10 @@
                                 class="text-blue-600 hover:text-blue-900">
                                 <i class="ri-edit-line"></i>
                             </button>
-                          
+                            <button (click)="deleteCustomer(customer._id)"
+                                class="text-red-600 hover:text-red-900">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -173,7 +110,7 @@
                 </tr>
 
                 <!-- No Results -->
-                <tr *ngIf="!loading && customers.length === 0">
+                <tr *ngIf="!loading && filteredCustomers.length === 0">
                     <td colspan="9" class="px-6 py-4 text-center text-gray-500">
                         No customers found matching your criteria
                     </td>
@@ -185,41 +122,21 @@
     <!-- Pagination -->
     <div class="flex items-center justify-between mt-4">
         <div class="text-sm text-gray-700">
-            Showing {{getMinValue()}} to {{getMaxValue()}} of {{total}} customers
+          Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
         </div>
         <div class="flex items-center space-x-2">
-            <button [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)"
-                class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
-                <i class="ri-arrow-left-s-line"></i>
-            </button>
-            <button [disabled]="currentPage * pageSize >= total" (click)="onPageChange(currentPage + 1)"
-                class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
-                <i class="ri-arrow-right-s-line"></i>
-            </button>
+          <button 
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+            class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          <button 
+            [disabled]="currentPage * pageSize >= total"
+            (click)="onPageChange(currentPage + 1)"
+            class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
         </div>
-    </div>
+      </div>
 </div>
-
-<!-- Status Update Modal -->
-<!-- <div *ngIf="selectedCustomerForStatus" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">
-            Update Customer Status
-        </h3>
-        <div class="space-y-3">
-            <button *ngFor="let status of customerStatuses"
-                (click)="updateCustomerStatus(selectedCustomerForStatus.id, status)"
-                class="w-full flex items-center p-3 rounded-lg hover:bg-gray-50"
-                [class.bg-blue-50]="selectedCustomerForStatus.accountInfo.status === status">
-                <span [ngClass]="getStatusClass(status)" class="w-3 h-3 rounded-full mr-3"></span>
-                <span class="flex-1 text-left">{{status | titlecase}}</span>
-            </button>
-        </div>
-        <div class="mt-6 flex justify-end">
-            <button (click)="selectedCustomerForStatus = null"
-                class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-500">
-                Close
-            </button>
-        </div>
-    </div>
-</div> -->

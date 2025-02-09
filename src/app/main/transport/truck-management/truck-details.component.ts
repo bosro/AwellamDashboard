@@ -1,51 +1,76 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TruckService } from '../../../services/truck.service';
-import { Truck, TruckLoad } from '../../../shared/types/truck-operation.types';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProductsService } from '../../../services/products.service';
+import Swal from 'sweetalert2';
+
+interface Product {
+  _id: string;
+  name: string;
+}
+
+interface Plant {
+  _id: string;
+  name: string;
+}
+
+interface Destination {
+  _id: string;
+  destination: string;
+}
+
+interface SocNumber {
+  _id: string;
+  socNumber: string;
+  quantity: number;
+  plantId: Plant;
+  categoryId: { _id: string; name: string };
+  productId: Product;
+  orderType: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Truck {
+  _id: string;
+  truckNumber: string;
+  capacity: number;
+  expenses: number;
+  status: string;
+  productId: Product | null;
+  orderId: string | null;
+  plantId: Plant | null;
+  categoryId: { _id: string; name: string } | null;
+  socNumber: SocNumber | null;
+  LoadStatus: string;
+  isAwellamLoad: boolean;
+  amountReceived: number;
+  customerName?: string;
+  destinationId?: Destination;
+}
 
 @Component({
-  selector: 'app-truck-details',
-  templateUrl: './truck-detail.component.html',
+  selector: 'app-truck-detail',
+  templateUrl: './truck-detail.component.html'
 })
-export class TruckDetailsComponent implements OnInit {
-  truck?: Truck;
-  loading = false;
-  showLoadForm = false;
-  loadForm: FormGroup;
-  products: any[] = [];
+export class TruckDetailComponent implements OnInit {
+  loading = true;
+  truck!: Truck ;
 
   constructor(
     private route: ActivatedRoute,
     private truckService: TruckService,
-    private productService: ProductsService,
-    private fb: FormBuilder
-  ) {
-    this.loadForm = this.fb.group({
-      capacity: ['', [Validators.required, Validators.min(0)]],
-      productId: ['', Validators.required]
-    });
-  }
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.loadTruckDetails(id);
+    const truckId = this.route.snapshot.paramMap.get('id');
+    if (truckId) {
+      this.loadTruckDetails(truckId);
+    }
   }
 
-  loadProducts(): void {
-    this.productService.getProducts().subscribe({
-      next: (response) => {
-        this.products = response.products;
-      },
-      error: (error) => console.error('Error loading products:', error)
-    });
-  }
-
-  private loadTruckDetails(id: string): void {
-    this.loading = true;
-    this.truckService.getTruckById(id).subscribe({
+  loadTruckDetails(truckId: string): void {
+    this.truckService.getTruckById(truckId).subscribe({
       next: (response) => {
         this.truck = response.truck;
         this.loading = false;
@@ -53,33 +78,43 @@ export class TruckDetailsComponent implements OnInit {
       error: (error) => {
         console.error('Error loading truck details:', error);
         this.loading = false;
+        Swal.fire('Error', 'Failed to load truck details', 'error');
       }
     });
   }
 
-  loadTruck(): void {
-    if (this.loadForm.valid && this.truck) {
-      const loadData = {
-        capacity: this.loadForm.get('capacity')?.value.toString(),
-        productId: this.loadForm.get('productId')?.value,
-        truckId: this.truck._id
-      };
-  
-      this.truckService.loadTruck(loadData).subscribe({
-        next: () => {
-          this.showLoadForm = false;
-          this.loadTruckDetails(this.truck!._id);
-        },
-        error: (error) => console.error('Error loading truck:', error)
-      });
-    }
+  goBack(): void {
+    this.router.navigate(['/main/transport/trucks/']);
   }
 
-  getStatusClass(status: Truck['status']): string {
-    return {
-      'active': 'bg-green-100 text-green-800',
-      'inactive': 'bg-gray-100 text-gray-800',
-      'maintenance': 'bg-yellow-100 text-yellow-800'
-    }[status] || '';
+  unloadTruck(truckId: string): void {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will unload the truck. Proceed?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, unload it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading = true;
+        
+        const endpoint = this.truck?.isAwellamLoad 
+          ? `${truckId}`
+          : `outside/${truckId}`;
+
+        this.truckService.unloadTruck(endpoint).subscribe({
+          next: () => {
+            Swal.fire('Success', 'Truck unloaded successfully', 'success');
+            this.loadTruckDetails(truckId);
+          },
+          error: (error) => {
+            this.loading = false;
+            Swal.fire('Error', error.error?.message || 'Failed to unload truck', 'error');
+          }
+        });
+      }
+    });
   }
 }

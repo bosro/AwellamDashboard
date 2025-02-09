@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TruckService } from '../../../services/truck.service';
-import { Truck } from '../../../shared/types/truck-operation.types';
 
 @Component({
   selector: 'app-truck-form',
@@ -18,26 +17,32 @@ export class TruckFormComponent implements OnInit {
     private router: Router
   ) {
     this.truckForm = this.fb.group({
-      truckNumber: ['', [Validators.required]],
-      capacity: ['', [Validators.required, Validators.min(0)]],
-      status: ['active', Validators.required]
+      truckNumber: ['', Validators.required],
+      capacity: ['', Validators.required],
+      status: ['active', Validators.required],
     });
+  }
+
+  goBack(){
+    this.router.navigate(['/main/transport/trucks/'])
   }
 
   ngOnInit(): void {}
 
   onSubmit(): void {
-    if (this.truckForm.valid) {
-      this.loading = true;
-      this.truckService.createTruck(this.truckForm.value).subscribe({
-        next: () => {
-          this.router.navigate(['/transport/trucks']);
-        },
-        error: (error) => {
-          console.error('Error creating truck:', error);
-          this.loading = false;
-        }
-      });
-    }
+    if (this.truckForm.invalid) return;
+
+    this.loading = true;
+    const formData = this.truckForm.value;
+
+    this.truckService.createTruck(formData).subscribe({
+      next: () => {
+        this.router.navigate(['main/transport/trucks']);
+      },
+      error: (error) => {
+        console.error('Error creating truck:', error);
+        this.loading = false;
+      },
+    });
   }
 }
