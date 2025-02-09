@@ -55,6 +55,14 @@ export class PlantService {
     return this.http.get<{ categories: Category[] }>(`${this.apiUrl}/categories`);
   }
 
+  getDestinationById(id: string): Observable<{ destination: Destination }> {
+    return this.http.get<{ destination: Destination }>(`${this.apiUrl}/destination/${id}`);
+  }
+
+  updateDestination(id: string, destination: Destination): Observable<any> {
+    return this.http.put(`${this.apiUrl}/destination/edit/${id}`, destination);
+  }
+
   getCategoriesByPlant(plantId: string): Observable<{ categories: Category[] }> {
     return this.http.get<{ categories: Category[] }>(`${this.apiUrl}/category/plants/${plantId}`);
   }

@@ -39,7 +39,7 @@ export class PaymentDetailComponent implements OnInit {
     this.socForm = this.fb.group({
       socNumber: ['', [Validators.required, Validators.minLength(5)]],
       quantity: ['', [Validators.required, Validators.min(1)]],
-      price: ['', [Validators.required, Validators.min(0)]],
+      // price: ['', [Validators.required, Validators.min(0)]],
       plantId: ['', Validators.required],
       productId: ['', Validators.required],
       destinationId: ['', Validators.required],

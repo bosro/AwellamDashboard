@@ -40,7 +40,7 @@ export class LoadTruckComponent implements OnInit {
       // categoryId: ['', Validators.required],
       productId: ['', Validators.required],
       customerName:['', Validators.required],
-      // amountReceived: ['', Validators.required],
+      amountReceived: ['', Validators.required],
       destinationId: ['', Validators.required] // Add destinationId form control
     });
   }

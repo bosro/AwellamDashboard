@@ -68,7 +68,7 @@ export class OrderEditComponent implements OnInit {
     this.loading = true;
     this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.productId}`).subscribe({
       next: (response) => {
-        this.trucks = response.trucks;
+        this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
         this.loading = false;
         Swal.fire({
           title: "Driver Fetched Successfully!",

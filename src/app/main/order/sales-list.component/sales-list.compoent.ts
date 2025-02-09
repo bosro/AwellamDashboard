@@ -180,7 +180,7 @@ onPlantSelect: any;
     if (confirm('Are you sure you want to delete this order?')) {
       this.ordersService.deleteOrder(id).subscribe({
         next: () => {
-          this.loadOrders();
+          // this.loadOrders();
           this.router.navigate(['main/orders/saleslist']);
         },
         error: (error) => console.error('Error deleting order:', error)

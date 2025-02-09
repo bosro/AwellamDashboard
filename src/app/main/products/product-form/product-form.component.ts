@@ -36,7 +36,7 @@ export class ProductFormComponent implements OnInit {
       costprice: ['', [Validators.required, Validators.min(0)]],
       plantId: ['', Validators.required],
       // categoryId: ['', Validators.required],
-      destinationId: ['', Validators.required],
+      // destinationId: ['', Validators.required],
       inStock: [true],
       // totalStock: ['', [Validators.required, Validators.min(0)]],
       image: [''],
@@ -64,23 +64,23 @@ export class ProductFormComponent implements OnInit {
       });
   }
 
-  onPlantSelect(event: Event): void {
-    const selectElement = event.target as HTMLSelectElement;
-    const plantId = selectElement.value;
+  // onPlantSelect(event: Event): void {
+  //   const selectElement = event.target as HTMLSelectElement;
+  //   const plantId = selectElement.value;
     
      
 
-      this.plantService.getDestinationsByPlant(plantId)
-        .pipe(finalize(() => this.loading = false))
-        .subscribe({
-          next: (response) => {
-            this.destinations = response.destinations;
-          },
-          error: (error) => console.error('Error loading destinations:', error)
-        });
+  //     this.plantService.getDestinationsByPlant(plantId)
+  //       .pipe(finalize(() => this.loading = false))
+  //       .subscribe({
+  //         next: (response) => {
+  //           this.destinations = response.destinations;
+  //         },
+  //         error: (error) => console.error('Error loading destinations:', error)
+  //       });
     
     
-  }
+  // }
 
   onSubmit(): void {
     if (this.productForm.valid) {
@@ -99,7 +99,7 @@ export class ProductFormComponent implements OnInit {
         // categoryId: formValue.categoryId,
         // totalStock: Number(formValue.totalStock), // Convert to number
         inStock: formValue.inStock,
-        destinationId: formValue.destinationId,
+        // destinationId: formValue.destinationId,
       };
   
       // Log the final payload

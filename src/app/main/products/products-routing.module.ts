@@ -21,7 +21,9 @@ const routes: Routes = [
       { path: 'inventory', component: ProductFormComponent },
       {path: 'plants/create' , component: PlantFormComponent},
       {path: 'categories/create' , component: CategoryFormComponent},
-      {path: 'destination/create' , component: DestinationFormComponent}
+      {path: 'destination/create' , component: DestinationFormComponent},
+      {path: 'destination/edit/:id' , component: DestinationFormComponent}
+
 
     ]
   }
