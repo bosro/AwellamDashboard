@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 export interface Order {
   _id: string;
@@ -37,6 +38,8 @@ export class OutSideOrdersTableComponent implements OnInit {
   currentPage: number = 1;
   Math=Math
 
+  private apiUrl =`${environment.apiUrl}`
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -46,7 +49,7 @@ export class OutSideOrdersTableComponent implements OnInit {
 
   toggleOrderStatus(order: Order): void {
     const newStatus = order.status === 'LOADED' ? 'DELIVERED' : 'LOADED';
-    const apiUrl = `http://127.0.0.1:3000/api/orders/toggle-staus/${order._id}`;
+    const apiUrl = `${this.apiUrl}/orders/toggle-staus/${order._id}`;
 
     this.http.put(apiUrl, {}).subscribe(
       () => {
@@ -61,7 +64,7 @@ export class OutSideOrdersTableComponent implements OnInit {
 
 
   fetchOrders(): void {
-    const apiUrl = 'http://127.0.0.1:3000/api/orders/outside-orders/get';
+    const apiUrl = `${this.apiUrl}/orders/outside-orders/get`;
     this.http.get<{ orders: Order[] }>(apiUrl).subscribe(
       (response) => {
         this.orders = response.orders;
