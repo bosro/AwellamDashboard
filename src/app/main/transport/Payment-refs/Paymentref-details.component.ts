@@ -15,7 +15,7 @@ import { Truck } from '../../../shared/types/truck-operation.types';
 
 @Component({
   selector: 'app-payment-detail',
-  templateUrl: './payment-detail.html',
+  templateUrl: './Payment-detail.html',
 })
 export class PaymentDetailComponent implements OnInit {
   paymentRef: PaymentReference | null = null;
