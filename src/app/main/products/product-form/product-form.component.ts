@@ -16,7 +16,7 @@ export class ProductFormComponent implements OnInit {
   loading = false;
   imageFile?: File;
   plants: Plant[] = [];
-  categories: Category[] = [];
+  // categories: Category[] = [];
   destinations: Destination[]=[];
   selectedPlant?: string;
 
@@ -33,12 +33,12 @@ export class ProductFormComponent implements OnInit {
   private initForm(): void {
     this.productForm = this.fb.group({
       name: ['', Validators.required],
-      price: ['', [Validators.required, Validators.min(0)]],
+      costprice: ['', [Validators.required, Validators.min(0)]],
       plantId: ['', Validators.required],
-      categoryId: ['', Validators.required],
+      // categoryId: ['', Validators.required],
       destinationId: ['', Validators.required],
       inStock: [true],
-      totalStock: ['', [Validators.required, Validators.min(0)]],
+      // totalStock: ['', [Validators.required, Validators.min(0)]],
       image: [''],
     });
   }
@@ -64,20 +64,11 @@ export class ProductFormComponent implements OnInit {
       });
   }
 
-  onPlantChange(event: Event): void {
+  onPlantSelect(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     const plantId = selectElement.value;
-    if (plantId) {
-      this.loading = true;
-      this.plantService.getCategoriesByPlant(plantId)
-        .pipe(finalize(() => this.loading = false))
-        .subscribe({
-          next: (response) => {
-            this.categories = response.categories;
-            this.productForm.patchValue({ categoryId: '' });
-          },
-          error: (error) => console.error('Error loading categories:', error)
-        });
+    
+     
 
       this.plantService.getDestinationsByPlant(plantId)
         .pipe(finalize(() => this.loading = false))
@@ -87,10 +78,8 @@ export class ProductFormComponent implements OnInit {
           },
           error: (error) => console.error('Error loading destinations:', error)
         });
-    } else {
-      this.categories = [];
-      this.productForm.patchValue({ categoryId: '' });
-    }
+    
+    
   }
 
   onSubmit(): void {
@@ -105,10 +94,10 @@ export class ProductFormComponent implements OnInit {
       // be expecting JSON data (as it works in Postman)
       const productData = {
         name: formValue.name,
-        price: Number(formValue.price), // Convert to number
+        costprice: Number(formValue.costprice), // Convert to number
         plantId: formValue.plantId,
-        categoryId: formValue.categoryId,
-        totalStock: Number(formValue.totalStock), // Convert to number
+        // categoryId: formValue.categoryId,
+        // totalStock: Number(formValue.totalStock), // Convert to number
         inStock: formValue.inStock,
         destinationId: formValue.destinationId,
       };
@@ -157,16 +146,16 @@ export class ProductFormComponent implements OnInit {
       .subscribe({
         next: (product) => {
           this.productForm.patchValue({
-            name: product.name,
-            price: product.price,
+            name: product?.name,
+            costprice: product.costprice,
             plantId: product.plantId,
-            categoryId: product.categoryId._id,
+            // categoryId: product.categoryId._id,
             inStock: product.inStock,
-            totalStock: product.totalStock
+            // totalStock: product.totalStock
           });
-          if (product.plantId) {
-            this.onPlantChange({ target: { value: product.plantId } } as unknown as Event);
-          }
+          // if (product.plantId) {
+          //   this.onPlantChange({ target: { value: product.plantId } } as unknown as Event);
+          // }
         },
         error: (error) => console.error('Error loading product:', error)
       });

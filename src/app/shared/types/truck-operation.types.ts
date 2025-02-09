@@ -1,20 +1,55 @@
 export interface Truck {
+driver: any;
   _id: string;
   truckNumber: string;
   capacity: number;
   expenses: number;
-  status: 'active' | 'inactive' | 'maintenance';
-  product?: {
+  status: string;
+  productId: {
     _id: string;
     name: string;
   };
   orderId: string | null;
-  deliveredOrders: any[];
-  expenditure: any[];
-
-  driver?: {
+  plantId: {
     _id: string;
     name: string;
+  };
+  categoryId: {
+    _id: string;
+    name: string;
+  } | null;
+  deliveredOrders: any[];
+  socNumber: {
+    _id: string;
+    socNumber: string;
+    quantity: number;
+    plantId: {
+      _id: string;
+      name: string;
+    };
+    categoryId: {
+      _id: string;
+      name: string;
+    };
+    productId: {
+      _id: string;
+      name: string;
+    };
+    status: string;
+    orderType: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  } | null;
+  LoadStatus: string;
+  isAwellamLoad: boolean;
+  amountReceived: number;
+  expenditure: any[];
+  __v: number;
+  customerName: string;
+  destinationId: {
+    _id: string;
+    destination: string;
   };
 }
 

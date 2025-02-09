@@ -130,7 +130,7 @@
           <div class="text-sm font-medium text-gray-900">{{order.customerId.fullName}}</div>
         </td>
         <td class="px-6 py-4">
-          <div class="text-sm font-medium text-gray-900">{{ order.categoryId.name || 'N/A' }}</div>
+          <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name || 'N/A' }}</div>
           <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div>
         </td>
         <td class="px-6 py-4">

@@ -19,6 +19,12 @@ export interface Destination{
   destination: string;
   rates: number;
   plantId: string;
+  cost:number
+}
+
+export interface DestinationResponse{
+  message: string,
+  destinations: Destination[]
 }
 
 @Injectable({

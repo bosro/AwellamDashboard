@@ -1,27 +1,39 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductsService } from '../../../services/products.service';
+// import { Product } from '../../../shared/types/product.interface';
+import { Product } from '../../../services/products.service';
 
 
-export interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  categoryId: {
-    _id: string;
-    name: string;
-  };
-  inStock: boolean;
-  totalStock: number;
-  image: string;
-}
+
+// export interface Product {
+
+//   _id: string;
+
+//   name: string;
+
+//   costprice: number;
+
+//   inStock: boolean;
+
+//   productId: {
+
+//     _id: string;
+
+//     name: string;
+
+//   };
+
+//   image: string;
+
+// }
 
 @Component({
   selector: 'app-product-details',
   templateUrl: './product-details.component.html'
 })
 export class ProductDetailsComponent implements OnInit {
-  product: Product | undefined;
+  product: Product | null = null;
   loading = false;
   // stockQuantity = 0;
   stockQuantity: number = 0;
@@ -37,28 +49,28 @@ export class ProductDetailsComponent implements OnInit {
     if (id) this.loadProduct(id);
   }
 
-  addStock(): void {
-    if (!this.product || this.stockQuantity <= 0) return;
+  // addStock(): void {
+  //   if (!this.product || this.stockQuantity <= 0) return;
     
-    this.productsService.addStock(this.product._id, this.stockQuantity).subscribe({
-      next: (updatedProduct) => {
-        this.product = updatedProduct;
-        this.stockQuantity = 0;
-      },
-      error: (error) => console.error('Error adding stock:', error)
-    });
-  }
+  //   this.productsService.addStock(this.product._id, this.stockQuantity).subscribe({
+  //     next: (updatedProduct) => {
+  //       this.product = updatedProduct;
+  //       this.stockQuantity = 0;
+  //     },
+  //     error: (error) => console.error('Error adding stock:', error)
+  //   });
+  // }
 
-  toggleStock(): void {
-    if (!this.product) return;
+  // toggleStock(): void {
+  //   if (!this.product) return;
     
-    this.productsService.toggleStock(this.product._id).subscribe({
-      next: (updatedProduct) => {
-        this.product = updatedProduct;
-      },
-      error: (error) => console.error('Error toggling stock status:', error)
-    });
-  }
+  //   this.productsService.toggleStock(this.product._id).subscribe({
+  //     next: (updatedProduct) => {
+  //       this.product = updatedProduct;
+  //     },
+  //     error: (error) => console.error('Error toggling stock status:', error)
+  //   });
+  // }
 
   private loadProduct(_id: string): void {
     this.loading = true;
@@ -66,7 +78,6 @@ export class ProductDetailsComponent implements OnInit {
       next: (product) => {
         this.product = product;
         this.loading = false;
-        // console.log(this.product)
       },
       error: (error) => {
         console.error('Error loading product:', error);

@@ -89,6 +89,7 @@ export interface PaymentReference {
   socNumbers: SocNumber[];
   createdAt: string;
   updatedAt: string;
+  orderType: string
 }
 
 
@@ -155,6 +156,9 @@ export class PaymentService {
 
   getCategoriesByPlant(plantId: string): Observable<{ categories: Category[] }> {
     return this.http.get<{ categories: Category[] }>(`${this.apiUrl}/category/plants/${plantId}`);
+  }
+  getProductByPlant(plantId: string): Observable<{ products: Product[] }> {
+    return this.http.get<{ products: Product[]}>(`${this.apiUrl}/products/get/${plantId}`);
   }
 
   getProductsByCategory(categoryId: string): Observable<{ products: Product[] }> {

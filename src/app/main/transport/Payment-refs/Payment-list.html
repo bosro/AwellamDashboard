@@ -29,7 +29,7 @@
                      placeholder="Enter reference number">
               <div *ngIf="paymentForm.get('paymentRef')?.touched && paymentForm.get('paymentRef')?.invalid" 
                    class="text-red-500 text-sm mt-1">
-                Reference number is required (min 5 characters)
+                Reference number must be of the form PR folowed by 11 numbers
               </div>
             </div>
   
@@ -97,6 +97,9 @@
                 Plant
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                OrderTypee
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Created Date
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -115,6 +118,10 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{payment.plantId.name}}</div>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{payment.orderType || 'N/A'}}</div>
+              </td>
+              
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-500">{{payment.createdAt | date:'medium'}}</div>
               </td>

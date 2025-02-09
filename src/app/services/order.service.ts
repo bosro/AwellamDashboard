@@ -28,7 +28,10 @@ items: any;
       name:string
     }
   };
-  socNumber:String;
+  socNumber:{
+    _id: string,
+    socNumber: string
+  };
   deliveryAddress: string;
   totalAmount: number; // Changed to number
   status: string;
