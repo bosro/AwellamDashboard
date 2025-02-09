@@ -5,7 +5,9 @@
       <div class="flex justify-between items-center">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">{{ product?.name }}</h1>
-          <p class="mt-2 text-gray-600">Product Details and Management</p>
+          <h1 class="text-3xl font-bold text-gray-900">{{ product?.plantId?.name }}</h1>
+           
+          <!-- <p class="mt-2 text-gray-600">Product Details and Management</p> -->
         </div>
         <button 
           routerLink="/main/products/list"
@@ -26,16 +28,21 @@
       <!-- Left Column - Image -->
       <div class="lg:col-span-1">
         <div class="bg-white rounded-xl shadow-sm p-6">
-          <img 
-            [src]="product.image || '/assets/placeholder.png'"
-            class="w-full h-80 object-cover rounded-lg"
-            [alt]="product.name"
-          >
+            <img 
+                [src]="product.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZcwAS4CogDrNQLb2m0n331ywN95Jwaw1l6g&s'"
+                class="w-full h-80 object-cover rounded-lg"
+                [alt]="product.name"
+              > 
         </div>
       </div>
+      <!-- <img 
+                [src]="product.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZcwAS4CogDrNQLb2m0n331ywN95Jwaw1l6g&s'"
+                class="w-full h-80 object-cover rounded-lg"
+                [alt]="product.name"
+              >  -->
 
       <!-- Middle Column - Details -->
-      <div class="lg:col-span-1">
+      <!-- <div class="lg:col-span-1">
         <div class="bg-white rounded-xl shadow-sm p-6">
           <h2 class="text-xl font-semibold text-gray-900 mb-6">Product Information</h2>
           
@@ -69,7 +76,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Right Column - Actions -->
       <div class="lg:col-span-1">
@@ -87,24 +94,24 @@
                   class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   placeholder="Enter quantity"
                 >
-                <button 
+                <!-- <button 
                   (click)="addStock()"
                   [disabled]="stockQuantity <= 0"
                   class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
                   Add Stock
-                </button>
+                </button> -->
               </div>
             </div>
 
             <!-- Toggle Stock Status -->
-            <div>
+            <!-- <div>
               <button 
                 (click)="toggleStock()"
                 class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <i class="ri-refresh-line mr-2"></i>
                 Toggle Stock Status
               </button>
-            </div>
+            </div> -->
 
             <!-- Edit Product -->
             <div>

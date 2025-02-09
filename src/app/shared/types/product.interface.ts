@@ -1,18 +1,14 @@
 export interface Product {
   _id: string;
   name: string;
-  price: number;
-  categoryId: {
-    _id: string;
-    name: string;
-  };
+  costprice: number;
   plantId: {
     _id: string,
     name:string
   }
   inStock: boolean;
   image: string;
-totalStock:number
+
 }
 
 

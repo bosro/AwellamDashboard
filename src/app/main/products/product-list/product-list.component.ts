@@ -7,10 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-interface Category {
-  _id: string;
-  name: string;
-}
+
 
 interface Plant {
   _id: string;
@@ -31,7 +28,7 @@ export class ProductListComponent implements OnInit {
   selectedProducts = new Set<string>();
   filterForm: FormGroup;
   exportDropdown = false;
-  categories: Category[] = [];
+  // categories: Category[] = [];
   plants: Plant[] = [];
   Math = Math;
 
@@ -76,6 +73,7 @@ export class ProductListComponent implements OnInit {
   private loadProducts(): void {
     this.productsService.getProducts({}).subscribe({
       next: (response) => {
+        console.log(response.products)
         this.products = response.products;
         this.total = this.products.length;
         this.applyFilters();
@@ -103,7 +101,7 @@ export class ProductListComponent implements OnInit {
       if (plantId) {
         this.loadCategories(plantId);
       } else {
-        this.categories = [];
+        // this.categories = [];
         this.filterForm.patchValue({ category: '' });
       }
     });
@@ -122,7 +120,7 @@ export class ProductListComponent implements OnInit {
     this.loading = true;
     this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
       next: (response) => {
-        this.categories = response.categories;
+        // this.categories = response.categories;
         this.loading = false;
       },
       error: (error) => {
@@ -158,12 +156,12 @@ export class ProductListComponent implements OnInit {
     this.filteredProducts = this.products.filter(product => {
       const matchesSearch = !search || product.name.toLowerCase().includes(search.toLowerCase());
       const matchesPlant = !plant || product.plantId._id === plant;
-      const matchesCategory = !category || product.categoryId._id === category;
-      const matchesMinPrice = !minPrice || product.price >= minPrice;
-      const matchesMaxPrice = !maxPrice || product.price <= maxPrice;
+      // const matchesCategory = !category || product.categoryId._id === category;
+      const matchesMinPrice = !minPrice || product.costprice >= minPrice;
+      const matchesMaxPrice = !maxPrice || product.costprice <= maxPrice;
       const matchesInStock = inStock === '' || product.inStock === (inStock === 'true');
 
-      return matchesSearch && matchesPlant && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesInStock;
+      return matchesSearch && matchesPlant  && matchesMinPrice && matchesMaxPrice && matchesInStock;
     });
 
     this.total = this.filteredProducts.length;

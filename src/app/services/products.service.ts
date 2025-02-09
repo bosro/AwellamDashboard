@@ -6,18 +6,21 @@ import { environment } from '../environments/environment';
 
 
 export interface Product {
-  plantId: any;
   _id: string;
   name: string;
-  price: number;
-  categoryId: {
-    _id: string;
-    name: string;
-  };
+costprice: number;
   inStock: boolean;
-  totalStock: number;
   image: string;
-  destinationId: any
+  plantId:{
+    _id: string;
+    name: string
+  };
+  destinationId: {
+    _id:string,
+    rates: number,
+    cost: number,
+    destination: string
+  }
 }
 
 
@@ -52,9 +55,8 @@ export class ProductsService {
   }
 
   getProductById(id: string): Observable<Product> {
-    return this.http.get<ProductResponse>(`${this.apiUrl}/${id}`).pipe(
-      map(response => response.product)
-    );
+    return this.http.get<{ message: string, product: Product }>(`${this.apiUrl}/${id}`)
+      .pipe(map(response => response.product));
   }
 
   createProduct(productData: any): Observable<Product> {

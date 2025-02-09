@@ -6,6 +6,8 @@ import { OrdersService } from '../../../services/order.service';
 import { forkJoin, combineLatest } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { PaymentService } from '../../../services/payment.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-order-processing',
@@ -32,12 +34,12 @@ export class OrderProcessingComponent implements OnInit {
     private fb: FormBuilder,
     private ordersService: OrdersService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private paymentService: PaymentService
   ) {
     this.orderForm = this.fb.group({
       plant: ['', Validators.required],
-      category: ['', Validators.required],
-      product: ['', Validators.required],
+
       customer: this.fb.group({
         id: ['', Validators.required],
         name: ['', Validators.required],
@@ -79,7 +81,7 @@ export class OrderProcessingComponent implements OnInit {
       next: ({ plants, customers }) => {
         this.plants = plants.plants;
         this.customers = customers.customers;
-        // this.filteredCustomers = this.customers;
+        this.filteredCustomers = this.customers;
       },
       error: (error) => {
         console.error('Error fetching data:', error);
@@ -92,44 +94,26 @@ export class OrderProcessingComponent implements OnInit {
     const plantId = event.target.value;
     if (plantId) {
       this.loading = true;
-      this.noCategoriesFound = false;
-      this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
-        next: (response) => {
-          this.categories = response.categories;
-          this.noCategoriesFound = this.categories.length === 0;
-          this.orderForm.patchValue({ category: '', product: '' });
-          this.products = [];
-        },
-        error: (error) => console.error('Error loading categories:', error),
-        complete: () => this.loading = false
-      });
+
+      this.paymentService.getProductByPlant(plantId).subscribe({
+              next: (response) => {
+                this.products = response.products;
+                this.loading = false
+              },
+              error: (error) => {
+                console.error('Error loading products:', error);
+                Swal.fire('Error', 'Failed to load products', 'error');
+              },
+            });
+    
     } else {
-      this.categories = [];
-      this.noCategoriesFound = false;
-      this.orderForm.patchValue({ category: '', product: '' });
+      // this.categories = [];
+      // this.noCategoriesFound = false;
+      // this.orderForm.patchValue({ category: '', product: '' });
     }
   }
 
-  onCategorySelect(event: any): void {
-    const categoryId = event.target.value;
-    if (categoryId) {
-      this.loading = true;
-      this.noProductsFound = false;
-      this.http.get<any>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
-        next: (response) => {
-          this.products = response.products;
-          this.noProductsFound = this.products.length === 0;
-          this.orderForm.patchValue({ product: '' });
-        },
-        error: (error) => console.error('Error loading products:', error),
-        complete: () => this.loading = false
-      });
-    } else {
-      this.products = [];
-      this.noProductsFound = false;
-      this.orderForm.patchValue({ product: '' });
-    }
-  }
+  
 
   get items(): FormArray {
     return this.orderForm.get('items') as FormArray;
@@ -218,11 +202,10 @@ export class OrderProcessingComponent implements OnInit {
           price: item.price,
           total: item.quantity * item.price
         })),
-        deliveryAddress: this.orderForm.value.customer.address,
+        // deliveryAddress: this.orderForm.value.customer.address,
         totalAmount: this.getTotal(),
         notes: this.orderForm.value.notes,
         plantId: this.orderForm.value.plant,
-        categoryId: this.orderForm.value.category
       };
 
       this.ordersService.createOrder(orderData).subscribe({

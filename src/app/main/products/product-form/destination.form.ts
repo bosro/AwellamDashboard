@@ -21,7 +21,8 @@ export class DestinationFormComponent implements OnInit {
     this.destinationForm = this.fb.group({
       destination: ['', Validators.required],
       plantId: ['', Validators.required],
-      rates: ['', Validators.required]
+      rates: ['', Validators.required],
+      cost: ['', Validators.required],
     });
   }
 

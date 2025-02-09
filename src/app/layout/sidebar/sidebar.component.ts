@@ -60,11 +60,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/orders/saleslist',
           icon: 'ri-file-list-2-line'
         },
-        // {
-        //   title: 'Create Order',
-        //   route: '/main/orders/processing',
-        //   icon: 'ri-play-list-add-fill'
-        // }
+        {
+          title: 'Outside Load Order',
+          route: '/main/orders/outsideload',
+          icon: 'ri-play-list-add-fill'
+        }
       ]
     },
     {

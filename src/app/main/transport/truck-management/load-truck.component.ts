@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import Swal from 'sweetalert2';
+import { PaymentService } from '../../../services/payment.service';
 
 @Component({
   selector: 'app-load-truck',
@@ -20,7 +21,7 @@ export class LoadTruckComponent implements OnInit {
   loading = false;
   noCategoriesFound = false;
   noProductsFound = false;
-  isLoadOutsideTruckInvoice = false;
+  isLoadOutsideTruckInvoice = true;
 
   private apiUrl = `${environment.apiUrl}`;
 
@@ -28,16 +29,19 @@ export class LoadTruckComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private http: HttpClient,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private paymentService: PaymentService
   ) {
     this.loadTruckForm = this.fb.group({
       truckId: ['', Validators.required],
       capacity: ['', [Validators.required, Validators.min(1)]],
       socNumber: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
       plantId: ['', Validators.required],
-      categoryId: ['', Validators.required],
+      // categoryId: ['', Validators.required],
       productId: ['', Validators.required],
-      destinationId: [''] // Add destinationId form control
+      customerName:['', Validators.required],
+      // amountReceived: ['', Validators.required],
+      destinationId: ['', Validators.required] // Add destinationId form control
     });
   }
 
@@ -66,18 +70,21 @@ export class LoadTruckComponent implements OnInit {
     const plantId = event.target.value;
     if (plantId) {
       this.loading = true;
-      this.noCategoriesFound = false;
-      this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
-        next: (response) => {
-          this.categories = response.categories;
-          this.noCategoriesFound = this.categories.length === 0;
-          this.loadTruckForm.patchValue({ categoryId: '', productId: '' }); // Reset category and product
-          this.products = []; // Clear products
-        },
-        error: (error) => console.error('Error loading categories:', error),
-        complete: () => (this.loading = false),
-      });
+      
 
+
+      this.paymentService.getProductByPlant(plantId).subscribe({
+        next: (response) => {
+          this.products = response.products;
+          console.log('Loaded products:', this.products); // Debug log
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading products:', error);
+          this.loading = false;
+          Swal.fire('Error', 'Failed to load products', 'error');
+        }
+      });
       // Fetch destinations
       this.http.get<any>(`${this.apiUrl}/destination/${plantId}/get`).subscribe({
         next: (response) => {
@@ -93,26 +100,26 @@ export class LoadTruckComponent implements OnInit {
   }
 
   // Fetch products based on selected category
-  onCategorySelect(event: any): void {
-    const categoryId = event.target.value;
-    if (categoryId) {
-      this.loading = true;
-      this.noProductsFound = false;
-      this.http.get<any>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
-        next: (response) => {
-          this.products = response.products;
-          this.noProductsFound = this.products.length === 0;
-          this.loadTruckForm.patchValue({ productId: '' }); // Reset product
-        },
-        error: (error) => console.error('Error loading products:', error),
-        complete: () => (this.loading = false),
-      });
-    } else {
-      this.products = [];
-      this.noProductsFound = false;
-      this.loadTruckForm.patchValue({ productId: '' });
-    }
-  }
+  // onCategorySelect(event: any): void {
+  //   const categoryId = event.target.value;
+  //   if (categoryId) {
+  //     this.loading = true;
+  //     this.noProductsFound = false;
+  //     this.http.get<any>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
+  //       next: (response) => {
+  //         this.products = response.products;
+  //         this.noProductsFound = this.products.length === 0;
+  //         this.loadTruckForm.patchValue({ productId: '' }); // Reset product
+  //       },
+  //       error: (error) => console.error('Error loading products:', error),
+  //       complete: () => (this.loading = false),
+  //     });
+  //   } else {
+  //     this.products = [];
+  //     this.noProductsFound = false;
+  //     this.loadTruckForm.patchValue({ productId: '' });
+  //   }
+  // }
 
   onLoadOutsideTruckInvoice(): void {
     this.isLoadOutsideTruckInvoice = true;
@@ -147,7 +154,7 @@ export class LoadTruckComponent implements OnInit {
       const loadTruckData = this.loadTruckForm.value;
 
       // Submit the form data to the backend
-      this.http.put(`${this.apiUrl}/trucks/load`, loadTruckData).subscribe({
+      this.http.post(`${this.apiUrl}/trucks/load`, loadTruckData).subscribe({
         next: () => {
           Swal.fire({
             icon: 'success',

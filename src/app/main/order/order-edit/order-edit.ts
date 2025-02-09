@@ -17,10 +17,8 @@ export class OrderEditComponent implements OnInit {
   orderId: string = '';
   trucks: any[] = [];
   order: any;
-  categoryId: string= '';
+  productId: string = '';
   private apiUrl = `${environment.apiUrl}`;
-// item: any;
-// drivers: any;
 
   constructor(
     private fb: FormBuilder,
@@ -39,8 +37,6 @@ export class OrderEditComponent implements OnInit {
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
-    // this.loadTrucks(this.order.productId?._id);
-    // this.getTrucks()
   }
 
   loadOrder(): void {
@@ -50,11 +46,8 @@ export class OrderEditComponent implements OnInit {
     this.ordersService.getOrderById(this.orderId).subscribe({
       next: (response) => {
         this.order = response.order;
-        this.categoryId=this.order?.categoryId
+        this.productId = this.order?.orderItems[0].product?._id;
 
-        // console.log(this.categoryId)
-
-      
         this.orderForm.patchValue({
           price: this.order.price,
           assignedTruck: this.order.truckId?._id
@@ -67,30 +60,18 @@ export class OrderEditComponent implements OnInit {
         this.loading = false;
       }
     });
-  } 
-  
-  // loadTrucks(): void {
-
-  // // loadTrucks(productId: string): void {
-  //   this.http.get<any>(`${environment.apiUrl}/trucks/get`).subscribe({
-  //     next: (response) => {
-  //       this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
-  //     },
-  //     error: (error) => console.error('Error loading trucks:', error)
-  //   });
-  // }
+  }
 
   private getTrucks(): void {
-    this.categoryId=this.order?.categoryId._id
+    if (!this.productId) return;
 
-    // console.log(categoryId)
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.categoryId}`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.productId}`).subscribe({
       next: (response) => {
-        this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
+        this.trucks = response.trucks;
         this.loading = false;
         Swal.fire({
-          title: "Driver Fetched Succesfully!",
+          title: "Driver Fetched Successfully!",
           icon: "success",
           draggable: true
         });
@@ -100,8 +81,7 @@ export class OrderEditComponent implements OnInit {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "No drive found holding this product category or from this plant !",
-          // footer: '<a href="#">Why do I have this issue?</a>'
+          text: "No driver found holding this product category or from this plant!",
         });
         this.loading = false;
       },
@@ -114,18 +94,18 @@ export class OrderEditComponent implements OnInit {
       const orderData = this.orderForm.value;
 
       // Update the order price
-      this.ordersService.editOrder(this.orderId, { price: orderData.price, quantity:orderData.quantity }).subscribe({
+      this.ordersService.editOrder(this.orderId, { price: orderData.price, quantity: orderData.quantity }).subscribe({
         next: () => {
           // Assign the truck to the order if a truck is selected
           if (orderData.assignedTruck) {
             this.http.put(`${environment.apiUrl}/orders/${this.orderId}/assign-truck`, {
               truckId: orderData.assignedTruck,
-              price:  orderData.price,
-              quantity:orderData.quantity
+              price: orderData.price,
+              quantity: orderData.quantity
             }).subscribe({
               next: () => {
                 Swal.fire({
-                  title: "Driver assigned Succesfully!",
+                  title: "Driver assigned Successfully!",
                   icon: "success",
                   draggable: true
                 });
@@ -136,8 +116,7 @@ export class OrderEditComponent implements OnInit {
                 this.saving = false;
                 Swal.fire({
                   icon: "error",
-                  title: `${ error.error?.message }`,
-                  // footer: '<a href="#">Why do I have this issue?</a>'
+                  title: `${error.error?.message}`,
                 });
               }
             });

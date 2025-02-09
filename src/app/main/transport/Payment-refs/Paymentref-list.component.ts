@@ -1,8 +1,9 @@
 export enum OrderType {
-  GUARANTEE_ORDER = "GUARANTEE ORDER",
-  SPECIAL_GUARANTEE_ORDER = "SPECIAL GUARANTEE ORDER",
-  NORMAL_CHEQUE_ORDER = "NORMAL CHÈQUE ORDER",
-  CASH_ORDER = "CASH ORDER"
+  GUARANTEE_ORDER = "GUARANTEE ORDER ",
+  SPECIAL_GUARANTEE_ORDER= "SPECIAL GUARANTEE ORDER",
+NORMAL_CHÈQUE_ORDER= "NORMAL CHÈQUE ORDER",
+CASH_ORDER = "CASH ORDER",
+BORROWED_ORDER= "BORROWED_ORDER"
 }
 
 // src/app/components/payment-list/payment-list.component.ts
@@ -43,7 +44,7 @@ export class PaymentListComponent implements OnInit {
     private http: HttpClient
   ) {
     this.paymentForm = this.fb.group({
-      paymentRef: ['', [Validators.required, Validators.minLength(5)]],
+      paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
       plantId: ['', Validators.required],
       orderType: ['', Validators.required]
     });
