@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, HostListener } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -19,16 +19,12 @@ interface MenuItem {
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-
-
-  @Input() isCollapsed = false;
   @Output() sidebarToggled = new EventEmitter<void>();
-
-  toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
-    this.sidebarToggled.emit();
-  }
-
+  
+  isSidebarOpen = false;
+  isCollapsed: boolean = false;
+  isMobileSidebarOpen: boolean = false;
+  isMobile: boolean = false;
 
   menuItems: MenuItem[] = [
     {
@@ -329,14 +325,35 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit(): void {
     this.filterMenuByRole();
+    this.checkScreenSize();
   }
 
-  // toggleSidebar(): void {
-  //   this.isCollapsed = !this.isCollapsed;
-  // }
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkScreenSize();
+    if (!this.isMobile) {
+      this.isMobileSidebarOpen = false;
+    }
+  }
 
-  toggleSubmenu(item: MenuItem): void {
-    item.expanded = !item.expanded;
+  toggleSidebar(): void {
+    if (this.isMobile) {
+      this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+    } else {
+      this.isCollapsed = !this.isCollapsed;
+      this.sidebarToggled.emit();
+    }
+  }
+
+  toggleMobileSidebar(): void {
+    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768;
+    if (!this.isMobile) {
+      this.isMobileSidebarOpen = false;
+    }
   }
 
   private filterMenuByRole(): void {
