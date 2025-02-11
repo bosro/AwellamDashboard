@@ -88,11 +88,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/products/inventory',
           icon: 'ri-file-list-3-line'
         },
-        {
-          title: 'Purchase Overview',
-          route: '/main/purchasing',
-          icon: 'ri-order-play-line'
-        },
+        // {
+        //   title: 'Purchase Overview',
+        //   route: '/main/purchasing',
+        //   icon: 'ri-order-play-line'
+        // },
         {
           title: 'Destinations',
           route: '/main/inventory/destination',
@@ -140,6 +140,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/dashboard',
           icon: 'ri-speed-up-line'
         },
+        {
+          title: 'Payment Ref /SOCs ',
+          route: '/main/transport/paymentrefs',
+          icon: 'ri-database-2-line'
+        },
 
         {
           title: 'Stock Overview',
@@ -167,11 +172,7 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/disbursement',
           icon: 'ri-exchange-funds-line'
         },
-        {
-          title: 'Payment Ref /SOCs ',
-          route: '/main/transport/paymentrefs',
-          icon: 'ri-database-2-line'
-        },
+      
         // {
         //   title: 'Fuel Analytics',
         //   route: '/main/transport/fuel-analytics',

@@ -37,6 +37,7 @@ export class OrderEditComponent implements OnInit {
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
+    this.getTrucks()
   }
 
   loadOrder(): void {
@@ -70,6 +71,8 @@ export class OrderEditComponent implements OnInit {
       next: (response) => {
         this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
         this.loading = false;
+
+        console.log(this.productId)
         Swal.fire({
           title: "Driver Fetched Successfully!",
           icon: "success",

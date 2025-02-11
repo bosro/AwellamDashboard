@@ -27,12 +27,12 @@
         </thead>
         <tbody class="divide-y divide-gray-200">
           <tr *ngFor="let order of paginatedOrders" class="hover:bg-gray-50">
-            <td class="px-6 py-4">{{ order.customerName }}</td>
-            <td class="px-6 py-4">{{ order.truckId.truckNumber }}</td>
-            <td class="px-6 py-4">{{ order.productId.name }}</td>
-            <td class="px-6 py-4">{{ order.capacity }}</td>
-            <td class="px-6 py-4">{{ order.socNumber }}</td>
-            <td class="px-6 py-4">{{ order.plantId.name }}</td>
+            <td class="px-6 py-4">{{ order?.customerName }}</td>
+            <td class="px-6 py-4">{{ order?.truckId?.truckNumber }}</td>
+            <td class="px-6 py-4">{{ order?.productId?.name || "N/A" }}</td>
+            <td class="px-6 py-4">{{ order?.capacity }}</td>
+            <td class="px-6 py-4">{{ order?.socNumber }}</td>
+            <td class="px-6 py-4">{{ order?.plantId?.name }}</td>
             <td class="px-6 py-4">
               <span
                 class="px-2 py-1 text-sm font-semibold rounded-full"

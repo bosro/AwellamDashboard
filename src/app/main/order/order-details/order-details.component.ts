@@ -45,6 +45,10 @@ driver:{
     _id: string,
     name: string
   }
+  socNumber:{
+    _id: string,
+    socNumber: string
+  }
  
   categoryId?: {
     _id:string,
@@ -137,7 +141,8 @@ export class OrderDetailsComponent implements OnInit {
       next: (response) => {
         this.order = {
           ...response.order,
-          categoryId: response.order.categoryId || { _id: '', name: '', plantId: { _id: '', name: '' } }
+          categoryId: response.order.categoryId || { _id: '', name: '', plantId: { _id: '', name: '' } },
+          socNumber: response.order.socNumber || { _id: '', socNumber: '' }
         };
         this.buildTimeline();
         this.loading = false;

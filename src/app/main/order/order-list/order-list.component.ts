@@ -4,6 +4,7 @@ import { Order, OrdersService } from '../../../services/order.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 interface Category {
   _id: string;
@@ -38,7 +39,8 @@ onPlantSelect: any;
   constructor(
     private ordersService: OrdersService,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -183,8 +185,10 @@ onPlantSelect: any;
     if (confirm('Are you sure you want to delete this order?')) {
       this.ordersService.deleteOrder(id).subscribe({
         next: () => this.loadOrders(),
+        
         error: (error) => console.error('Error deleting order:', error)
       });
+      this.router.navigate(['main/orders/list']);
     }
   }
 

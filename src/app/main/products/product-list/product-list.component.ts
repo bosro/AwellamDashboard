@@ -19,7 +19,7 @@ interface Plant {
   templateUrl: './product-list.component.html'
 })
 export class ProductListComponent implements OnInit {
-  products: Product[] = [];
+  products!: Product[] ;
   filteredProducts: Product[] = [];
   loading = false;
   total = 0;

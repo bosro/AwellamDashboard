@@ -52,6 +52,7 @@ export interface OrderResponse {
 interface OrdersResponse {
   message: string;
   order: {
+    socNumber: { _id: string; socNumber: string; };
     categoryId: { _id: string; name: string; plantId: { _id: string; name: string; }; };
     _id: string;
     status: string;

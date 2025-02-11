@@ -1,18 +1,8 @@
-export enum OrderType {
-  GUARANTEE_ORDER = "GUARANTEE ORDER ",
-  SPECIAL_GUARANTEE_ORDER= "SPECIAL GUARANTEE ORDER",
-NORMAL_CHÈQUE_ORDER= "NORMAL CHÈQUE ORDER",
-CASH_ORDER = "CASH ORDER",
-BORROWED_ORDER= "BORROWED_ORDER"
-}
-
-// src/app/components/payment-list/payment-list.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PaymentService } from '../../../services/payment.service';
+import { OrderType, PaymentService } from '../../../services/payment.service';
 import { PaymentReference, Plant } from '../../../services/payment.service';
-// import { OrderType } from '../../../models/enums';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { Category } from '../../../shared/types/product.interface';
@@ -29,9 +19,11 @@ export class PaymentListComponent implements OnInit {
   error: string | null = null;
   showForm = false;
   paymentForm: FormGroup;
+  editForm: FormGroup;
   orderTypes = Object.values(OrderType);
   submitting = false;
-
+  editModalVisible = false;
+  selectedPayment: PaymentReference | null = null;
 
   private readonly apiUrl = `${environment.apiUrl}`
   categories!: Category[];
@@ -48,15 +40,25 @@ export class PaymentListComponent implements OnInit {
       plantId: ['', Validators.required],
       orderType: ['', Validators.required]
     });
+
+    this.editForm = this.fb.group({
+      paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
+      plantId: ['', Validators.required],
+      orderType: ['', Validators.required]
+    });
   }
-
-
 
   ngOnInit(): void {
     this.loadPayments();
     this.loadPlants();
   }
 
+
+  openDetails(id: string): void {
+    this.router.navigate([`main/transport/payment-ref/${id}`]);
+  }
+
+  
   loadPlants(): void {
     this.loading = true;
     this.http.get<{ plants: Plant[] }>(`${this.apiUrl}/plants/get`).subscribe({
@@ -70,40 +72,6 @@ export class PaymentListComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  loadCategories(plantId: string): void {
-    this.loading = true;
-    this.http.get<{ categories: Category[] }>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
-      next: (response) => {
-        this.categories = response.categories;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-        this.error = 'Failed to load categories';
-        this.loading = false;
-      }
-    });
-  }
-
-  loadProducts(categoryId: string): void {
-    this.loading = true;
-    this.http.get<{ products: Product[] }>(`${this.apiUrl}/products/category/${categoryId}`).subscribe({
-      next: (response) => {
-        this.products = response.products;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-        this.error = 'Failed to load products';
-        this.loading = false;
-      }
-    });
-  }
-
-  openDetails(id: string): void {
-    this.router.navigate([`main/transport/payment-ref/${id}`]);
   }
 
   loadPayments(): void {
@@ -139,6 +107,58 @@ export class PaymentListComponent implements OnInit {
           console.error('Error creating payment reference:', error);
           this.error = 'Failed to create payment reference';
           this.submitting = false;
+        }
+      });
+    }
+  }
+
+  openEditModal(payment: PaymentReference): void {
+    this.selectedPayment = payment;
+    this.editForm.patchValue({
+      paymentRef: payment.paymentRef,
+      plantId: payment.plantId._id,
+      orderType: payment.orderType
+    });
+    this.editModalVisible = true;
+  }
+
+  closeEditModal(): void {
+    this.editModalVisible = false;
+    this.selectedPayment = null;
+    this.editForm.reset();
+  }
+
+  onEditSubmit(): void {
+    if (this.editForm.valid && this.selectedPayment) {
+      this.submitting = true;
+      this.error = null;
+
+      const updatedPayment = { ...this.selectedPayment, ...this.editForm.value };
+
+      this.paymentService.updatePaymentReference(updatedPayment).subscribe({
+        next: () => {
+          this.loadPayments();
+          this.closeEditModal();
+          this.submitting = false;
+        },
+        error: (error) => {
+          console.error('Error updating payment reference:', error);
+          this.error = 'Failed to update payment reference';
+          this.submitting = false;
+        }
+      });
+    }
+  }
+
+  deletePayment(paymentId: string): void {
+    if (confirm('Are you sure you want to delete this payment reference?')) {
+      this.paymentService.deletePaymentReference(paymentId).subscribe({
+        next: () => {
+          this.loadPayments();
+        },
+        error: (error) => {
+          console.error('Error deleting payment reference:', error);
+          this.error = 'Failed to delete payment reference';
         }
       });
     }

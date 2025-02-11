@@ -41,6 +41,35 @@ export interface AssignDriverResponse {
   };
 }
 
+export interface UpdateSocRequest {
+  socNumber: string;
+  quantity: number;
+  plantId: string;
+  categoryId: string;
+  productId: string;
+  orderType: string;
+  status: string;
+}
+
+export interface UpdateSocResponse {
+  message: string;
+  soc: {
+    _id: string;
+    socNumber: string;
+    quantity: number;
+    plantId: string;
+    categoryId: string;
+    productId: string;
+    orderType: string;
+    status: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteSocResponse {
+  message: string;
+}
+
 export interface Category {
   _id: string;
   name: string;
@@ -69,6 +98,7 @@ export interface Product {
 }
 
 export interface SocNumber {
+  destinationId: any;
   _id: string;
   socNumber: string;
   quantity: number;
@@ -133,6 +163,14 @@ export class PaymentService {
     return this.http.get<PaymentDetailResponse>(`${this.apiUrl}/payment/get/${id}`);
   }
 
+  updatePaymentReference(payment: PaymentReference): Observable<PaymentReference> {
+    return this.http.put<PaymentReference>(`${this.apiUrl}/payment/edit/${payment._id}`, payment);
+  }
+
+  deletePaymentReference(paymentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/payment/delete/${paymentId}`);
+  }
+
 
   assignSocToDriver(truckId: string, socId: string): Observable<AssignDriverResponse> {
     return this.http.post<AssignDriverResponse>(
@@ -170,6 +208,23 @@ export class PaymentService {
     orderType: OrderType;
   }): Observable<any> {
     return this.http.post(`${this.apiUrl}/payment/create`, data);
+  }
+
+  updateSoc(
+    paymentRefId: string, 
+    socId: string, 
+    socData: UpdateSocRequest
+  ): Observable<UpdateSocResponse> {
+    return this.http.put<UpdateSocResponse>(
+      `${this.apiUrl}/soc/edit/${socId}`,
+      socData
+    );
+  }
+
+  deleteSoc(paymentRefId: string, socId: string): Observable<DeleteSocResponse> {
+    return this.http.delete<DeleteSocResponse>(
+      `${this.apiUrl}/soc/delete/${socId}`
+    );
   }
 
 

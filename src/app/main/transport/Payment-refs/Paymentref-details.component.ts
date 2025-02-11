@@ -25,8 +25,12 @@ export class PaymentDetailComponent implements OnInit {
   plants: Plant[] = [];
   products: Product[] = [];
   destinations: any[] = [];
-  socForm: FormGroup;
+  socForm!: FormGroup;
+  editSocForm!: FormGroup;
   formSubmitting = false;
+  selectedSoc: SocNumber | null = null;
+  viewModalVisible = false;
+  editModalVisible = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -36,10 +40,23 @@ export class PaymentDetailComponent implements OnInit {
     private truckService: TruckService,
     private plantService: PlantService
   ) {
+    this.initializeForms();
+  }
+
+  private initializeForms() {
+    // Initialize create form
     this.socForm = this.fb.group({
       socNumber: ['', [Validators.required, Validators.minLength(5)]],
       quantity: ['', [Validators.required, Validators.min(1)]],
-      // price: ['', [Validators.required, Validators.min(0)]],
+      plantId: ['', Validators.required],
+      productId: ['', Validators.required],
+      destinationId: ['', Validators.required],
+    });
+
+    // Initialize edit form
+    this.editSocForm = this.fb.group({
+      socNumber: ['', [Validators.required, Validators.minLength(5)]],
+      quantity: ['', [Validators.required, Validators.min(1)]],
       plantId: ['', Validators.required],
       productId: ['', Validators.required],
       destinationId: ['', Validators.required],
@@ -136,7 +153,6 @@ export class PaymentDetailComponent implements OnInit {
       const socData = {
         ...this.socForm.value,
         quantity: Number(this.socForm.value.quantity),
-        price: Number(this.socForm.value.price),
       };
 
       this.paymentService.createSoc(this.paymentRef._id, socData).subscribe({
@@ -168,12 +184,88 @@ export class PaymentDetailComponent implements OnInit {
     }
   }
 
+  viewSocDetails(soc: SocNumber): void {
+    this.selectedSoc = soc;
+    this.viewModalVisible = true;
+  }
+
+  closeViewModal(): void {
+    this.viewModalVisible = false;
+    this.selectedSoc = null;
+  }
+
+  openEditSocModal(soc: SocNumber): void {
+    this.selectedSoc = soc;
+    this.editModalVisible = true;
+    
+    // Load related data for the dropdowns
+    if (soc.plantId) {
+      this.onPlantSelect({ target: { value: soc.plantId._id } });
+    }
+
+    // Populate the edit form
+    this.editSocForm.patchValue({
+      socNumber: soc.socNumber,
+      quantity: soc.quantity,
+      plantId: soc.plantId?._id,
+      productId: soc.productId?._id,
+      destinationId: soc.destinationId?._id
+    });
+  }
+
+  closeEditSocModal(): void {
+    this.editModalVisible = false;
+    this.selectedSoc = null;
+    this.editSocForm.reset();
+  }
+
+  goBack(){
+    this.router.navigate(['/main/transport/paymentrefs'])
+  }
+
+  onEditSocSubmit(): void {
+    if (this.editSocForm.valid && this.selectedSoc && this.paymentRef) {
+      this.formSubmitting = true;
+
+      const socData = {
+        ...this.editSocForm.value,
+        quantity: Number(this.editSocForm.value.quantity)
+      };
+
+      this.paymentService.updateSoc(this.paymentRef._id, this.selectedSoc._id, socData)
+        .pipe(finalize(() => this.formSubmitting = false))
+        .subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Success',
+              text: 'SOC updated successfully',
+              icon: 'success',
+              timer: 2000
+            });
+            this.loadPaymentDetails(this.paymentRef!._id);
+            this.closeEditSocModal();
+          },
+          error: (error) => {
+            console.error('Error updating SOC:', error);
+            Swal.fire('Error', error.error?.message || 'Failed to update SOC', 'error');
+          }
+        });
+    } else {
+      Object.keys(this.editSocForm.controls).forEach(key => {
+        const control = this.editSocForm.get(key);
+        if (control?.invalid) {
+          control.markAsTouched();
+        }
+      });
+    }
+  }
+
   getActiveSocs(): SocNumber[] {
-    return this.paymentRef?.socNumbers.filter((soc:any) => soc.status === 'active') || [];
+    return this.paymentRef?.socNumbers.filter((soc) => soc.status === 'active') || [];
   }
 
   getInactiveSocs(): SocNumber[] {
-    return this.paymentRef?.socNumbers.filter((soc:any) => soc.status === 'inactive') || [];
+    return this.paymentRef?.socNumbers.filter((soc) => soc.status === 'inactive') || [];
   }
 
   async assignDriver(socId: string): Promise<void> {
@@ -233,6 +325,36 @@ export class PaymentDetailComponent implements OnInit {
       console.error('Error in truck assignment:', error);
       Swal.fire('Error', 'Failed to complete truck assignment', 'error');
     }
+  }
+
+  deleteSoc(socId: string): void {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed && this.paymentRef) {
+        this.paymentService.deleteSoc(this.paymentRef._id, socId)
+          .subscribe({
+            next: () => {
+              Swal.fire(
+                'Deleted!',
+                'SOC has been deleted.',
+                'success'
+              );
+              this.loadPaymentDetails(this.paymentRef!._id);
+            },
+            error: (error) => {
+              console.error('Error deleting SOC:', error);
+              Swal.fire('Error', error.error?.message || 'Failed to delete SOC', 'error');
+            }
+          });
+      }
+    });
   }
 
   async loadAvailableTrucks(): Promise<Truck[]> {

@@ -15,12 +15,7 @@ costprice: number;
     _id: string;
     name: string
   };
-  destinationId: {
-    _id:string,
-    rates: number,
-    cost: number,
-    destination: string
-  }
+  totalStock: number;
 }
 
 
