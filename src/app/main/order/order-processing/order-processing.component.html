@@ -1,287 +1,271 @@
 <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="mb-8">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Create New Order</h1>
-          <!-- <p class="mt-2 text-sm text-gray-600">Fill in the details below to create a new order</p> -->
-        </div>
-        <button 
-          routerLink="/main/orders/list"
-          class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
-          <i class="ri-arrow-left-line mr-2"></i>
-          Back to Orders
-        </button>
-      </div>
-    </div>
+
 
     <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Selection Steps -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Plant Selection -->
-        <div class="bg-white rounded-lg shadow-sm border p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">1. Select Plant</h2>
-          <div class="relative">
-            <select
-              formControlName="plant"
-              (change)="onPlantSelect($event)"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="orderForm.get('plant')?.touched && orderForm.get('plant')?.invalid"
-              [disabled]="loading">
-              <option value="">Select a plant</option>
-              <option *ngFor="let plant of plants" [value]="plant._id">
-                {{plant.name}}
-              </option>
-            </select>
-            <div *ngIf="loading" class="mt-2 text-sm text-gray-500">
-              <i class="ri-loader-4-line animate-spin mr-1"></i>
-              Loading plants...
+
+
+    <!-- Order Notes -->
+    <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+          <div class="flex justify-between items-center">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900">Create New Order</h1>
+              <!-- <p class="mt-2 text-sm text-gray-600">Fill in the details below to create a new order</p> -->
             </div>
+            <button routerLink="/main/orders/list"
+              class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
+              <i class="ri-arrow-left-line mr-2"></i>
+              Back to Orders
+            </button>
           </div>
         </div>
 
-        <!-- Category Selection -->
-        <!-- <div class="bg-white rounded-lg shadow-sm border p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">2. Select Category</h2>
-          <div class="relative">
-            <select
-              formControlName="category"
-              (change)="onCategorySelect($event)"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="orderForm.get('category')?.touched && orderForm.get('category')?.invalid"
-              [disabled]="loading || !orderForm.get('plant')?.value">
-              <option value="">Select a category</option>
-              <option *ngFor="let category of categories" [value]="category._id">
-                {{category.name}}
-              </option>
-            </select>
-            <div *ngIf="loading" class="mt-2 text-sm text-gray-500">
-              <i class="ri-loader-4-line animate-spin mr-1"></i>
-              Loading categories...
+        <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <!-- Selection Steps -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Plant Selection -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+              <h2 class="text-lg font-medium text-gray-900 mb-4"> Select Plant</h2>
+              <div class="relative">
+                <select formControlName="plant" (change)="onPlantSelect($event)"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  [class.border-red-500]="orderForm.get('plant')?.touched && orderForm.get('plant')?.invalid"
+                  [disabled]="loading">
+                  <option value="">Select a plant</option>
+                  <option *ngFor="let plant of plants" [value]="plant._id">
+                    {{plant.name}}
+                  </option>
+                </select>
+                <div *ngIf="loading" class="mt-2 text-sm text-gray-500">
+                  <i class="ri-loader-4-line animate-spin mr-1"></i>
+                  Loading plants...
+                </div>
+              </div>
             </div>
-            <div *ngIf="noCategoriesFound" class="mt-2 text-sm text-red-500">
-              No categories found for this plant
+
+            <!-- Product Selection -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+              <h2 class="text-lg font-medium text-gray-900 mb-4"> Select Product</h2>
+              <div class="relative">
+                <select formControlName="product" (change)="onProductSelect($event)"
+                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  [class.border-red-500]="orderForm.get('product')?.touched && orderForm.get('product')?.invalid"
+                  [disabled]="loading || !orderForm.get('category')?.value">
+                  <option value="">Select a product</option>
+                  <option *ngFor="let product of products" [value]="product._id">
+                    {{product.name}} - GHC {{product.price | number: '1.2-2' }}
+                  </option>
+                </select>
+                <div *ngIf="loading" class="mt-2 text-sm text-gray-500">
+                  <i class="ri-loader-4-line animate-spin mr-1"></i>
+                  Loading products...
+                </div>
+                <div *ngIf="noProductsFound" class="mt-2 text-sm text-red-500">
+                  No products found in this category
+                </div>
+              </div>
             </div>
           </div>
-        </div> -->
 
-        <!-- Product Selection -->
-        <div class="bg-white rounded-lg shadow-sm border p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">3. Select Product</h2>
-          <div class="relative">
-            <select
-              formControlName="product"
-              (change)="onProductSelect($event)"
-              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              [class.border-red-500]="orderForm.get('product')?.touched && orderForm.get('product')?.invalid"
-              [disabled]="loading || !orderForm.get('category')?.value">
-              <option value="">Select a product</option>
-              <option *ngFor="let product of products" [value]="product._id">
-                {{product.name}} - GHC {{product.price | number: '1.2-2' }}
-              </option>
-            </select>
-            <div *ngIf="loading" class="mt-2 text-sm text-gray-500">
-              <i class="ri-loader-4-line animate-spin mr-1"></i>
-              Loading products...
-            </div>
-            <div *ngIf="noProductsFound" class="mt-2 text-sm text-red-500">
-              No products found in this category
-            </div>
-          </div>
-        </div>
-      </div>
+          <!-- Selected Products List -->
+          <div *ngIf="items.length > 0" class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Selected Products</h2>
+            <div class="space-y-4" formArrayName="items">
+              <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"
+                class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium text-gray-900">{{item.get('name')?.value}}</span>
+                    <button type="button" (click)="removeItem(i)" class="text-red-600 hover:text-red-800">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                  <div class="mt-2 flex items-center space-x-4">
+                    <!-- Quantity Input -->
+                    <div class="flex-1">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                      <input type="number" formControlName="quantity" class="w-full px-3 py-2 border rounded-md"
+                        [class.border-red-500]="item.get('quantity')?.invalid && item.get('quantity')?.touched" min="1">
+                    </div>
+                    <!-- Price Input -->
+                    <div class="flex-1">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Price (GHC)</label>
+                      <input type="number" formControlName="price" class="w-full px-3 py-2 border rounded-md"
+                        [class.border-red-500]="item.get('price')?.invalid && item.get('price')?.touched" min="0">
+                    </div>
 
-      <!-- Selected Products List -->
-      <div *ngIf="items.length > 0" class="bg-white rounded-lg shadow-sm border p-6">
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Selected Products</h2>
-        <div class="space-y-4" formArrayName="items">
-          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" 
-          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-       <div class="flex-1">
-         <div class="flex items-center justify-between">
-           <span class="font-medium text-gray-900">{{item.get('name')?.value}}</span>
-           <button type="button" (click)="removeItem(i)" 
-                   class="text-red-600 hover:text-red-800">
-             <i class="ri-delete-bin-line"></i>
-           </button>
-         </div>
-         <div class="mt-2 flex items-center space-x-4">
-           <!-- Quantity Input -->
-           <div class="flex-1">
-             <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-             <input 
-               type="number"
-               formControlName="quantity"
-               class="w-full px-3 py-2 border rounded-md"
-               [class.border-red-500]="item.get('quantity')?.invalid && item.get('quantity')?.touched"
-               min="1">
-           </div>
-           <!-- Price Input -->
-           <div class="flex-1">
-             <label class="block text-sm font-medium text-gray-700 mb-1">Price (GHC)</label>
-             <input 
-               type="number"
-               formControlName="price"
-               class="w-full px-3 py-2 border rounded-md"
-               [class.border-red-500]="item.get('price')?.invalid && item.get('price')?.touched"
-               min="0">
-           </div>
-
-           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
-            <div class="px-3 py-2 bg-gray-100 rounded-md font-medium">
-              GHC {{getTotal() | number: '1.2-2' }}
-            </div>
-            </div>
-           <!-- Total Display -->
-           <!-- <div class="flex-1">
+                    <div class="flex-1">
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
+                      <div class="px-3 py-2 bg-gray-100 rounded-md font-medium">
+                        GHC {{getTotal() | number: '1.2-2' }}
+                      </div>
+                    </div>
+                    <!-- Total Display -->
+                    <!-- <div class="flex-1">
              <label class="block text-sm font-medium text-gray-700 mb-1">Total</label>
              <input [value]="item.get('total')?.value" class="border p-2 rounded" readonly>
            </div> -->
-         </div>
-       </div>
-     </div>
-        </div>
-      </div>
-
-  <!-- Customer Information -->
-  <div class="bg-white rounded-lg shadow-sm border p-6" formGroupName="customer">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h2>
-    
-    <!-- Customer Select with Search -->
-    <div class="space-y-4">
-      <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Search -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                <div class="relative">
-                    <input type="text" formControlName="search" placeholder="Search customers..."
-                        class="w-full pl-10 pr-4 py-2 border rounded-lg">
-                    <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+                  </div>
                 </div>
+              </div>
             </div>
-        </form>
-      <div class="relative">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Select Customer *</label>
-        <select
-          formControlName="id"
-          (change)="onCustomerSelect($event)"
-          class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          [class.border-red-500]="orderForm.get('customer.id')?.touched && orderForm.get('customer.id')?.invalid"
-          [disabled]="loading">
-          <option value="">Select a customer</option>
-          <option *ngFor="let customer of customers" [value]="customer._id">
-            {{customer.fullName}} - {{customer.phoneNumber}}
-          </option>
-        </select>
-        <div *ngIf="loading" class="mt-2 flex items-center text-sm text-gray-500">
-          <i class="ri-loader-4-line animate-spin mr-2"></i>
-          Loading customers...
-        </div>
-        <div *ngIf="orderForm.get('customer.id')?.touched && orderForm.get('customer.id')?.invalid" 
-             class="mt-1 text-sm text-red-500">
-          Please select a customer
-        </div>
-      </div>
+          </div>
 
-      <!-- Selected Customer Details -->
-      <div *ngIf="selectedCustomer" class="bg-gray-50 p-4 rounded-lg border space-y-3">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Full Name</label>
-          <input
-            type="text"
-            formControlName="name"
-            class="mt-1 w-full px-4 py-2 bg-white border rounded-lg"
-            readonly>
-        </div>
-        <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Customer Information -->
           <div>
-            <label class="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              formControlName="email"
-              class="mt-1 w-full px-4 py-2 bg-white border rounded-lg"
-              readonly>
+            <div class="bg-white rounded-lg shadow-sm border p-6" formGroupName="customer">
+              <h2 class="text-lg font-medium text-gray-900 mb-4">Customer Information</h2>
+
+              <!-- Customer Search -->
+              <div class="space-y-4">
+                </div>
+                <div class="relative">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Search Customer *</label>
+                  <div class="relative">
+                    <input type="text" formControlName="search" placeholder="Search customers..."
+                      class="w-full pl-10 pr-4 py-2 border rounded-lg" [formControl]="searchControl"
+                      placeholder="Search customers...">
+                    <i class="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+                  </div>
+                  <ul *ngIf="filterForm.get('search')?.value">
+
+                    <div *ngIf="filteredCustomers.length > 0 && filterForm.get('search')?.value"
+                      class="absolute z-10 w-full bg-white border rounded-lg mt-1">
+                      <ul>
+                        <li *ngFor="let customer of filteredCustomers" (click)="onCustomerSelect(customer)"
+                          class="px-4 py-2 cursor-pointer hover:bg-gray-100">
+                          {{customer.fullName}} - {{customer.phoneNumber}}
+                        </li>
+                      </ul>
+                    </div>
+                    <div *ngIf="loading" class="mt-2 flex items-center text-sm text-gray-500">
+                      <i class="ri-loader-4-line animate-spin mr-2"></i>
+                      Loading customers...
+                    </div>
+                    <div *ngIf="orderForm.get('customer.id')?.touched && orderForm.get('customer.id')?.invalid"
+                      class="mt-1 text-sm text-red-500">
+                      Please select a customer
+                    </div>
+                    </ul>
+
+
+
+
+                    <!-- Selected Customer Details -->
+                    <div *ngIf="selectedCustomer" class="bg-gray-50 p-4 rounded-lg border space-y-3">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" formControlName="name"
+                          class="mt-1 w-full px-4 py-2 bg-white border rounded-lg" readonly>
+                      </div>
+
+                      </div>
+                      <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                formControlName="email"
+                class="mt-1 w-full px-4 py-2 bg-white border rounded-lg"
+                readonly>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Phone</label>
+              <input
+                type="text"
+                formControlName="phone"
+                class="mt-1 w-full px-4 py-2 bg-white border rounded-lg"
+                readonly>
+            </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">Phone</label>
-            <input
-              type="text"
-              formControlName="phone"
+            <label class="block text-sm font-medium text-gray-700">Delivery Address</label>
+            <textarea
+              formControlName="address"
+              rows="2"
               class="mt-1 w-full px-4 py-2 bg-white border rounded-lg"
-              readonly>
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Delivery Address</label>
-          <textarea
-            formControlName="address"
-            rows="2"
-            class="mt-1 w-full px-4 py-2 bg-white border rounded-lg"
-            readonly></textarea>
-        </div> -->
-      </div>
-    </div>
-  </div>
+              readonly></textarea>
+          </div> -->
+                      <!-- </div> -->
+                      <!-- </div> -->
+                      <!-- <label>Customer</label>
+    <input [formControl]="searchControl" placeholder="Search customers..." />
+    <ul *ngIf="filterForm.get('search')?.value">
+      <li *ngFor="let customer of filteredCustomers" (click)="onCustomerSelect(customer)">
+        {{ customer.fullName }} - {{ customer.phoneNumber }}
+      </li>
+    </ul> -->
 
-  <!-- Order Notes -->
-  <div class="bg-white rounded-lg shadow-sm border p-6">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Order Notes</h2>
-    <div>
-      <textarea
-        formControlName="notes"
-        rows="3"
-        placeholder="Add any special instructions or notes for this order..."
-        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-    </div>
-  </div>
+                      <!-- </div> -->
 
-  <!-- Order Summary -->
-  <div class="bg-white rounded-lg shadow-sm border p-6">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
-    <div class="space-y-4">
-      <!-- No items message -->
-      <div *ngIf="items.length === 0" class="text-center py-8 text-gray-500">
-        <i class="ri-shopping-cart-line text-4xl mb-2"></i>
-        <p>No items added to the order yet</p>
-        <p class="text-sm">Select products to add them to your order</p>
-      </div>
-      <!-- Total with larger text -->
-      <div class="pt-4 border-t flex justify-between items-center">
-        <span class="text-lg font-medium text-gray-900">Total Amount</span>
-        <div>
-          
-          <span class="text-2xl font-bold text-blue-600">
-            GHC {{getTotal()| number: '1.2-2' }}
-          </span>
-          <!-- <label>Total</label> -->
-          <!-- <label>Total Order Amount: GHC {{ getTotal() }}</label> -->
-        </div>
-      </div>
-    </div>
-  </div>
+                      <div *ngIf="orderForm.get('customer.id')?.invalid && orderForm.get('customer.id')?.touched">
+                        Customer is required.
+                      </div>
 
-  <!-- Form Actions -->
-  <div class="flex justify-end space-x-4 sticky bottom-0 bg-white p-4 border-t shadow-lg">
-    <button 
-      type="button"
-      routerLink="/main/orders/list"
-      class="px-6 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-      Cancel
-    </button>
-    <button 
-      type="submit"
-      [disabled]="orderForm.invalid || saving || items.length === 0"
-      class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
+
+
+
+                      <!-- Order Notes -->
+                      <div class="bg-white rounded-lg shadow-sm border p-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Notes</h2>
+                        <div>
+                          <textarea formControlName="notes" rows="3"
+                            placeholder="Add any special instructions or notes for this order..."
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                      </div>
+
+                      <!-- Order Summary -->
+                      <div class="bg-white rounded-lg shadow-sm border p-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
+                        <div class="space-y-4">
+                          <!-- No items message -->
+                          <div *ngIf="items.length === 0" class="text-center py-8 text-gray-500">
+                            <i class="ri-shopping-cart-line text-4xl mb-2"></i>
+                            <p>No items added to the order yet</p>
+                            <p class="text-sm">Select products to add them to your order</p>
+                          </div>
+                          <!-- Total with larger text -->
+                          <div class="pt-4 border-t flex justify-between items-center">
+                            <span class="text-lg font-medium text-gray-900">Total Amount</span>
+                            <div>
+
+                              <span class="text-2xl font-bold text-blue-600">
+                                GHC {{getTotal()| number: '1.2-2' }}
+                              </span>
+                              <!-- <label>Total</label> -->
+                              <!-- <label>Total Order Amount: GHC {{ getTotal() }}</label> -->
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Form Actions -->
+                      <div class="flex justify-end space-x-4 sticky bottom-0 bg-white p-4 border-t shadow-lg">
+                        <button type="button" routerLink="/main/orders/list"
+                          class="px-6 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                          Cancel
+                        </button>
+                        <button type="submit" [disabled]="orderForm.invalid || saving || items.length === 0" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
              disabled:opacity-50 disabled:cursor-not-allowed">
-      <div class="flex items-center">
-        <i *ngIf="saving" class="ri-loader-4-line animate-spin mr-2"></i>
-        <span>{{ saving ? 'Creating Order...' : 'Create Order' }}</span>
+                          <div class="flex items-center">
+                            <i *ngIf="saving" class="ri-loader-4-line animate-spin mr-2"></i>
+                            <span>{{ saving ? 'Creating Order...' : 'Create Order' }}</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              </form>
+             
+            </div>
+          </div>
+        </form>
       </div>
-    </button>
-  </div>
-</form>
-</div>
-</div>
+    </div>

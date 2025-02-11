@@ -8,6 +8,10 @@ export interface Order {
   truckId: {
     _id: string;
     truckNumber: string;
+    driver:{
+      _id: string;
+      name: string
+    };
   };
   productId: {
     _id: string;
@@ -21,7 +25,9 @@ export interface Order {
   };
   destinationId: {
     _id: string;
+    name:string
   };
+  amountReceived: number;
   status: string;
 }
 

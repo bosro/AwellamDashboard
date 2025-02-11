@@ -29,6 +29,7 @@ items: any;
     }
   };
   socNumber:{
+    toLowerCase(): unknown;
     _id: string,
     socNumber: string
   };
