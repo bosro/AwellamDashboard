@@ -42,7 +42,7 @@ export class OrderProcessingComponent implements OnInit {
     private customersService: CustomersService
   ) {
     this.orderForm = this.fb.group({
-      plant: ['', Validators.required],
+      plantId: ['', Validators.required],
 
       customer: this.fb.group({
         id: ['', Validators.required],
@@ -278,7 +278,7 @@ export class OrderProcessingComponent implements OnInit {
         })),
         totalAmount: this.getTotal(),
         notes: this.orderForm.value.notes,
-        plantId: this.orderForm.value.plant,
+        plantId: this.orderForm.value.plantId,
       };
 
       this.ordersService.createOrder(orderData).subscribe({

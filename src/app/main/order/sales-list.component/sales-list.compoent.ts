@@ -5,6 +5,10 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
+import { PaymentService } from '../../../services/payment.service';
+import { Product, ProductsService } from '../../../services/products.service';
+import { forkJoin } from 'rxjs';
+
 interface Category {
   _id: string;
   name: string;
@@ -31,15 +35,18 @@ export class SalesOrderListComponent implements OnInit {
   categories: Category[] = [];
   plants: Plant[] = [];
   Math = Math;
+  products!: Product[];
+  allOrders: Order[] = []; // Store all orders for frontend filtering
 
   private apiUrl = `${environment.apiUrl}`;
-onPlantSelect: any;
 
   constructor(
     private ordersService: OrdersService,
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private paymentService: PaymentService,
+    private productsService: ProductsService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -51,8 +58,9 @@ onPlantSelect: any;
       }),
       minAmount: [''],
       maxAmount: [''],
-      plant: [''],
-      category: ['']
+      plantId: [''],
+      category: [''],
+      productId: ['']
     });
   }
 
@@ -60,17 +68,37 @@ onPlantSelect: any;
     this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
+    this.loadProducts();
   }
 
   private loadInitialData(): void {
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
-      next: (response) => {
-        this.plants = response.plants;
+    
+    forkJoin({
+      plants: this.http.get<any>(`${this.apiUrl}/plants/get`),
+    }).subscribe({
+      next: ({ plants }) => {
+        this.plants = plants.plants;
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading plants:', error);
+        console.error('Error loading initial data:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  private loadProducts(): void {
+    this.productsService.getProducts({}).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = this.products.length;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
         this.loading = false;
       }
     });
@@ -80,43 +108,60 @@ onPlantSelect: any;
     this.filterForm.valueChanges
       .pipe(
         debounceTime(300),
-        distinctUntilChanged()
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
       )
       .subscribe(() => {
         this.currentPage = 1;
         this.applyFilters();
       });
-
-    this.filterForm.get('plant')?.valueChanges.subscribe(plantId => {
-      if (plantId) {
-        this.loadCategories(plantId);
-      } else {
-        this.categories = [];
-        this.filterForm.patchValue({ category: '' });
-      }
-    });
   }
 
-  private loadCategories(plantId: string): void {
-    this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
-      next: (response) => {
-        this.categories = response.categories;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-        this.loading = false;
-      }
-    });
+  onPlantSelect(event: any): void {
+    const plantId = event.target.value;
+    if (plantId) {
+      this.loading = true;
+      this.ordersService.getPlantOrders(plantId).subscribe({
+        next: (response) => {
+          this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
+          this.total = this.allOrders.length;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+          this.loading = false;
+        }
+      });
+    }
   }
+
+  onProductSelect(event: any): void {
+    const productId = event.target.value;
+    if (productId) {
+      this.loading = true;
+      this.ordersService.getProductOrders(productId).subscribe({
+        next: (response) => {
+          this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
+          this.total = this.allOrders.length;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  
 
   loadOrders(): void {
     this.loading = true;
     this.ordersService.getOrders().subscribe({
       next: (response) => {
-        this.orders = response.orders.filter(order => order.status === 'DELIVERED');
-        this.total = this.orders.length;
+        this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
+        this.total = this.allOrders.length;
         this.applyFilters();
         this.loading = false;
       },
@@ -128,33 +173,79 @@ onPlantSelect: any;
   }
 
   applyFilters(): void {
-    const { search, status, paymentStatus, dateRange, minAmount, maxAmount, plant, category } = this.filterForm.value;
+    const filters = this.filterForm.value;
+    
+    if (!this.allOrders || this.allOrders.length === 0) {
+      this.filteredOrders = [];
+      this.total = 0;
+      return;
+    }
 
-    this.filteredOrders = this.orders.filter(order => {
-      const matchesSearch = !search ||
-        order.customerId.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        order.orderNumber.toLowerCase().includes(search.toLowerCase());
+    let filtered = [...this.allOrders];
 
-      const matchesStatus = !status || order.status === status;
+    // Search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.customerId?.fullName?.toLowerCase().includes(searchTerm) ||
+        order.orderNumber?.toLowerCase().includes(searchTerm) ||
+        order.orderItems.some(item => 
+          item.product?.name?.toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-      const matchesPaymentStatus = !paymentStatus || order.paymentStatus === paymentStatus;
+    // Status filter
+    if (filters.status) {
+      filtered = filtered.filter(order => order.status === filters.status);
+    }
 
-      const matchesDateRange = (!dateRange.start || new Date(order.date) >= new Date(dateRange.start)) &&
-                               (!dateRange.end || new Date(order.date) <= new Date(dateRange.end));
+    // Payment status filter
+    if (filters.paymentStatus) {
+      filtered = filtered.filter(order => order.paymentStatus === filters.paymentStatus);
+    }
 
-      const matchesAmountRange = (!minAmount || order.totalAmount >= minAmount) &&
-        (!maxAmount || order.totalAmount <= maxAmount);
+    // Date range filter
+    if (filters.dateRange.start || filters.dateRange.end) {
+      const startDate = filters.dateRange.start ? new Date(filters.dateRange.start) : null;
+      const endDate = filters.dateRange.end ? new Date(filters.dateRange.end) : null;
 
-      const matchesPlant = !plant || order.categoryId.plantId._id === plant;
-      const matchesCategory = !category || order.categoryId._id === category;
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.date);
+        return (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+      });
+    }
 
-      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange && matchesPlant && matchesCategory;
-    });
+    // Amount filter
+    if (filters.minAmount) {
+      filtered = filtered.filter(order => order.totalAmount >= filters.minAmount);
+    }
+    if (filters.maxAmount) {
+      filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
+    }
 
+    // Plant filter
+    if (filters.plant) {
+      filtered = filtered.filter(order => order.categoryId?.plantId?._id === filters.plant);
+    }
+
+    // Product filter
+    if (filters.product) {
+      filtered = filtered.filter(order => 
+        order.orderItems.some(item => item.product._id === filters.product)
+      );
+    }
+
+    this.filteredOrders = filtered;
     this.total = this.filteredOrders.length;
-    this.filteredOrders = this.filteredOrders.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredOrders = filtered.slice(startIndex, endIndex);
   }
 
+  // Rest of the component remains the same...
   onPageChange(page: number): void {
     this.currentPage = page;
     this.applyFilters();
@@ -168,20 +259,12 @@ onPlantSelect: any;
     }
   }
 
-  toggleAllSelection(): void {
-    if (this.selectedOrders.size === this.filteredOrders.length) {
-      this.selectedOrders.clear();
-    } else {
-      this.filteredOrders.forEach(order => this.selectedOrders.add(order._id));
-    }
-  }
-
   deleteOrder(id: string): void {
     if (confirm('Are you sure you want to delete this order?')) {
       this.ordersService.deleteOrder(id).subscribe({
         next: () => {
-          // this.loadOrders();
-          this.router.navigate(['main/orders/saleslist']);
+          this.loadOrders();
+          this.router.navigate(['main/orders/list']);
         },
         error: (error) => console.error('Error deleting order:', error)
       });
@@ -198,7 +281,8 @@ onPlantSelect: any;
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
-    this.applyFilters();
+    this.products = [];
+    this.loadOrders(); // Reload all orders when clearing filters
   }
 
   getStatusClass(status: string): string {

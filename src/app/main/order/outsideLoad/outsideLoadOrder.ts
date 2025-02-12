@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 export interface Order {
   _id: string;
@@ -17,8 +18,8 @@ export interface Order {
     _id: string;
     name: string;
   };
-  capacity: number;
-  socNumber: string;
+  loadedbags: number;
+  OutsideSoc: string;
   plantId: {
     _id: string;
     name: string;
@@ -29,6 +30,7 @@ export interface Order {
   };
   amountReceived: number;
   status: string;
+  updatedAt: string
 }
 
 @Component({
@@ -45,6 +47,7 @@ export class OutSideOrdersTableComponent implements OnInit {
   Math=Math
 
   private apiUrl =`${environment.apiUrl}`
+date: string|undefined;
 
   constructor(private http: HttpClient) {}
 
@@ -54,7 +57,8 @@ export class OutSideOrdersTableComponent implements OnInit {
 
 
   toggleOrderStatus(order: Order): void {
-    const newStatus = order.status === 'LOADED' ? 'DELIVERED' : 'LOADED';
+    const newStatus = order.status === 'DELIVERED' ? 'DELIVERED' : 'LOADED';
+    
     const apiUrl = `${this.apiUrl}/orders/toggle-staus/${order._id}`;
 
     this.http.put(apiUrl, {}).subscribe(
@@ -66,6 +70,44 @@ export class OutSideOrdersTableComponent implements OnInit {
         console.error('Error updating order status:', error);
       }
     );
+  }
+
+
+  deleteOrder(order: Order) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to delete this order?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const apiUrl = `${this.apiUrl}/orders/outside/delete/${order._id}`;
+  
+        this.http.delete(apiUrl, {}).subscribe(
+          () => {
+            // Update the order status locally
+            Swal.fire(
+              'Deleted!',
+              'The order has been deleted.',
+              'success'
+            );
+            this.fetchOrders()
+          },
+          
+          (error) => {
+            console.error('Error deleting order status:', error);
+            Swal.fire(
+              'Error!',
+              'There was an error deleting the order.',
+              'error'
+            );
+          }
+        );
+      }
+    });
   }
 
 
@@ -87,7 +129,7 @@ export class OutSideOrdersTableComponent implements OnInit {
       order.customerName.toLowerCase().includes(this.searchText.toLowerCase()) ||
       order.truckId.truckNumber.toLowerCase().includes(this.searchText.toLowerCase()) ||
       order.productId.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      order.socNumber.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      order.OutsideSoc.toLowerCase().includes(this.searchText.toLowerCase()) ||
       order.plantId.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
       order.status.toLowerCase().includes(this.searchText.toLowerCase())
     );

@@ -31,9 +31,9 @@
             <div class="bg-white rounded-lg shadow-sm border p-6">
               <h2 class="text-lg font-medium text-gray-900 mb-4"> Select Plant</h2>
               <div class="relative">
-                <select formControlName="plant" (change)="onPlantSelect($event)"
+                <select formControlName="plantId" (change)="onPlantSelect($event)"
                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  [class.border-red-500]="orderForm.get('plant')?.touched && orderForm.get('plant')?.invalid"
+                  [class.border-red-500]="orderForm.get('plantId')?.touched && orderForm.get('plantId')?.invalid"
                   [disabled]="loading">
                   <option value="">Select a plant</option>
                   <option *ngFor="let plant of plants" [value]="plant._id">

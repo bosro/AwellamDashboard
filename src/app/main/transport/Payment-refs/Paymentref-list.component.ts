@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { Category } from '../../../shared/types/product.interface';
 import { Product } from '../../../services/products.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-payment-list',
@@ -14,18 +15,26 @@ import { Product } from '../../../services/products.service';
 })
 export class PaymentListComponent implements OnInit {
   payments: PaymentReference[] = [];
+  filteredPayments: PaymentReference[] = [];
   plants: Plant[] = [];
   loading = false;
   error: string | null = null;
   showForm = false;
   paymentForm: FormGroup;
   editForm: FormGroup;
+  filterForm: FormGroup;
   orderTypes = Object.values(OrderType);
   submitting = false;
   editModalVisible = false;
   selectedPayment: PaymentReference | null = null;
+  Math=Math
 
-  private readonly apiUrl = `${environment.apiUrl}`
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+
+  private readonly apiUrl = `${environment.apiUrl}`;
   categories!: Category[];
   products!: Product[];
 
@@ -38,27 +47,100 @@ export class PaymentListComponent implements OnInit {
     this.paymentForm = this.fb.group({
       paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
       plantId: ['', Validators.required],
-      orderType: ['', Validators.required]
+      orderType: ['', Validators.required],
+      chequeNumber: ['', Validators.required]
     });
 
     this.editForm = this.fb.group({
       paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
       plantId: ['', Validators.required],
-      orderType: ['', Validators.required]
+      orderType: ['', Validators.required],
+      chequeNumber: ['', Validators.required]
+    });
+
+    this.filterForm = this.fb.group({
+      searchPaymentRef: [''],
+      searchChequeNumber: [''],
+      filterOrderType: [''],
+      filterPlantId: ['']
     });
   }
 
   ngOnInit(): void {
     this.loadPayments();
     this.loadPlants();
+    this.setupFilters();
   }
 
+  setupFilters(): void {
+    // Apply debounce to search inputs
+    this.filterForm.get('searchPaymentRef')?.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(() => this.applyFilters());
+
+    this.filterForm.get('searchChequeNumber')?.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+      .subscribe(() => this.applyFilters());
+
+    // Immediate filtering for dropdowns
+    this.filterForm.get('filterOrderType')?.valueChanges
+      .subscribe(() => this.applyFilters());
+
+    this.filterForm.get('filterPlantId')?.valueChanges
+      .subscribe(() => this.applyFilters());
+  }
+
+  applyFilters(): void {
+    const filters = this.filterForm.value;
+    
+    this.filteredPayments = this.payments.filter(payment => {
+      const matchPaymentRef = !filters.searchPaymentRef || 
+        payment.paymentRef.toLowerCase().includes(filters.searchPaymentRef.toLowerCase());
+      
+      const matchChequeNumber = !filters.searchChequeNumber || 
+        payment.chequeNumber.toString().includes(filters.searchChequeNumber);
+      
+      const matchOrderType = !filters.filterOrderType || 
+        payment.orderType === filters.filterOrderType;
+      
+      const matchPlantId = !filters.filterPlantId || 
+        payment.plantId._id === filters.filterPlantId;
+
+      return matchPaymentRef && matchChequeNumber && matchOrderType && matchPlantId;
+    });
+
+    this.totalItems = this.filteredPayments.length;
+    this.currentPage = 1; // Reset to first page when filters change
+  }
+
+  get paginatedPayments(): PaymentReference[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredPayments.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+  }
+
+  clearFilters(): void {
+    this.filterForm.reset();
+    this.applyFilters();
+  }
 
   openDetails(id: string): void {
     this.router.navigate([`main/transport/payment-ref/${id}`]);
   }
 
-  
   loadPlants(): void {
     this.loading = true;
     this.http.get<{ plants: Plant[] }>(`${this.apiUrl}/plants/get`).subscribe({
@@ -81,7 +163,10 @@ export class PaymentListComponent implements OnInit {
     this.paymentService.getPaymentReferences().subscribe({
       next: (response) => {
         this.payments = response.paymentReferences;
+        this.filteredPayments = [...this.payments];
+        this.totalItems = this.payments.length;
         this.loading = false;
+        this.applyFilters(); // Apply any existing filters to the new data
       },
       error: (error) => {
         this.error = 'Failed to load payment references';
@@ -117,7 +202,8 @@ export class PaymentListComponent implements OnInit {
     this.editForm.patchValue({
       paymentRef: payment.paymentRef,
       plantId: payment.plantId._id,
-      orderType: payment.orderType
+      orderType: payment.orderType,
+      chequeNumber: payment.chequeNumber
     });
     this.editModalVisible = true;
   }

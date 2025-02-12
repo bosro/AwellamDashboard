@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
+  totalPrice: any;
 items: any;
   _id: string;
   customerId: {
@@ -32,6 +33,10 @@ items: any;
     toLowerCase(): unknown;
     _id: string,
     socNumber: string
+  };
+  plantId:{
+    _id:string,
+    name:string
   };
   deliveryAddress: string;
   totalAmount: number; // Changed to number
@@ -94,6 +99,17 @@ export class OrdersService {
   getOrders(): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/get`);
   }
+
+  getProductOrders(productId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/product/${productId}`);
+  }
+
+  getPlantOrders(plantId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/plant/${plantId}`);
+  }
+
+
+
 
   getOrderById(id: string): Observable<OrdersResponse> {
     return this.http.get<OrdersResponse>(`${this.apiUrl}/get/${id}`);

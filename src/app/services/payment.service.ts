@@ -79,10 +79,11 @@ export interface Category {
 }
 
 export enum OrderType {
-  GUARANTEE_ORDER = "GUARANTEE ORDER",
-  SPECIAL_GUARANTEE_ORDER = "SPECIAL GUARANTEE ORDER",
-  NORMAL_CHEQUE_ORDER = "NORMAL CHÈQUE ORDER",
-  CASH_ORDER = "CASH ORDER"
+  GUARANTEE_ORDER = "GUARANTEE ORDER ",
+  SPECIAL_GUARANTEE_ORDER= "SPECIAL GUARANTEE ORDER",
+NORMAL_CHÈQUE_ORDER= "NORMAL CHÈQUE ORDER",
+CASH_ORDER = "CASH ORDER",
+BORROWED_ORDER= "BORROWED_ORDER"
 }
 
 export interface Product {
@@ -119,7 +120,8 @@ export interface PaymentReference {
   socNumbers: SocNumber[];
   createdAt: string;
   updatedAt: string;
-  orderType: string
+  orderType: string;
+  chequeNumber: number;
 }
 
 

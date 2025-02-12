@@ -5,7 +5,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
-import { PaymentService, Product } from '../../../services/payment.service';
+import { PaymentService } from '../../../services/payment.service';
+import { Product, ProductsService } from '../../../services/products.service';
+import { forkJoin } from 'rxjs';
 
 interface Category {
   _id: string;
@@ -43,7 +45,8 @@ export class OrderListComponent implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private productsService: ProductsService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -55,9 +58,9 @@ export class OrderListComponent implements OnInit {
       }),
       minAmount: [''],
       maxAmount: [''],
-      plant: [''],
+      plantId: [''],
       category: [''],
-      product: [''] // Added product filter
+      productId: ['']
     });
   }
 
@@ -65,17 +68,37 @@ export class OrderListComponent implements OnInit {
     this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
+    this.loadProducts();
   }
 
   private loadInitialData(): void {
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
-      next: (response) => {
-        this.plants = response.plants;
+    
+    forkJoin({
+      plants: this.http.get<any>(`${this.apiUrl}/plants/get`),
+    }).subscribe({
+      next: ({ plants }) => {
+        this.plants = plants.plants;
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading plants:', error);
+        console.error('Error loading initial data:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  private loadProducts(): void {
+    this.productsService.getProducts({}).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = this.products.length;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
         this.loading = false;
       }
     });
@@ -97,25 +120,41 @@ export class OrderListComponent implements OnInit {
     const plantId = event.target.value;
     if (plantId) {
       this.loading = true;
-      this.paymentService.getProductByPlant(plantId).subscribe({
+      this.ordersService.getPlantOrders(plantId).subscribe({
         next: (response) => {
-          this.products = response.products;
-          this.loading = false;
-          // Reset product filter when plant changes
-          this.filterForm.patchValue({ product: '' }, { emitEvent: false });
+          this.allOrders = response.orders.filter(order => order.status === 'PENDING');
+          this.total = this.allOrders.length;
           this.applyFilters();
+          this.loading = false;
         },
         error: (error) => {
-          console.error('Error loading products:', error);
+          console.error('Error loading orders:', error);
           this.loading = false;
-        },
+        }
       });
-    } else {
-      this.products = [];
-      this.filterForm.patchValue({ product: '' }, { emitEvent: false });
-      this.applyFilters();
     }
   }
+
+  onProductSelect(event: any): void {
+    const productId = event.target.value;
+    if (productId) {
+      this.loading = true;
+      this.ordersService.getProductOrders(productId).subscribe({
+        next: (response) => {
+          this.allOrders = response.orders.filter(order => order.status === 'PENDING');
+          this.total = this.allOrders.length;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  
 
   loadOrders(): void {
     this.loading = true;
@@ -136,46 +175,77 @@ export class OrderListComponent implements OnInit {
   applyFilters(): void {
     const filters = this.filterForm.value;
     
-    // First filter the orders
-    this.filteredOrders = this.allOrders.filter(order => {
-      // Search filter
-      const searchTerm = filters.search?.toLowerCase() || '';
-      const matchesSearch = !searchTerm || 
-        (order.customerId?.fullName?.toLowerCase().includes(searchTerm)) ||
-        (order.orderNumber?.toLowerCase().includes(searchTerm)) ||
-        (order.orderItems[0]?.product?.name?.toLowerCase().includes(searchTerm));
+    if (!this.allOrders || this.allOrders.length === 0) {
+      this.filteredOrders = [];
+      this.total = 0;
+      return;
+    }
 
-      // Status filter
-      const matchesStatus = !filters.status || order.status === filters.status;
+    let filtered = [...this.allOrders];
 
-      // Date range filter
-      const startDate = filters.dateRange?.start ? new Date(filters.dateRange.start) : null;
-      const endDate = filters.dateRange?.end ? new Date(filters.dateRange.end) : null;
-      const orderDate = new Date(order.date);
-      const matchesDateRange = (!startDate || orderDate >= startDate) && 
-        (!endDate || orderDate <= endDate);
+    // Search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.customerId?.fullName?.toLowerCase().includes(searchTerm) ||
+        order.orderNumber?.toLowerCase().includes(searchTerm) ||
+        order.orderItems.some(item => 
+          item.product?.name?.toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-      // Plant filter
-      const matchesPlant = !filters.plant || 
-        order.categoryId?.plantId?._id === filters.plant;
+    // Status filter
+    if (filters.status) {
+      filtered = filtered.filter(order => order.status === filters.status);
+    }
 
-      // Product filter
-      const matchesProduct = !filters.product || 
-        order.orderItems.some(item => item.product._id === filters.product);
+    // Payment status filter
+    if (filters.paymentStatus) {
+      filtered = filtered.filter(order => order.paymentStatus === filters.paymentStatus);
+    }
 
-      return matchesSearch && matchesStatus && matchesDateRange && 
-        matchesPlant && matchesProduct;
-    });
+    // Date range filter
+    if (filters.dateRange.start || filters.dateRange.end) {
+      const startDate = filters.dateRange.start ? new Date(filters.dateRange.start) : null;
+      const endDate = filters.dateRange.end ? new Date(filters.dateRange.end) : null;
 
-    // Update total count
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.date);
+        return (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+      });
+    }
+
+    // Amount filter
+    if (filters.minAmount) {
+      filtered = filtered.filter(order => order.totalAmount >= filters.minAmount);
+    }
+    if (filters.maxAmount) {
+      filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
+    }
+
+    // Plant filter
+    if (filters.plant) {
+      filtered = filtered.filter(order => order.categoryId?.plantId?._id === filters.plant);
+    }
+
+    // Product filter
+    if (filters.product) {
+      filtered = filtered.filter(order => 
+        order.orderItems.some(item => item.product._id === filters.product)
+      );
+    }
+
+    this.filteredOrders = filtered;
     this.total = this.filteredOrders.length;
 
     // Apply pagination
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.filteredOrders = this.filteredOrders.slice(startIndex, endIndex);
+    this.filteredOrders = filtered.slice(startIndex, endIndex);
   }
 
+  // Rest of the component remains the same...
   onPageChange(page: number): void {
     this.currentPage = page;
     this.applyFilters();
@@ -212,7 +282,7 @@ export class OrderListComponent implements OnInit {
     this.filterForm.reset();
     this.currentPage = 1;
     this.products = [];
-    this.applyFilters();
+    this.loadOrders(); // Reload all orders when clearing filters
   }
 
   getStatusClass(status: string): string {

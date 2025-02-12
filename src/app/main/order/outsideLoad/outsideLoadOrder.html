@@ -15,6 +15,7 @@
       <table class="min-w-full bg-white border border-gray-200">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
@@ -29,13 +30,14 @@
         </thead>
         <tbody class="divide-y divide-gray-200">
           <tr *ngFor="let order of paginatedOrders" class="hover:bg-gray-50">
+            <td class="px-6 py-4">{{ order?.updatedAt || "N/A"   }}</td>
             <td class="px-6 py-4">{{ order?.customerName || "N/A"  }}</td>
             <td class="px-6 py-4">{{ order?.truckId?.truckNumber  || "N/A" }}</td>
             <td class="px-6 py-4">{{ order?.truckId?.driver?.name || "N/A"  }}</td>
             <td class="px-6 py-4">{{ order?.productId?.name || "N/A" }}</td>
-            <td class="px-6 py-4">{{ order?.capacity }}</td>
+            <td class="px-6 py-4">{{ order?.loadedbags  }}</td>
             <td class="px-6 py-4">{{ order?.amountReceived }}</td>
-            <td class="px-6 py-4">{{ order?.socNumber }}</td>
+            <td class="px-6 py-4">{{ order?.OutsideSoc }}</td>
             <td class="px-6 py-4">{{ order?.plantId?.name }}</td>
             <td class="px-6 py-4">
               <span
@@ -52,24 +54,17 @@
             </td>
             <td class="px-6 py-4">
               <button
-                (click)="toggleOrderStatus(order)"
-                class="p-2 text-gray-500 hover:text-blue-500 focus:outline-none"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </button>
+  (click)="toggleOrderStatus(order)"
+  [disabled]="order.status === 'DELIVERED'"
+  class="p-2 text-gray-500 hover:text-blue-500 focus:outline-none"
+>
+  Toggle
+</button>
+              <button 
+              (click)="deleteOrder(order)"
+              class="text-red-600 hover:text-red-900">
+              <i class="ri-delete-bin-line"></i>
+            </button>
             </td>
           </tr>
         </tbody>
