@@ -68,7 +68,7 @@ export class OrderListComponent implements OnInit {
     this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
-    this.loadProducts();
+    // this.loadProducts();
   }
 
   private loadInitialData(): void {
@@ -89,20 +89,20 @@ export class OrderListComponent implements OnInit {
     });
   }
 
-  private loadProducts(): void {
-    this.productsService.getProducts({}).subscribe({
-      next: (response) => {
-        this.products = response.products;
-        this.total = this.products.length;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-        this.loading = false;
-      }
-    });
-  }
+  // private loadProducts(): void {
+  //   this.productsService.getProducts({}).subscribe({
+  //     next: (response) => {
+  //       this.products = response.products;
+  //       this.total = this.products.length;
+  //       this.applyFilters();
+  //       this.loading = false;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading products:', error);
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
 
   private setupFilters(): void {
     this.filterForm.valueChanges
@@ -120,19 +120,33 @@ export class OrderListComponent implements OnInit {
     const plantId = event.target.value;
     if (plantId) {
       this.loading = true;
+      this.productsService.getProductByPlant(plantId).subscribe({
+        next: (response: { products: Product[] }) => {
+          this.products = response.products;
+          this.total = this.products.length;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading products:', error);
+          this.loading = false;
+        }
+      });
       this.ordersService.getPlantOrders(plantId).subscribe({
-        next: (response) => {
+        next: (response: { orders: Order[] }) => {
           this.allOrders = response.orders.filter(order => order.status === 'PENDING');
           this.total = this.allOrders.length;
           this.applyFilters();
           this.loading = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading orders:', error);
           this.loading = false;
         }
       });
+      
     }
+    
   }
 
   onProductSelect(event: any): void {

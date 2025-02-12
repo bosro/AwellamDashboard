@@ -68,7 +68,7 @@ export class SalesOrderListComponent implements OnInit {
     this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
-    this.loadProducts();
+   
   }
 
   private loadInitialData(): void {
@@ -89,8 +89,8 @@ export class SalesOrderListComponent implements OnInit {
     });
   }
 
-  private loadProducts(): void {
-    this.productsService.getProducts({}).subscribe({
+  private loadProducts(plantId: string): void {
+    this.productsService.getProductByPlant(plantId).subscribe({
       next: (response) => {
         this.products = response.products;
         this.total = this.products.length;
@@ -120,19 +120,33 @@ export class SalesOrderListComponent implements OnInit {
     const plantId = event.target.value;
     if (plantId) {
       this.loading = true;
+      this.productsService.getProductByPlant(plantId).subscribe({
+        next: (response: { products: Product[] }) => {
+          this.products = response.products;
+          this.total = this.products.length;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading products:', error);
+          this.loading = false;
+        }
+      });
       this.ordersService.getPlantOrders(plantId).subscribe({
-        next: (response) => {
+        next: (response: { orders: Order[] }) => {
           this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
           this.total = this.allOrders.length;
           this.applyFilters();
           this.loading = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading orders:', error);
           this.loading = false;
         }
       });
+      
     }
+    
   }
 
   onProductSelect(event: any): void {
