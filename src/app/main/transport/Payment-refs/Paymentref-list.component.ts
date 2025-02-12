@@ -27,7 +27,7 @@ export class PaymentListComponent implements OnInit {
   submitting = false;
   editModalVisible = false;
   selectedPayment: PaymentReference | null = null;
-  Math=Math
+  Math = Math;
 
   // Pagination
   currentPage = 1;
@@ -73,50 +73,82 @@ export class PaymentListComponent implements OnInit {
   }
 
   setupFilters(): void {
-    // Apply debounce to search inputs
-    this.filterForm.get('searchPaymentRef')?.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe(() => this.applyFilters());
+    // Set up filter listeners with type safety
+    const searchControls = ['searchPaymentRef', 'searchChequeNumber'] as const;
+    const filterControls = ['filterOrderType', 'filterPlantId'] as const;
 
-    this.filterForm.get('searchChequeNumber')?.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe(() => this.applyFilters());
+    // Add debounce to search inputs
+    searchControls.forEach(controlName => {
+      this.filterForm.get(controlName)?.valueChanges
+        .pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        )
+        .subscribe(() => this.applyFilters());
+    });
 
-    // Immediate filtering for dropdowns
-    this.filterForm.get('filterOrderType')?.valueChanges
-      .subscribe(() => this.applyFilters());
-
-    this.filterForm.get('filterPlantId')?.valueChanges
-      .subscribe(() => this.applyFilters());
+    // Immediate filtering for dropdown selections
+    filterControls.forEach(controlName => {
+      this.filterForm.get(controlName)?.valueChanges
+        .subscribe(() => this.applyFilters());
+    });
   }
 
   applyFilters(): void {
+    if (!this.payments || !this.payments.length) {
+      this.filteredPayments = [];
+      this.totalItems = 0;
+      return;
+    }
+
     const filters = this.filterForm.value;
     
-    this.filteredPayments = this.payments.filter(payment => {
-      const matchPaymentRef = !filters.searchPaymentRef || 
-        payment.paymentRef.toLowerCase().includes(filters.searchPaymentRef.toLowerCase());
-      
-      const matchChequeNumber = !filters.searchChequeNumber || 
-        payment.chequeNumber.toString().includes(filters.searchChequeNumber);
-      
-      const matchOrderType = !filters.filterOrderType || 
-        payment.orderType === filters.filterOrderType;
-      
-      const matchPlantId = !filters.filterPlantId || 
-        payment.plantId._id === filters.filterPlantId;
+    // If no filters are applied, show all payments
+    if (!filters.searchPaymentRef && !filters.searchChequeNumber && 
+        !filters.filterOrderType && !filters.filterPlantId) {
+      this.filteredPayments = [...this.payments];
+      this.totalItems = this.payments.length;
+      return;
+    }
 
-      return matchPaymentRef && matchChequeNumber && matchOrderType && matchPlantId;
+    this.filteredPayments = this.payments.filter(payment => {
+      // Check each filter condition independently
+      const paymentRefMatch = !filters.searchPaymentRef || 
+        (payment.paymentRef && 
+         payment.paymentRef.toLowerCase().includes(filters.searchPaymentRef.toLowerCase().trim()));
+
+      const chequeNumberMatch = !filters.searchChequeNumber || 
+        (payment.chequeNumber && 
+         payment.chequeNumber.toString().toLowerCase().includes(
+           filters.searchChequeNumber.toString().toLowerCase().trim()
+         ));
+
+      const orderTypeMatch = !filters.filterOrderType || 
+        (payment.orderType && payment.orderType === filters.filterOrderType);
+
+      const plantIdMatch = !filters.filterPlantId || 
+        (payment.plantId && payment.plantId._id === filters.filterPlantId);
+
+      // Return true if ANY of the filter conditions match (OR logic)
+      return filters.searchPaymentRef ? paymentRefMatch :
+             filters.searchChequeNumber ? chequeNumberMatch :
+             filters.filterOrderType ? orderTypeMatch :
+             filters.filterPlantId ? plantIdMatch :
+             true;
     });
 
+    // Sort filtered results
+    this.sortFilteredPayments();
+
+    // Update pagination
     this.totalItems = this.filteredPayments.length;
-    this.currentPage = 1; // Reset to first page when filters change
+    this.currentPage = 1;
+  }
+
+  private sortFilteredPayments(): void {
+    this.filteredPayments.sort((a, b) => {
+      return a.paymentRef.localeCompare(b.paymentRef);
+    });
   }
 
   get paginatedPayments(): PaymentReference[] {
@@ -134,7 +166,9 @@ export class PaymentListComponent implements OnInit {
 
   clearFilters(): void {
     this.filterForm.reset();
-    this.applyFilters();
+    this.filteredPayments = [...this.payments];
+    this.totalItems = this.payments.length;
+    this.currentPage = 1;
   }
 
   openDetails(id: string): void {
