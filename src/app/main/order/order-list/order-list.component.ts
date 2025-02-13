@@ -28,7 +28,7 @@ export class OrderListComponent implements OnInit {
   filteredOrders: Order[] = [];
   loading = false;
   total = 0;
-  pageSize = 10;
+  pageSize = 15;
   currentPage = 1;
   selectedOrders = new Set<string>();
   filterForm: FormGroup;
