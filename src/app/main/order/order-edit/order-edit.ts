@@ -84,7 +84,7 @@ export class OrderEditComponent implements OnInit {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "No driver found holding this product category or from this plant!",
+          text: "No trucks found holding products!",
         });
         this.loading = false;
       },

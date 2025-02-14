@@ -5,6 +5,7 @@ driver: any;
   capacity: number;
   expenses: number;
   status: string;
+  loadedbags: number;
   productId: {
     _id: string;
     name: string;

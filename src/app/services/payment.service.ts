@@ -110,6 +110,7 @@ export interface SocNumber {
   orderType: string;
   createdAt: string;
   updatedAt: string;
+  totalquantity: number;
 }
 
 export interface PaymentReference {

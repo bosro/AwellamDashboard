@@ -18,6 +18,7 @@ export class CustomerListComponent implements OnInit {
   selectedCustomers = new Set<string>();
   filterForm!: FormGroup;
   Math = Math;
+  allFilteredCustomers: Customer[] = [];
 
   constructor(
     private customersService: CustomersService,
@@ -66,22 +67,24 @@ export class CustomerListComponent implements OnInit {
 
   applyFilters(): void {
     const { search } = this.filterForm.value;
-    this.filteredCustomers = this.customers.filter(customer =>
+    this.allFilteredCustomers = this.customers.filter(customer =>
       !search || customer.fullName.toLowerCase().includes(search.toLowerCase())
     );
-    this.total = this.filteredCustomers.length;
+    this.total = this.allFilteredCustomers.length;
     this.paginateCustomers();
   }
 
   paginateCustomers(): void {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.filteredCustomers = this.filteredCustomers.slice(startIndex, endIndex);
+    this.filteredCustomers = this.allFilteredCustomers.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
-    this.currentPage = page;
-    this.paginateCustomers();
+    if (page >= 1 && page <= Math.ceil(this.total / this.pageSize)) {
+      this.currentPage = page;
+      this.paginateCustomers();
+    }
   }
 
   toggleSelection(customerId: string): void {

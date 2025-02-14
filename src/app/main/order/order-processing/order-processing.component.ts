@@ -111,7 +111,7 @@ export class OrderProcessingComponent implements OnInit {
         this.filteredCustomers = [];
         this.total = response.total || this.customers.length;
         // Add this debug log
-        console.log('Sample customer:', this.customers[0]);
+        // console.log('Sample customer:', this.customers[0]);
         this.loading = false;
       },
       error: (error) => {

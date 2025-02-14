@@ -137,15 +137,39 @@ export class OutSideOrdersTableComponent implements OnInit {
   // Toggle Order Status
   toggleOrderStatus(order: Order): void {
     const newStatus = order.status === 'DELIVERED' ? 'DELIVERED' : 'LOADED';
-    const apiUrl = `${this.apiUrl}/orders/toggle-staus/${order._id}`;
-    this.http.put(apiUrl, {}).subscribe(
-      () => {
-        order.status = newStatus;
-      },
-      (error) => {
-        console.error('Error updating order status:', error);
+    const apiUrl = `${this.apiUrl}/orders/toggle-status/${order._id}`;
+  
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you really want to change the status to DELIVERED ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, change it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.http.put(apiUrl, {}).subscribe(
+          () => {
+            order.status = newStatus;
+            Swal.fire(
+              'Updated!',
+              `The order status has been changed to DELIVERED .`,
+              'success'
+            );
+            this.fetchOrders();
+          },
+          (error) => {
+            console.error('Error updating order status:', error);
+            Swal.fire(
+              'Error!',
+              'There was an error updating the order status.',
+              'error'
+            );
+          }
+        );
       }
-    );
+    });
   }
 
   // Delete Order
