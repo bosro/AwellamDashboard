@@ -21,18 +21,19 @@ items: any;
     price: number; // Changed to number
     _id: string;
   }[];
-  categoryId:{
+  assignedDriver:{
     _id: string,
-    name:string,
-    plantId:{
-      _id:string,
-      name:string
-    }
+    name: string
+
   };
   socNumber:{
     toLowerCase(): unknown;
     _id: string,
-    socNumber: string
+    socNumber: string,
+    destinationId:{
+      _id: string,
+      destination: string
+    }
   };
   plantId:{
     _id:string,
@@ -117,6 +118,9 @@ export class OrdersService {
 
   toggleOrderStatus(id: string): Observable<Order> {
     return this.http.patch<Order>(`${this.apiUrl}/${id}/toggle-status`, {});
+  }
+  toggleOrderDeliveredStatus(id: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.apiUrl}/${id}/status`, {});
   }
 
   editOrder(id: string, data: any): Observable<Order> {

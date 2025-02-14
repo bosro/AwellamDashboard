@@ -110,6 +110,10 @@
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+   
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Driver</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Destination</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC Ref</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
         <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th> -->
@@ -138,6 +142,15 @@
         </td>
         <td class="px-6 py-4">
           <div class="text-sm font-medium text-gray-900">{{ order.totalAmount || '0'}}</div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].price || '0'}}</div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{ order?.assignedDriver?.name || 'N/A'}}</div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="text-sm font-medium text-gray-900">{{ order?.socNumber?.destinationId?.destination || 'N/A'}}</div>
         </td>
         <td class="px-6 py-4">
           <div class="text-sm font-medium text-gray-900">{{order?.socNumber?.socNumber || 'N/A'}}</div>

@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { PaymentService } from '../../../services/payment.service';
 import { Product, ProductsService } from '../../../services/products.service';
 import { forkJoin } from 'rxjs';
+import Swal from 'sweetalert2';
 
 interface Category {
   _id: string;
@@ -238,10 +239,7 @@ export class SalesOrderListComponent implements OnInit {
       filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
     }
 
-    // Plant filter
-    if (filters.plant) {
-      filtered = filtered.filter(order => order.categoryId?.plantId?._id === filters.plant);
-    }
+   
 
     // Product filter
     if (filters.product) {
@@ -286,9 +284,35 @@ export class SalesOrderListComponent implements OnInit {
   }
 
   toggleStatus(id: string): void {
-    this.ordersService.toggleOrderStatus(id).subscribe({
-      next: () => this.loadOrders(),
-      error: (error) => console.error('Error toggling status:', error)
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to change the status of this order?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, change it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ordersService.toggleOrderDeliveredStatus(id).subscribe({
+          next: () => {
+            this.loadOrders();
+            Swal.fire(
+              'Updated!',
+              'The order status has been changed.',
+              'success'
+            );
+          },
+          error: (error) => {
+            console.error('Error toggling status:', error);
+            Swal.fire(
+              'Error!',
+              'There was an error updating the order status.',
+              'error'
+            );
+          }
+        });
+      }
     });
   }
 
