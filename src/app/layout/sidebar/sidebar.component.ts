@@ -259,6 +259,13 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/purchase-list',
           icon: 'ri-list-view'
         },
+        {
+          title: 'SOC Report ',
+          route: '/main/reports/soc-report',
+          icon: 'ri-list-view'
+        },
+
+        
         // {
         //   title: 'Report Generator',
         //   route: '/main/reports/generator',

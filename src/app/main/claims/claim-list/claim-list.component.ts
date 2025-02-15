@@ -79,11 +79,20 @@ export class ClaimsReportComponent implements OnInit {
 
   generateClaimsReport(): void {
     if (this.filterForm.invalid) return;
-
+  
     this.loading = true;
     const { startDate, endDate, destinationId } = this.filterForm.value;
-
-    this.reportsService.getClaimsReport(startDate, endDate, destinationId).subscribe({
+  
+    // Get the destination name and plant name
+    const destination = this.destinations.find(dest => dest._id === destinationId);
+    const location = destination ? destination.destination : ''; // Use destination name as location
+    const plant = this.selectedPlant ? this.selectedPlant.name : ''; // Use plant name
+  
+    // Add pagination (default page = 1)
+    const page = 1;
+  
+    // Call the service with all required parameters
+    this.reportsService.getClaimsReport(page, location, plant, startDate, endDate).subscribe({
       next: (blob: Blob) => {
         // Download the Excel file
         const url = window.URL.createObjectURL(blob);
@@ -92,7 +101,7 @@ export class ClaimsReportComponent implements OnInit {
         link.download = `claims-report-${startDate}-to-${endDate}.xlsx`;
         link.click();
         window.URL.revokeObjectURL(url);
-
+  
         // Parse the Excel file and display its data
         const reader = new FileReader();
         reader.onload = (e: any) => {
@@ -101,7 +110,7 @@ export class ClaimsReportComponent implements OnInit {
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const json = XLSX.utils.sheet_to_json(worksheet);
-
+  
           // Transform data to match the required format
           this.claimsData = json.map((claim: any) => ({
             DATE: new Date(claim.date).toLocaleDateString(),
@@ -116,7 +125,7 @@ export class ClaimsReportComponent implements OnInit {
           }));
         };
         reader.readAsArrayBuffer(blob);
-
+  
         this.loading = false;
       },
       error: (error) => {
