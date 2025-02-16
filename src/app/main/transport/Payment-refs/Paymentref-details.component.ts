@@ -31,6 +31,7 @@ export class PaymentDetailComponent implements OnInit {
   selectedSoc: SocNumber | null = null;
   viewModalVisible = false;
   editModalVisible = false;
+  
 
   constructor(
     private route: ActivatedRoute,

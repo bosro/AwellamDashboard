@@ -111,6 +111,24 @@ export interface SocNumber {
   createdAt: string;
   updatedAt: string;
   totalquantity: number;
+  assignedTruck: {
+    _id: string,
+    truckNumber: string,
+    driver:{
+      name: string,
+      phoneNumber: number
+    }
+  };
+  assignedOrder:{
+    _id: string ,
+    customerId : {
+      _id:string, 
+      fullName: string,
+      phoneNumber: string,
+      address: string
+    }
+
+  }
 }
 
 export interface PaymentReference {

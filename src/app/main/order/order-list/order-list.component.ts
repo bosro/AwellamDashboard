@@ -201,7 +201,7 @@ export class OrderListComponent implements OnInit {
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       filtered = filtered.filter(order => 
-      
+        order.customerId?.fullName?.toLowerCase().includes(searchTerm) ||
         order.orderNumber?.toLowerCase().includes(searchTerm) ||
         order.orderItems.some(item => 
           item.product?.name?.toLowerCase().includes(searchTerm)
@@ -238,7 +238,8 @@ export class OrderListComponent implements OnInit {
       filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
     }
 
- 
+   
+
     // Product filter
     if (filters.product) {
       filtered = filtered.filter(order => 
