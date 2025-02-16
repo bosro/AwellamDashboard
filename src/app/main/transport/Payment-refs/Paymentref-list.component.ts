@@ -28,6 +28,9 @@ export class PaymentListComponent implements OnInit {
   editModalVisible = false;
   selectedPayment: PaymentReference | null = null;
   Math = Math;
+  prs: any[] = [];
+  filteredPRs: any[] = [];
+  searchQuery: string = '';
 
   // Pagination
   currentPage = 1;
@@ -62,7 +65,9 @@ export class PaymentListComponent implements OnInit {
       searchPaymentRef: [''],
       searchChequeNumber: [''],
       filterOrderType: [''],
-      filterPlantId: ['']
+      filterPlantId: [''],
+      search: [''],
+      
     });
   }
 
@@ -70,11 +75,12 @@ export class PaymentListComponent implements OnInit {
     this.loadPayments();
     this.loadPlants();
     this.setupFilters();
+    this.loadPRs();
   }
 
   setupFilters(): void {
     // Set up filter listeners with type safety
-    const searchControls = ['searchPaymentRef', 'searchChequeNumber'] as const;
+    const searchControls = ['searchPaymentRef', 'searchChequeNumber','search'] as const;
     const filterControls = ['filterOrderType', 'filterPlantId'] as const;
 
     // Add debounce to search inputs
@@ -129,11 +135,15 @@ export class PaymentListComponent implements OnInit {
       const plantIdMatch = !filters.filterPlantId || 
         (payment.plantId && payment.plantId._id === filters.filterPlantId);
 
+        const socMatch = !filters.search || 
+        (payment.soc && payment.soc.toLowerCase().includes(filters.search.toLowerCase().trim()));
+
       // Return true if ANY of the filter conditions match (OR logic)
       return filters.searchPaymentRef ? paymentRefMatch :
              filters.searchChequeNumber ? chequeNumberMatch :
              filters.filterOrderType ? orderTypeMatch :
              filters.filterPlantId ? plantIdMatch :
+             filters.search ? socMatch :
              true;
     });
 
@@ -209,6 +219,33 @@ export class PaymentListComponent implements OnInit {
       }
     });
   }
+
+
+  loadPRs(): void {
+    this.paymentService.getPaymentReferences().subscribe({
+      next: (response) => {
+        this.prs = response.paymentReferences.map(pr => ({
+          ...pr,
+          soc: pr.soc || 'N/A' // Ensure SOC is included, default to 'N/A' if not present
+        }));
+      },
+      error: (error) => {
+        console.error('Error loading payment references:', error);
+      }
+    });
+  }
+
+  onSearch(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    const query = inputElement.value;
+    this.searchQuery = query;
+    if (query) {
+      this.filteredPRs = this.prs.filter(pr => pr.soc.toLowerCase().includes(query.toLowerCase()));
+    } else {
+      this.filteredPRs = [];
+    }
+  }
+
 
   onSubmit(): void {
     if (this.paymentForm.valid) {

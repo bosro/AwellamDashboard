@@ -22,7 +22,7 @@
 
     <!-- Total Orders -->
     <div>
-      <app-metrics-card title="Total Orders" [value]="metrics.totalOrders" icon="ri-shopping-cart-line"
+      <app-metrics-card title="Pending Orders" [value]="metrics.totalPendingOrders" icon="ri-shopping-cart-line"
         colorClass="bg-yellow-100 text-yellow-600" (click)="OrderList()"></app-metrics-card>
     </div>
 
@@ -30,6 +30,10 @@
     <div>
       <app-metrics-card title="Conversion Rate" [value]="(metrics?.conversionRate | number: '1.2-2') ?? '0 %'" icon="ri-line-chart-line"
         colorClass="bg-orange-100 text-orange-600" suffix="%"></app-metrics-card>
+    </div>
+    <div>
+      <app-metrics-card title="Total Delivered Products" [value]="(metrics?.totalQuantityDelivered ) ?? '0'" icon="ri-line-chart-line"
+        colorClass="bg-orange-100 text-orange-600" ></app-metrics-card>
     </div>
   </div>
 

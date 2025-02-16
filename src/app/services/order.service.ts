@@ -100,6 +100,12 @@ export class OrdersService {
   getOrders(): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/get`);
   }
+  getPendingOrders(): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/get/pending`);
+  }
+  getDelieveredOrders(): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/get/delivered`);
+  }
 
   getProductOrders(productId: string): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/product/${productId}`);

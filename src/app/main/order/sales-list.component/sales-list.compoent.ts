@@ -173,9 +173,9 @@ export class SalesOrderListComponent implements OnInit {
 
   loadOrders(): void {
     this.loading = true;
-    this.ordersService.getOrders().subscribe({
+    this.ordersService.getDelieveredOrders().subscribe({
       next: (response) => {
-        this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
+        this.allOrders = response.orders;
         this.total = this.allOrders.length;
         this.applyFilters();
         this.loading = false;

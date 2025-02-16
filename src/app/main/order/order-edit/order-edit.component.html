@@ -30,7 +30,7 @@
             class="w-full px-4 py-2 border rounded-lg">
             <option value="">Select a driver</option>
             <option *ngFor="let truck of trucks" [value]="truck._id">
-              {{truck.driver.name}} - {{truck.socNumber.productId.name}} - BAGS LOADED {{truck.capacity}}
+              {{truck.driver.name}} - {{truck.socNumber.productId.name}} - BAGS LOADED {{truck.loadedbags}}
             </option>
           </select>
         </div>

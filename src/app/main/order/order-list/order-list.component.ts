@@ -65,7 +65,7 @@ export class OrderListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadInitialData();
+    // this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
     // this.loadProducts();
@@ -172,9 +172,9 @@ export class OrderListComponent implements OnInit {
 
   loadOrders(): void {
     this.loading = true;
-    this.ordersService.getOrders().subscribe({
+    this.ordersService.getPendingOrders().subscribe({
       next: (response) => {
-        this.allOrders = response.orders.filter(order => order.status === 'PENDING');
+        this.allOrders = response.orders;
         this.total = this.allOrders.length;
         this.applyFilters();
         this.loading = false;

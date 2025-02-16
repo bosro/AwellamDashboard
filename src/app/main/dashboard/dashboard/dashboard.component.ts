@@ -37,7 +37,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   DriverList(){
-    this.router.navigate(['main/transport/drivers'])
+    this.router.navigate(['main/transport/trucks'])
   }
 
   OrderList(){

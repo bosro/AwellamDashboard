@@ -141,6 +141,7 @@ export interface PaymentReference {
   updatedAt: string;
   orderType: string;
   chequeNumber: number;
+  soc?: string;
 }
 
 
