@@ -82,11 +82,12 @@ export class PaymentDetailComponent implements OnInit {
       next: (response) => {
         this.paymentRef = response.paymentReference;
         this.loading = false;
+
+        console.log(response)
       },
       error: (error) => {
         this.error = 'Failed to load payment reference details';
         this.loading = false;
-        console.error('Error loading payment details:', error);
         Swal.fire('Error', 'Failed to load payment details', 'error');
       },
     });

@@ -65,7 +65,7 @@ export class OrderListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.loadInitialData();
+    this.loadInitialData();
     this.setupFilters();
     this.loadOrders();
     // this.loadProducts();

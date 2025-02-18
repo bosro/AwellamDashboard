@@ -181,6 +181,13 @@ export class PaymentService {
     return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/get`);
   }
 
+  getPaymentReferencesWithoutActiveSoc(): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/without-socs`);
+  }
+  getPaymentReferencesWithActiveSoc(): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/active-soc`);
+  }
+
   getPaymentReferenceDetails(id: string): Observable<PaymentDetailResponse> {
     return this.http.get<PaymentDetailResponse>(`${this.apiUrl}/payment/get/${id}`);
   }

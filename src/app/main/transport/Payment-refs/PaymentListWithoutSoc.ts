@@ -5,15 +5,13 @@ import { OrderType, PaymentService } from '../../../services/payment.service';
 import { PaymentReference, Plant } from '../../../services/payment.service';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { Category } from '../../../shared/types/product.interface';
-import { Product } from '../../../services/products.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-payment-list',
-  templateUrl: './Payment-list.html'
+  selector: 'app-payment-list-without-soc',
+  templateUrl: './PaymentListWithoutSoc.html'
 })
-export class PaymentListComponent implements OnInit {
+export class PaymentListWithoutSocComponent implements OnInit {
   payments: PaymentReference[] = [];
   filteredPayments: PaymentReference[] = [];
   plants: Plant[] = [];
@@ -31,8 +29,8 @@ export class PaymentListComponent implements OnInit {
   prs: any[] = [];
   filteredPRs: any[] = [];
   searchQuery: string = '';
-  prsWithoutActiveSOCs: any[] = [];
   prsWithActiveSOCs: any[] = [];
+  prsWithoutActiveSOCs: any[] = [];
 
   // Pagination
   currentPage = 1;
@@ -40,8 +38,6 @@ export class PaymentListComponent implements OnInit {
   totalItems = 0;
 
   private readonly apiUrl = `${environment.apiUrl}`;
-  categories!: Category[];
-  products!: Product[];
 
   constructor(
     private paymentService: PaymentService,
@@ -68,29 +64,41 @@ export class PaymentListComponent implements OnInit {
       searchChequeNumber: [''],
       filterOrderType: [''],
       filterPlantId: [''],
-      search: [''],
-      
+      search: ['']
     });
   }
 
   ngOnInit(): void {
-    this.loadPayments();
-    this.loadPlants();
-    this.setupFilters();
+    this.loadPRsWithoutActiveSOCs();
     this.loadPRs();
+    this.loadPayments();
   }
 
+  loadPRsWithoutActiveSOCs(): void {
+    this.loading = true;
+    this.error = null;
 
-  navigateToPRsWithoutSOCs(): void {
-    this.router.navigate(['/main/transport/without-socs']);
+    this.paymentService.getPaymentReferencesWithoutActiveSoc().subscribe({
+      next: (response) => {
+        this.prsWithoutActiveSOCs = response.paymentReferences.filter(pr => !pr.soc || pr.soc === 'N/A');
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading payment references:', error);
+        this.error = 'Failed to load payment references';
+        this.loading = false;
+      }
+    });
+  }
+
+  navigateBack(): void {
+    this.router.navigate(['/main/transport/paymentrefs']);
   }
 
   setupFilters(): void {
-    // Set up filter listeners with type safety
-    const searchControls = ['searchPaymentRef', 'searchChequeNumber','search'] as const;
+    const searchControls = ['searchPaymentRef', 'searchChequeNumber', 'search'] as const;
     const filterControls = ['filterOrderType', 'filterPlantId'] as const;
 
-    // Add debounce to search inputs
     searchControls.forEach(controlName => {
       this.filterForm.get(controlName)?.valueChanges
         .pipe(
@@ -100,7 +108,6 @@ export class PaymentListComponent implements OnInit {
         .subscribe(() => this.applyFilters());
     });
 
-    // Immediate filtering for dropdown selections
     filterControls.forEach(controlName => {
       this.filterForm.get(controlName)?.valueChanges
         .subscribe(() => this.applyFilters());
@@ -115,8 +122,7 @@ export class PaymentListComponent implements OnInit {
     }
 
     const filters = this.filterForm.value;
-    
-    // If no filters are applied, show all payments
+
     if (!filters.searchPaymentRef && !filters.searchChequeNumber && 
         !filters.filterOrderType && !filters.filterPlantId) {
       this.filteredPayments = [...this.payments];
@@ -125,7 +131,6 @@ export class PaymentListComponent implements OnInit {
     }
 
     this.filteredPayments = this.payments.filter(payment => {
-      // Check each filter condition independently
       const paymentRefMatch = !filters.searchPaymentRef || 
         (payment.paymentRef && 
          payment.paymentRef.toLowerCase().includes(filters.searchPaymentRef.toLowerCase().trim()));
@@ -142,22 +147,13 @@ export class PaymentListComponent implements OnInit {
       const plantIdMatch = !filters.filterPlantId || 
         (payment.plantId && payment.plantId._id === filters.filterPlantId);
 
-        const socMatch = !filters.search || 
+      const socMatch = !filters.search || 
         (payment.soc && payment.soc.toLowerCase().includes(filters.search.toLowerCase().trim()));
 
-      // Return true if ANY of the filter conditions match (OR logic)
-      return filters.searchPaymentRef ? paymentRefMatch :
-             filters.searchChequeNumber ? chequeNumberMatch :
-             filters.filterOrderType ? orderTypeMatch :
-             filters.filterPlantId ? plantIdMatch :
-             filters.search ? socMatch :
-             true;
+      return paymentRefMatch && chequeNumberMatch && orderTypeMatch && plantIdMatch && socMatch;
     });
 
-    // Sort filtered results
     this.sortFilteredPayments();
-
-    // Update pagination
     this.totalItems = this.filteredPayments.length;
     this.currentPage = 1;
   }
@@ -211,13 +207,13 @@ export class PaymentListComponent implements OnInit {
     this.loading = true;
     this.error = null;
     
-    this.paymentService.getPaymentReferencesWithActiveSoc().subscribe({
+    this.paymentService.getPaymentReferencesWithoutActiveSoc().subscribe({
       next: (response) => {
         this.payments = response.paymentReferences;
         this.filteredPayments = [...this.payments];
         this.totalItems = this.payments.length;
         this.loading = false;
-        this.applyFilters(); // Apply any existing filters to the new data
+        this.applyFilters();
       },
       error: (error) => {
         this.error = 'Failed to load payment references';
@@ -227,18 +223,14 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
-
   loadPRs(): void {
-    this.paymentService.getPaymentReferencesWithActiveSoc().subscribe({
+    this.paymentService.getPaymentReferencesWithoutActiveSoc().subscribe({
       next: (response) => {
         this.prs = response.paymentReferences.map(pr => ({
           ...pr,
-          soc: pr.soc || 'N/A' // Ensure SOC is included, default to 'N/A' if not present
+          soc: pr.soc || 'N/A'
         }));
-        // this.filterPRsWithActiveSOCs();
       },
-
-      
       error: (error) => {
         console.error('Error loading payment references:', error);
       }
@@ -255,13 +247,6 @@ export class PaymentListComponent implements OnInit {
       this.filteredPRs = [];
     }
   }
-
-
-  // filterPRsWithActiveSOCs(): void {
-  //   this.prsWithActiveSOCs = this.prs.filter(pr => pr.soc && pr.soc !== 'N/A');
-  //   this.prsWithoutActiveSOCs = this.prs.filter(pr => !pr.soc || pr.soc === 'N/A');
-  // }
-
 
   onSubmit(): void {
     if (this.paymentForm.valid) {

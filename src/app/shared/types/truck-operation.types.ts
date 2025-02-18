@@ -52,6 +52,8 @@ driver: any;
     _id: string;
     destination: string;
   };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TruckResponse {

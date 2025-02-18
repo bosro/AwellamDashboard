@@ -28,8 +28,8 @@ export class OrderEditComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
-      price: ['', Validators.required],
-      quantity: ['', Validators.required],
+      price: ['', ],
+      quantity: ['', ],
       assignedTruck: ['']
     });
   }

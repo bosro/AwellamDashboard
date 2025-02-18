@@ -46,6 +46,7 @@ items: any;
   deliveryStatus: string;
   orderNumber: string;
   date: string;
+  actualDeliveryDate: string;
   createdAt: string;
   updatedAt: string;
 }
