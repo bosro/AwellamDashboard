@@ -102,6 +102,10 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plant</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              
+              Destination
+            </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -115,6 +119,7 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.amountReceived }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.OutsideSoc }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.plantId.name }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.destinationId?.destination || 'N/A' }}</td>
           </tr>
         </tbody>
       </table>

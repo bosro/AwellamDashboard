@@ -19,7 +19,7 @@ export class OutsideClaimsReportComponent implements OnInit {
   destinations: Destination[] = [];
   filteredDestinations: Destination[] = [];
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 15;
   totalItems = 0;
   Math = Math;
 
@@ -38,12 +38,11 @@ export class OutsideClaimsReportComponent implements OnInit {
 
   ngOnInit(): void {
     const today = new Date();
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(today.getDate() - 21);
-
+    const todayString = today.toISOString().split('T')[0];
+  
     this.filterForm.patchValue({
-      startDate: oneWeekAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0]
+      startDate: todayString,
+      endDate: todayString
     });
     this.loadPlants();
     this.getOutSideLOadDetails();
@@ -63,6 +62,7 @@ export class OutsideClaimsReportComponent implements OnInit {
           OutsideSoc: order.OutsideSoc,
           plantId: order.plantId,
           amountReceived: order.amountReceived,
+          destination: order.destinationId
         }));
         this.totalItems = this.claimsData.length;
         this.loading = false;

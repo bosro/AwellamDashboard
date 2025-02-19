@@ -26,7 +26,7 @@ export interface Order {
   };
   destinationId: {
     _id: string;
-    name: string;
+    destination: string;
   };
   amountReceived: number;
   status: string;

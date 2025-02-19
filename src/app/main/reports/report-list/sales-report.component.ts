@@ -12,7 +12,7 @@ export class SalesReportComponent implements OnInit {
   loading = false;
   salesData: any[] = [];
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 15;
   totalItems = 0;
 Math=Math
   constructor(
@@ -27,14 +27,13 @@ Math=Math
 
   ngOnInit(): void {
     const today = new Date();
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(today.getDate() - 7);
-
+    const todayString = today.toISOString().split('T')[0];
+  
     this.filterForm.patchValue({
-      startDate: oneWeekAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0]
+      startDate: todayString,
+      endDate: todayString
     });
-
+  
     this.getSalesReportDetails();
   }
 
