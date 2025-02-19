@@ -34,6 +34,20 @@ export class ClaimsReportComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPlants();
+
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const todayString = today.toISOString().split('T')[0];
+    const tomorrowString = tomorrow.toISOString().split('T')[0];
+    
+    this.filterForm.patchValue({
+      startDate: todayString,
+      endDate: tomorrowString
+    });
+
+    // Call getClaimsDetails after setting default values
+    this.getClaimsDetails();
   }
 
   loadPlants(): void {
@@ -77,6 +91,31 @@ export class ClaimsReportComponent implements OnInit {
     this.loadDestinations();
   }
 
+  getClaimsDetails(): void {
+    const { startDate, endDate } = this.filterForm.value;
+    this.loading = true;
+    this.reportsService.getClaimsReportDetails(startDate, endDate).subscribe({
+      next: (data: any) => {
+        console.log(data);
+        this.claimsData = data.map((claim: any) => ({
+          'DATE OF DISPATCH': new Date(claim.date).toLocaleDateString(),
+          DESTINATION: claim.destination,
+          DRIVER: claim.driver,
+          'INVOICE/WAYBILL NO.': claim.invoice,
+          QTY: claim.quantity,
+          'RATE (100%)': claim.rate100,
+          'RATE (95%)': claim.rate95,
+          AMOUNT: claim.amount,
+        }));
+        this.loading = false;
+      },
+      error: (error: any) => {
+        console.error('Error fetching claims report details:', error);
+        this.loading = false;
+      }
+    });
+  }
+
   generateClaimsReport(): void {
     if (this.filterForm.invalid) return;
   
@@ -113,15 +152,14 @@ export class ClaimsReportComponent implements OnInit {
   
           // Transform data to match the required format
           this.claimsData = json.map((claim: any) => ({
-            DATE: new Date(claim.date).toLocaleDateString(),
-            DRIVER: claim.driver,
-            CATEGORY: claim.category,
+            'DATE OF DISPATCH': new Date(claim.date).toLocaleDateString(),
             DESTINATION: claim.destination,
-            SOC: claim.soc,
+            DRIVER: claim.driver,
+            'INVOICE/WAYBILL NO.': claim.invoice,
             QTY: claim.quantity,
-            RATE: claim.rate,
-            'AMOUNT (100%)': claim.amount100,
-            'AMOUNT (95%)': claim.amount95,
+            'RATE (100%)': claim.rate100,
+            'RATE (95%)': claim.rate95,
+            AMOUNT: claim.amount,
           }));
         };
         reader.readAsArrayBuffer(blob);

@@ -15,6 +15,8 @@ interface SalesResponse {
 export class ReportsService {
   private apiUrl = `${environment.apiUrl}/reports`;
   private apiUrll = `${environment.apiUrl}/soc/reports`;
+  private apiUrlll = `${environment.apiUrl}/claims`;
+  
 
   constructor(private http: HttpClient) {}
 
@@ -77,6 +79,17 @@ export class ReportsService {
     );
   }
 
+
+  getClaimsReportDetails(startDate: string, endDate: string): Observable<SalesResponse> {
+    return this.http.get<SalesResponse>(
+      `${this.apiUrlll}/delivered-orders/view`, // Reuse the same endpoint
+      {
+        params: { startDate, endDate },
+        responseType: 'json'
+      }
+    );
+  }
+
   
 
   // getClaimsReport(startDate: string, endDate: string ,destinationId:string): Observable<Blob> {
@@ -102,7 +115,7 @@ export class ReportsService {
       endDate,
     };
   
-    return this.http.get(`${this.apiUrl}/claims-report`, {
+    return this.http.get(`${this.apiUrlll}/delivered-orders/export`, {
       params,
       responseType: 'blob', // Ensure the response is treated as a Blob
     });
