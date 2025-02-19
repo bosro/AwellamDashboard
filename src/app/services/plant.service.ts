@@ -18,7 +18,11 @@ export interface Destination{
   _id: string;
   destination: string;
   rates: number;
-  plantId: string;
+  plantId: {
+    id: any;
+    _id: string
+    name: String
+  };
   cost:number
 }
 

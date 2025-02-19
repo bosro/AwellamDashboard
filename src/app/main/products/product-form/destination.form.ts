@@ -58,7 +58,13 @@ export class DestinationFormComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (response) => {
-          this.destinationForm.patchValue(response.destination);
+          this.destinationForm.patchValue({
+            destination: response.destination.destination,
+            plantId: response.destination.plantId._id, // Ensure plantId is correctly set
+            rates: response.destination.rates,
+            cost: response.destination.cost
+          });
+          console.log('Form Values:', this.destinationForm.value); // Debugging statement
         },
         error: (error) => console.error('Error loading destination:', error)
       });
