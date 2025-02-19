@@ -28,11 +28,14 @@ export class SOCReportComponent implements OnInit {
 
   ngOnInit(): void {
     const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
     const todayString = today.toISOString().split('T')[0];
-  
+    const tomorrowString = tomorrow.toISOString().split('T')[0];
+    
     this.filterForm.patchValue({
       startDate: todayString,
-      endDate: todayString
+      endDate: tomorrowString
     });
 
     this.getSOCReportDetails();
