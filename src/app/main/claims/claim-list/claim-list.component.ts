@@ -95,12 +95,12 @@ export class ClaimsReportComponent implements OnInit {
     const { startDate, endDate } = this.filterForm.value;
     this.loading = true;
     this.reportsService.getClaimsReportDetails(startDate, endDate).subscribe({
-      next: (data: any) => {
-        console.log(data);
-        this.claimsData = data.map((claim: any) => ({
+      next: (response: any) => {
+        console.log(response);
+        this.claimsData = response.data.map((claim: any) => ({
           'DATE OF DISPATCH': new Date(claim.date).toLocaleDateString(),
           DESTINATION: claim.destination,
-          DRIVER: claim.driver,
+          DRIVER: claim.driver || 'N/A', // Assuming driver data might be missing
           'INVOICE/WAYBILL NO.': claim.invoice,
           QTY: claim.quantity,
           'RATE (100%)': claim.rate100,
@@ -154,7 +154,7 @@ export class ClaimsReportComponent implements OnInit {
           this.claimsData = json.map((claim: any) => ({
             'DATE OF DISPATCH': new Date(claim.date).toLocaleDateString(),
             DESTINATION: claim.destination,
-            DRIVER: claim.driver,
+            DRIVER: claim.driver || 'N/A', // Assuming driver data might be missing
             'INVOICE/WAYBILL NO.': claim.invoice,
             QTY: claim.quantity,
             'RATE (100%)': claim.rate100,
