@@ -129,8 +129,8 @@
          <div class="text-sm font-medium text-gray-900">{{order.socNumber || 'N/A'}}</div>
         </td>
         <td class="px-6 py-4">
-          <div class="text-sm text-gray-900">{{order.date | date:'mediumDate'}}</div>
-          <div class="text-xs text-gray-500">{{order.date | date:'shortTime'}}</div>
+          <div class="text-sm text-gray-900">{{order.updatedAt | date:'mediumDate'}}</div>
+          <div class="text-xs text-gray-500">{{order.updatedAt | date:'shortTime'}}</div>
         </td>
         <td class="px-6 py-4">
           <span [ngClass]="getStatusClass(order.status)"

@@ -157,8 +157,8 @@
           <!-- <div class="text-sm text-gray-500">{{order.orderItems.length}} items</div> -->
         </td>
         <td class="px-6 py-4">
-          <div class="text-sm text-gray-900">{{order.actualDeliveryDate ? (order.actualDeliveryDate | date:'mediumDate') : 'N/A'}}</div>
-          <div class="text-xs text-gray-500">{{order.actualDeliveryDate ? (order.actualDeliveryDate | date:'shortTime') : 'N/A'}}</div>
+          <div class="text-sm text-gray-900">{{order.updatedAt  | date:'mediumDate': 'N/A'}}</div>
+          <div class="text-xs text-gray-500">{{order.updatedAt | date:'shortTime' : 'N/A'}}</div>
         </td>
         <!-- <td class="px-6 py-4">
           <span [ngClass]="getPaymentStatusClass(order.paymentStatus)"
