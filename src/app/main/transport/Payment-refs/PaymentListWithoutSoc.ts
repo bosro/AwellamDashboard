@@ -69,8 +69,8 @@ export class PaymentListWithoutSocComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadPRsWithoutActiveSOCs();
-    this.loadPRs();
+    // this.loadPRsWithoutActiveSOCs();
+    // this.loadPRs();
     this.loadPayments();
   }
 
@@ -211,6 +211,7 @@ export class PaymentListWithoutSocComponent implements OnInit {
       next: (response) => {
         this.payments = response.paymentReferences;
         this.filteredPayments = [...this.payments];
+        this.prsWithoutActiveSOCs = response.paymentReferences.filter(pr => !pr.soc || pr.soc === 'N/A');
         this.totalItems = this.payments.length;
         this.loading = false;
         this.applyFilters();

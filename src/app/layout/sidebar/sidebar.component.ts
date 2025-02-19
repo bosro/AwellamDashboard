@@ -233,12 +233,12 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Awellam Invoices ',
-          route: '/main/claims',
+          route: '/main/claims/awellam-claims',
           icon: 'ri-list-view'
         },
         {
           title: 'Outside Load Invoices  ',
-          route: '/main/reports/purchase-list',
+          route: '/main/claims/outside-claims',
           icon: 'ri-list-view'
         },
       ]
@@ -254,11 +254,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/list',
           icon: 'ri-list-view'
         },
-        {
-          title: 'Pruchase Report ',
-          route: '/main/reports/purchase-list',
-          icon: 'ri-list-view'
-        },
+        // {
+        //   title: 'Pruchase Report ',
+        //   route: '/main/reports/purchase-list',
+        //   icon: 'ri-list-view'
+        // },
         {
           title: 'SOC Report ',
           route: '/main/reports/soc-report',

@@ -11,7 +11,10 @@ export class SalesReportComponent implements OnInit {
   filterForm: FormGroup;
   loading = false;
   salesData: any[] = [];
-
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+Math=Math
   constructor(
     private fb: FormBuilder,
     private reportsService: ReportsService
@@ -22,10 +25,48 @@ export class SalesReportComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const today = new Date();
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(today.getDate() - 7);
+
+    this.filterForm.patchValue({
+      startDate: oneWeekAgo.toISOString().split('T')[0],
+      endDate: today.toISOString().split('T')[0]
+    });
+
+    this.getSalesReportDetails();
+  }
+
+  getSalesReportDetails(): void {
+    const { startDate, endDate } = this.filterForm.value;
+    this.loading = true;
+    this.reportsService.getSalesReportDetails(startDate, endDate).subscribe({
+      next: (data: any) => {
+        this.salesData = data.data.map((sale: any) => ({
+          Date: sale.Date,
+          Customer: sale.Customer,
+          Plant: sale.Plant,
+          Product: sale.Product,
+          Quantity: sale.Quantity,
+          Price: sale.Price,
+          Driver: sale.Driver,
+          SocNumber: sale.SocNumber,
+          SocDestination: sale.SocDestination,
+          SocRates: sale.SocRates,
+        }));
+        this.totalItems = this.salesData.length;
+        this.loading = false;
+      },
+      error: (error: any) => {
+        console.error('Error fetching sales report details:', error);
+        this.loading = false;
+      }
+    });
+  }
 
   generateSalesReport(): void {
-    if (this.filterForm.invalid) return;
+    // if (this.filterForm.invalid) return;
 
     this.loading = true;
     const { startDate, endDate } = this.filterForm.value;
@@ -40,24 +81,25 @@ export class SalesReportComponent implements OnInit {
         link.click();
         window.URL.revokeObjectURL(url);
 
-        // Parse the Excel file and display its data
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const json = XLSX.utils.sheet_to_json(worksheet);
-          this.salesData = json;
-        };
-        reader.readAsArrayBuffer(blob);
-
         this.loading = false;
       },
-      error: (error:any) => {
+      error: (error: any) => {
         console.error('Error generating sales report:', error);
         this.loading = false;
       },
     });
+  }
+
+  get paginatedSalesData(): any[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.salesData.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.pageSize);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
   }
 }

@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { SocNumber, SocResponse, } from './payment.service';
 
+
+interface SalesResponse {
+  message: string,
+  sales: any[]
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -23,13 +29,45 @@ export class ReportsService {
   }
 
 
-  getSalesReport(startDate: string, endDate: string): Observable<Blob> {
-    return this.http.post(
-      `${this.apiUrl}/sales-report`,
-      { startDate, endDate },
-      { responseType: 'blob' }
-    );
+  getSOCReportDetails(startDate: string, endDate: string): Observable<SocResponse> {
+    const url = `${this.apiUrl}/inactive-socs/details`;
+    return this.http.get<SocResponse>(url, {
+      params: { startDate, endDate }
+    });
   }
+ 
+
+
+  getSalesReport(startDate: string, endDate: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/sales-report/export`, {
+      params: { startDate, endDate },
+      responseType: 'blob'
+    });
+  }
+  getSalesReportDetails(startDate: string, endDate: string): Observable<SalesResponse> {
+    return this.http.get<SalesResponse>(`${this.apiUrl}/sales-report/view`, {
+      params: { startDate, endDate },
+      responseType: 'json'
+    });
+  }
+
+
+  getOutsideLoadclaimReport(startDate: string, endDate: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/outside-orders/export`, {
+      params: { startDate, endDate },
+      responseType: 'blob'
+    });
+  }
+  getOutsideLoadclaimDetails(startDate: string, endDate: string): Observable<SalesResponse> {
+    return this.http.get<SalesResponse>(`${this.apiUrl}/outside-orders/view`, {
+      params: { startDate, endDate },
+      responseType: 'json'
+    });
+  }
+
+
+
+ 
 
   getPurchasingReport(startDate: string, endDate: string): Observable<Blob> {
     return this.http.post(

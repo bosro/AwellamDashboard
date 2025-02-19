@@ -5,8 +5,6 @@ import { OrderType, PaymentService } from '../../../services/payment.service';
 import { PaymentReference, Plant } from '../../../services/payment.service';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { Category } from '../../../shared/types/product.interface';
-import { Product } from '../../../services/products.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -40,8 +38,6 @@ export class PaymentListComponent implements OnInit {
   totalItems = 0;
 
   private readonly apiUrl = `${environment.apiUrl}`;
-  categories!: Category[];
-  products!: Product[];
 
   constructor(
     private paymentService: PaymentService,
@@ -68,8 +64,7 @@ export class PaymentListComponent implements OnInit {
       searchChequeNumber: [''],
       filterOrderType: [''],
       filterPlantId: [''],
-      search: [''],
-      
+      search: ['']
     });
   }
 
@@ -80,17 +75,14 @@ export class PaymentListComponent implements OnInit {
     this.loadPRs();
   }
 
-
   navigateToPRsWithoutSOCs(): void {
     this.router.navigate(['/main/transport/without-socs']);
   }
 
   setupFilters(): void {
-    // Set up filter listeners with type safety
-    const searchControls = ['searchPaymentRef', 'searchChequeNumber','search'] as const;
+    const searchControls = ['searchPaymentRef', 'searchChequeNumber', 'search'] as const;
     const filterControls = ['filterOrderType', 'filterPlantId'] as const;
 
-    // Add debounce to search inputs
     searchControls.forEach(controlName => {
       this.filterForm.get(controlName)?.valueChanges
         .pipe(
@@ -100,7 +92,6 @@ export class PaymentListComponent implements OnInit {
         .subscribe(() => this.applyFilters());
     });
 
-    // Immediate filtering for dropdown selections
     filterControls.forEach(controlName => {
       this.filterForm.get(controlName)?.valueChanges
         .subscribe(() => this.applyFilters());
@@ -115,8 +106,7 @@ export class PaymentListComponent implements OnInit {
     }
 
     const filters = this.filterForm.value;
-    
-    // If no filters are applied, show all payments
+
     if (!filters.searchPaymentRef && !filters.searchChequeNumber && 
         !filters.filterOrderType && !filters.filterPlantId) {
       this.filteredPayments = [...this.payments];
@@ -125,7 +115,6 @@ export class PaymentListComponent implements OnInit {
     }
 
     this.filteredPayments = this.payments.filter(payment => {
-      // Check each filter condition independently
       const paymentRefMatch = !filters.searchPaymentRef || 
         (payment.paymentRef && 
          payment.paymentRef.toLowerCase().includes(filters.searchPaymentRef.toLowerCase().trim()));
@@ -142,22 +131,13 @@ export class PaymentListComponent implements OnInit {
       const plantIdMatch = !filters.filterPlantId || 
         (payment.plantId && payment.plantId._id === filters.filterPlantId);
 
-        const socMatch = !filters.search || 
-        (payment.soc && payment.soc.toLowerCase().includes(filters.search.toLowerCase().trim()));
+      const socMatch = !filters.search || 
+        (payment.soc && payment.soc.toUpperCase().includes(filters.search.toLowerCase().trim()));
 
-      // Return true if ANY of the filter conditions match (OR logic)
-      return filters.searchPaymentRef ? paymentRefMatch :
-             filters.searchChequeNumber ? chequeNumberMatch :
-             filters.filterOrderType ? orderTypeMatch :
-             filters.filterPlantId ? plantIdMatch :
-             filters.search ? socMatch :
-             true;
+      return  socMatch || paymentRefMatch || chequeNumberMatch && orderTypeMatch && plantIdMatch && socMatch;
     });
 
-    // Sort filtered results
     this.sortFilteredPayments();
-
-    // Update pagination
     this.totalItems = this.filteredPayments.length;
     this.currentPage = 1;
   }
@@ -227,18 +207,17 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
-
   loadPRs(): void {
-    this.paymentService.getPaymentReferencesWithActiveSoc().subscribe({
+    this.paymentService.getPaymentReferences().subscribe({
       next: (response) => {
         this.prs = response.paymentReferences.map(pr => ({
           ...pr,
-          soc: pr.soc || 'N/A' // Ensure SOC is included, default to 'N/A' if not present
+          soc: pr.soc || 'N/A',
+          socNumbers: pr.socNumbers || []
         }));
-        // this.filterPRsWithActiveSOCs();
+        this.filterPRsWithActiveSOCs(); // Call the filtering method
+        
       },
-
-      
       error: (error) => {
         console.error('Error loading payment references:', error);
       }
@@ -247,21 +226,24 @@ export class PaymentListComponent implements OnInit {
 
   onSearch(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const query = inputElement.value;
+    const query = inputElement.value.trim().toLowerCase(); // Trim and convert to lowercase
     this.searchQuery = query;
+  
     if (query) {
-      this.filteredPRs = this.prs.filter(pr => pr.soc.toLowerCase().includes(query.toLowerCase()));
+      // Filter PRs where the SOC number matches the query
+      this.filteredPRs = this.prs.filter(pr => 
+        pr.socNumbers && pr.socNumbers.some((soc:any )=> 
+          soc.socNumber.toLowerCase().includes(query)
+        )
+      );
     } else {
-      this.filteredPRs = [];
+      this.filteredPRs = []; // Clear the filtered results if the query is empty
     }
   }
-
-
-  // filterPRsWithActiveSOCs(): void {
-  //   this.prsWithActiveSOCs = this.prs.filter(pr => pr.soc && pr.soc !== 'N/A');
-  //   this.prsWithoutActiveSOCs = this.prs.filter(pr => !pr.soc || pr.soc === 'N/A');
-  // }
-
+  filterPRsWithActiveSOCs(): void {
+    this.prsWithActiveSOCs = this.prs.filter(pr => pr.soc && pr.soc !== 'N/A');
+    this.prsWithoutActiveSOCs = this.prs.filter(pr => !pr.soc || pr.soc === 'N/A');
+  }
 
   onSubmit(): void {
     if (this.paymentForm.valid) {

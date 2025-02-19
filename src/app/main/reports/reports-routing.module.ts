@@ -18,7 +18,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: 'list', component: SalesReportComponent },
-      { path: 'purchase-list', component: PurchasingReportComponent},
+      // { path: 'purchase-list', component: PurchasingReportComponent},
       {path: 'soc-report' , component : SOCReportComponent}
 
       // { path: 'generator', component: ReportGeneratorComponent },
