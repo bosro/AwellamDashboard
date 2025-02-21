@@ -41,7 +41,7 @@ export class ReportsService {
 
 
   getSalesReport(startDate: string, endDate: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrll}/sales-report/export`, {
+    return this.http.get(`${this.apiUrl}/sales-report/export`, {
       params: { startDate, endDate },
       responseType: 'blob'
     });

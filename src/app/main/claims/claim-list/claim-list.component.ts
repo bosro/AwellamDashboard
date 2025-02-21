@@ -104,7 +104,7 @@ export class ClaimsReportComponent implements OnInit {
           'DATE OF DISPATCH': new Date(claim.date).toLocaleDateString(),
           DESTINATION: claim.destination,
           DRIVER: claim.driver || 'N/A', // Assuming driver data might be missing
-          'INVOICE/WAYBILL NO.': claim.invoice,
+          'INVOICE/WAYBILL NO.': claim.socNumber,
           QTY: claim.quantity,
           'RATE (100%)': claim.rate100,
           'RATE (95%)': claim.rate95,
