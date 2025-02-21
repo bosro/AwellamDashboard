@@ -14,7 +14,7 @@ interface SalesResponse {
 })
 export class ReportsService {
   private apiUrl = `${environment.apiUrl}/reports`;
-  private apiUrll = `${environment.apiUrl}/soc/reports`;
+  private apiUrll = `${environment.apiUrl}/soc`;
   private apiUrlll = `${environment.apiUrl}/claims`;
   
 
@@ -23,7 +23,7 @@ export class ReportsService {
 
 
   getSOCReport(startDate: string, endDate: string): Observable<Blob> {
-    const url = `${this.apiUrll}/export`;
+    const url = `${this.apiUrll}/reports/export`;
     return this.http.get(url, {
       params: { startDate, endDate },
       responseType: 'blob'
@@ -32,7 +32,7 @@ export class ReportsService {
 
 
   getSOCReportDetails(startDate: string, endDate: string): Observable<SocResponse> {
-    const url = `${this.apiUrl}/inactive-socs/details`;
+    const url = `${this.apiUrll}/inactive-socs/details`;
     return this.http.get<SocResponse>(url, {
       params: { startDate, endDate }
     });
@@ -41,7 +41,7 @@ export class ReportsService {
 
 
   getSalesReport(startDate: string, endDate: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/sales-report/export`, {
+    return this.http.get(`${this.apiUrll}/sales-report/export`, {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -80,11 +80,12 @@ export class ReportsService {
   }
 
 
-  getClaimsReportDetails(startDate: string, endDate: string): Observable<SalesResponse> {
+  getClaimsReportDetails(startDate: string, endDate: string,    destination: string,
+    plant: string,): Observable<SalesResponse> {
     return this.http.get<SalesResponse>(
       `${this.apiUrlll}/delivered-orders/view`, // Reuse the same endpoint
       {
-        params: { startDate, endDate },
+        params: { startDate, endDate ,destination, plant, },
         responseType: 'json'
       }
     );
@@ -102,14 +103,14 @@ export class ReportsService {
 
   getClaimsReport(
     page: number,
-    location: string,
+    destination: string,
     plant: string,
     startDate: string,
     endDate: string
   ): Observable<Blob> {
     const params = {
       page: page.toString(),
-      location,
+      destination,
       plant,
       startDate,
       endDate,

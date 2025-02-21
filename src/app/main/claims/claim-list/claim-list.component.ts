@@ -92,9 +92,12 @@ export class ClaimsReportComponent implements OnInit {
   }
 
   getClaimsDetails(): void {
-    const { startDate, endDate } = this.filterForm.value;
+    const { startDate, endDate,destinationId } = this.filterForm.value;
+    const destination = this.destinations.find(dest => dest._id === destinationId);
+    const location = destination ? destination.destination : ''; // Use destination name as location
+    const plant = this.selectedPlant ? this.selectedPlant.name : ''; // Use plant name
     this.loading = true;
-    this.reportsService.getClaimsReportDetails(startDate, endDate).subscribe({
+    this.reportsService.getClaimsReportDetails(startDate, endDate,location, plant, ).subscribe({
       next: (response: any) => {
         console.log(response);
         this.claimsData = response.data.map((claim: any) => ({
@@ -119,7 +122,6 @@ export class ClaimsReportComponent implements OnInit {
   generateClaimsReport(): void {
     if (this.filterForm.invalid) return;
   
-    this.loading = true;
     const { startDate, endDate, destinationId } = this.filterForm.value;
   
     // Get the destination name and plant name
@@ -140,35 +142,9 @@ export class ClaimsReportComponent implements OnInit {
         link.download = `claims-report-${startDate}-to-${endDate}.xlsx`;
         link.click();
         window.URL.revokeObjectURL(url);
-  
-        // Parse the Excel file and display its data
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const json = XLSX.utils.sheet_to_json(worksheet);
-  
-          // Transform data to match the required format
-          this.claimsData = json.map((claim: any) => ({
-            'DATE OF DISPATCH': new Date(claim.date).toLocaleDateString(),
-            DESTINATION: claim.destination,
-            DRIVER: claim.driver || 'N/A', // Assuming driver data might be missing
-            'INVOICE/WAYBILL NO.': claim.invoice,
-            QTY: claim.quantity,
-            'RATE (100%)': claim.rate100,
-            'RATE (95%)': claim.rate95,
-            AMOUNT: claim.amount,
-          }));
-        };
-        reader.readAsArrayBuffer(blob);
-  
-        this.loading = false;
       },
       error: (error) => {
         console.error('Error generating claims report:', error);
-        this.loading = false;
       },
     });
   }
