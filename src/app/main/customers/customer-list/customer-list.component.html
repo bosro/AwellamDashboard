@@ -80,8 +80,10 @@
                         <div class="text-sm text-gray-900">{{customer.totalOrders || 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">GHC {{customer.balance}}</div>
-                    </td>
+                        <div [ngClass]="{'bg-red-100 text-red-800': customer.balance < 0, 'bg-green-100 text-green-800': customer.balance >= 0}" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full mb-2">
+                          {{ customer.balance  | currency:'GHC':'symbol':'1.2-2' }}
+                        </div>
+                      </td>
                     <td class="px-6 py-4 text-right text-sm font-medium">
                         <div class="flex justify-end space-x-3">
                             <button [routerLink]="['/main/customers/details', customer._id]"

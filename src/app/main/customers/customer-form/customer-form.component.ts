@@ -35,7 +35,8 @@ export class CustomerFormComponent implements OnInit {
         fullName: ['', Validators.required],
         address: ['', Validators.required],
         email: ['', ],
-        phoneNumber: ['', Validators.required]
+        phoneNumber: ['', Validators.required],
+        balance:['', Validators.required]
       })
     });
   }
@@ -68,7 +69,8 @@ export class CustomerFormComponent implements OnInit {
             fullName: customer.fullName,
             address: customer.address,
             email: customer.email,
-            phoneNumber: customer.phoneNumber
+            phoneNumber: customer.phoneNumber,
+            balance:customer.balance
           }
         });
         this.loading = false;

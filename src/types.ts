@@ -113,3 +113,73 @@ export interface Category {
     country: string;
     password?: string;
   }
+
+
+  // app.interfaces.ts
+
+/*********************
+ * Enums
+ *********************/
+
+export enum TransactionType {
+  PURCHASE = 'purchase',
+  PAYMENT = 'payment',
+  REFUND = 'refund',
+}
+
+export enum PaymentMethod {
+  CASH = 'cash',
+  CREDIT_CARD = 'credit_card',
+  BANK_TRANSFER = 'bank_transfer',
+  MOBILE_PAYMENT = 'mobile_payment',
+  PAYPAL = 'paypal',
+  // Add more payment methods as needed
+}
+
+/*********************
+ * Interfaces
+ *********************/
+
+
+
+// Transaction Interface
+export interface Transaction {
+  _id: string;
+  customerId: {
+    _id: string,
+    fullName: string
+  }; // Embedded customer details
+  type: TransactionType;
+  amount: number;
+  balanceAfter: number;
+  paymentReference: string;
+  paymentMethod: PaymentMethod;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+// API Response for Fetching Transactions
+export interface TransactionsResponse {
+  success: boolean;
+  data: Transaction[];
+}
+
+// API Response for a Single Transaction
+export interface SingleTransactionResponse {
+  success: boolean;
+  data: Transaction;
+}
+
+// API Response for Fetching Customers
+export interface CustomersResponse {
+  success: boolean;
+  data: Customer[];
+}
+
+// API Response for a Single Customer
+export interface SingleCustomerResponse {
+  success: boolean;
+  data: Customer;
+}

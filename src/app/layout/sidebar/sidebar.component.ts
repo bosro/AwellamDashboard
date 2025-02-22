@@ -226,6 +226,46 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
+      title: 'Transaction',
+      icon: 'ri-bar-chart-2-line',
+      expanded: false,
+      roles: ['super_admin', 'Admin_Support'],
+      children: [
+        {
+          title: 'Make Payment ',
+          route: '/main/transaction/list',
+          icon: 'ri-list-view'
+        },
+        // {
+        //   title: 'Pruchase Report ',
+        //   route: '/main/reports/purchase-list',
+        //   icon: 'ri-list-view'
+        // },
+        // {
+        //   title: 'SOC Report ',
+        //   route: '/main/reports/soc-report',
+        //   icon: 'ri-list-view'
+        // },
+
+        
+        // {
+        //   title: 'Report Generator',
+        //   route: '/main/reports/generator',
+        //   icon: 'ri-ai-generate-text'
+        // },
+        // {
+        //   title: 'Report Schedule',
+        //   route: '/main/reports/scheduled',
+        //   icon: 'ri-calendar-2-line'
+        // },
+        // {
+        //   title: 'Report Templates',
+        //   route: '/main/reports/templates',
+        //   icon: 'ri-book-open-line'
+        // }
+      ]
+    },
+    {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
       roles: ['super_admin', 'Admin_Support'],
