@@ -15,7 +15,6 @@ import { TransactionRoutingModule } from './transaction.routing';
     declarations: [
         TransactionDetailModalComponent,
         TransactionComponent,
-        ObjectUrlPipe
         
     ],
     imports: [
