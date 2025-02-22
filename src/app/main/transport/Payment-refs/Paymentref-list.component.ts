@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class PaymentListComponent implements OnInit {
   payments: PaymentReference[] = [];
-  filteredPayments: PaymentReference[] = [];
+  filteredPayments: any[] = [];
   plants: Plant[] = [];
   loading = false;
   error: string | null = null;
@@ -73,6 +73,7 @@ export class PaymentListComponent implements OnInit {
     this.loadPlants();
     this.setupFilters();
     this.loadPRs();
+    // this.getPayments()
   }
 
   navigateToPRsWithoutSOCs(): void {
@@ -132,7 +133,7 @@ export class PaymentListComponent implements OnInit {
         (payment.plantId && payment.plantId._id === filters.filterPlantId);
 
       const socMatch = !filters.search || 
-        (payment.soc && payment.soc.toUpperCase().includes(filters.search.toLowerCase().trim()));
+        (payment.soc && payment.soc.toUpperCase().includes(filters.search.toUpperCase().trim()));
 
       return  socMatch || paymentRefMatch || chequeNumberMatch && orderTypeMatch && plantIdMatch && socMatch;
     });
@@ -148,7 +149,7 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
-  get paginatedPayments(): PaymentReference[] {
+  get  paginatedPayments(): PaymentReference[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return this.filteredPayments.slice(startIndex, startIndex + this.pageSize);
   }
@@ -207,6 +208,35 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
+
+
+  getPayments(): void {
+    this.loading = true;
+   
+
+   console.log( this.searchQuery)
+    
+    this.paymentService.getSoc(this.searchQuery).subscribe({
+      next: (response) => {
+        this.payments = response.paymentReferences;
+        this.filteredPayments = [...this.payments];
+        this.totalItems = this.payments.length;
+        this.loading = false;
+        this.applyFilters(); // Apply any existing filters to the new data
+      },
+      error: (error) => {
+        this.error = 'Failed to load payment references';
+        this.loading = false;
+        console.error('Error loading payments:', error);
+      }
+    });
+  }
+
+  getSOC(){
+    this.getPayments()
+  }
+
+
   loadPRs(): void {
     this.paymentService.getPaymentReferences().subscribe({
       next: (response) => {
@@ -226,14 +256,14 @@ export class PaymentListComponent implements OnInit {
 
   onSearch(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    const query = inputElement.value.trim().toLowerCase(); // Trim and convert to lowercase
+    const query = inputElement.value.trim().toUpperCase(); // Trim and convert to lowercase
     this.searchQuery = query;
   
     if (query) {
       // Filter PRs where the SOC number matches the query
       this.filteredPRs = this.prs.filter(pr => 
         pr.socNumbers && pr.socNumbers.some((soc:any )=> 
-          soc.socNumber.toLowerCase().includes(query)
+          soc.socNumber.toUpperCase().includes(query)
         )
       );
     } else {

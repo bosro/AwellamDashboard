@@ -184,6 +184,10 @@ export class PaymentService {
   getPaymentReferencesWithoutActiveSoc(): Observable<PaymentResponse> {
     return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/without-socs`);
   }
+
+  getSoc(socId:any): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/soc/${socId}`);
+  }
   getPaymentReferencesWithActiveSoc(): Observable<PaymentResponse> {
     return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/active-soc`);
   }
@@ -255,6 +259,9 @@ export class PaymentService {
       `${this.apiUrl}/soc/delete/${socId}`
     );
   }
+
+
+  // /soc/:socNumber
 
 
   createSocNumber(paymentRefId: string, socData: any): Observable<any> {

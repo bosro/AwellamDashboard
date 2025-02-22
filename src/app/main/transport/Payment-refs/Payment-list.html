@@ -74,18 +74,13 @@
             class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             placeholder="Search SOC..."
             (input)="onSearch($event)">
+
+            <button (click)="getSOC()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"> Search SOc</button>
         </div>
       
         <!-- Display filtered PRs -->
         <div *ngIf="filteredPRs.length > 0" class="ml-4">
-          <ul>
-            <li *ngFor="let pr of filteredPRs" class="text-sm text-gray-700">
-              {{ pr.paymentRef }} - 
-              <span *ngFor="let soc of pr.socNumbers">
-                {{ soc.socNumber }} ({{ soc.status }})
-              </span>
-            </li>
-          </ul>
+    
         </div>
       
         <!-- No results message -->

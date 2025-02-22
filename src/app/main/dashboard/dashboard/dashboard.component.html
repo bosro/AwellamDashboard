@@ -1,170 +1,259 @@
-<div class=" sm:p-6">
+<div class="p-4 sm:p-6 bg-gray-50 min-h-screen">
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <div>
-      <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">Dashboard</h1>
+      <h1 class="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+      <p class="text-sm text-gray-600">Business Performance Overview</p>
+    </div>
+    <div class="flex gap-4">
+      <select 
+        [(ngModel)]="selectedRange" 
+        (change)="onDateRangeChange($event)"
+        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <option *ngFor="let range of dateRanges" [value]="range.value">
+          {{range.label}}
+        </option>
+      </select>
     </div>
   </div>
 
-  <!-- Quick Stats -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <!-- Key Metrics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <!-- Active Drivers -->
-    <div>
-      <app-metrics-card title="Active Drivers" [value]="metrics.activeDrivers" icon="ri-truck-line"
-        colorClass="bg-blue-100 text-blue-600" (click)="DriverList()"></app-metrics-card>
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500" (click)="navigateToDrivers()">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100 text-blue-500">
+          <i class="fas fa-truck text-xl"></i>
+        </div>
+        <div class="ml-4" >
+          <p class="text-sm font-medium text-gray-500">Active Drivers</p>
+          <p class="text-xl font-semibold text-gray-900">{{dashboardData.activeDrivers}}</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Total Revenue -->
-    <div>
-      <app-metrics-card title="Total Revenue GHC" [value]="(metrics.revenueMetrics?.totalRevenue | number: '1.2-2') ?? '0.00'" icon="ri-money-dollar-circle-line"
-        colorClass="bg-green-100 text-green-600"></app-metrics-card>
+    <!-- Revenue -->
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-green-100 text-green-500">
+          <i class="fas fa-money-bill text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+          <p class="text-xl font-semibold text-gray-900">GHC {{dashboardData.totalRevenue | number:'1.2-2'}}</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Total Orders -->
-    <div>
-      <app-metrics-card title="Pending Orders" [value]="metrics.totalPendingOrders" icon="ri-shopping-cart-line"
-        colorClass="bg-yellow-100 text-yellow-600" (click)="OrderList()"></app-metrics-card>
+    <!-- Pending Orders -->
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500" (click)="navigateToOrders()">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
+          <i class="fas fa-clock text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500" >Pending Orders</p>
+          <p class="text-xl font-semibold text-gray-900">{{dashboardData.totalPendingOrders}}</p>
+        </div>
+      </div>
     </div>
 
     <!-- Conversion Rate -->
-    <div>
-      <app-metrics-card title="Conversion Rate" [value]="(metrics?.conversionRate | number: '1.2-2') ?? '0 %'" icon="ri-line-chart-line"
-        colorClass="bg-orange-100 text-orange-600" suffix="%"></app-metrics-card>
-    </div>
-    <div>
-      <app-metrics-card title="Total Delivered Products" [value]="(metrics?.totalQuantityDelivered ) ?? '0'" icon="ri-line-chart-line"
-        colorClass="bg-orange-100 text-orange-600" ></app-metrics-card>
-    </div>
-    <div>
-      <app-metrics-card title="Last Month Revenue" [value]="(metrics?.lastMonthRevenue ) ?? '0'" icon="ri-line-chart-line"
-        colorClass="bg-orange-100 text-orange-600" ></app-metrics-card>
-    </div>
-  </div>
-
-  <!-- Highest Stock Items -->
-  <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Highest Stock Items</h2>
-  
-    <!-- Desktop Table (Hidden on Mobile) -->
-    <div class="hidden sm:block">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-            <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-            <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TotalStock </th>
-            <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let item of metrics.lowestStockItems">
-            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.name }}</td>
-            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.costprice | currency:'GHC':'symbol':'1.2-2' }}</td>
-            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm" [ngClass]="{'text-red-600': item.totalStock === 0, 'text-green-600': item.totalStock > 0}">
-              {{ item.totalStock }}
-            </td>
-            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.updatedAt | date:'medium' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-  
-    <!-- Mobile Cards (Visible on Mobile) -->
-    <div class="sm:hidden space-y-4">
-      <div *ngFor="let item of metrics.lowestStockItems" class="bg-gray-50 p-4 rounded-lg shadow-sm">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-900">Name:</span>
-          <span class="text-sm text-gray-900">{{ item.name }}</span>
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-purple-100 text-purple-500">
+          <i class="fas fa-chart-line text-xl"></i>
         </div>
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-900">Price:</span>
-          <span class="text-sm text-gray-900">{{ item.price | currency:'GHC':'symbol':'1.2-2' }}</span>
-        </div>
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-900">Stock:</span>
-          <span class="text-sm" [ngClass]="{'text-red-600': item.totalStock === 0, 'text-green-600': item.totalStock > 0}">
-            {{ item.totalStock }}
-          </span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm font-medium text-gray-900">Last Updated:</span>
-          <span class="text-sm text-gray-900">{{ item.updatedAt | date:'medium' }}</span>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Conversion Rate</p>
+          <p class="text-xl font-semibold text-gray-900">{{dashboardData.conversionRate | number:'1.2-2'}}%</p>
         </div>
       </div>
     </div>
   </div>
 
-
-
-  <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Delivered Product</h2>
-  
-    <!-- Desktop Table (Hidden on Mobile) -->
-    <div class="hidden sm:block">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-            <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Delievered</th>
-            <!-- <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TotalStock </th> -->
-            <!-- <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th> -->
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let item of metrics.deliveredProducts">
-            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.name }}</td>
-            <!-- <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.costprice | currency:'GHC':'symbol':'1.2-2' }}</td> -->
-            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm" [ngClass]="{'text-red-600': item.totalStock === 0, 'text-green-600': item.totalStock > 0}">
-              {{ item.totalDelivered }}
-            </td>
-            <!-- <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.updatedAt | date:'medium' }}</td> -->
-          </tr>
-        </tbody>
-      </table>
+  <!-- Additional Metrics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Average Order Value -->
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-indigo-100 text-indigo-500">
+          <i class="fas fa-dollar-sign text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Average Order Value</p>
+          <p class="text-xl font-semibold text-gray-900">GHC {{dashboardData.averageOrderValue | number:'1.2-2'}}</p>
+        </div>
+      </div>
     </div>
-    
-  
-    <!-- Mobile Cards (Visible on Mobile) -->
-    <div class="sm:hidden space-y-4">
-      <div *ngFor="let item of metrics.lowestStockItems" class="bg-gray-50 p-4 rounded-lg shadow-sm">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-900">Name:</span>
-          <span class="text-sm text-gray-900">{{ item.name }}</span>
+
+    <!-- Total Deliveries -->
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-teal-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-teal-100 text-teal-500">
+          <i class="fas fa-box text-xl"></i>
         </div>
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-900">Price:</span>
-          <span class="text-sm text-gray-900">{{ item.price | currency:'GHC':'symbol':'1.2-2' }}</span>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Total Deliveries</p>
+          <p class="text-xl font-semibold text-gray-900">{{dashboardData.totalDeliveries}}</p>
         </div>
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-sm font-medium text-gray-900">Stock:</span>
-          <span class="text-sm" [ngClass]="{'text-red-600': item.totalStock === 0, 'text-green-600': item.totalStock > 0}">
-            {{ item.totalStock }}
-          </span>
+      </div>
+    </div>
+
+    <!-- Revenue Growth -->
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-pink-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-pink-100 text-pink-500">
+          <i class="fas fa-chart-line text-xl"></i>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm font-medium text-gray-900">Last Updated:</span>
-          <span class="text-sm text-gray-900">{{ item.updatedAt | date:'medium' }}</span>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Revenue Growth</p>
+          <p class="text-xl font-semibold text-gray-900">{{dashboardData.revenueGrowth}}%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peak Revenue -->
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100 text-red-500">
+          <i class="fas fa-chart-bar text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Peak Revenue</p>
+          <p class="text-xl font-semibold text-gray-900">GHC {{dashboardData.revenueMetrics.peakRevenue | number:'1.2-2'}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100 text-red-500">
+          <i class="fas fa-chart-bar text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">LastMonth Revenue</p>
+          <p class="text-xl font-semibold text-gray-900">GH {{dashboardData.lastMonthRevenue | number:'1.2-2' }}</p>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+      <div class="flex items-center">
+        <div class="p-3 rounded-full bg-red-100 text-red-500">
+          <i class="fas fa-chart-bar text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Total Quantity Delievered</p>
+          <p class="text-xl font-semibold text-gray-900">{{dashboardData.totalQuantityDelivered }}</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Revenue Metrics -->
-  <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Revenue Metrics</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div>
-        <app-metrics-card title="Total Revenue" [value]="(metrics.revenueMetrics?.totalRevenue | number: '1.2-2') ?? '0.00'" icon="ri-money-dollar-circle-line"
-          colorClass="bg-green-100 text-green-600"></app-metrics-card>
+  <!-- Charts Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Stock Level Chart -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Stock Level Analysis</h3>
+        <div class="flex gap-2">
+          <button (click)="toggleChartType('stock')" 
+            class="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200">
+            Toggle View
+          </button>
+        </div>
       </div>
-      <div>
-        <app-metrics-card title="Average Revenue" [value]="(metrics.revenueMetrics?.averageRevenue | number: '1.2-2') ?? '0.00'" icon="ri-bar-chart-line"
-          colorClass="bg-blue-100 text-blue-600"></app-metrics-card>
+      <canvas #stockChart></canvas>
+    </div>
+
+    <!-- Delivery Distribution Chart -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Product Delivery Distribution</h3>
+        <div class="flex gap-2">
+          <button (click)="toggleChartType('delivery')" 
+            class="px-3 py-1 text-sm rounded bg-gray-100 hover:bg-gray-200">
+            Toggle View
+          </button>
+        </div>
       </div>
-      <div>
-        <app-metrics-card title="Growth" [value]="metrics.revenueMetrics?.growth" icon="ri-line-chart-line"
-          colorClass="bg-purple-100 text-purple-600" suffix="%"></app-metrics-card>
+      <canvas #deliveryChart></canvas>
+    </div>
+
+    <!-- Monthly Growth Chart -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h3 class="text-lg font-semibold mb-4">Delivered Products Last Month</h3>
+      <canvas #growthChart></canvas>
+    </div>
+
+    <!-- Revenue Metrics Chart -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h3 class="text-lg font-semibold mb-4">Revenue Metrics</h3>
+      <canvas #revenueChart></canvas>
+    </div>
+  </div>
+
+  <!-- Tables Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Stock Items Table -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h3 class="text-lg font-semibold mb-4">Stock Status</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let item of dashboardData.lowestStockItems">
+              <td class="px-6 py-4 whitespace-nowrap">{{item.name}}</td>
+              <td class="px-6 py-4 whitespace-nowrap">GHC {{item.costprice}}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{item.totalStock}}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span [class]="item.inStock ? 
+                  'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' : 
+                  'px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800'">
+                  {{item.inStock ? 'In Stock' : 'Out of Stock'}}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Delivered Products Table -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h3 class="text-lg font-semibold mb-4">Delivered Products</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Delivered</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let product of dashboardData.deliveredProducts">
+              <td class="px-6 py-4 whitespace-nowrap">{{product.name}}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{product.totalDelivered}}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="bg-blue-600 h-2.5 rounded-full" 
+                    [style.width]="(product.totalDelivered / dashboardData.totalQuantityDelivered * 100) + '%'">
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

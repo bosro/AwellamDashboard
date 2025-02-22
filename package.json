@@ -25,6 +25,7 @@
     "@auth0/angular-jwt": "^5.2.0",
     "@swimlane/ngx-charts": "^21.1.2",
     "@types/xlsx": "^0.0.35",
+    "chart.js": "^4.4.8",
     "flowbite": "^2.5.2",
     "rxjs": "~7.8.0",
     "sweetalert": "^2.1.2",
