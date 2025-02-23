@@ -59,7 +59,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private dashboardService: DashboardService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -240,11 +240,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadDashboardData(): void {
-    this.dashboardService.getDashboardData()
+    const queryParams = this.getQueryParams();
+    this.dashboardService.getDashboardData(queryParams)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          console.log('Dashboard data:', response); // Debugging: Log the response data
           this.dashboardData = response;
           this.updateCharts();
         },
@@ -253,6 +253,37 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
   }
+
+
+  private getQueryParams(): any {
+    const currentDate = new Date(); let queryParams: any = {};
+
+    switch (this.selectedRange) {
+      case 'today':
+        queryParams.day = currentDate.getDate();
+        queryParams.month = currentDate.getMonth() + 1;
+        queryParams.year = currentDate.getFullYear();
+        break;
+      case 'week':
+        // Assuming the backend handles the week range based on the current date
+        queryParams.week = this.getWeekNumber(currentDate); // Implement getWeekNumber method
+        queryParams.year = currentDate.getFullYear();
+        break;
+      case 'month':
+        queryParams.month = currentDate.getMonth() + 1;
+        queryParams.year = currentDate.getFullYear();
+        break;
+      case 'year':
+        queryParams.year = currentDate.getFullYear();
+        break;
+    }
+
+    return queryParams;
+  }
+
+
+
+  private getWeekNumber(date: Date): number { const firstDayOfYear = new Date(date.getFullYear(), 0, 1); const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000; return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7); }
 
   private updateCharts(): void {
     if (this.stockChart) {

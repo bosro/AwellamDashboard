@@ -226,13 +226,13 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
-      title: 'Transaction',
+      title: 'Customer Payment ',
       icon: 'ri-bar-chart-2-line',
       expanded: false,
       roles: ['super_admin', 'Admin_Support'],
       children: [
         {
-          title: 'Make Payment ',
+          title: 'Receive Payment ',
           route: '/main/transaction/list',
           icon: 'ri-list-view'
         },

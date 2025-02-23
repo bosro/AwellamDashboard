@@ -4,7 +4,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomersService } from '../../../services/customer.service';
 import { Customer, } from '../../../shared/types/customer.interface';
 import { Order } from '../../../services/order.service';
+import { OrdersService } from '../../../services/order.service';
 // import {OrderResponse} from  '../../../services/order.service'
+import printJS from 'print-js';
 
 interface CustomerOrder {
   id: string;
@@ -64,8 +66,8 @@ interface Communication {
 export class CustomerDetailsComponent implements OnInit {
   customer?: Customer;
   loading = false;
-  tabs: Array<'overview' | 'orders' | 'communications' | 'notes'> = ['overview', 'orders', 'communications', 'notes'];
-  activeTab: 'overview' | 'orders' | 'communications' | 'notes' = 'overview';
+  tabs: Array<'overview' | 'orders' | 'Payments' | 'notes'> = ['overview', 'orders', 'Payments', 'notes'];
+  activeTab: 'overview' | 'orders' | 'Payments' | 'notes' = 'overview';
   // orders: CustomerOrder[] = [];
   communications: Communication[] = [];
   showNoteForm = false;
@@ -75,10 +77,12 @@ export class CustomerDetailsComponent implements OnInit {
   showAddPaymentForm = false;
   noteForm: FormGroup;
   emailForm: FormGroup;
-  orders: Order[] = [];
-  
+  orders!: Order[];
+  selectedOrder: any;
+  transactions: any[] = [];
 
-  
+
+
   customerMetrics: CustomerMetrics = {
     lifetimeValue: 0,
     averageOrderValue: 0,
@@ -87,17 +91,21 @@ export class CustomerDetailsComponent implements OnInit {
     purchaseHistory: []
   };
 
-  goBack(){
+  goBack() {
     this.router.navigate(['/main/customers/list/'])
   }
+
+
+
   
-  
+
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private customersService: CustomersService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private ordersService : OrdersService
   ) {
     this.noteForm = this.fb.group({
       content: ['', Validators.required],
@@ -111,6 +119,9 @@ export class CustomerDetailsComponent implements OnInit {
       attachments: [[]]
     });
   }
+
+
+
 
   // Add missing methods for component functionality
   editAddress(address: any): void {
@@ -144,7 +155,7 @@ export class CustomerDetailsComponent implements OnInit {
 
   getStatusClass(status?: string): string {
     if (!status) return '';
-    
+
     const statusClasses: Record<string, string> = {
       active: 'bg-green-100 text-green-800',
       inactive: 'bg-gray-100 text-gray-800',
@@ -178,7 +189,42 @@ export class CustomerDetailsComponent implements OnInit {
       if (params['id']) {
         this.loadCustomer(params['id']);
       }
+      this.loadCustomerTransactions(params['id']);
     });
+  }
+
+
+  loadCustomerTransactions(id: string): void {
+    if (id) {
+      this.customersService.getCustomerTransactions(id).subscribe(response => {
+        this.transactions = response.data;
+      });
+    }
+  }
+
+  loadOrderDetails(orderId: string | null): void {
+    if (orderId) {
+      this.ordersService.getOrderById(orderId).subscribe(order => {
+        this.selectedOrder = order;
+      });
+    }
+  }
+
+    PrintOrder(orderId: string): void {
+      this.loadOrderDetails(orderId);
+      setTimeout(() => {
+      printJS({
+        printable: 'invoice',
+        type: 'html',
+        style: `
+          @page { size: auto; margin: 20mm; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid black; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        `,
+        documentTitle: 'Invoice'
+      });
+    }, 1000); // Delay to ensure data is loaded
   }
 
   private loadCustomer(id: string): void {
@@ -202,8 +248,8 @@ export class CustomerDetailsComponent implements OnInit {
 
 
 
-  
- 
+
+
 
   private loadCustomerData(): void {
     if (!this.customer) return;
@@ -251,7 +297,7 @@ export class CustomerDetailsComponent implements OnInit {
 
   private calculateOrderFrequency(orders: CustomerOrder[]): number {
     if (orders.length < 2) return 0;
-    
+
     const dates = orders.map(o => new Date(o.createdAt)).sort((a, b) => a.getTime() - b.getTime());
     const totalDays = (dates[dates.length - 1].getTime() - dates[0].getTime()) / (1000 * 60 * 60 * 24);
     return totalDays / (orders.length - 1);
@@ -262,14 +308,14 @@ export class CustomerDetailsComponent implements OnInit {
       const date = new Date(order.createdAt);
       const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
       const existingMonth = acc.find(m => m.month === month);
-      
+
       if (existingMonth) {
         existingMonth.amount += order.total;
         existingMonth.orders += 1;
       } else {
         acc.push({ month, amount: order.total, orders: 1 });
       }
-      
+
       return acc;
     }, []);
   }

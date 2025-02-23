@@ -44,6 +44,14 @@ export class TransactionService {
     return this.http.get<Transaction>(`${this.apiUrl}/transactions/${id}`);
   }
 
+
+  getDebtors():Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/transactions/debtors/export`,{
+         responseType: 'blob'
+    });
+  }
+  
+
   updateTransaction(id: string, transaction: Transaction): Observable<Transaction> {
     return this.http.put<Transaction>(`${this.apiUrl}/transactions/${id}`, transaction);
   }

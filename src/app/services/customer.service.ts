@@ -9,6 +9,11 @@ export interface OrderResponse {
   message: string;
   orders: Order[];
 }
+export interface TransactionResponse {
+  message: string;
+  data: any[];
+}
+
 
 
 @Injectable({
@@ -16,6 +21,7 @@ export interface OrderResponse {
 })
 export class CustomersService {
   private apiUrl = `${environment.apiUrl}/customers`;
+  private apiUrll = `${environment.apiUrl}/transactions`;
 
   constructor(private http: HttpClient) {}
 
@@ -29,6 +35,12 @@ export class CustomersService {
   getCustomerById(id: string): Observable<{ customer: Customer }> {
     return this.http.get<{ customer: Customer }>(`${this.apiUrl}/get/${id}`);
   }
+
+
+  getCustomerTransactions(id: string, params?: any): Observable<TransactionResponse> {
+    return this.http.get<TransactionResponse>(`${this.apiUrll}/get/${id}/transactions`, { params });
+  }
+
   
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
     return this.http.post<Customer>(`${this.apiUrl}/create`, customer);

@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { CustomersService } from '../../../services/customer.service';
 import { Customer } from '../../../shared/types/customer.interface';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-
+import { Subscriber } from 'rxjs';
+import { TransactionService } from '../../../services/transaction.service';
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html'
@@ -22,6 +23,7 @@ export class CustomerListComponent implements OnInit {
 
   constructor(
     private customersService: CustomersService,
+    private transactionService: TransactionService,
     private fb: FormBuilder
   ) {}
 
@@ -94,6 +96,22 @@ export class CustomerListComponent implements OnInit {
       this.selectedCustomers.add(customerId);
     }
   }
+
+  getDebtors(){
+    this.transactionService.getDebtors().subscribe({
+      next: (blob: Blob) => {
+        // Download the Excel file
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `debtors-list.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => console.error('Error exporting debtors:', error)
+    });
+  }
+  
 
   toggleAllSelection(): void {
     if (this.selectedCustomers.size === this.filteredCustomers.length) {
