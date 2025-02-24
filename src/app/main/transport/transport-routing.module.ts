@@ -20,6 +20,7 @@ import { DestinationListComponent } from '../inventory/destination/destination-l
 import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
 import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
 import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
+import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
 // import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
 // import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
 
@@ -44,7 +45,9 @@ const routes: Routes = [
       { path: 'destination', component: DestinationListComponent },
       { path: 'disbursement', component: StockDisbursementComponent },
       {path:'paymentrefs', component: PaymentListComponent},
-      {path:'payment-ref/:id' , component: PaymentDetailComponent}
+      {path:'payment-ref/:id' , component: PaymentDetailComponent},
+      {path:'without-socs', component: PaymentListWithoutSocComponent},
+      
     ],
   },
 ];

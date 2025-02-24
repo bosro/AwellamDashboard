@@ -81,6 +81,11 @@ const routes: Routes = [
         loadChildren: ()=> import ('./customers/customer.module').then((m)=>m.CustomerModule),
         canActivate: [AuthGuard],
       },
+      {
+        path:'transaction',
+        loadChildren: ()=> import ('./transactions/transaction.module').then((m)=>m.TransactionModule),
+        canActivate: [AuthGuard],
+      },
 //     ],
 //   },
 // ];

@@ -88,11 +88,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/products/inventory',
           icon: 'ri-file-list-3-line'
         },
-        {
-          title: 'Purchase Overview',
-          route: '/main/purchasing',
-          icon: 'ri-order-play-line'
-        },
+        // {
+        //   title: 'Purchase Overview',
+        //   route: '/main/purchasing',
+        //   icon: 'ri-order-play-line'
+        // },
         {
           title: 'Destinations',
           route: '/main/inventory/destination',
@@ -140,6 +140,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/dashboard',
           icon: 'ri-speed-up-line'
         },
+        {
+          title: 'Payment Ref /SOCs ',
+          route: '/main/transport/paymentrefs',
+          icon: 'ri-database-2-line'
+        },
 
         {
           title: 'Stock Overview',
@@ -167,11 +172,7 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/disbursement',
           icon: 'ri-exchange-funds-line'
         },
-        {
-          title: 'Payment Ref /SOCs ',
-          route: '/main/transport/paymentrefs',
-          icon: 'ri-database-2-line'
-        },
+      
         // {
         //   title: 'Fuel Analytics',
         //   route: '/main/transport/fuel-analytics',
@@ -225,6 +226,46 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
+      title: 'Customer Payment ',
+      icon: 'ri-bar-chart-2-line',
+      expanded: false,
+      roles: ['super_admin', 'Admin_Support'],
+      children: [
+        {
+          title: 'Receive Payment ',
+          route: '/main/transaction/list',
+          icon: 'ri-list-view'
+        },
+        // {
+        //   title: 'Pruchase Report ',
+        //   route: '/main/reports/purchase-list',
+        //   icon: 'ri-list-view'
+        // },
+        // {
+        //   title: 'SOC Report ',
+        //   route: '/main/reports/soc-report',
+        //   icon: 'ri-list-view'
+        // },
+
+        
+        // {
+        //   title: 'Report Generator',
+        //   route: '/main/reports/generator',
+        //   icon: 'ri-ai-generate-text'
+        // },
+        // {
+        //   title: 'Report Schedule',
+        //   route: '/main/reports/scheduled',
+        //   icon: 'ri-calendar-2-line'
+        // },
+        // {
+        //   title: 'Report Templates',
+        //   route: '/main/reports/templates',
+        //   icon: 'ri-book-open-line'
+        // }
+      ]
+    },
+    {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
       roles: ['super_admin', 'Admin_Support'],
@@ -232,12 +273,12 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Awellam Invoices ',
-          route: '/main/claims',
+          route: '/main/claims/awellam-claims',
           icon: 'ri-list-view'
         },
         {
           title: 'Outside Load Invoices  ',
-          route: '/main/reports/purchase-list',
+          route: '/main/claims/outside-claims',
           icon: 'ri-list-view'
         },
       ]
@@ -253,11 +294,18 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/list',
           icon: 'ri-list-view'
         },
+        // {
+        //   title: 'Pruchase Report ',
+        //   route: '/main/reports/purchase-list',
+        //   icon: 'ri-list-view'
+        // },
         {
-          title: 'Pruchase Report ',
-          route: '/main/reports/purchase-list',
+          title: 'SOC Report ',
+          route: '/main/reports/soc-report',
           icon: 'ri-list-view'
         },
+
+        
         // {
         //   title: 'Report Generator',
         //   route: '/main/reports/generator',

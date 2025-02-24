@@ -5,6 +5,7 @@ driver: any;
   capacity: number;
   expenses: number;
   status: string;
+  loadedbags: number;
   productId: {
     _id: string;
     name: string;
@@ -51,6 +52,8 @@ driver: any;
     _id: string;
     destination: string;
   };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TruckResponse {

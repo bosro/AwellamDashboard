@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
+  totalPrice: any;
 items: any;
   _id: string;
   customerId: {
@@ -20,17 +21,23 @@ items: any;
     price: number; // Changed to number
     _id: string;
   }[];
-  categoryId:{
+  assignedDriver:{
     _id: string,
-    name:string,
-    plantId:{
-      _id:string,
-      name:string
-    }
+    name: string
+
   };
   socNumber:{
+    toLowerCase(): unknown;
     _id: string,
-    socNumber: string
+    socNumber: string,
+    destinationId:{
+      _id: string,
+      destination: string
+    }
+  };
+  plantId:{
+    _id:string,
+    name:string
   };
   deliveryAddress: string;
   totalAmount: number; // Changed to number
@@ -39,6 +46,7 @@ items: any;
   deliveryStatus: string;
   orderNumber: string;
   date: string;
+  actualDeliveryDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +60,7 @@ export interface OrderResponse {
 interface OrdersResponse {
   message: string;
   order: {
+    socNumber: { _id: string; socNumber: string; };
     categoryId: { _id: string; name: string; plantId: { _id: string; name: string; }; };
     _id: string;
     status: string;
@@ -92,6 +101,23 @@ export class OrdersService {
   getOrders(): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/get`);
   }
+  getPendingOrders(): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/get/pending`);
+  }
+  getDelieveredOrders(): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/get/delivered`);
+  }
+
+  getProductOrders(productId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/product/${productId}`);
+  }
+
+  getPlantOrders(plantId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/plant/${plantId}`);
+  }
+
+
+
 
   getOrderById(id: string): Observable<OrdersResponse> {
     return this.http.get<OrdersResponse>(`${this.apiUrl}/get/${id}`);
@@ -99,6 +125,9 @@ export class OrdersService {
 
   toggleOrderStatus(id: string): Observable<Order> {
     return this.http.patch<Order>(`${this.apiUrl}/${id}/toggle-status`, {});
+  }
+  toggleOrderDeliveredStatus(id: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.apiUrl}/${id}/status`, {});
   }
 
   editOrder(id: string, data: any): Observable<Order> {

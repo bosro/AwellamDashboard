@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { Plant, PlantService } from '../../../services/plant.service';
+import { finalize } from 'rxjs/internal/operators/finalize';
 
 export interface UserFormData {
   _id: string;
@@ -24,11 +26,13 @@ export class UserEditModalComponent implements OnInit {
   loading = false;
   error: string | null = null;
   showPassword = false;
+  plants!: Plant[];
   roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support']; // Example roles, replace with actual roles
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private plantService: PlantService
   ) {}
 
   ngOnInit(): void {
@@ -44,9 +48,22 @@ export class UserEditModalComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['' ,Validators.required],
       phoneNumber:[''],
-      role: ['', Validators.required]
+      role: ['', Validators.required],
+      plant: ['', Validators.required]
     });
   }
+
+   loadPlants(): void {
+      this.loading = true;
+      this.plantService.getPlants()
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: (response) => {
+            this.plants = response.plants;
+          },
+          error: (error) => console.error('Error loading plants:', error)
+        });
+    }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;

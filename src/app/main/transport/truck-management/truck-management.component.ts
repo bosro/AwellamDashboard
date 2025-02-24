@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TruckService } from '../../../services/truck.service';
 import { Truck } from '../../../shared/types/truck-operation.types';
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-truck-management',
@@ -19,7 +19,12 @@ export class TruckManagementComponent implements OnInit {
   pageSize = 10;
   filterForm!: FormGroup;
 
-  Math= Math
+  // Modal state
+  isModalOpen = false;
+  selectedTruck: Truck | null = null;
+  editForm!: FormGroup;
+
+  Math = Math;
 
   constructor(
     private fb: FormBuilder,
@@ -111,8 +116,8 @@ export class TruckManagementComponent implements OnInit {
     return classes[status] || '';
   }
 
-  goBack(){
-    this.router.navigate(['/main/transport/trucks/'])
+  goBack(): void {
+    this.router.navigate(['/main/transport/trucks/']);
   }
 
   viewTruckDetails(id: string): void {
@@ -132,6 +137,47 @@ export class TruckManagementComponent implements OnInit {
       this.truckService.deleteTruck(id).subscribe({
         next: () => this.loadTrucks(),
         error: (error) => console.error('Error deleting truck:', error)
+      });
+    }
+  }
+
+  openEditModal(truck: Truck): void {
+    this.selectedTruck = truck;
+    this.isModalOpen = true;
+    this.initializeEditForm();
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.selectedTruck = null;
+  }
+
+  initializeEditForm(): void {
+    this.editForm = this.fb.group({
+      truckNumber: [this.selectedTruck?.truckNumber, Validators.required],
+      capacity: [this.selectedTruck?.capacity, [Validators.required, Validators.min(1)]],
+      loadedbags: [this.selectedTruck?.loadedbags, [Validators.required, Validators.min(0)]],
+      status: [this.selectedTruck?.status, Validators.required],
+      expenses: [this.selectedTruck?.expenses, [Validators.required, Validators.min(0)]],
+      driver: [this.selectedTruck?.driver?.name || '']
+    });
+  }
+
+  onSubmit(): void {
+    if (this.editForm.valid && this.selectedTruck) {
+      const updatedTruck: Truck = {
+        ...this.selectedTruck,
+        ...this.editForm.value
+      };
+
+      this.truckService.updateTruck(this.selectedTruck._id, updatedTruck).subscribe({
+        next: () => {
+          this.loadTrucks();
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Error updating truck:', error);
+        }
       });
     }
   }

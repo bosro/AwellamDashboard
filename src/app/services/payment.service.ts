@@ -41,6 +41,35 @@ export interface AssignDriverResponse {
   };
 }
 
+export interface UpdateSocRequest {
+  socNumber: string;
+  quantity: number;
+  plantId: string;
+  categoryId: string;
+  productId: string;
+  orderType: string;
+  status: string;
+}
+
+export interface UpdateSocResponse {
+  message: string;
+  soc: {
+    _id: string;
+    socNumber: string;
+    quantity: number;
+    plantId: string;
+    categoryId: string;
+    productId: string;
+    orderType: string;
+    status: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteSocResponse {
+  message: string;
+}
+
 export interface Category {
   _id: string;
   name: string;
@@ -50,10 +79,11 @@ export interface Category {
 }
 
 export enum OrderType {
-  GUARANTEE_ORDER = "GUARANTEE ORDER",
-  SPECIAL_GUARANTEE_ORDER = "SPECIAL GUARANTEE ORDER",
-  NORMAL_CHEQUE_ORDER = "NORMAL CHÈQUE ORDER",
-  CASH_ORDER = "CASH ORDER"
+  GUARANTEE_ORDER = "GUARANTEE ORDER ",
+  SPECIAL_GUARANTEE_ORDER= "SPECIAL GUARANTEE ORDER",
+NORMAL_CHÈQUE_ORDER= "NORMAL CHÈQUE ORDER",
+CASH_ORDER = "CASH ORDER",
+BORROWED_ORDER= "BORROWED_ORDER"
 }
 
 export interface Product {
@@ -69,6 +99,7 @@ export interface Product {
 }
 
 export interface SocNumber {
+  destinationId: any;
   _id: string;
   socNumber: string;
   quantity: number;
@@ -79,6 +110,25 @@ export interface SocNumber {
   orderType: string;
   createdAt: string;
   updatedAt: string;
+  totalquantity: number;
+  assignedTruck: {
+    _id: string,
+    truckNumber: string,
+    driver:{
+      name: string,
+      phoneNumber: number
+    }
+  };
+  assignedOrder:{
+    _id: string ,
+    customerId : {
+      _id:string, 
+      fullName: string,
+      phoneNumber: string,
+      address: string
+    }
+
+  }
 }
 
 export interface PaymentReference {
@@ -89,7 +139,9 @@ export interface PaymentReference {
   socNumbers: SocNumber[];
   createdAt: string;
   updatedAt: string;
-  orderType: string
+  orderType: string;
+  chequeNumber: number;
+  soc?: string;
 }
 
 
@@ -129,8 +181,27 @@ export class PaymentService {
     return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/get`);
   }
 
+  getPaymentReferencesWithoutActiveSoc(): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/without-socs`);
+  }
+
+  getSoc(socId:any): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/soc/${socId}`);
+  }
+  getPaymentReferencesWithActiveSoc(): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/active-soc`);
+  }
+
   getPaymentReferenceDetails(id: string): Observable<PaymentDetailResponse> {
     return this.http.get<PaymentDetailResponse>(`${this.apiUrl}/payment/get/${id}`);
+  }
+
+  updatePaymentReference(payment: PaymentReference): Observable<PaymentReference> {
+    return this.http.put<PaymentReference>(`${this.apiUrl}/payment/edit/${payment._id}`, payment);
+  }
+
+  deletePaymentReference(paymentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/payment/delete/${paymentId}`);
   }
 
 
@@ -171,6 +242,26 @@ export class PaymentService {
   }): Observable<any> {
     return this.http.post(`${this.apiUrl}/payment/create`, data);
   }
+
+  updateSoc(
+    paymentRefId: string, 
+    socId: string, 
+    socData: UpdateSocRequest
+  ): Observable<UpdateSocResponse> {
+    return this.http.put<UpdateSocResponse>(
+      `${this.apiUrl}/soc/edit/${socId}`,
+      socData
+    );
+  }
+
+  deleteSoc(paymentRefId: string, socId: string): Observable<DeleteSocResponse> {
+    return this.http.delete<DeleteSocResponse>(
+      `${this.apiUrl}/soc/delete/${socId}`
+    );
+  }
+
+
+  // /soc/:socNumber
 
 
   createSocNumber(paymentRefId: string, socData: any): Observable<any> {
