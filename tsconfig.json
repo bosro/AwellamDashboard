@@ -1,6 +1,5 @@
-/* To learn more about TypeScript configuration: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options */
-
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -16,16 +15,14 @@
     "sourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
-    "target": "ES5",       // Changed for better compatibility on older iPads
-    "module": "ESNext",    // Use ESNext for tree-shaking benefits
+    "target": "ES2022",
+    "module": "ES2022",
     "lib": [
-      "ES2015",
-      "DOM"
-    ],
-    "downlevelIteration": true, // Ensures for..of loops work on older Safari versions
-    "forceConsistentCasingInFileNames": true
+      "ES2022",
+      "dom"
+    ]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
