@@ -75,6 +75,7 @@ export class DriverFormComponent implements OnInit {
   private loadAvailableTrucks(): void {
     this.truckService.getTrucks().subscribe({
       next: (response) => {
+        // console.log(response)
         this.availableTrucks = response.trucks.filter(
           (truck: Truck) => !truck.driver || truck.driver._id === this.driverId
         );
