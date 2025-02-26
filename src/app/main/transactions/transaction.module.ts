@@ -8,6 +8,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { TransactionDetailModalComponent } from './transaction/transaction-details';
 import { TransactionComponent } from './transaction/transactions.component';
 import { TransactionRoutingModule } from './transaction.routing';
+import { BankTransactionsDashboardComponent } from './dashboard/dashboard';
 
 
 
@@ -15,6 +16,7 @@ import { TransactionRoutingModule } from './transaction.routing';
     declarations: [
         TransactionDetailModalComponent,
         TransactionComponent,
+        BankTransactionsDashboardComponent
         
     ],
     imports: [

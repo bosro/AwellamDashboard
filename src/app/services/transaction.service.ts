@@ -53,10 +53,10 @@ export class TransactionService {
   
 
   updateTransaction(id: string, transaction: Transaction): Observable<Transaction> {
-    return this.http.put<Transaction>(`${this.apiUrl}/transactions/${id}`, transaction);
+    return this.http.put<Transaction>(`${this.apiUrl}/transactions/edit/${id}`, transaction);
   }
 
   deleteTransaction(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/transactions/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/transactions/delete/${id}`);
   }
 }

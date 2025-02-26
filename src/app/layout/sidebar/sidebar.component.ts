@@ -206,6 +206,59 @@ export class SidebarComponent implements OnInit {
     // },
 
     {
+      title: 'Expenses',
+      icon: 'ri-user-settings-line',
+      expanded: false,
+      roles: ['super_admin', 'Admin_Support'],
+      children: [
+        {
+          title: 'Expenses',
+          route: '/main/expenses/dashbaord',
+          icon: 'ri-group-line'
+        },
+        {
+          title: 'Expense Types',
+          route: '/main/expenses/types',
+          icon: 'ri-group-line'
+        },
+        {
+          title: 'Transport Expenses',
+          route: '/main/expenses/transport',
+          icon: 'i-user-add-line',
+          children: [
+            {
+              title: 'Fuel Expenses',
+              route: '/main/expenses/transport/fuel',
+              icon: 'ri-oil-line'
+            },
+            {
+              title: 'Maintenance Expenses',
+              route: '/main/expenses/transport/maintenance',
+              icon: 'ri-tools-line'
+            }
+          ]
+        },
+        {
+          title: 'General Expenses',
+          route: '/main/customers/new',
+          icon: 'i-user-add-line',
+          children: [
+            {
+              title: 'Office Supplies',
+              route: '/main/expenses/general/office-supplies',
+              icon: 'ri-file-list-line'
+            },
+            {
+              title: 'Utilities',
+              route: '/main/expenses/general/utilities',
+              icon: 'ri-flashlight-line'
+            }
+          ]
+        }
+      ]
+    },
+
+    {
       title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
       expanded: false,
@@ -231,6 +284,11 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       roles: ['super_admin', 'Admin_Support'],
       children: [
+        {
+          title: 'Payment Dashboard ',
+          route: '/main/transaction/main',
+          icon: 'ri-list-view'
+        },
         {
           title: 'Receive Payment ',
           route: '/main/transaction/list',

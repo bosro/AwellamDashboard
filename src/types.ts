@@ -121,20 +121,7 @@ export interface Category {
  * Enums
  *********************/
 
-export enum TransactionType {
-  PURCHASE = 'purchase',
-  PAYMENT = 'payment',
-  REFUND = 'refund',
-}
 
-export enum PaymentMethod {
-  CASH = 'cash',
-  CREDIT_CARD = 'credit_card',
-  BANK_TRANSFER = 'bank_transfer',
-  MOBILE_PAYMENT = 'mobile_payment',
-  PAYPAL = 'paypal',
-  // Add more payment methods as needed
-}
 
 /*********************
  * Interfaces
@@ -144,20 +131,17 @@ export enum PaymentMethod {
 
 // Transaction Interface
 export interface Transaction {
-  _id: string;
-  customerId: {
-    _id: string,
-    fullName: string
-  }; // Embedded customer details
+  _id?: string;
+  customerId: string;
   type: TransactionType;
   amount: number;
-  balanceAfter: number;
-  paymentReference: string;
   paymentMethod: PaymentMethod;
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
+  paymentReference?: string;
+  bankName?: string; // Add this field
+  date?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  Reference:''
 }
 
 // API Response for Fetching Transactions
@@ -182,4 +166,26 @@ export interface CustomersResponse {
 export interface SingleCustomerResponse {
   success: boolean;
   data: Customer;
+}
+
+export enum TransactionType {
+  PAYMENT = "payment",
+  REFUND = "refund",
+}
+
+export enum PaymentMethod {
+  CASH = "cash",
+  CREDIT_CARD = "credit_card",
+  BANK_TRANSFER = "bank_transfer",
+  MOBILE_PAYMENT = "mobile_money",
+}
+
+export enum BankName {
+  FIRST_ATLANTIC_BANK = "First Atlantic Bank",
+  GCB_BANK = "GCB Bank",
+  BANK_OF_AFRICA = "Bank of Africa",
+  STANBIC_BANK = "Stanbic Bank",
+  NIB_BANK = "NIB Bank",
+  ECOBANK_AWELLAM_ENTERPRISE = "Ecobank - Awellam Enterprise",
+  ECOBANK_INSHIRAPA_CONSTRUCTIONS = "Ecobank - Inshirapa Constructions",
 }

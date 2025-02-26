@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CustomersService } from '../../../services/customer.service';
 import { TransactionService } from '../../../services/transaction.service';
-import { Transaction, TransactionType, PaymentMethod } from '../../../../types';
+import { Transaction, TransactionType, PaymentMethod, BankName } from '../../../../types';
 import { Customer } from '../../../shared/types/customer.interface';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
@@ -18,6 +18,8 @@ export class TransactionComponent implements OnInit {
   // Filter variables
   selectedCustomerId: string = '';
   selectedType: string = '';
+  selectedPaymentMethod: string = '';
+  selectedBankName: string = '';
   startDate: string = '';
   endDate: string = '';
   searchTerm: string = '';
@@ -28,10 +30,12 @@ export class TransactionComponent implements OnInit {
   
   // Form data
   transactionForm: Partial<Transaction> = {
-    type: TransactionType.PURCHASE,
+    type: TransactionType.PAYMENT,
     amount: 0,
     paymentMethod: PaymentMethod.CASH,
-    paymentReference: ''
+    // paymentReference: '',
+    bankName: '',
+    Reference:''
   };
   
   // Modal states
@@ -43,6 +47,7 @@ export class TransactionComponent implements OnInit {
   // Dropdown options
   transactionTypes = Object.values(TransactionType);
   paymentMethods = Object.values(PaymentMethod);
+  bankNames = Object.values(BankName);
   
   // Pagination
   currentPage: number = 1;
@@ -112,6 +117,14 @@ export class TransactionComponent implements OnInit {
       params.type = this.selectedType;
     }
     
+    if (this.selectedPaymentMethod) {
+      params.paymentMethod = this.selectedPaymentMethod;
+    }
+    
+    if (this.selectedBankName) {
+      params.bankName = this.selectedBankName;
+    }
+    
     if (this.startDate) {
       params.startDate = this.startDate;
     }
@@ -166,7 +179,7 @@ export class TransactionComponent implements OnInit {
       if (transaction.type === TransactionType.PAYMENT) {
         return sum + transaction.amount;
       } else if (transaction.type === TransactionType.REFUND) {
-        return sum + transaction.amount;
+        return sum - transaction.amount;
       } else {
         return sum + transaction.amount;
       }
@@ -190,6 +203,8 @@ export class TransactionComponent implements OnInit {
   resetFilters(): void {
     this.selectedCustomerId = '';
     this.selectedType = '';
+    this.selectedPaymentMethod = '';
+    this.selectedBankName = '';
     this.startDate = '';
     this.endDate = '';
     this.searchTerm = '';
@@ -201,10 +216,12 @@ export class TransactionComponent implements OnInit {
     this.showModal = true;
     this.isEditMode = false;
     this.transactionForm = {
-      type: TransactionType.PURCHASE,
+      type: TransactionType.PAYMENT,
       amount: 0,
       paymentMethod: PaymentMethod.CASH,
-      paymentReference: ''
+      // paymentReference: '',
+      bankName: '',
+      Reference:''
     };
   }
 
@@ -219,7 +236,9 @@ export class TransactionComponent implements OnInit {
       type: transaction.type,
       amount: transaction.amount,
       paymentMethod: transaction.paymentMethod,
-      paymentReference: transaction.paymentReference || ''
+      // paymentReference: transaction.paymentReference || '',
+      bankName: transaction.bankName || '',
+      Reference: transaction.Reference || ''
     };
     this.showModal = true;
     this.isEditMode = true;
@@ -246,8 +265,17 @@ export class TransactionComponent implements OnInit {
       type: this.transactionForm.type!,
       amount: this.transactionForm.amount!,
       paymentMethod: this.transactionForm.paymentMethod!,
-      paymentReference: this.transactionForm.paymentReference
+      Reference: this.transactionForm.Reference
     };
+
+    // Add bank name only if payment method is bank transfer
+    if (this.transactionForm.paymentMethod === PaymentMethod.BANK_TRANSFER) {
+      if (!this.transactionForm.bankName) {
+        alert("Please select a bank for bank transfers.");
+        return;
+      }
+      newTransaction.bankName = this.transactionForm.bankName;
+    }
 
     this.transactionService.addTransaction(newTransaction as any).subscribe(
       transaction => {
@@ -273,8 +301,17 @@ export class TransactionComponent implements OnInit {
       type: this.transactionForm.type!,
       amount: this.transactionForm.amount!,
       paymentMethod: this.transactionForm.paymentMethod!,
-      paymentReference: this.transactionForm.paymentReference
+      Reference: this.transactionForm.Reference
     };
+
+    // Add bank name only if payment method is bank transfer
+    if (this.transactionForm.paymentMethod === PaymentMethod.BANK_TRANSFER) {
+      if (!this.transactionForm.bankName) {
+        alert("Please select a bank for bank transfers.");
+        return;
+      }
+      updatedTransaction.bankName = this.transactionForm.bankName;
+    }
 
     this.transactionService.updateTransaction(updatedTransaction._id!, updatedTransaction as any).subscribe(
       transaction => {
@@ -351,7 +388,6 @@ export class TransactionComponent implements OnInit {
         return 'bg-green-100 text-green-800';
       case TransactionType.REFUND:
         return 'bg-red-100 text-red-800';
-      case TransactionType.PURCHASE:
       default:
         return 'bg-blue-100 text-blue-800';
     }
@@ -364,9 +400,13 @@ export class TransactionComponent implements OnInit {
         return 'text-green-600';
       case TransactionType.REFUND:
         return 'text-red-600';
-      case TransactionType.PURCHASE:
       default:
         return 'text-blue-600';
     }
+  }
+
+  // Check if bank name should be displayed
+  shouldShowBankName(paymentMethod: string): boolean {
+    return paymentMethod === PaymentMethod.BANK_TRANSFER;
   }
 }
