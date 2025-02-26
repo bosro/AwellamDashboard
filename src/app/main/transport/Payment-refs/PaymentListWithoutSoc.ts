@@ -225,18 +225,25 @@ export class PaymentListWithoutSocComponent implements OnInit {
   }
 
 
+
   getPayments(): void {
     this.loading = true;
+   
+
+   console.log( this.searchQuery)
+    
     this.paymentService.getSoc(this.searchQuery).subscribe({
       next: (response) => {
-        this.filteredPayments = response.paymentReferences;
-        this.totalItems = this.filteredPayments.length;
+        this.payments = response.paymentReferences;
+        this.filteredPayments = [...this.payments];
+        this.totalItems = this.payments.length;
         this.loading = false;
         this.applyFilters(); // Apply any existing filters to the new data
       },
       error: (error) => {
-        console.error('Error loading payment references:', error);
+        this.error = 'Failed to load payment references';
         this.loading = false;
+        console.error('Error loading payments:', error);
       }
     });
   }
