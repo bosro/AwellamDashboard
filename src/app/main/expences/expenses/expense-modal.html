@@ -1,0 +1,142 @@
+<div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-auto overflow-y-auto max-h-screen">
+      <h2 class="text-xl font-semibold mb-4">
+        {{ expense?._id ? 'Edit' : 'Create' }} Expense
+      </h2>
+      
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label for="truckId" class="block text-sm font-medium text-gray-700">Truck</label>
+            <select 
+              id="truckId" 
+              formControlName="truckId" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value="" disabled>Select Truck</option>
+              <option *ngFor="let truck of trucks" [value]="truck._id">
+                {{ truck.truckNumber }} - {{ truck.driver?.name || 'No Driver' }}
+              </option>
+            </select>
+            <div *ngIf="form.get('truckId')?.invalid && form.get('truckId')?.touched" class="text-red-500 text-sm mt-1">
+              Truck is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="expenseType" class="block text-sm font-medium text-gray-700">Expense Type</label>
+            <select 
+              id="expenseType" 
+              formControlName="expenseType" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value="" disabled>Select Expense Type</option>
+              <option *ngFor="let type of expenseTypes" [value]="type._id">
+                {{ type.name }}
+              </option>
+            </select>
+            <div *ngIf="form.get('expenseType')?.invalid && form.get('expenseType')?.touched" class="text-red-500 text-sm mt-1">
+              Expense type is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="accountType" class="block text-sm font-medium text-gray-700">Account Type</label>
+            <select 
+              id="accountType" 
+              formControlName="accountType" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option *ngFor="let type of accountTypes" [value]="type">
+                {{ type }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+            <input 
+              type="number" 
+              id="amount" 
+              formControlName="amount" 
+              min="0"
+              step="0.01"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+            <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="text-red-500 text-sm mt-1">
+              Valid amount is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+            <input 
+              type="date" 
+              id="date" 
+              formControlName="date" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+            <div *ngIf="form.get('date')?.invalid && form.get('date')?.touched" class="text-red-500 text-sm mt-1">
+              Date is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="recipient" class="block text-sm font-medium text-gray-700">Recipient</label>
+            <input 
+              type="text" 
+              id="recipient" 
+              formControlName="recipient" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+            <div *ngIf="form.get('recipient')?.invalid && form.get('recipient')?.touched" class="text-red-500 text-sm mt-1">
+              Recipient is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+            <select 
+              id="status" 
+              formControlName="status" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            rows="3"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          ></textarea>
+          <div *ngIf="form.get('description')?.invalid && form.get('description')?.touched" class="text-red-500 text-sm mt-1">
+            Description is required
+          </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3 pt-4">
+          <button 
+            type="button" 
+            (click)="onCancel()" 
+            class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="form.invalid" 
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>

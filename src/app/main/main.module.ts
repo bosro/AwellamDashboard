@@ -86,6 +86,10 @@ const routes: Routes = [
         loadChildren: ()=> import ('./transactions/transaction.module').then((m)=>m.TransactionModule),
         canActivate: [AuthGuard],
       },
+      {
+        path: 'expenses',
+        loadChildren: () => import('./expences/expense.module').then(m => m.ExpenseModule)
+      },
 //     ],
 //   },
 // ];

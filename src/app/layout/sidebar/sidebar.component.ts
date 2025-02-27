@@ -212,48 +212,25 @@ export class SidebarComponent implements OnInit {
       roles: ['super_admin', 'Admin_Support'],
       children: [
         {
-          title: 'Expenses',
-          route: '/main/expenses/dashbaord',
+          title: ' Dashboard',
+          route: '/main/expenses/dashboard',
           icon: 'ri-group-line'
         },
         {
           title: 'Expense Types',
-          route: '/main/expenses/types',
+          route: '/main/expenses/expense-types',
           icon: 'ri-group-line'
         },
         {
           title: 'Transport Expenses',
           route: '/main/expenses/transport',
           icon: 'i-user-add-line',
-          children: [
-            {
-              title: 'Fuel Expenses',
-              route: '/main/expenses/transport/fuel',
-              icon: 'ri-oil-line'
-            },
-            {
-              title: 'Maintenance Expenses',
-              route: '/main/expenses/transport/maintenance',
-              icon: 'ri-tools-line'
-            }
-          ]
+        
         },
         {
           title: 'General Expenses',
-          route: '/main/customers/new',
+          route: '/main/expenses/general',
           icon: 'i-user-add-line',
-          children: [
-            {
-              title: 'Office Supplies',
-              route: '/main/expenses/general/office-supplies',
-              icon: 'ri-file-list-line'
-            },
-            {
-              title: 'Utilities',
-              route: '/main/expenses/general/utilities',
-              icon: 'ri-flashlight-line'
-            }
-          ]
         }
       ]
     },
