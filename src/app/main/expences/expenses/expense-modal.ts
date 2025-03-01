@@ -14,7 +14,7 @@ export class ExpenseModalComponent implements OnInit {
   @Output() cancel = new EventEmitter<void>();
 
   form!: FormGroup;
-  accountTypes = ['transport', 'maintenance', 'other'];
+  accountTypes = ['transport',"wholesale"];
   statuses = ['pending', 'approved', 'rejected'];
 
   constructor(private fb: FormBuilder) { }

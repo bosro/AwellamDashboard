@@ -44,7 +44,7 @@
             <td class="px-6 py-4 whitespace-nowrap">
               {{ expense.expenseType?.name || 'No Type' }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">${{ expense.amount }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">GHC {{ expense.amount }}</td>
             <td class="px-6 py-4 whitespace-nowrap">{{ expense.recipient }}</td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span [ngClass]="{
