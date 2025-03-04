@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 interface BorrowedSoc {
   _id: string;
@@ -64,7 +65,7 @@ export class BorrowedSocComponent implements OnInit {
 
   fetchBorrowedSocs(): void {
     this.loading = true;
-    this.http.get<BorrowedSocResponse>('http://127.0.0.1:3000/api/soc/get/borrowed')
+    this.http.get<BorrowedSocResponse>(`${environment.apiUrl}/soc/get/borrowed`)
       .subscribe({
         next: (response) => {
           this.borrowedSocs = response.borrowedSocs;
