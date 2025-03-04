@@ -339,6 +339,13 @@ export class SidebarComponent implements OnInit {
           route: '/main/reports/soc-report',
           icon: 'ri-list-view'
         },
+{
+        title: 'Borrowed SOC ',
+        route: '/main/reports/borrowed-soc',
+        icon: 'ri-list-view'
+      }
+
+        
 
         
         // {

@@ -7,6 +7,8 @@ import { Order } from '../../../services/order.service';
 import { OrdersService } from '../../../services/order.service';
 // import {OrderResponse} from  '../../../services/order.service'
 import printJS from 'print-js';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 interface CustomerOrder {
   id: string;
@@ -55,16 +57,12 @@ interface Communication {
   date: string;
 }
 
-
-
-
-
 @Component({
   selector: 'app-customer-details',
   templateUrl: './customer-detail.component.html'
 })
 export class CustomerDetailsComponent implements OnInit {
-  customer?: Customer;
+  customer!: Customer;
   loading = false;
   tabs: Array<'overview' | 'orders' | 'Payments' | 'notes'> = ['overview', 'orders', 'Payments', 'notes'];
   activeTab: 'overview' | 'orders' | 'Payments' | 'notes' = 'overview';
@@ -81,7 +79,15 @@ export class CustomerDetailsComponent implements OnInit {
   selectedOrder: any;
   transactions: any[] = [];
 
-
+  // New properties for merge functionality
+  showMergeModal = false;
+  mergeLoading = false;
+  mergeForm: FormGroup;
+  customersList: Customer[] = [];
+  filteredCustomers: Customer[] = [];
+  searchTerm = '';
+  mergeResult: any = null;
+  mergeError: string = '';
 
   customerMetrics: CustomerMetrics = {
     lifetimeValue: 0,
@@ -95,17 +101,13 @@ export class CustomerDetailsComponent implements OnInit {
     this.router.navigate(['/main/customers/list/'])
   }
 
-
-
-  
-
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private customersService: CustomersService,
     private fb: FormBuilder,
-    private ordersService : OrdersService
+    private ordersService: OrdersService,
+    private http: HttpClient
   ) {
     this.noteForm = this.fb.group({
       content: ['', Validators.required],
@@ -118,10 +120,13 @@ export class CustomerDetailsComponent implements OnInit {
       template: [''],
       attachments: [[]]
     });
+
+    // Initialize merge form
+    this.mergeForm = this.fb.group({
+      sourceCustomerId: ['', Validators.required],
+      targetCustomerId: ['', Validators.required]
+    });
   }
-
-
-
 
   // Add missing methods for component functionality
   editAddress(address: any): void {
@@ -166,13 +171,6 @@ export class CustomerDetailsComponent implements OnInit {
     return statusClasses[status.toLowerCase()] || '';
   }
 
-
-
-
-
-
-
-
   viewDetails(communicationId: string): void {
     // Implementation for viewing communication details
     console.log('Viewing details:', communicationId);
@@ -193,7 +191,6 @@ export class CustomerDetailsComponent implements OnInit {
     });
   }
 
-
   loadCustomerTransactions(id: string): void {
     if (id) {
       this.customersService.getCustomerTransactions(id).subscribe(response => {
@@ -210,9 +207,9 @@ export class CustomerDetailsComponent implements OnInit {
     }
   }
 
-    PrintOrder(orderId: string): void {
-      this.loadOrderDetails(orderId);
-      setTimeout(() => {
+  PrintOrder(orderId: string): void {
+    this.loadOrderDetails(orderId);
+    setTimeout(() => {
       printJS({
         printable: 'invoice',
         type: 'html',
@@ -227,6 +224,156 @@ export class CustomerDetailsComponent implements OnInit {
     }, 1000); // Delay to ensure data is loaded
   }
 
+  // New methods for customer merge functionality
+  openMergeModal(): void {
+    this.showMergeModal = true;
+    this.mergeResult = null;
+    this.mergeError = '';
+    this.loadCustomersList();
+
+    // Set source customer ID to current customer
+    if (this.customer?._id) {
+      this.mergeForm.patchValue({
+        sourceCustomerId: this.customer._id
+      });
+    }
+  }
+
+  closeMergeModal(): void {
+    this.showMergeModal = false;
+    this.mergeForm.get('targetCustomerId')?.reset();
+    this.searchTerm = '';
+  }
+
+  loadCustomersList(): void {
+    this.mergeLoading = true;
+    this.customersService.getCustomers().subscribe({
+      next: (response) => {
+        // Filter out the current customer
+        this.customersList = response.customers.filter(c => c._id !== this.customer?._id);
+        this.filterCustomers();
+        this.mergeLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading customers:', error);
+        this.mergeLoading = false;
+        this.mergeError = 'Failed to load customers list';
+      }
+    });
+  }
+
+  filterCustomers(): void {
+    if (!this.searchTerm) {
+      this.filteredCustomers = this.customersList;
+      return;
+    }
+    
+    const search = this.searchTerm.toLowerCase();
+    this.filteredCustomers = this.customersList.filter(customer => 
+      customer.fullName.toLowerCase().includes(search) || 
+      (customer.phoneNumber && customer.phoneNumber.toString().includes(search)) ||
+      (customer.email && customer.email.toLowerCase().includes(search))
+    );
+  }
+
+  mergeCustomers(): void {
+    if (this.mergeForm.invalid) {
+      return;
+    }
+
+    if (this.mergeForm.value.sourceCustomerId === this.mergeForm.value.targetCustomerId) {
+      this.mergeError = 'Source and target customers cannot be the same';
+      return;
+    }
+
+    this.mergeLoading = true;
+    // Use the API endpoint for merging customers
+    this.http.post<any>(`${environment.apiUrl}/customers/merge`, this.mergeForm.value)
+      .subscribe({
+        next: (result) => {
+          this.mergeResult = result;
+          this.mergeLoading = false;
+          
+          // Reload current customer data if it's the target customer
+          if (this.customer?._id === this.mergeForm.value.targetCustomerId) {
+            this.loadCustomer(this.customer._id);
+            this.loadCustomerTransactions(this.customer._id);
+          } else {
+            // If current customer was merged into another, redirect to the target customer
+            this.router.navigate(['/main/customers/details', this.mergeForm.value.targetCustomerId]);
+          }
+        },
+        error: (error) => {
+          console.error('Error merging customers:', error);
+          this.mergeError = error.error?.message || 'Failed to merge customers';
+          this.mergeLoading = false;
+        }
+      });
+  }
+
+  // Print merge details method
+  printMergeDetails(): void {
+    if (!this.mergeResult) return;
+    
+    const printContent = document.createElement('div');
+    printContent.innerHTML = `
+      <div style="padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="text-align: center; margin-bottom: 20px;">Customer Merge Details</h1>
+        <div style="border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
+          <h2 style="margin-top: 0;">Success! ${this.mergeResult.message}</h2>
+          <p><strong>Merge Date:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+        
+        <div style="display: flex; gap: 20px;">
+          <div style="flex: 1; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+            <h2>Source Customer (Merged From)</h2>
+            <p><strong>ID:</strong> ${this.mergeResult.details.sourceCustomer.id}</p>
+            <p><strong>Name:</strong> ${this.mergeResult.details.sourceCustomer.name}</p>
+            <p><strong>Status:</strong> ${this.mergeResult.details.sourceCustomer.status}</p>
+          </div>
+          
+          <div style="flex: 1; border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
+            <h2>Target Customer (Merged Into)</h2>
+            <p><strong>ID:</strong> ${this.mergeResult.details.targetCustomer.id}</p>
+            <p><strong>Name:</strong> ${this.mergeResult.details.targetCustomer.name}</p>
+            <p><strong>New Balance:</strong> ${this.mergeResult.details.targetCustomer.newBalance}</p>
+            <p><strong>Total Orders:</strong> ${this.mergeResult.details.targetCustomer.totalOrders}</p>
+          </div>
+        </div>
+        
+        <div style="border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-top: 20px;">
+          <h2>Transfer Summary</h2>
+          <p><strong>Orders Transferred:</strong> ${this.mergeResult.details.ordersTransferred}</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #666; font-size: 12px;">
+          <p>This is an automated report generated on ${new Date().toLocaleString()}</p>
+        </div>
+      </div>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Customer Merge Details</title>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+            <script>
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 500);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  }
+
   private loadCustomer(id: string): void {
     this.loading = true;
     this.customersService.getCustomerById(id).subscribe({
@@ -234,6 +381,14 @@ export class CustomerDetailsComponent implements OnInit {
         this.customer = response.customer; // Access the customer property from the response
         this.loadCustomerData();
         this.loading = false;
+        
+        // Set the source customer ID in the merge form
+        if (this.customer?._id) {
+          this.mergeForm.patchValue({
+            sourceCustomerId: this.customer._id
+          });
+        }
+        
         console.log(this.customer);
       },
       error: (error) => {
@@ -242,14 +397,6 @@ export class CustomerDetailsComponent implements OnInit {
       }
     });
   }
-
-
-
-
-
-
-
-
 
   private loadCustomerData(): void {
     if (!this.customer) return;
@@ -319,9 +466,4 @@ export class CustomerDetailsComponent implements OnInit {
       return acc;
     }, []);
   }
-
-
-
-
-
 }

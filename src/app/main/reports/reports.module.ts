@@ -8,13 +8,15 @@ import { SalesReportComponent} from './report-list/sales-report.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PurchasingReportComponent } from './report-list/purchasing-report.component';
 import { SOCReportComponent } from './report-list/soc-report.component';
+import { BorrowedSocComponent } from './report-list/BorrowedSoc';
 
 
 @NgModule({
   declarations: [
     SalesReportComponent,
     PurchasingReportComponent,
-    SOCReportComponent
+    SOCReportComponent,
+    BorrowedSocComponent
     // ReportListComponent,
     // ReportViewerComponent,
     // ReportGeneratorComponent,

@@ -41,6 +41,12 @@ export class TruckService {
     return this.http.post(`${this.apiUrll}/soc/trucks/${truckId}/assign-soc/${socId}`, {});
   }
 
+
+ borrowedOrder( socId: string ,recipient: any): Observable<any> {
+    return this.http.put(`${this.apiUrll}/soc/borrowed/${socId}`, recipient);
+  }
+  
+
   // unloadTruck(id: string): Observable<Truck> {
   //   return this.http.put<Truck>(`${this.apiUrl}/unload/${id}`, {});
   // }

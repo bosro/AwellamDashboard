@@ -217,15 +217,17 @@ export class PaymentDetailComponent implements OnInit {
         showLoaderOnConfirm: true,
         preConfirm: () => {
           const borrowedStatus = (document.getElementById('borrowedStatus') as HTMLSelectElement).value;
-          const recipientName = (document.getElementById('recipientName') as HTMLInputElement).value;
+          const recipient = (document.getElementById('recipientName') as HTMLInputElement).value;
   
-          if (!recipientName) {
+          if (!recipient) {
             Swal.showValidationMessage('You need to enter a recipient name.');
             return false;
           }
+
+          // const recipient: recipient
   
           return this.truckService
-            .assignSocToTruck(socId, borrowedStatus, )
+            .borrowedOrder(socId  ,{recipient: recipient})
             .toPromise()
             .catch((error) => {
               const errorMessage = error.error?.message || 'Assignment failed';
