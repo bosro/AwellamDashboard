@@ -110,16 +110,16 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr *ngFor="let row of paginatedClaimsData">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.createdAt | date:'shortDate' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.date  | date:'mediumDate' | date:'shortDate'}}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.customerName }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.truckId?.truckNumber || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.truckId?.driver?.name || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.productId.name }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.loadedbags }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.amountReceived }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.OutsideSoc }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.plantId.name }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.destinationId?.destination || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.truckNumber || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.driver || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.product }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.loadedBags }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.amount }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.outsideSoc }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.plant }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.destination || 'N/A' }}</td>
           </tr>
         </tbody>
       </table>

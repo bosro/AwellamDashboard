@@ -31,6 +31,7 @@ export class PaymentDetailComponent implements OnInit {
   selectedSoc: SocNumber | null = null;
   viewModalVisible = false;
   editModalVisible = false;
+  borrowedVisible = false
   
 
   constructor(
@@ -190,6 +191,66 @@ export class PaymentDetailComponent implements OnInit {
     this.selectedSoc = soc;
     this.viewModalVisible = true;
   }
+
+ SetAsBorroedOrder(soc: SocNumber): void {
+    this.selectedSoc = soc;
+    this.borrowedVisible = true;
+  }
+
+  async SetBorrowed(socId: string): Promise<void> {
+    try {
+      const { value, isConfirmed } = await Swal.fire({
+        title: 'Set SOC As Borrowed Order',
+        html: `
+          <label for="borrowedStatus">Mark as Borrowed:</label>
+          <select id="borrowedStatus" class="swal2-input">
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+          <br><br>
+          <label for="recipientName">Recipient Name:</label>
+          <input id="recipientName" class="swal2-input" placeholder="Enter recipient name">
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Assign',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+          const borrowedStatus = (document.getElementById('borrowedStatus') as HTMLSelectElement).value;
+          const recipientName = (document.getElementById('recipientName') as HTMLInputElement).value;
+  
+          if (!recipientName) {
+            Swal.showValidationMessage('You need to enter a recipient name.');
+            return false;
+          }
+  
+          return this.truckService
+            .assignSocToTruck(socId, borrowedStatus, )
+            .toPromise()
+            .catch((error) => {
+              const errorMessage = error.error?.message || 'Assignment failed';
+              Swal.showValidationMessage(`Assignment failed: ${errorMessage}`);
+            });
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      });
+  
+      if (isConfirmed) {
+        await Swal.fire({
+          title: 'Success!',
+          text: 'SOC assigned successfully',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        this.loadPaymentDetails(this.paymentRef!._id);
+      }
+    } catch (error) {
+      console.error('Error in SOC assignment:', error);
+      Swal.fire('Error', 'Failed to complete SOC assignment', 'error');
+    }
+  }
+  
 
   closeViewModal(): void {
     this.viewModalVisible = false;

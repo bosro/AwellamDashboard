@@ -57,16 +57,18 @@ export class OutsideClaimsReportComponent implements OnInit {
     this.reportsService.getOutsideLoadclaimDetails(startDate, endDate).subscribe({
       next: (data: any) => {
         this.claimsData = data.orders.map((order: any) => ({
-          createdAt: order.createdAt,
+          date: order.date,
           customerName: order.customerName,
-          truckId: order.truckId,
-          productId: order.productId,
-          loadedbags: order.loadedbags,
-          OutsideSoc: order.OutsideSoc,
-          plantId: order.plantId,
-          amountReceived: order.amountReceived,
-          destination: order.destinationId
+          truckNumber: order.truckNumber,
+          product: order.product,
+          loadedBags: order.loadedBags,
+          outsideSoc: order.outsideSoc,
+          plant: order.plant,
+          amount: order.amount,
+          destination: order.destination
         }));
+
+        console.log(data)
         this.totalItems = this.claimsData.length;
         this.loading = false;
       },
