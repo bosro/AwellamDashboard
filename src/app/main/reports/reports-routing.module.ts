@@ -6,6 +6,7 @@ import { SalesReportComponent } from './report-list/sales-report.component';
 import { PurchasingReportComponent } from './report-list/purchasing-report.component';
 import { SOCReportComponent } from './report-list/soc-report.component';
 import { BorrowedSocComponent } from './report-list/BorrowedSoc';
+import { CustomerSummaryComponent } from './report-list/customer.report.component';
 // import { ReportListComponent } from './report-list/sales-report.component';
 // import { ReportGeneratorComponent } from './report-generator/report-generator.component';
 // import { ReportViewerComponent } from './report-viewer/report-viewer.component';
@@ -19,6 +20,8 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: 'list', component: SalesReportComponent },
+      {path: 'customer-summary' , component:CustomerSummaryComponent},
+
       // { path: 'purchase-list', component: PurchasingReportComponent},
       {path: 'soc-report' , component : SOCReportComponent},
       {path: 'borrowed-soc' , component : BorrowedSocComponent}

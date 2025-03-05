@@ -324,6 +324,12 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       roles: ['super_admin', 'Admin_Support'],
       children: [
+
+        {
+          title: 'Customer Summary ',
+          route: '/main/reports/customer-summary',
+          icon: 'ri-list-view'
+        },
         {
           title: 'Sales Report ',
           route: '/main/reports/list',
