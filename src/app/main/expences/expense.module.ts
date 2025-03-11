@@ -16,6 +16,12 @@ import { ExpenseModalComponent } from './expenses/expense-modal';
 import { ExpenseRoutingModule } from './expense.routing';
 import { ExpenseDashboardComponent } from './expenseDashboard/expenseDashboard';
 
+// Imprest Components
+import { ImprestListComponent } from './imprest/imprest-list/imprest-list.component';
+import { ImprestFormComponent } from './imprest/imprest-form/imprest-form.component';
+import { ImprestDetailComponent } from './imprest/imprest-details/imprest-details.component';
+// import { ImprestService } from './imprest/services/imprest.service';
+
 // const routes: Routes = [
 //   { path: 'expense-types', component: ExpenseTypeComponent },
 //   { path: 'expenses', component: ExpenseListComponent },
@@ -29,7 +35,11 @@ import { ExpenseDashboardComponent } from './expenseDashboard/expenseDashboard';
     ExpenseModalComponent,
     ExpenseTypeComponent,
     // ExpenseTypeModalComponent,
-    ExpenseDashboardComponent
+    ExpenseDashboardComponent,
+    // Imprest Components
+    ImprestListComponent,
+    ImprestFormComponent,
+    ImprestDetailComponent
   ],
   imports: [
     CommonModule,
@@ -39,8 +49,10 @@ import { ExpenseDashboardComponent } from './expenseDashboard/expenseDashboard';
     ReactiveFormsModule,
     // HttpClientModule,
     ExpenseRoutingModule
-
   ],
-
+  providers: [
+    // Add Imprest Service
+    // ImprestService
+  ]
 })
 export class ExpenseModule { }

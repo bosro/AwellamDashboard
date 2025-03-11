@@ -84,6 +84,7 @@ import { finalize } from 'rxjs/internal/operators/finalize';
                   <option value="super_admin">Super Admin</option>
                   <option value="Stocks_Manager">Stocks Manager</option>
                   <option value="Admin_Support">Admin Support</option>
+                  <option value="Accounting-Officer">Accounting-Officer</option>
                 </select>
               </div>
 

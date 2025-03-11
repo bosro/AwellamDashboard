@@ -27,7 +27,7 @@ export class UserEditModalComponent implements OnInit {
   error: string | null = null;
   showPassword = false;
   plants!: Plant[];
-  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support']; // Example roles, replace with actual roles
+  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support','Accounting-Officer']; // Example roles, replace with actual roles
 
   constructor(
     private fb: FormBuilder,

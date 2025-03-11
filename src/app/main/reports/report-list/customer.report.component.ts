@@ -1,32 +1,27 @@
+// customer.report.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomerAccountService } from '../../../services/customer-account.service';
+import { CustomersService } from '../../../services/customer.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { CustomersService } from '../../../services/customer.service';
 
 @Component({
   selector: 'app-customer-summary',
   templateUrl: './customer.report.component.html'
 })
 export class CustomerSummaryComponent implements OnInit {
-  // Data properties
   customers: any[] = [];
   customerAccount: any = null;
   loading = false;
   searchAttempted = false;
   
-  // Pagination for orders
-  currentOrderPage = 1;
-  orderPageSize = 10;
-  totalOrderPages = 0;
+  // Activities pagination
+  activities: any[] = [];
+  currentActivityPage = 1;
+  activityPageSize = 10;
+  totalActivityPages = 0;
   
-  // Pagination for transactions
-  currentTransactionPage = 1;
-  transactionPageSize = 10;
-  totalTransactionPages = 0;
-  
-  // Filter form
   filterForm: FormGroup;
   
   constructor(
@@ -34,7 +29,6 @@ export class CustomerSummaryComponent implements OnInit {
     private customersService: CustomersService,
     private fb: FormBuilder
   ) {
-    // Initialize form with default values
     const today = new Date();
     const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
     
@@ -49,31 +43,15 @@ export class CustomerSummaryComponent implements OnInit {
     this.loadCustomers();
   }
   
-  /**
-   * Format date to YYYY-MM-DD for form controls
-   */
   formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return date.toISOString().split('T')[0];
   }
   
-  /**
-   * Load all customers for dropdown selection
-   */
   loadCustomers(): void {
     this.loading = true;
     this.customersService.getCustomers().subscribe({
       next: (response) => {
-        // Make sure we're properly handling the customer data and ID field
         this.customers = response.customers || [];
-        
-        // Log first customer to debug
-        if (this.customers.length > 0) {
-          console.log('Sample customer:', this.customers[0]);
-        }
-        
         this.loading = false;
       },
       error: (error) => {
@@ -83,17 +61,10 @@ export class CustomerSummaryComponent implements OnInit {
     });
   }
   
-  /**
-   * Load customer account data based on selected criteria
-   */
   loadCustomerAccount(): void {
-    if (this.filterForm.invalid) {
-      return;
-    }
+    if (this.filterForm.invalid) return;
     
     const values = this.filterForm.value;
-    console.log('Loading customer account with ID:', values.customerId);
-    
     this.loading = true;
     this.searchAttempted = true;
     
@@ -105,20 +76,25 @@ export class CustomerSummaryComponent implements OnInit {
       next: (response) => {
         this.customerAccount = response;
         
-        // Calculate pagination for orders
-        this.totalOrderPages = Math.ceil(
-          (this.customerAccount.data.orders?.length || 0) / this.orderPageSize
-        );
-        
-        // Calculate pagination for transactions
-        this.totalTransactionPages = Math.ceil(
-          (this.customerAccount.data.transactions?.length || 0) / this.transactionPageSize
-        );
-        
-        // Reset page numbers
-        this.currentOrderPage = 1;
-        this.currentTransactionPage = 1;
-        
+        // Process activities
+        this.activities = response.data.activities.map((activity: any) => {
+          // Keep all original properties
+          return {
+            ...activity,
+            // Add computed properties only if needed
+            displayType: activity.type === 'order' ? 'Order' : 'Payment',
+            displayAmount: activity.type === 'order' ? activity.totalAmount : activity.amount,
+            displayStatus: activity.type === 'order' ? 
+              activity.paymentStatus : 
+              (activity.balanceAfter >= 0 ? 'Completed' : 'Partial'),
+            displayReference: activity.type === 'order' ? 
+              activity.orderNumber : 
+              (activity.paymentReference || activity.Reference || 'N/A')
+          };
+        });
+  
+        this.totalActivityPages = Math.ceil(this.activities.length / this.activityPageSize);
+        this.currentActivityPage = 1;
         this.loading = false;
       },
       error: (error) => {
@@ -128,148 +104,146 @@ export class CustomerSummaryComponent implements OnInit {
     });
   }
   
-  /**
-   * Helper method to generate array for pagination
-   */
-  generatePageArray(totalPages: number): number[] {
-    return new Array(totalPages).fill(0).map((_, i) => i);
-  }
-  
-  /**
-   * Get paginated orders
-   */
-  get paginatedOrders() {
-    if (!this.customerAccount || !this.customerAccount.data.orders) {
-      return [];
-    }
-    
-    const startIndex = (this.currentOrderPage - 1) * this.orderPageSize;
-    return this.customerAccount.data.orders.slice(startIndex, startIndex + this.orderPageSize);
-  }
-  
-  /**
-   * Get paginated transactions
-   */
-  get paginatedTransactions() {
-    if (!this.customerAccount || !this.customerAccount.data.transactions) {
-      return [];
-    }
-    
-    const startIndex = (this.currentTransactionPage - 1) * this.transactionPageSize;
-    return this.customerAccount.data.transactions.slice(
-      startIndex, 
-      startIndex + this.transactionPageSize
-    );
-  }
-  
-  /**
-   * Change order page
-   */
-  changeOrderPage(page: number): void {
-    if (page < 1 || page > this.totalOrderPages) {
-      return;
-    }
-    this.currentOrderPage = page;
-  }
-  
-  /**
-   * Change transaction page
-   */
-  changeTransactionPage(page: number): void {
-    if (page < 1 || page > this.totalTransactionPages) {
-      return;
-    }
-    this.currentTransactionPage = page;
-  }
-  
-  /**
-   * Export customer data to PDF
-   */
-  exportToPdf(): void {
-    if (!this.customerAccount) {
-      return;
-    }
 
-    // Hide pagination and buttons for PDF export
-    const actionButtons = document.getElementById('action-buttons');
-    const paginationElements = document.querySelectorAll('.pagination');
-    
-    if (actionButtons) actionButtons.style.display = 'none';
-    paginationElements.forEach(el => {
-      (el as HTMLElement).style.display = 'none';
-    });
-    
-    // Get the content element
-    const content = document.getElementById('pdf-content');
-    if (!content) {
-      console.error('PDF content element not found');
-      return;
-    }
-    
-    // Show loading indicator
-    this.loading = true;
-    
-    // Use html2canvas to capture the content
-    html2canvas(content, {
-      scale: 1,
-      useCORS: true,
-      logging: false,
-      allowTaint: true
-    }).then(canvas => {
-      // Create PDF
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      // Calculate dimensions
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      
-      // Add first page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      // Add additional pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      // Save PDF
-      const customerName = this.customerAccount.data.customerInfo.fullName.replace(/\s+/g, '_');
-      pdf.save(`${customerName}_Account_Summary.pdf`);
-      
-      // Restore UI elements
-      if (actionButtons) actionButtons.style.display = 'flex';
-      paginationElements.forEach(el => {
-        (el as HTMLElement).style.display = 'flex';
-      });
-      
-      this.loading = false;
-    }).catch(error => {
-      console.error('Error generating PDF:', error);
-      this.loading = false;
-      
-      // Restore UI elements
-      if (actionButtons) actionButtons.style.display = 'flex';
-      paginationElements.forEach(el => {
-        (el as HTMLElement).style.display = 'flex';
-      });
-    });
+  get paginatedActivities() {
+    const startIndex = (this.currentActivityPage - 1) * this.activityPageSize;
+    return this.activities.slice(startIndex, startIndex + this.activityPageSize);
   }
-  
-  /**
-   * Print the current report
-   */
+
+  changeActivityPage(page: number): void {
+    if (page < 1 || page > this.totalActivityPages) return;
+    this.currentActivityPage = page;
+  }
+
+  generatePageArray(totalPages: number): number[] {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  exportToPdf(): void {
+    if (!this.customerAccount) return;
+
+    const doc = new jsPDF();
+    const customerInfo = this.customerAccount.data.customerInfo;
+    const accountSummary = this.customerAccount.data.accountSummary;
+
+    // Add header
+    doc.setFontSize(20);
+    doc.text('Customer Account Summary', 105, 20, { align: 'center' });
+    
+    // Add customer information
+    doc.setFontSize(12);
+    doc.text(`Customer: ${customerInfo.fullName}`, 20, 40);
+    doc.text(`Email: ${customerInfo.email}`, 20, 50);
+    doc.text(`Phone: ${customerInfo.phoneNumber}`, 20, 60);
+    doc.text(`Address: ${customerInfo.address}`, 20, 70);
+
+    // Add account summary
+    doc.text('Account Summary', 20, 90);
+    doc.text(`Total Orders: ${accountSummary.totalOrders}`, 20, 100);
+    doc.text(`Total Order Amount: GHS ${accountSummary.totalOrderAmount}`, 20, 110);
+    doc.text(`Total Paid: GHS ${accountSummary.totalPaid}`, 20, 120);
+    doc.text(`Current Balance: GHS ${accountSummary.currentBalance}`, 20, 130);
+
+    // Add activities
+    doc.text('Activity History', 20, 150);
+    let yPos = 160;
+    
+    // Add table headers
+    const headers = ['Date', 'Type', 'Reference', 'Amount', 'Status'];
+    let startX = 20;
+    headers.forEach(header => {
+      doc.text(header, startX, yPos);
+      startX += 35;
+    });
+    yPos += 10;
+
+    // Add activities data
+    this.activities.forEach(activity => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      startX = 20;
+      doc.text(activity.displayDate, startX, yPos);
+      doc.text(activity.displayType, startX + 35, yPos);
+      doc.text(activity.displayReference, startX + 70, yPos);
+      doc.text(`GHS ${activity.displayAmount}`, startX + 105, yPos);
+      doc.text(activity.displayStatus, startX + 140, yPos);
+      yPos += 10;
+    });
+
+    doc.save(`${customerInfo.fullName}_Account_Summary.pdf`);
+  }
+
   printReport(): void {
-    window.print();
+    const printContent = document.createElement('div');
+    const customerInfo = this.customerAccount.data.customerInfo;
+    const accountSummary = this.customerAccount.data.accountSummary;
+
+    printContent.innerHTML = `
+      <style>
+        @media print {
+          body { font-family: Arial, sans-serif; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .section { margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f5f5f5; }
+        }
+      </style>
+      <div class="header">
+        <h1>Customer Account Summary</h1>
+        <p>Period: ${accountSummary.reportPeriod.from} to ${accountSummary.reportPeriod.to}</p>
+      </div>
+      <div class="section">
+        <h2>Customer Information</h2>
+        <p>Name: ${customerInfo.fullName}</p>
+        <p>Email: ${customerInfo.email}</p>
+        <p>Phone: ${customerInfo.phoneNumber}</p>
+        <p>Address: ${customerInfo.address}</p>
+      </div>
+      <div class="section">
+        <h2>Account Summary</h2>
+        <p>Total Orders: ${accountSummary.totalOrders}</p>
+        <p>Total Order Amount: GHS ${accountSummary.totalOrderAmount}</p>
+        <p>Total Paid: GHS ${accountSummary.totalPaid}</p>
+        <p>Current Balance: GHS ${accountSummary.currentBalance}</p>
+      </div>
+      <div class="section">
+        <h2>Activity History</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Reference</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.activities.map(activity => `
+              <tr>
+                <td>${activity.displayDate}</td>
+                <td>${activity.displayType}</td>
+                <td>${activity.displayReference}</td>
+                <td>GHS ${activity.displayAmount}</td>
+                <td>${activity.displayStatus}</td>
+                <td>${activity.type === 'order' ? 
+                      `${activity.plantName} | ${activity.Product.join(', ')}` : 
+                      activity.paymentMethod}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow?.document.write(printContent.innerHTML);
+    printWindow?.document.close();
+    printWindow?.print();
   }
 }

@@ -13,10 +13,26 @@ export class ExpenseTypeComponent implements OnInit {
   isModalOpen = false;
   isLoading = false;
   error = '';
-  
+
   // Form properties
   form!: FormGroup;
-  categories = ['Transportation', 'Maintenance', 'Fuel', 'Food', 'Accommodation', 'Other'];
+  categories = ["Insurance",
+    "Utilities",
+    "Advertising",
+    "Général Expenses",
+    "Bank fees",
+    "Depreciation",
+    "Business fees",
+    "Entertainment",
+    "Food expenses",
+    "Interest",
+    "Salaries & Wages",
+    "Gifts & Donations",
+    "Taxes and licenses",
+    "Transportation",
+    "Fuels",
+    "Tyres & Batteries",
+    "Transport Expenses"];
 
   constructor(
     private expenseTypeService: ExpenseTypeService,
@@ -79,7 +95,7 @@ export class ExpenseTypeComponent implements OnInit {
   onSubmit(): void {
     if (this.form.valid) {
       const formData = this.form.value;
-      
+
       if (this.selectedExpenseType && this.selectedExpenseType._id) {
         this.expenseTypeService.update(this.selectedExpenseType._id, formData).subscribe({
           next: () => {

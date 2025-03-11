@@ -1,0 +1,88 @@
+<!-- src/app/components/imprest-form/imprest-form.component.html -->
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow p-8">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">
+        {{ isEditMode ? 'Edit Imprest' : 'Create New Imprest' }}
+      </h1>
+  
+      <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error }}
+      </div>
+  
+      <div *ngIf="loading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+  
+      <form [formGroup]="imprestForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+        <div class="space-y-6">
+          <!-- Date Field -->
+          <div>
+            <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+            <input 
+              type="date" 
+              id="date" 
+              formControlName="date"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+            <!-- <div *ngIf="dateControl.invalid && (dateControl.dirty || dateControl.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="dateControl.errors?.required">Date is required</div>
+            </div> -->
+          </div>
+  
+          <!-- Amount Field -->
+          <div>
+            <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500 sm:text-sm">$</span>
+              </div>
+              <input 
+                type="number" 
+                id="amount" 
+                formControlName="amount"
+                class="block w-full pl-7 pr-12 border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              >
+            </div>
+            <!-- <div *ngIf="amountControl.invalid && (amountControl.dirty || amountControl.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="amountControl.errors?.required">Amount is required</div>
+              <div *ngIf="amountControl.errors?.min">Amount must be greater than or equal to 0</div>
+            </div> -->
+          </div>
+  
+          <!-- Description Field -->
+          <div>
+            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea 
+              id="description" 
+              formControlName="description"
+              rows="3"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            ></textarea>
+            <!-- <div *ngIf="descriptionControl.invalid && (descriptionControl.dirty || descriptionControl.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="descriptionControl.errors?.required">Description is required</div>
+            </div> -->
+          </div>
+  
+          <!-- Form Actions -->
+          <div class="flex justify-end space-x-3 pt-4">
+            <button 
+              type="button" 
+              (click)="cancelForm()"
+              class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="submitting || imprestForm.invalid"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow disabled:opacity-50">
+              {{ submitting ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>

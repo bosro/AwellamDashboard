@@ -1,0 +1,121 @@
+<!-- src/app/components/imprest-detail/imprest-detail.component.html -->
+
+<div class="container mx-auto px-4 py-8">
+    <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="loading" class="flex justify-center my-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  
+    <div *ngIf="!loading && imprestDetail">
+      <!-- Header with Navigation -->
+      <div class="flex items-center mb-6">
+        <button (click)="goBack()" class="mr-4 text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <h1 class="text-2xl font-bold text-gray-800 flex-1">Imprest Details</h1>
+        <div class="space-x-3">
+          <button (click)="editImprest()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow">
+            Edit
+          </button>
+          <button (click)="deleteImprest()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded shadow">
+            Delete
+          </button>
+        </div>
+      </div>
+  
+      <!-- Imprest Info Card -->
+      <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b">
+          <h2 class="text-xl font-semibold">Imprest Information</h2>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500">Description</p>
+              <p class="font-medium">{{ imprestDetail.description }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Date</p>
+              <p class="font-medium">{{ formatDate(imprestDetail.date) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Total Amount</p>
+              <p class="font-medium">{{ formatCurrency(imprestDetail.amount) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Current Balance</p>
+              <p class="font-medium">{{ formatCurrency(imprestDetail.currentBalance) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Status</p>
+              <span [ngClass]="getStatusColor(imprestDetail.status)" 
+                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                {{ imprestDetail.status }}
+              </span>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Created</p>
+              <p class="font-medium">{{ formatDate(imprestDetail.createdAt) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Expenses Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b flex justify-between items-center">
+          <h2 class="text-xl font-semibold">Expenses</h2>
+          <div class="text-sm text-gray-500">
+            <span class="font-medium">{{ imprestDetail.expenses.length }}</span> expenses recorded
+          </div>
+        </div>
+        
+        <div *ngIf="imprestDetail.expenses.length === 0" class="p-6 text-center text-gray-500">
+          No expenses recorded for this imprest.
+        </div>
+        
+        <div *ngIf="imprestDetail.expenses.length > 0" class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Type</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipient</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let expense of imprestDetail.expenses">
+                <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(expense.date) }}</td>
+                <td class="px-6 py-4">{{ expense.description }}</td>
+                <td class="px-6 py-4 capitalize">{{ expense.accountType }}</td>
+                <td class="px-6 py-4">{{ expense.recipient }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(expense.amount) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [ngClass]="getStatusColor(expense.status)" 
+                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                    {{ expense.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <span *ngIf="expense.truckId">
+                    {{ expense.truckId.truckNumber }} 
+                    <span class="text-gray-500">({{ expense.truckId.driver.name }})</span>
+                  </span>
+                  <span *ngIf="!expense.truckId" class="text-gray-400">N/A</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>

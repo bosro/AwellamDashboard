@@ -31,7 +31,7 @@ export class SidebarComponent implements OnInit {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/main/dashboard',
-      roles: ['super_admin', 'Admin_Support', 'Loading_officer', 'Stocks_Manager', ]
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer', 'Stocks_Manager', 'Accounting-Officer']
     },
     {
       title: 'Orders',
@@ -209,7 +209,7 @@ export class SidebarComponent implements OnInit {
       title: 'Expenses',
       icon: 'ri-user-settings-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_Support'],
+      roles: ['super_admin', 'Admin_Support','Accounting-Officer'],
       children: [
         {
           title: ' Dashboard',
@@ -231,7 +231,15 @@ export class SidebarComponent implements OnInit {
           title: 'General Expenses',
           route: '/main/expenses/general',
           icon: 'i-user-add-line',
+        },
+        {
+          title: 'Imprest',
+          route: '/main/expenses/imprest',
+          icon: 'i-user-add-line',
         }
+
+
+        
       ]
     },
 
