@@ -54,8 +54,13 @@ export class PaymentDetailComponent implements OnInit {
   private initializeForms() {
     // Initialize create form
     this.socForm = this.fb.group({
-      socNumber: ['', [Validators.required, Validators.minLength(5)]],
-      quantity: ['', [Validators.required, Validators.min(1)]],
+      socNumber: ['', [
+        Validators.required, 
+        Validators.minLength(12), 
+        Validators.maxLength(12),
+        Validators.pattern(/^SOC\d{9}$/)
+      ]],
+      quantity: ['', ],
       plantId: ['', Validators.required],
       productId: ['', Validators.required],
       destinationId: ['', Validators.required],
@@ -63,8 +68,14 @@ export class PaymentDetailComponent implements OnInit {
 
     // Initialize edit form
     this.editSocForm = this.fb.group({
-      socNumber: ['', [Validators.required, Validators.minLength(5)]],
-      quantity: ['', [Validators.required, Validators.min(1)]],
+      socNumber: ['', [
+        Validators.required, 
+        Validators.minLength(12), 
+        Validators.maxLength(12),
+        Validators.pattern(/^SOC\d{9}$/)
+      ]],
+      
+      quantity: ['', ],
       plantId: ['', Validators.required],
       productId: ['', Validators.required],
       destinationId: ['', Validators.required],
