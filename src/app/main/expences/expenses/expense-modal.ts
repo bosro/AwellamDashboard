@@ -55,7 +55,8 @@ export class ExpenseModalComponent implements OnInit {
     this.imprestService.getAllImprests().subscribe({
       next: (response) => {
         if (response.success) {
-          this.imprests = response.data;
+          // Filter only ACTIVE imprests on the frontend
+          this.imprests = response.data.filter(imprest => imprest.status === 'active');
         } else {
           this.error = 'Failed to load imprests';
         }
@@ -67,6 +68,7 @@ export class ExpenseModalComponent implements OnInit {
       }
     });
   }
+  
 
   createForm(): void {
     // Convert nested objects to their IDs for the form
