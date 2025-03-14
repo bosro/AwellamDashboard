@@ -339,6 +339,11 @@ export class SidebarComponent implements OnInit {
           icon: 'ri-list-view'
         },
         {
+          title: 'Active SOCs ',
+          route: '/main/reports/active-soc',
+          icon: 'ri-list-view'
+        },
+        {
           title: 'Sales Report ',
           route: '/main/reports/list',
           icon: 'ri-list-view'

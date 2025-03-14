@@ -31,8 +31,14 @@ export class PaymentDetailComponent implements OnInit {
   selectedSoc: SocNumber | null = null;
   viewModalVisible = false;
   editModalVisible = false;
-  borrowedVisible = false
+  borrowedVisible = false;
+  statuses = ['active', 'inactive'];
   
+  // New properties for multiple SOC assignment
+  selectedSocs: string[] = [];
+  bulkAssignModalVisible = false;
+  allSocs: any[] = []; // Store all SOCs from the system
+  bulkAssignLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -62,6 +68,7 @@ export class PaymentDetailComponent implements OnInit {
       plantId: ['', Validators.required],
       productId: ['', Validators.required],
       destinationId: ['', Validators.required],
+      status : ['',Validators.required]
     });
   }
 
@@ -70,9 +77,61 @@ export class PaymentDetailComponent implements OnInit {
     if (id) {
       this.loadPaymentDetails(id);
       this.loadPlants();
+      this.loadAllSocs(); // Load all SOCs from the system
     } else {
       this.router.navigate(['/payments']);
     }
+  }
+
+  bulkAssignFromCurrent(): void {
+    if (this.selectedSocs.length === 0) {
+      Swal.fire('Warning', 'Please select at least one SOC to assign', 'warning');
+      return;
+    }
+    this.showCurrentSocsModal = true;
+  }
+  
+  closeCurrentSocsModal(): void {
+    this.showCurrentSocsModal = false;
+  }
+  
+  // // Helper method to get SOC number by ID
+  // getSocNumberById(socId: string): string {
+  //   // First check in local active SOCs
+  //   const localSoc = this.getActiveSocs().find(soc => soc._id === socId);
+  //   if (localSoc) return localSoc.socNumber;
+    
+  //   // Then check in global SOCs
+  //   const globalSoc = this.allSocs.find(soc => soc._id === socId);
+  //   return globalSoc ? globalSoc.socNumber : socId;
+  // }
+  
+  // Add this property to your component
+  showCurrentSocsModal = false;
+  
+  // Load all SOCs from the system
+  loadAllSocs(): void {
+    this.bulkAssignLoading = true;
+    this.paymentService.getAllSocs().subscribe({
+      next: (response) => {
+        this.allSocs = response.socNumbers.filter(soc => soc.status === 'active'); // Store full SOC objects
+        console.log(this.allSocs);
+        this.bulkAssignLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading all SOCs:', error);
+        this.bulkAssignLoading = false;
+        Swal.fire('Error', 'Failed to load all SOCs', 'error');
+      },
+    });
+  }
+  
+  
+
+  // Helper method to get SOC number by ID
+  getSocNumberById(socId: string): string {
+    const soc = this.allSocs.find(soc => soc._id === socId);
+    return soc ? soc.socNumber : socId;
   }
 
   loadPaymentDetails(id: string): void {
@@ -83,8 +142,6 @@ export class PaymentDetailComponent implements OnInit {
       next: (response) => {
         this.paymentRef = response.paymentReference;
         this.loading = false;
-
-        console.log(response)
       },
       error: (error) => {
         this.error = 'Failed to load payment reference details';
@@ -192,7 +249,7 @@ export class PaymentDetailComponent implements OnInit {
     this.viewModalVisible = true;
   }
 
- SetAsBorroedOrder(soc: SocNumber): void {
+  SetAsBorroedOrder(soc: SocNumber): void {
     this.selectedSoc = soc;
     this.borrowedVisible = true;
   }
@@ -223,11 +280,9 @@ export class PaymentDetailComponent implements OnInit {
             Swal.showValidationMessage('You need to enter a recipient name.');
             return false;
           }
-
-          // const recipient: recipient
   
           return this.truckService
-            .borrowedOrder(socId  ,{recipient: recipient})
+            .borrowedOrder(socId, {recipient: recipient})
             .toPromise()
             .catch((error) => {
               const errorMessage = error.error?.message || 'Assignment failed';
@@ -253,7 +308,6 @@ export class PaymentDetailComponent implements OnInit {
     }
   }
   
-
   closeViewModal(): void {
     this.viewModalVisible = false;
     this.selectedSoc = null;
@@ -270,6 +324,7 @@ export class PaymentDetailComponent implements OnInit {
 
     // Populate the edit form
     this.editSocForm.patchValue({
+      status: soc.status,
       socNumber: soc.socNumber,
       quantity: soc.quantity,
       plantId: soc.plantId?._id,
@@ -284,7 +339,7 @@ export class PaymentDetailComponent implements OnInit {
     this.editSocForm.reset();
   }
 
-  goBack(){
+  goBack(): void {
     this.router.navigate(['/main/transport/paymentrefs'])
   }
 
@@ -385,6 +440,7 @@ export class PaymentDetailComponent implements OnInit {
           showConfirmButton: false,
         });
         this.loadPaymentDetails(this.paymentRef!._id);
+        this.loadAllSocs(); // Refresh the SOC list
       }
     } catch (error) {
       console.error('Error in truck assignment:', error);
@@ -433,6 +489,100 @@ export class PaymentDetailComponent implements OnInit {
     } catch (error) {
       console.error('Error loading trucks:', error);
       throw error;
+    }
+  }
+
+  // Methods for handling multiple SOC assignment
+  toggleSocSelection(socId: string): void {
+    const index = this.selectedSocs.indexOf(socId);
+    if (index === -1) {
+      this.selectedSocs.push(socId);
+    } else {
+      this.selectedSocs.splice(index, 1);
+    }
+  }
+
+  isSocSelected(socId: string): boolean {
+    return this.selectedSocs.includes(socId);
+  }
+
+  openBulkAssignModal(): void {
+    if (this.selectedSocs.length === 0) {
+      Swal.fire('Warning', 'Please select at least one SOC to assign', 'warning');
+      return;
+    }
+    this.bulkAssignModalVisible = true;
+  }
+
+  closeBulkAssignModal(): void {
+    this.bulkAssignModalVisible = false;
+    this.selectedSocs = [];
+  }
+
+  async bulkAssignToTruck(): Promise<void> {
+    try {
+      if (this.selectedSocs.length === 0) {
+        Swal.fire('Warning', 'Please select at least one SOC to assign', 'warning');
+        return;
+      }
+
+      const trucks = await this.loadAvailableTrucks();
+      if (trucks.length === 0) {
+        Swal.fire('Warning', 'No available trucks found', 'warning');
+        return;
+      }
+
+      const truckOptions = trucks.reduce((acc, truck) => {
+        acc[truck._id] = `${truck.truckNumber} ${truck.driver ? `(Driver: ${truck.driver.name})` : ''} - Capacity: ${truck.capacity || 'N/A'}`;
+        return acc;
+      }, {} as { [key: string]: string });
+
+      const { value: selectedTruckId, isConfirmed } = await Swal.fire({
+        title: 'Select Truck for Multiple SOCs',
+        input: 'select',
+        inputOptions: truckOptions,
+        inputPlaceholder: 'Select a truck',
+        showCancelButton: true,
+        inputValidator: (value) => {
+          return new Promise((resolve) => {
+            if (!value) {
+              resolve('You need to select a truck');
+            } else {
+              resolve(null);
+            }
+          });
+        },
+        confirmButtonText: 'Assign',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        preConfirm: (truckId) => {
+          return this.truckService
+            .assignSocListToTruck(truckId, this.selectedSocs)
+            .toPromise()
+            .catch((error) => {
+              const errorMessage = error.error?.message || 'Assignment failed';
+              Swal.showValidationMessage(`Assignment failed: ${errorMessage}`);
+            });
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      });
+
+      if (isConfirmed) {
+        await Swal.fire({
+          title: 'Success!',
+          text: 'Multiple SOCs assigned to truck successfully',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        this.selectedSocs = [];
+        this.closeBulkAssignModal();
+        this.loadPaymentDetails(this.paymentRef!._id);
+        this.loadAllSocs(); // Refresh the list of all SOCs
+      }
+    } catch (error) {
+      console.error('Error in bulk truck assignment:', error);
+      Swal.fire('Error', 'Failed to complete truck assignment', 'error');
     }
   }
 }

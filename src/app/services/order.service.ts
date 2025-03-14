@@ -119,8 +119,8 @@ export class OrdersService {
 
 
 
-  getOrderById(id: string): Observable<OrdersResponse> {
-    return this.http.get<OrdersResponse>(`${this.apiUrl}/get/${id}`);
+  getOrderById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/get/${id}`);
   }
 
   toggleOrderStatus(id: string): Observable<Order> {

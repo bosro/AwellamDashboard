@@ -28,12 +28,10 @@
             </option>
           </select>
         </div>
-          <!-- (change)="onTruckSelect($event.target.value)" -->
-<!--  -->
+        
         <div class="mb-4">
           <label for="truckId" class="block text-sm font-medium text-gray-700">Truck</label>
           <select 
-          
             id="truckId" 
             formControlName="truckId" 
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -68,11 +66,15 @@
             id="accountType" 
             formControlName="accountType" 
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            [ngClass]="{'bg-gray-100': form.get('accountType')?.disabled}"
           >
             <option *ngFor="let type of accountTypes" [value]="type">
               {{ type }}
             </option>
           </select>
+          <div *ngIf="form.get('truckId')?.value" class="text-sm text-gray-500 mt-1">
+            Account type is automatically set to transport with truck selection
+          </div>
         </div>
         
         <div class="mb-4">

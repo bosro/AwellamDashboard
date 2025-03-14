@@ -121,15 +121,81 @@
         <div class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">SOC information</h2>
           <div class="space-y-4">
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">{{order?.socNumber?.socNumber}}</h3>
-              <!-- <span [ngClass]="{
-                'bg-green-100 text-green-800': order?.paymentStatus === 'Paid',
-                'bg-yellow-100 text-yellow-800': order?.paymentStatus === 'Unpaid',
-                'bg-red-100 text-red-800': order?.paymentStatus === 'Failed'
-              }" class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full">
-                {{order?.paymentStatus}}
-              </span> -->
+            <!-- Display when no SOC information is available -->
+            <div *ngIf="(!order?.socNumbers || order.socNumbers.length === 0) && !order?.socNumber" class="text-sm text-gray-500">
+              No SOC numbers assigned to this order.
+            </div>
+            
+            <!-- Display single SOC when only socNumber is available -->
+            <div *ngIf="order?.socNumber" class="border-b pb-3 mb-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900">{{order?.socNumber?.socNumber}}</h3>
+                  <p class="text-xs text-gray-500 mt-1" *ngIf="order?.socNumber?.productId?.name">
+                    Product: {{order?.socNumber?.productId?.name}}
+                  </p>
+                  <p class="text-xs text-gray-500" *ngIf="!order?.socNumber?.productId?.name && order?.socNumber?.productId">
+                    Product ID: {{order?.socNumber?.productId}}
+                  </p>
+                  <p class="text-xs text-gray-500" *ngIf="order?.socNumber?.plantId?.name">
+                    Plant: {{order?.socNumber?.plantId?.name}}
+                  </p>
+                  <p class="text-xs text-gray-500" *ngIf="!order?.socNumber?.plantId?.name && order?.socNumber?.plantId">
+                    Plant ID: {{order?.socNumber?.plantId}}
+                  </p>
+                </div>
+                <div class="text-right">
+                  <span [ngClass]="{
+                    'bg-red-100 text-red-800': order?.socNumber?.quantity === 0,
+                    'bg-yellow-100 text-yellow-800': order?.socNumber?.quantity > 0 && order?.socNumber?.status === 'inactive',
+                    'bg-green-100 text-green-800': order?.socNumber?.status === 'active'
+                  }" class="inline-flex px-2 py-1 text-xs font-medium rounded-full">
+                    {{order?.socNumber?.status}}
+                  </span>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Remaining: {{order?.socNumber?.quantity}} / {{order?.socNumber?.totalquantity}} bags
+                  </p>
+                  <p class="text-xs text-gray-600 mt-1" *ngIf="order?.socNumber?.borrowedOrder">
+                    <span class="font-medium text-blue-600">Borrowed Order</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Display SOC numbers array when available -->
+            <div *ngFor="let soc of order?.socNumbers" class="border-b pb-3 mb-3 last:border-b-0 last:mb-0 last:pb-0">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900">{{soc?.socNumber}}</h3>
+                  <p class="text-xs text-gray-500 mt-1" *ngIf="soc?.productId?.name">
+                    Product: {{soc?.productId?.name}}
+                  </p>
+                  <p class="text-xs text-gray-500" *ngIf="!soc?.productId?.name && soc?.productId">
+                    Product ID: {{soc?.productId}}
+                  </p>
+                  <p class="text-xs text-gray-500" *ngIf="soc?.plantId?.name">
+                    Plant: {{soc?.plantId?.name}}
+                  </p>
+                  <p class="text-xs text-gray-500" *ngIf="!soc?.plantId?.name && soc?.plantId">
+                    Plant ID: {{soc?.plantId}}
+                  </p>
+                </div>
+                <div class="text-right">
+                  <span [ngClass]="{
+                    'bg-red-100 text-red-800': soc?.quantity === 0,
+                    'bg-yellow-100 text-yellow-800': soc?.quantity > 0 && soc?.status === 'inactive',
+                    'bg-green-100 text-green-800': soc?.status === 'active'
+                  }" class="inline-flex px-2 py-1 text-xs font-medium rounded-full">
+                    {{soc?.status}}
+                  </span>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Remaining: {{soc?.quantity}} / {{soc?.totalquantity}} bags
+                  </p>
+                  <p class="text-xs text-gray-600 mt-1" *ngIf="soc?.borrowedOrder">
+                    <span class="font-medium text-blue-600">Borrowed Order</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

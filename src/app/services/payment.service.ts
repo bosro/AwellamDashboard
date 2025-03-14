@@ -31,6 +31,26 @@ export interface SocResponse {
   };
 }
 
+
+
+interface Soc {
+  _id: string;
+  socNumber: string;
+  quantity: number;
+  plantId: any;
+  categoryId: string;
+  productId: any;
+  status: string;
+  orderType: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiResponse {
+  message: string;
+  socNumbers: Soc[];
+}
+
 export interface AssignDriverResponse {
   message: string;
   soc: {
@@ -157,11 +177,13 @@ export interface PaymentDetailResponse {
   paymentReference: PaymentReference;
 }
 
+
 // src/app/services/payment.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { Destination } from './plant.service';
 // import { PaymentReference, Plant, Category, Product } from '../models/interfaces';
 
 
@@ -219,6 +241,10 @@ export class PaymentService {
       socData
     );
   }
+
+  assignSocListToTruck(truckId: string, socNumbers: string[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/soc/trucks/${truckId}/assign-soc`, { socNumbers });
+  }
   
 
   getPlants(): Observable<{ plants: Plant[] }> {
@@ -259,6 +285,33 @@ export class PaymentService {
       `${this.apiUrl}/soc/delete/${socId}`
     );
   }
+
+  getAllSocs(): Observable<ApiResponse> {
+    return this.http.get<ApiResponse>(`${this.apiUrl}/soc/get`);
+  }
+
+  // fetchSOCs(): void {
+  //   this.loading = true;
+  //   this.error = null;
+    
+  //   this.http.get<ApiResponse>(`${this.apiUrl}/soc/get`).subscribe({
+  //     next: (response) => {
+  //       // Filter only active SOCs
+  //       if (response.socNumbers) {
+  //         this.socList = response.socNumbers.filter(soc => soc.status === 'active');
+  //         this.filteredSocList = [...this.socList];
+  //         this.updatePagination();
+  //         this.extractPlantAndProducts();
+  //       }
+  //       this.loading = false;
+  //     },
+  //     error: (err) => {
+  //       this.error = 'Failed to load SOC data. Please try again later.';
+  //       console.error('Error fetching SOC data:', err);
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
 
 
   // /soc/:socNumber

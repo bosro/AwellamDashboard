@@ -17,8 +17,8 @@ export class TruckService {
     return this.http.get<TruckResponse>(`${this.apiUrl}/get`, { params });
   }
 
-  getTruckById(id: string): Observable<{ message: string; truck: Truck }> {
-    return this.http.get<{ message: string; truck: Truck }>(`${this.apiUrl}/get/${id}`);
+  getTruckById(id: string): Observable<{ message: string; truck: any }> {
+    return this.http.get<{ message: string; truck: any }>(`${this.apiUrl}/get/${id}`);
   }
 
   createTruck(data: Partial<Truck>): Observable<{ message: string; truck: Truck }> {
@@ -39,6 +39,10 @@ export class TruckService {
 
   assignSocToTruck(truckId: string, socId: string): Observable<any> {
     return this.http.post(`${this.apiUrll}/soc/trucks/${truckId}/assign-soc/${socId}`, {});
+  }
+
+  assignSocListToTruck(truckId: string, socNumbers: string[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrll}/soc/trucks/${truckId}/assign-soc`, { socNumbers });
   }
 
 

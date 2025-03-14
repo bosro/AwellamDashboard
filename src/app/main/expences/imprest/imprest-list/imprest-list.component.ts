@@ -4,6 +4,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Imprest } from '../imprest.model';
 import { ImprestService } from '../../../../services/imprest.service';
+import { ExpenseTypeService } from '../../../../services/expenseType.service'
+import { ExpenseService, Expense } from '../../../../services/expense.service';
+
 
 @Component({
   selector: 'app-imprest-list',
@@ -13,14 +16,20 @@ export class ImprestListComponent implements OnInit {
   imprests!: any[];
   loading = true;
   error = '';
+  selectedExpense: any = null;
+  isModalOpen = false;
+  expenseTypes: any[] = [];
 
   constructor(
     private imprestService: ImprestService,
+     private expenseService: ExpenseService,
+        private expenseTypeService: ExpenseTypeService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loadImprests();
+    this.loadExpenseTypes()
   }
 
   loadImprests(): void {
@@ -68,12 +77,66 @@ export class ImprestListComponent implements OnInit {
     }
   }
 
+  openCreateModal(): void {
+    this.selectedExpense = null;
+    this.isModalOpen = true;
+  }
+
   createNewImprest(): void {
     this.router.navigate(['/main/expenses/imprest/create']);
   }
 
   formatDate(dateString: string | Date): string {
     return new Date(dateString).toLocaleDateString();
+  }
+
+
+  loadExpenseTypes(): void {
+    this.expenseTypeService.getAll().subscribe({
+      next: (response) => {
+        this.expenseTypes = response.expenseTypes || [];
+      },
+      error: (err) => {
+        console.error('Failed to load expense types', err);
+      }
+    });
+  }
+
+
+  openEditModal(expense: any): void {
+    this.selectedExpense = { ...expense };
+    this.isModalOpen = true;
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.selectedExpense = null;
+  }
+
+  handleSave(expense: any): void {
+    if (this.selectedExpense && this.selectedExpense._id) {
+      this.expenseService.update(this.selectedExpense._id, expense).subscribe({
+        next: () => {
+
+          this.closeModal();
+        },
+        error: (err) => {
+          this.error = 'Failed to update expense';
+          console.error(err);
+        }
+      });
+    } else {
+      this.expenseService.create(expense).subscribe({
+        next: () => {
+
+          this.closeModal();
+        },
+        error: (err) => {
+          this.error = 'Failed to create expense';
+          console.error(err);
+        }
+      });
+    }
   }
 
   formatCurrency(amount: number): string {

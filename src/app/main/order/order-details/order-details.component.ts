@@ -110,7 +110,7 @@ interface OrderResponse {
   templateUrl: './order-details.component.html'
 })
 export class OrderDetailsComponent implements OnInit {
-  order?: Order;
+  order?: any;
   loading = false;
   saving = false;
   showNoteForm = false;
@@ -142,7 +142,7 @@ export class OrderDetailsComponent implements OnInit {
         this.order = {
           ...response.order,
           categoryId: response.order.categoryId || { _id: '', name: '', plantId: { _id: '', name: '' } },
-          socNumber: response.order.socNumber || { _id: '', socNumber: '' }
+          socNumber: response.order.socNumbers|| { _id: '', socNumber: '' }
         };
         this.buildTimeline();
         this.loading = false;

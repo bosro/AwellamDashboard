@@ -10,6 +10,7 @@ import { PurchasingReportComponent } from './report-list/purchasing-report.compo
 import { SOCReportComponent } from './report-list/soc-report.component';
 import { BorrowedSocComponent } from './report-list/BorrowedSoc';
 import { CustomerSummaryComponent } from './report-list/customer.report.component';
+import { SocTableComponent } from './report-list/ActiveSoc.list';
 
 
 @NgModule({
@@ -19,6 +20,7 @@ import { CustomerSummaryComponent } from './report-list/customer.report.componen
     SOCReportComponent,
     BorrowedSocComponent,
     CustomerSummaryComponent,
+    SocTableComponent
     // ReportListComponent,
     // ReportViewerComponent,
     // ReportGeneratorComponent,

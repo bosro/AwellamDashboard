@@ -28,6 +28,26 @@ export class ExpenseModalComponent implements OnInit {
   ngOnInit(): void {
     this.loadImprests();
     this.createForm();
+    
+    // Add listener for truck selection changes
+    this.form.get('truckId')?.valueChanges.subscribe(truckId => {
+      this.updateAccountTypeBasedOnTruck(truckId);
+    });
+    
+    // Initialize account type based on initial truck selection
+    this.updateAccountTypeBasedOnTruck(this.form.get('truckId')?.value);
+  }
+
+  updateAccountTypeBasedOnTruck(truckId: string): void {
+    if (truckId) {
+      // If truck is selected, set to transport and disable
+      this.form.get('accountType')?.setValue('transport');
+      this.form.get('accountType')?.disable();
+    } else {
+      // If no truck is selected, set to wholesale and enable
+      this.form.get('accountType')?.setValue('wholesale');
+      this.form.get('accountType')?.enable();
+    }
   }
 
   loadImprests(): void {
@@ -50,83 +70,53 @@ export class ExpenseModalComponent implements OnInit {
 
   createForm(): void {
     // Convert nested objects to their IDs for the form
-   
-      // Initialize form without truckId
-      const expenseTypeId = this.expense?.expenseType?._id || this.expense?.expenseType || '';
-      const imprestId = this.expense?.imprestId?._id || this.expense?.imprestId || '';
-  
-      const formGroup: any = {
-        expenseType: [expenseTypeId, Validators.required],
-        imprestId: [imprestId],
-        accountType: [this.expense?.accountType || 'transport', Validators.required],
-        amount: [this.expense?.amount || '', [Validators.required, Validators.min(0)]],
-        date: [this.formatDateForInput(this.expense?.date) || this.formatDateForInput(new Date()), Validators.required],
-        recipient: [this.expense?.recipient || '', Validators.required],
-        description: [this.expense?.description || '', Validators.required],
-        status: [this.expense?.status || 'pending', Validators.required]
-      };
-  
-      // Only add truckId if it exists in the expense
-      const truckId = this.expense?.truckId?._id || this.expense?.truckId;
-      if (truckId) {
-        formGroup.truckId = [truckId];
-      }
-  
-      this.form = this.fb.group(formGroup);
-    }
-  
-    // Add method to handle truck selection
-    onTruckSelect(truckId: string): void {
-      if (truckId) {
-        this.form.addControl('truckId', this.fb.control(truckId));
-      } else {
-        this.form.removeControl('truckId');
-      }
-    }
-    formatDateForInput(dateStr: string | Date): string {
-      if (!dateStr) return '';
-      const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
-      return date.toISOString().substring(0, 10);
-    }
+    const expenseTypeId = this.expense?.expenseType?._id || this.expense?.expenseType || '';
+    const imprestId = this.expense?.imprestId?._id || this.expense?.imprestId || '';
+    const truckId = this.expense?.truckId?._id || this.expense?.truckId || '';
+
+    const formGroup: any = {
+      expenseType: [expenseTypeId, Validators.required],
+      imprestId: [imprestId],
+      truckId: [truckId], // Always include truckId control initially
+      accountType: [this.expense?.accountType || 'transport', Validators.required],
+      amount: [this.expense?.amount || '', [Validators.required, Validators.min(0)]],
+      date: [this.formatDateForInput(this.expense?.date) || this.formatDateForInput(new Date()), Validators.required],
+      recipient: [this.expense?.recipient || '', Validators.required],
+      description: [this.expense?.description || '', Validators.required],
+      status: [this.expense?.status || 'pending', Validators.required]
+    };
+
+    this.form = this.fb.group(formGroup);
+  }
+
+  formatDateForInput(dateStr: string | Date): string {
+    if (!dateStr) return '';
+    const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+    return date.toISOString().substring(0, 10);
+  }
     
-    onSubmit(): void {
-      if (this.form.valid) {
-        const formData = {
-          ...this.form.value,
-          date: new Date(this.form.value.date).toISOString()
-        };
-        
-        if (this.expense && this.expense._id) {
-          formData._id = this.expense._id;
-        }
-        
-        this.save.emit(formData);
-      } else {
-        this.form.markAllAsTouched();
+  onSubmit(): void {
+    if (this.form.valid) {
+      // Use getRawValue to include disabled controls
+      const formData = {
+        ...this.form.getRawValue(),
+        date: new Date(this.form.getRawValue().date).toISOString()
+      };
+      
+      // Remove truckId from payload if it's empty/null
+      if (!formData.truckId) {
+        delete formData.truckId;
       }
+      
+      if (this.expense && this.expense._id) {
+        formData._id = this.expense._id;
+      }
+      
+      this.save.emit(formData);
+    } else {
+      this.form.markAllAsTouched();
     }
-
-  
-
-
-
-  // onSubmit(): void {
-  //   if (this.form.valid) {
-  //     const formData = {
-  //       ...this.form.value,
-  //       date: new Date(this.form.value.date).toISOString()
-  //     };
-      
-  //     // If we're editing, include the _id
-  //     if (this.expense && this.expense._id) {
-  //       formData._id = this.expense._id;
-  //     }
-      
-  //     this.save.emit(formData);
-  //   } else {
-  //     this.form.markAllAsTouched();
-  //   }
-  // }
+  }
 
   onCancel(): void {
     this.cancel.emit();
@@ -140,6 +130,6 @@ export class ExpenseModalComponent implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return amount?.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) || '$0.00';
+    return amount?.toLocaleString('en-US', { style: 'currency', currency: 'GHC' }) || '$0.00';
   }
 }

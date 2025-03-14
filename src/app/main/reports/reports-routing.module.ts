@@ -7,6 +7,7 @@ import { PurchasingReportComponent } from './report-list/purchasing-report.compo
 import { SOCReportComponent } from './report-list/soc-report.component';
 import { BorrowedSocComponent } from './report-list/BorrowedSoc';
 import { CustomerSummaryComponent } from './report-list/customer.report.component';
+import { SocTableComponent } from './report-list/ActiveSoc.list';
 // import { ReportListComponent } from './report-list/sales-report.component';
 // import { ReportGeneratorComponent } from './report-generator/report-generator.component';
 // import { ReportViewerComponent } from './report-viewer/report-viewer.component';
@@ -21,6 +22,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: 'list', component: SalesReportComponent },
       {path: 'customer-summary' , component:CustomerSummaryComponent},
+      {path: 'active-soc' , component:SocTableComponent},
 
       // { path: 'purchase-list', component: PurchasingReportComponent},
       {path: 'soc-report' , component : SOCReportComponent},
