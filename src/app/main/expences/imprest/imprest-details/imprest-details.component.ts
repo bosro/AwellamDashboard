@@ -4,6 +4,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Imprest } from '../imprest.model';
 import { ImprestService } from '../../../../services/imprest.service';
+import { ExpenseService, Expense } from '../../../../services/expense.service';
+import { ExpenseTypeService } from '../../../../services/expenseType.service'
+import { TruckService } from '../../../../services/truck.service';
 
 @Component({
   selector: 'app-imprest-detail',
@@ -11,14 +14,21 @@ import { ImprestService } from '../../../../services/imprest.service';
 })
 export class ImprestDetailComponent implements OnInit {
   imprestDetail: any | null = null;
+  selectedExpense: any = null;
+  isModalOpen = false;
   loading = true;
   error = '';
   imprestId: string = '';
+  trucks: any[] = [];
+  expenseTypes: any[] = [];
 
   constructor(
     private imprestService: ImprestService,
+    private expenseTypeService: ExpenseTypeService,
+    private truckService: TruckService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private expenseService: ExpenseService,
   ) { }
 
   ngOnInit(): void {
@@ -31,6 +41,8 @@ export class ImprestDetailComponent implements OnInit {
         this.loading = false;
       }
     });
+    this.loadTrucks();
+    this.loadExpenseTypes()
   }
 
   loadImprestDetail(): void {
@@ -50,7 +62,10 @@ export class ImprestDetailComponent implements OnInit {
       }
     });
   }
-
+  openEditModal(expense: any): void {
+    this.selectedExpense = { ...expense };
+    this.isModalOpen = true;
+  }
   goBack(): void {
     this.router.navigate(['/main/expenses/imprest']);
   }
@@ -71,6 +86,75 @@ export class ImprestDetailComponent implements OnInit {
         },
         error: (err) => {
           this.error = 'Error deleting imprest: ' + (err.message || 'Unknown error');
+        }
+      });
+    }
+  }
+
+  deleteExpense(id: string): void {
+    if (confirm('Are you sure you want to delete this expense?')) {
+      this.expenseService.delete(id).subscribe({
+        next: () => {
+          this.loadImprestDetail();
+        },
+        error: (err) => {
+          this.error = 'Failed to delete expense';
+          console.error(err);
+        }
+      });
+    }
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.selectedExpense = null;
+  }
+
+
+  loadTrucks(): void {
+    this.truckService.getTrucks().subscribe({
+      next: (response) => {
+        this.trucks = response.trucks || [];
+      },
+      error: (err) => {
+        console.error('Failed to load trucks', err);
+      }
+    });
+  }
+
+  loadExpenseTypes(): void {
+    this.expenseTypeService.getAll().subscribe({
+      next: (response) => {
+        this.expenseTypes = response.expenseTypes || [];
+      },
+      error: (err) => {
+        console.error('Failed to load expense types', err);
+      }
+    });
+  }
+
+
+  handleSave(expense: any): void {
+    if (this.selectedExpense && this.selectedExpense._id) {
+      this.expenseService.update(this.selectedExpense._id, expense).subscribe({
+        next: () => {
+          this.loadImprestDetail();
+          this.closeModal();
+        },
+        error: (err) => {
+          this.error = 'Failed to update expense';
+          console.error(err);
+        }
+      });
+    } else {
+      this.expenseService.create(expense).subscribe({
+        next: () => {
+          this.loadImprestDetail();
+          this.closeModal();
+        },
+        error: (err) => {
+          this.error = 'Failed to create expense';
+          console.error(err);
         }
       });
     }
