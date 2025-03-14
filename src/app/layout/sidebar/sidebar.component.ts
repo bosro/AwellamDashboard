@@ -216,11 +216,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/expenses/dashboard',
           icon: 'ri-group-line'
         },
-        {
-          title: 'Expense Types',
-          route: '/main/expenses/expense-types',
-          icon: 'ri-group-line'
-        },
+        // {
+        //   title: 'Expense Types',
+        //   route: '/main/expenses/expense-types',
+        //   icon: 'ri-group-line'
+        // },
         {
           title: 'Transport Expenses',
           route: '/main/expenses/transport',

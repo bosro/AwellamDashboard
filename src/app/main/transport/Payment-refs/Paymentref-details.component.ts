@@ -18,7 +18,7 @@ import { Truck } from '../../../shared/types/truck-operation.types';
   templateUrl: './Payment-detail.html',
 })
 export class PaymentDetailComponent implements OnInit {
-  paymentRef: PaymentReference | null = null;
+  paymentRef: any | null = null;
   loading = false;
   error: string | null = null;
   showCreateForm = false;
@@ -85,10 +85,13 @@ export class PaymentDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    const plantId=this.paymentRef?.plantId?._id;
+    console.log(plantId)
     if (id) {
       this.loadPaymentDetails(id);
+      
       this.loadPlants();
-      this.loadAllSocs(); // Load all SOCs from the system
+      // this.loadAllSocs(plantId); // Load all SOCs from the system
     } else {
       this.router.navigate(['/payments']);
     }
@@ -121,11 +124,13 @@ export class PaymentDetailComponent implements OnInit {
   showCurrentSocsModal = false;
   
   // Load all SOCs from the system
-  loadAllSocs(): void {
+  loadAllSocs(plantId:any): void {
     this.bulkAssignLoading = true;
-    this.paymentService.getAllSocs().subscribe({
+    // const plantId = this.paymentRef?.plantId?._id;
+    this.paymentService.getActiveSocsByPlant(plantId).subscribe({
       next: (response) => {
         this.allSocs = response.socNumbers.filter(soc => soc.status === 'active'); // Store full SOC objects
+        console.log(this.allSocs)
         console.log(this.allSocs);
         this.bulkAssignLoading = false;
       },
@@ -153,6 +158,15 @@ export class PaymentDetailComponent implements OnInit {
       next: (response) => {
         this.paymentRef = response.paymentReference;
         this.loading = false;
+
+           // Ensure paymentRef is defined before accessing plantId
+      if (this.paymentRef?.plantId?._id) {
+        const plantId = this.paymentRef.plantId._id;
+        console.log('Plant ID:', plantId);
+
+        // Call loadAllSocs only after we have the correct plantId
+        this.loadAllSocs(plantId);
+      }
       },
       error: (error) => {
         this.error = 'Failed to load payment reference details';
@@ -392,11 +406,11 @@ export class PaymentDetailComponent implements OnInit {
   }
 
   getActiveSocs(): SocNumber[] {
-    return this.paymentRef?.socNumbers.filter((soc) => soc.status === 'active') || [];
+    return this.paymentRef?.socNumbers.filter((soc:any) => soc.status === 'active') || [];
   }
 
   getInactiveSocs(): SocNumber[] {
-    return this.paymentRef?.socNumbers.filter((soc) => soc.status === 'inactive') || [];
+    return this.paymentRef?.socNumbers.filter((soc:any) => soc.status === 'inactive') || [];
   }
 
   async assignDriver(socId: string): Promise<void> {
@@ -451,7 +465,7 @@ export class PaymentDetailComponent implements OnInit {
           showConfirmButton: false,
         });
         this.loadPaymentDetails(this.paymentRef!._id);
-        this.loadAllSocs(); // Refresh the SOC list
+        // this.loadAllSocs(); // Refresh the SOC list
       }
     } catch (error) {
       console.error('Error in truck assignment:', error);
@@ -589,7 +603,7 @@ export class PaymentDetailComponent implements OnInit {
         this.selectedSocs = [];
         this.closeBulkAssignModal();
         this.loadPaymentDetails(this.paymentRef!._id);
-        this.loadAllSocs(); // Refresh the list of all SOCs
+        // this.loadAllSocs(); // Refresh the list of all SOCs
       }
     } catch (error) {
       console.error('Error in bulk truck assignment:', error);

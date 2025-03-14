@@ -6,6 +6,7 @@ import { Imprest } from '../imprest.model';
 import { ImprestService } from '../../../../services/imprest.service';
 import { ExpenseTypeService } from '../../../../services/expenseType.service'
 import { ExpenseService, Expense } from '../../../../services/expense.service';
+import { TruckService } from '../../../../services/truck.service';
 
 
 @Component({
@@ -19,17 +20,20 @@ export class ImprestListComponent implements OnInit {
   selectedExpense: any = null;
   isModalOpen = false;
   expenseTypes: any[] = [];
+  trucks: any[] = [];
 
   constructor(
     private imprestService: ImprestService,
      private expenseService: ExpenseService,
         private expenseTypeService: ExpenseTypeService,
+        private truckService: TruckService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.loadImprests();
-    this.loadExpenseTypes()
+    this.loadExpenseTypes();
+    this.loadTrucks();
   }
 
   loadImprests(): void {
@@ -46,6 +50,17 @@ export class ImprestListComponent implements OnInit {
       error: (err) => {
         this.error = 'Error loading imprests: ' + (err.message || 'Unknown error');
         this.loading = false;
+      }
+    });
+  }
+
+  loadTrucks(): void {
+    this.truckService.getTrucks().subscribe({
+      next: (response) => {
+        this.trucks = response.trucks || [];
+      },
+      error: (err) => {
+        console.error('Failed to load trucks', err);
       }
     });
   }

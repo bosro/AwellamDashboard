@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ImprestService } from '../../../services/imprest.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-expense-modal',
@@ -22,7 +23,8 @@ export class ExpenseModalComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private imprestService: ImprestService
+    private imprestService: ImprestService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -122,6 +124,11 @@ export class ExpenseModalComponent implements OnInit {
 
   onCancel(): void {
     this.cancel.emit();
+  }
+
+
+  goToExpenseTypes(): void {
+    this.router.navigate(['/main/expenses/expense-types']);
   }
 
   // Format the imprest display name

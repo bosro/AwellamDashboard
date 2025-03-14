@@ -316,7 +316,10 @@ export class PaymentService {
 
   // /soc/:socNumber
 
-
+  getActiveSocsByPlant(plantId: string): Observable<ApiResponse> {
+    return this.http.get<ApiResponse>(`${this.apiUrl}/soc/get/${plantId}`);
+  }
+  
   createSocNumber(paymentRefId: string, socData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/soc/create/${paymentRefId}`, socData);
   }

@@ -93,6 +93,7 @@
   *ngIf="isModalOpen" 
   [expense]="selectedExpense" 
   [expenseTypes]="expenseTypes"
+  [trucks]="trucks"
   (save)="handleSave($event)" 
   (cancel)="closeModal()"
 ></app-expense-modal>

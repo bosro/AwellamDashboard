@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ExpenseService, Expense } from '../../../services/expense.service';
 import { ExpenseTypeService } from '../../../services/expenseType.service'
 import { TruckService } from '../../../services/truck.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-expense-list',
   templateUrl: './expense-list.html',
@@ -20,7 +21,8 @@ export class ExpenseListComponent implements OnInit {
   constructor(
     private expenseService: ExpenseService,
     private expenseTypeService: ExpenseTypeService,
-    private truckService: TruckService
+    private truckService: TruckService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -79,6 +81,10 @@ export class ExpenseListComponent implements OnInit {
   closeModal(): void {
     this.isModalOpen = false;
     this.selectedExpense = null;
+  }
+
+  goToExpenseTypes(): void {
+    this.router.navigate(['/main/expenses/expense-types']);
   }
 
   handleSave(expense: any): void {
