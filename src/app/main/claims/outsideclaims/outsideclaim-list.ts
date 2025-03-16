@@ -61,6 +61,7 @@ export class OutsideClaimsReportComponent implements OnInit {
           customerName: order.customerName,
           truckNumber: order.truckNumber,
           product: order.product,
+          driver: order.driver,
           loadedBags: order.loadedBags,
           outsideSoc: order.outsideSoc,
           plant: order.plant,

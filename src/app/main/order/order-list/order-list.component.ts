@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
@@ -24,8 +24,8 @@ interface Plant {
   templateUrl: './order-list.component.html'
 })
 export class OrderListComponent implements OnInit {
-  orders: Order[] = [];
-  filteredOrders: Order[] = [];
+  orders: any[] = [];
+  filteredOrders: any[] = [];
   loading = false;
   total = 0;
   pageSize = 15;
@@ -65,49 +65,33 @@ export class OrderListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadInitialData();
-    this.setupFilters();
-    this.loadOrders();
-    // this.loadProducts();
+    // Load in sequence to avoid multiple parallel requests
+    this.loadPlantsAndInitialize();
   }
 
-  private loadInitialData(): void {
+  private loadPlantsAndInitialize(): void {
     this.loading = true;
-    
-    forkJoin({
-      plants: this.http.get<any>(`${this.apiUrl}/plants/get`),
-    }).subscribe({
-      next: ({ plants }) => {
-        this.plants = plants.plants;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading initial data:', error);
-        this.loading = false;
-      }
-    });
+    this.http.get<any>(`${this.apiUrl}/plants/get`)
+      .pipe(finalize(() => {
+        // Don't set loading to false here, we're loading orders next
+        this.setupFilters();
+        this.loadOrders();
+      }))
+      .subscribe({
+        next: (response) => {
+          this.plants = response.plants;
+        },
+        error: (error) => {
+          console.error('Error loading plants:', error);
+          this.loading = false; // Only set to false on error
+        }
+      });
   }
-
-  // private loadProducts(): void {
-  //   this.productsService.getProducts({}).subscribe({
-  //     next: (response) => {
-  //       this.products = response.products;
-  //       this.total = this.products.length;
-  //       this.applyFilters();
-  //       this.loading = false;
-  //     },
-  //     error: (error) => {
-  //       console.error('Error loading products:', error);
-  //       this.loading = false;
-  //     }
-  //   });
-  // }
 
   private setupFilters(): void {
     this.filterForm.valueChanges
       .pipe(
-        debounceTime(300),
+        debounceTime(500), // Increased from 300ms to reduce API calls
         distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
       )
       .subscribe(() => {
@@ -118,72 +102,75 @@ export class OrderListComponent implements OnInit {
 
   onPlantSelect(event: any): void {
     const plantId = event.target.value;
+    this.loading = true; // Start loading before API calls
+    
     if (plantId) {
-      this.loading = true;
-      this.productsService.getProductByPlant(plantId).subscribe({
-        next: (response: { products: Product[] }) => {
-          this.products = response.products;
-          this.total = this.products.length;
-          this.applyFilters();
-          this.loading = false;
-        },
-        error: (error: any) => {
-          console.error('Error loading products:', error);
-          this.loading = false;
-        }
-      });
-      this.ordersService.getPlantOrders(plantId).subscribe({
-        next: (response: { orders: Order[] }) => {
-          this.allOrders = response.orders.filter(order => order.status === 'PENDING');
+      // Load products and orders in parallel
+      forkJoin({
+        products: this.productsService.getProductByPlant(plantId),
+        orders: this.ordersService.getPlantOrders(plantId)
+      })
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.products = response.products.products;
+          this.allOrders = response.orders.orders.filter(order => order.status === 'PENDING');
           this.total = this.allOrders.length;
           this.applyFilters();
-          this.loading = false;
         },
-        error: (error: any) => {
-          console.error('Error loading orders:', error);
-          this.loading = false;
+        error: (error) => {
+          console.error('Error loading plant data:', error);
         }
       });
-      
+    } else {
+      // Reset products
+      this.products = [];
+      // Reload all orders
+      this.loadOrders();
     }
-    
   }
 
   onProductSelect(event: any): void {
     const productId = event.target.value;
     if (productId) {
       this.loading = true;
-      this.ordersService.getProductOrders(productId).subscribe({
-        next: (response) => {
-          this.allOrders = response.orders.filter(order => order.status === 'PENDING');
-          this.total = this.allOrders.length;
-          this.applyFilters();
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error loading orders:', error);
-          this.loading = false;
-        }
-      });
+      this.ordersService.getProductOrders(productId)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: (response) => {
+            this.allOrders = response.orders.filter(order => order.status === 'PENDING');
+            this.total = this.allOrders.length;
+            this.applyFilters();
+          },
+          error: (error) => {
+            console.error('Error loading product orders:', error);
+          }
+        });
+    } else {
+      // If product selection cleared, revert to previous state
+      const plantId = this.filterForm.get('plantId')?.value;
+      if (plantId) {
+        this.onPlantSelect({ target: { value: plantId } });
+      } else {
+        this.loadOrders();
+      }
     }
   }
 
-  
-
   loadOrders(): void {
     this.loading = true;
-    this.ordersService.getPendingOrders().subscribe({
-      next: (response) => {
-        this.allOrders = response.orders;
-        this.total = this.allOrders.length;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading orders:', error);
-        this.loading = false;
-      }
-    });
+    this.ordersService.getPendingOrders()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.allOrders = response.orders;
+          this.total = this.allOrders.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+        }
+      });
   }
 
   applyFilters(): void {
@@ -238,8 +225,6 @@ export class OrderListComponent implements OnInit {
       filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
     }
 
-   
-
     // Product filter
     if (filters.product) {
       filtered = filtered.filter(order => 
@@ -247,16 +232,14 @@ export class OrderListComponent implements OnInit {
       );
     }
 
-    this.filteredOrders = filtered;
-    this.total = this.filteredOrders.length;
-
+    this.total = filtered.length;
+    
     // Apply pagination
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.filteredOrders = filtered.slice(startIndex, endIndex);
   }
 
-  // Rest of the component remains the same...
   onPageChange(page: number): void {
     this.currentPage = page;
     this.applyFilters();
@@ -270,23 +253,37 @@ export class OrderListComponent implements OnInit {
     }
   }
 
-  deleteOrder(id: string): void {
+  deleteOrder(id: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation(); // Prevent row click
+    }
+    
     if (confirm('Are you sure you want to delete this order?')) {
-      this.ordersService.deleteOrder(id).subscribe({
-        next: () => {
-          this.loadOrders();
-          this.router.navigate(['main/orders/list']);
-        },
-        error: (error) => console.error('Error deleting order:', error)
-      });
+      this.loading = true;
+      this.ordersService.deleteOrder(id)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: () => {
+            this.loadOrders();
+            this.router.navigate(['main/orders/list']);
+          },
+          error: (error) => console.error('Error deleting order:', error)
+        });
     }
   }
 
-  toggleStatus(id: string): void {
-    this.ordersService.toggleOrderStatus(id).subscribe({
-      next: () => this.loadOrders(),
-      error: (error) => console.error('Error toggling status:', error)
-    });
+  toggleStatus(id: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation(); // Prevent row click
+    }
+    
+    this.loading = true;
+    this.ordersService.toggleOrderStatus(id)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: () => this.loadOrders(),
+        error: (error) => console.error('Error toggling status:', error)
+      });
   }
 
   clearFilters(): void {
