@@ -39,10 +39,10 @@
               <p class="text-sm text-gray-500">Description</p>
               <p class="font-medium">{{ imprestDetail.description }}</p>
             </div>
-            <div>
-              <p class="text-sm text-gray-500">Description</p>
-              <p class="font-medium">{{ imprestDetail.plantId.name }}</p>
-            </div>
+            <!-- <div>
+              <p class="text-sm text-gray-500">Plant</p>
+              <p class="font-medium">{{ imprestDetail.plantId.name || 'N/A' }}</p>
+            </div> -->
             <div>
               <p class="text-sm text-gray-500">Date</p>
               <p class="font-medium">{{ formatDate(imprestDetail.date) }}</p>
