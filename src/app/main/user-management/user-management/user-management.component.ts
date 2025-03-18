@@ -37,7 +37,7 @@ interface UserFilters {
   templateUrl: './user-management.component.html'
 })
 export class UserManagementComponent implements OnInit {
-  users: User[] = [];
+  users: any[] = [];
   selectedUsers: Set<string> = new Set();
   loading = false;
   metrics!: UserMetrics;

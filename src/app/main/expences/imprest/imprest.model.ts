@@ -9,6 +9,7 @@ export interface Imprest {
     status?: string;
     createdAt?: string;
     updatedAt?: string;
+  plantId?: string;
   }
   
   export interface Expense {
