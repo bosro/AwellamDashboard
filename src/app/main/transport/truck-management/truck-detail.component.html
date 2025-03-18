@@ -16,6 +16,15 @@
     >
       Unload Truck
     </button>
+
+    <button
+    *ngIf="truck?.LoadStatus === 'NOTLOADED'"
+    (click)="truck && unloadSOCNumber(truck._id)"
+    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+  >
+    CLear SOC from Truck
+  </button>
+    
   </div>
 
   <div *ngIf="loading" class="flex justify-center p-4">

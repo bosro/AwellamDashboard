@@ -21,12 +21,20 @@ export class TruckService {
     return this.http.get<{ message: string; truck: any }>(`${this.apiUrl}/get/${id}`);
   }
 
+  // unloadSOCfromTruck(id: string): Observable<{ message: string; truck: any }> {
+  //   return this.http.put<{ message: string; truck: any }>(`${this.apiUrl}/clearsoc/${id}`);
+  // }
+
   createTruck(data: Partial<Truck>): Observable<{ message: string; truck: Truck }> {
     return this.http.post<{ message: string; truck: Truck }>(`${this.apiUrl}/create`, data);
   }
 
   updateTruck(id: string, data: Partial<Truck>): Observable<{ message: string; truck: Truck }> {
     return this.http.put<{ message: string; truck: Truck }>(`${this.apiUrl}/trucks/${id}`, data);
+  }
+
+  unloadSOCfromTruck(id: string, data: Partial<Truck>): Observable<{ message: string; truck: Truck }> {
+    return this.http.put<{ message: string; truck: Truck }>(`${this.apiUrl}/clearsoc/${id}`, data);
   }
 
   loadTruck(data: TruckLoad): Observable<{ message: string }> {

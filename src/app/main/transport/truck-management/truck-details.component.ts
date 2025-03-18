@@ -100,6 +100,22 @@ export class TruckDetailComponent implements OnInit {
     });
   }
 
+  unloadSOCNumber(truckId: string): void {
+    this.truckService.unloadSOCfromTruck(truckId ,{}).subscribe({
+      next: (response) => {
+        // this.truck = response.truck;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading truck details:', error);
+        this.loading = false;
+        Swal.fire('Error', 'Failed to clear truck details', 'error');
+      }
+    });
+  }
+
+  
+
   goBack(): void {
     this.router.navigate(['/main/transport/trucks/']);
   }
