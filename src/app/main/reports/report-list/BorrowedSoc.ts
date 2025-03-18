@@ -32,8 +32,8 @@ interface BorrowedSocResponse {
   templateUrl: './BorrowedSoc.html'
 })
 export class BorrowedSocComponent implements OnInit {
-  borrowedSocs: BorrowedSoc[] = [];
-  filteredSocs: BorrowedSoc[] = [];
+  borrowedSocs: any[] = [];
+  filteredSocs: any[] = [];
   socNumberFilter = new FormControl('');
   
   // Pagination properties
@@ -65,7 +65,7 @@ export class BorrowedSocComponent implements OnInit {
 
   fetchBorrowedSocs(): void {
     this.loading = true;
-    this.http.get<BorrowedSocResponse>(`${environment.apiUrl}/soc/get/borrowed`)
+    this.http.get<BorrowedSocResponse>(`${environment.apiUrl}/soc/getsoc/isborrowed`)
       .subscribe({
         next: (response) => {
           this.borrowedSocs = response.borrowedSocs;
@@ -98,7 +98,7 @@ export class BorrowedSocComponent implements OnInit {
     this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
-  get paginatedSocs(): BorrowedSoc[] {
+  get paginatedSocs(): any[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredSocs.slice(startIndex, startIndex + this.itemsPerPage);
   }

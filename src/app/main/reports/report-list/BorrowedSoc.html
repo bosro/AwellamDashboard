@@ -77,8 +77,8 @@
                     {{ soc.status }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ soc.plantId }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ soc.destinationId }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ soc.plantId.name}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ soc.destinationId.destination }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ soc.assignedTruck || 'N/A' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ soc.assignedOrder || 'N/A' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ soc.recipient || 'N/A' }}</td>

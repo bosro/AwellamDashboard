@@ -108,8 +108,8 @@
                 </td>
                 <td class="px-6 py-4">
                   <span *ngIf="expense.truckId">
-                    {{ expense.truckId.truckNumber }} 
-                    <span class="text-gray-500">({{ expense.truckId.driver.name }})</span>
+                    {{ expense.truckId.truckNumber }}
+                    <span *ngIf="expense.truckId.driver" class="text-gray-500">({{ expense.truckId.driver.name }})</span>
                   </span>
                   <span *ngIf="!expense.truckId" class="text-gray-400">N/A</span>
                 </td>
