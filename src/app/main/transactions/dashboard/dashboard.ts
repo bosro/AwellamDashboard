@@ -136,7 +136,7 @@ export class BankTransactionsDashboardComponent implements OnInit {
       if (transaction.type === TransactionType.PAYMENT) {
         bankStats[bank].totalAmount += transaction.amount;
         bankStats[bank].paymentCount++;
-      } else if (transaction.type === TransactionType.REFUND) {
+      } else if (transaction.type === TransactionType.CREDIT_NOTE) {
         bankStats[bank].totalAmount -= transaction.amount;
         bankStats[bank].refundCount++;
       }
@@ -156,7 +156,7 @@ export class BankTransactionsDashboardComponent implements OnInit {
     this.totalBankAmount = bankTransactions.reduce((sum, t) => {
       if (t.type === TransactionType.PAYMENT) {
         return sum + t.amount;
-      } else if (t.type === TransactionType.REFUND) {
+      } else if (t.type === TransactionType.CREDIT_NOTE) {
         return sum - t.amount; 
       }
       return sum;

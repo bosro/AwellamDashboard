@@ -178,7 +178,7 @@ export class TransactionComponent implements OnInit {
     this.totalAmount = transactions.reduce((sum, transaction) => {
       if (transaction.type === TransactionType.PAYMENT) {
         return sum + transaction.amount;
-      } else if (transaction.type === TransactionType.REFUND) {
+      } else if (transaction.type === TransactionType.CREDIT_NOTE) {
         return sum - transaction.amount;
       } else {
         return sum + transaction.amount;
@@ -386,7 +386,7 @@ export class TransactionComponent implements OnInit {
     switch (type) {
       case TransactionType.PAYMENT:
         return 'bg-green-100 text-green-800';
-      case TransactionType.REFUND:
+      case TransactionType.CREDIT_NOTE:
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-blue-100 text-blue-800';
@@ -398,7 +398,7 @@ export class TransactionComponent implements OnInit {
     switch (type) {
       case TransactionType.PAYMENT:
         return 'text-green-600';
-      case TransactionType.REFUND:
+      case TransactionType.CREDIT_NOTE:
         return 'text-red-600';
       default:
         return 'text-blue-600';

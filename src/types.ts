@@ -169,8 +169,12 @@ export interface SingleCustomerResponse {
 }
 
 export enum TransactionType {
-  PAYMENT = "payment",
-  REFUND = "refund",
+  PAYMENT = "PAYMENT",
+  // CREDIT_ADDED='CREDIT_ADDED',
+  CREDIT_NOTE='CREDIT_NOTE',
+  // CREDIT_REMOVED='CREDIT_REMOVED',
+  DEBIT_NOTE = 'DEBIT_NOTE',
+  // DEDIT_NOTE_REMOVED = 'DEBIT_NOTE_REMOVED'
 }
 
 export enum PaymentMethod {
