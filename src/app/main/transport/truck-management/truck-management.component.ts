@@ -158,6 +158,8 @@ export class TruckManagementComponent implements OnInit {
       capacity: [this.selectedTruck?.capacity, [Validators.required, Validators.min(1)]],
       loadedbags: [this.selectedTruck?.loadedbags, [Validators.required, Validators.min(0)]],
       isAwellamLoad: [this.selectedTruck?.status, ],
+      status: [this.selectedTruck?.status, ],
+      LoadStatus: [this.selectedTruck?.LoadStatus, ],
       expenses: [this.selectedTruck?.expenses, [Validators.required, Validators.min(0)]],
       driver: [this.selectedTruck?.driver?.name || '']
     });

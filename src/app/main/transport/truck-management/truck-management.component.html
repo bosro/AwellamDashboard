@@ -216,6 +216,29 @@
             <!-- <option value="maintenance">Maintenance</option> -->
           </select>
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <select
+            formControlName="status"
+            class="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <!-- <option value="maintenance">Maintenance</option> -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">LOADED STATUS</label>
+          <select
+            formControlName="LoadStatus"
+            class="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="LOADED">LOADED</option>
+            <option value="NOTLOADED">NOTLOADED</option>
+            <option value="DELIEVERED">DELIEVERED</option>
+            <!-- <option value="maintenance">Maintenance</option> -->
+          </select>
+        </div>
         <!-- <div>
           <label class="block text-sm font-medium text-gray-700">Expenses (GHC)</label>
           <input
