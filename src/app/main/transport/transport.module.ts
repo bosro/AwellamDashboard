@@ -26,6 +26,7 @@ import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.c
 import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
 import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
 import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
+import { TruckStatisticsComponent } from './truck-management/truckhistory.component';
 
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
@@ -46,6 +47,7 @@ import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithou
     PaymentDetailComponent,
     PaymentListComponent,
     PaymentListWithoutSocComponent,
+    TruckStatisticsComponent,
     // PaymentListComponent,
     // InventoryListComponent,
     // InventoryFormComponent,

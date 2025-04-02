@@ -124,6 +124,12 @@ export class TruckManagementComponent implements OnInit {
     this.router.navigate(['main/transport/trucks/details/', id]);
   }
 
+  viewTruckHistory(id: string): void {
+    this.router.navigate(['main/transport/trucks/statistics/', id]);
+  }
+
+
+
   addTruck(): void {
     this.router.navigate(['main/transport/trucks/new/']);
   }

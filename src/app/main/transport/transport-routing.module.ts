@@ -21,6 +21,7 @@ import { StockDisbursementComponent } from './stock-disbursement/stock-disbursem
 import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
 import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
 import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
+import { TruckStatisticsComponent } from './truck-management/truckhistory.component';
 // import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
 // import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
 
@@ -29,6 +30,7 @@ const routes: Routes = [
     path: '',
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'trucks/statistics/:id', component: TruckStatisticsComponent },
       { path: 'dashboard', component: TransportDashboardComponent },
       { path: 'drivers/new', component: DriverFormComponent },
       { path: 'drivers/:id', component: DriverDetailsComponent },

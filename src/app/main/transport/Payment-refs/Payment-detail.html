@@ -295,6 +295,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Driver</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Self List</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
@@ -329,6 +330,15 @@
                   Load Driver
                 </button>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button (click)="assignSocToSelfList(soc._id)"
+                        [disabled]="soc.status === 'inactive'"
+                        class="text-indigo-600 hover:text-indigo-900"
+                        [ngClass]="{'text-gray-400 cursor-not-allowed': soc.status === 'inactive'}">
+                  Load Self List
+                </button>
+              </td>
+              
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button (click)="SetBorrowed(soc._id)" class="text-blue-600 hover:text-blue-900 mr-2">
                   Borrowed Order??

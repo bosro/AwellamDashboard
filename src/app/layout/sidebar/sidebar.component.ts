@@ -64,7 +64,13 @@ export class SidebarComponent implements OnInit {
           title: 'Outside Load Order',
           route: '/main/orders/outsideload',
           icon: 'ri-play-list-add-fill'
+        },
+        {
+          title: 'Self List Orders',
+          route: '/main/orders/selflist',
+          icon: 'ri-play-list-add-fill'
         }
+        
       ]
     },
     {

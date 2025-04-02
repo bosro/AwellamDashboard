@@ -1,0 +1,262 @@
+<!-- self-list.component.html -->
+<div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Self List Orders</h1>
+      
+      <!-- Search and pagination header -->
+      <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div class="w-full md:w-1/3">
+          <div class="relative">
+            <input 
+              type="text" 
+              [formControl]="searchControl"
+              placeholder="Search by customer name or phone" 
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-2.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+        
+        <div class="text-sm text-gray-600">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} orders
+        </div>
+      </div>
+      
+      <!-- Loading indicator -->
+      <div *ngIf="isLoading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+      
+      <!-- Error message -->
+      <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error }}
+      </div>
+      
+      <!-- Orders table -->
+      <div *ngIf="!isLoading && orders.length > 0" class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SOC Number</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver Name</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let order of orders" 
+                (click)="openDetailsModal(order)"
+                class="hover:bg-gray-50 cursor-pointer">
+              <td class="px-4 py-4 whitespace-nowrap">{{ order.socNumber.socNumber }}</td>
+              <td class="px-4 py-4 whitespace-nowrap">{{ order.truckNumber }}</td>
+              <td class="px-4 py-4 whitespace-nowrap">{{ order.driverName }}</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                      [ngClass]="{
+                        'bg-yellow-100 text-yellow-800': order.status === 'pending',
+                        'bg-green-100 text-green-800': order.status === 'completed'
+                      }">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">{{ formatDate(order.createdAt) }}</td>
+              <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                <button *ngIf="order.status !== 'completed'"
+                        (click)="openStatusModal(order, $event)" 
+                        class="text-blue-600 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded">
+                  Complete
+                </button>
+                <button (click)="openDeleteModal(order, $event)" 
+                        class="text-red-600 hover:text-red-900 bg-red-100 hover:bg-red-200 px-3 py-1 rounded">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && orders.length === 0" class="text-center my-8">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="mt-4 text-lg text-gray-600">No orders found</p>
+        <p class="text-gray-500">Try changing your search criteria</p>
+      </div>
+      
+      <!-- Pagination -->
+      <div *ngIf="totalItems > itemsPerPage" class="flex justify-center mt-6">
+        <nav class="inline-flex rounded-md shadow-sm -space-x-px">
+          <button 
+            [disabled]="currentPage === 1"
+            (click)="changePage(currentPage - 1)"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+            [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}">
+            Previous
+          </button>
+          
+          <ng-container *ngFor="let page of [].constructor(Math.ceil(totalItems / itemsPerPage)); let i = index">
+            <button 
+              *ngIf="i + 1 >= currentPage - 2 && i + 1 <= currentPage + 2"
+              (click)="changePage(i + 1)"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium hover:bg-gray-50"
+              [ngClass]="{'bg-blue-50 text-blue-600 z-10': currentPage === i + 1, 'text-gray-500': currentPage !== i + 1}">
+              {{ i + 1 }}
+            </button>
+          </ng-container>
+          
+          <button 
+            [disabled]="currentPage === Math.ceil(totalItems / itemsPerPage)"
+            (click)="changePage(currentPage + 1)"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+            [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === Math.ceil(totalItems / itemsPerPage)}">
+            Next
+          </button>
+        </nav>
+      </div>
+    </div>
+  
+    <!-- Details Modal -->
+    <div *ngIf="showDetailsModal && selectedOrder" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+        <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="text-xl font-bold text-gray-800">Order Details</h2>
+          <button (click)="closeDetailsModal()" class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="px-6 py-4 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <span class="text-gray-500 text-sm">Order ID</span>
+              <p class="font-medium">{{ selectedOrder._id }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">SOC Number</span>
+              <p class="font-medium">{{ selectedOrder.socNumber.socNumber }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Customer ID</span>
+              <p class="font-medium">{{ selectedOrder.customer._id }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Truck Number</span>
+              <p class="font-medium">{{ selectedOrder.truckNumber }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Driver Name</span>
+              <p class="font-medium">{{ selectedOrder.driverName }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Status</span>
+              <p class="font-medium">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
+                      [ngClass]="{
+                        'bg-yellow-100 text-yellow-800': selectedOrder.status === 'pending',
+                        'bg-green-100 text-green-800': selectedOrder.status === 'completed'
+                      }">
+                  {{ selectedOrder.status }}
+                </span>
+              </p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Created By</span>
+              <p class="font-medium">{{ selectedOrder.createdBy?.fullName || 'N/A' }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Created At</span>
+              <p class="font-medium">{{ formatDate(selectedOrder.createdAt) }}</p>
+            </div>
+            <div>
+              <span class="text-gray-500 text-sm">Updated At</span>
+              <p class="font-medium">{{ formatDate(selectedOrder.updatedAt) }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+          <button 
+            *ngIf="selectedOrder.status !== 'completed'"
+            (click)="closeDetailsModal(); openStatusModal(selectedOrder, $event)" 
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+            Mark as Completed
+          </button>
+          <button 
+            (click)="closeDetailsModal(); openDeleteModal(selectedOrder, $event)" 
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
+            Delete Order
+          </button>
+          <button 
+            (click)="closeDetailsModal()" 
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Delete Confirmation Modal -->
+    <div *ngIf="showDeleteModal && selectedOrder" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-800">Confirm Deletion</h2>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-gray-700">Are you sure you want to delete the order with SOC Number <span class="font-medium">{{ selectedOrder.socNumber.socNumber }}</span>?</p>
+          <p class="text-gray-500 mt-2">This action cannot be undone.</p>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+          <button 
+            (click)="deleteOrder()" 
+            [disabled]="isLoading"
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+            [ngClass]="{'opacity-50 cursor-not-allowed': isLoading}">
+            <span *ngIf="isLoading" class="animate-pulse">Deleting...</span>
+            <span *ngIf="!isLoading">Delete</span>
+          </button>
+          <button 
+            (click)="closeDeleteModal()" 
+            [disabled]="isLoading"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md"
+            [ngClass]="{'opacity-50 cursor-not-allowed': isLoading}">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Status Update Confirmation Modal -->
+    <div *ngIf="showStatusModal && selectedOrder" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-800">Confirm Status Update</h2>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-gray-700">Are you sure you want to mark the order with SOC Number <span class="font-medium">{{ selectedOrder.socNumber.socNumber }}</span> as completed?</p>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+          <button 
+            (click)="updateStatus()" 
+            [disabled]="isLoading"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            [ngClass]="{'opacity-50 cursor-not-allowed': isLoading}">
+            <span *ngIf="isLoading" class="animate-pulse">Updating...</span>
+            <span *ngIf="!isLoading">Confirm</span>
+          </button>
+          <button 
+            (click)="closeStatusModal()" 
+            [disabled]="isLoading"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md"
+            [ngClass]="{'opacity-50 cursor-not-allowed': isLoading}">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>

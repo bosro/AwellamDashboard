@@ -45,6 +45,26 @@ export class TruckService {
     return this.http.get<{ trucks: Truck[] }>(`${this.apiUrl}/get`);
   }
 
+
+  getDeliveredOrders(truckId: string, startDate?: string, endDate?: string): Observable<any> {
+    let url = `${this.apiUrl}/delivered-orders/${truckId}`;
+    
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    
+    return this.http.get<any>(url);
+  }
+
+  getTruckExpenses(truckId: string, startDate?: string, endDate?: string): Observable<any> {
+    let url = `${this.apiUrll}/expenses/statistics/truck/${truckId}`;
+    
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    
+    return this.http.get<any>(url);
+  }
   assignSocToTruck(truckId: string, socId: string): Observable<any> {
     return this.http.post(`${this.apiUrll}/soc/trucks/${truckId}/assign-soc/${socId}`, {});
   }

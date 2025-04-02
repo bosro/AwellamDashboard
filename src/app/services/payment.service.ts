@@ -184,6 +184,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { Destination } from './plant.service';
+import { Customer } from '../shared/types/customer.interface';
 // import { PaymentReference, Plant, Category, Product } from '../models/interfaces';
 
 
@@ -224,6 +225,19 @@ export class PaymentService {
 
   deletePaymentReference(paymentId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/payment/delete/${paymentId}`);
+  }
+
+  assignSocToSelfList(payload: {
+    customer: string;
+    socNumber: string;
+    truckNumber: string;
+    driverName: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/selflist/create`, payload);
+  }
+
+  getCustomers(): Observable<{ customers: Customer[]; total: number }> {
+    return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/customers/get`);
   }
 
 

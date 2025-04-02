@@ -111,3 +111,90 @@ export interface MaintenanceTask {
   completedAt?: string;
   notes?: string;
 }
+
+export interface Truck {
+  _id: string;
+  truckNumber: string;
+  model: string;
+  licensePlate: string;
+  // Add other truck properties as needed
+}
+
+export interface TruckResponse {
+  success: boolean;
+  truck: Truck;
+}
+
+export interface DeliveredOrder {
+  _id: string;
+  status: string;
+  customerId: {
+    _id: string;
+    email: string;
+  };
+  plantId: {
+    _id: string;
+    name: string;
+  };
+  orderItems: {
+    product: {
+      _id: string;
+      name: string;
+    };
+    quantity: number;
+    price: number;
+    _id: string;
+  }[];
+  totalAmount: number;
+  paymentStatus: string;
+  deliveryStatus: string;
+  notes: string;
+  date: string;
+  orderNumber: string;
+  assignedDriver?: {
+    _id: string;
+    name: string;
+    licenseNumber: string;
+  };
+  assignedTruck: string;
+  socNumber?: any;
+}
+
+export interface ExpenseResponse {
+  success: boolean;
+  data: {
+    truckId: string;
+    period: {
+      startDate: string;
+      endDate: string;
+    };
+    summary: {
+      totalExpenses: number;
+      totalAmount: number;
+      averageExpenseAmount: number;
+      averageMonthlyExpense: number;
+    };
+    byExpenseType: {
+      [key: string]: {
+        count: number;
+        total: number;
+      };
+    };
+    byMonth: {
+      [key: string]: {
+        count: number;
+        total: number;
+      };
+    };
+    topExpenses: {
+      id: string;
+      amount: number;
+      date: string;
+      description: string;
+      type: string;
+    }[];
+  };
+  meta: {
+    totalExpenses: number;
+  };
+}

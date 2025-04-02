@@ -12,6 +12,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { OrderEditComponent } from './order-edit/order-edit';
 import { SalesOrderListComponent } from './sales-list.component/sales-list.compoent';
 import { OutSideOrdersTableComponent } from './outsideLoad/outsideLoadOrder';
+import { SelfListComponent } from './selfListOrders/self-list.component';
 
 
 
@@ -23,7 +24,8 @@ import { OutSideOrdersTableComponent } from './outsideLoad/outsideLoadOrder';
     OrderProcessingComponent,
     OrderEditComponent,
     SalesOrderListComponent,
-    OutSideOrdersTableComponent
+    OutSideOrdersTableComponent,
+    SelfListComponent
   ],
   imports: [
     CommonModule,
