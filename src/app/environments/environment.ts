@@ -20,8 +20,6 @@ const environments = {
 
 
 
-
-
 const currentEnvironment = 'production';
 
 export const environment = environments[currentEnvironment];
