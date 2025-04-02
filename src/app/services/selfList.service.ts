@@ -25,7 +25,7 @@ export class SelfListService {
   }
 
   updateOrderStatus(id: string, status: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/update/${id}`, { status });
+    return this.http.put(`${this.baseUrl}/status/${id}`, { status });
   }
 
   deleteOrder(id: string): Observable<any> {

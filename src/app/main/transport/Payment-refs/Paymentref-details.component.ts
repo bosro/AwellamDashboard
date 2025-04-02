@@ -545,194 +545,217 @@ export class PaymentDetailComponent implements OnInit {
   }
 
  /**
- * Assigns a SOC number to the self list after collecting customer information
+ * Assigns a SOC number to the Self Lifting after collecting customer information
  * @param socNumber - The SOC number to be assigned
  * @returns Promise resolving when assignment is complete
  */
-async assignSocToSelfList(socNumber: string): Promise<void> {
+ async assignSocToSelfList(socNumber: string): Promise<void> {
   try {
-    // Fetch customer data for dropdown selection
+    // Fetch customers for the dropdown
     const customersResponse = await this.paymentService.getCustomers().toPromise();
-    
-    // Validate customer data
-    if (!customersResponse?.customers) {
-      this.showErrorNotification('Failed to fetch customers');
+
+    // Check if customersResponse or customers is undefined
+    if (!customersResponse || !customersResponse.customers) {
+      Swal.fire({
+        icon: 'error',
+        title: '<div style="color: #dc3545; font-size: 24px; font-weight: 600;">Error</div>',
+        text: 'Failed to fetch customers',
+        confirmButtonColor: '#4a6da7',
+        backdrop: `rgba(0,0,0,0.4)`,
+        customClass: {
+          confirmButton: 'btn btn-primary'
+        }
+      });
       return;
     }
-    
+
     const customers = customersResponse.customers;
-    
+
     if (customers.length === 0) {
-      this.showWarningNotification('No customers found');
+      Swal.fire({
+        icon: 'warning',
+        title: '<div style="color: #ffc107; font-size: 24px; font-weight: 600;">Warning</div>',
+        text: 'No customers found',
+        confirmButtonColor: '#4a6da7',
+        backdrop: `rgba(0,0,0,0.4)`,
+        customClass: {
+          confirmButton: 'btn btn-primary'
+        }
+      });
       return;
     }
-    
-    // Create customer selection options
-    const customerOptions = this.buildCustomerOptions(customers);
-    
-    // Show input form and collect assignment data
-    const assignmentData = await this.showAssignmentForm(customerOptions);
-    
-    // Process form submission if confirmed
-    if (assignmentData) {
-      await this.processSocAssignment(socNumber, assignmentData);
+
+    // Prepare customer options for the select field
+    const customerOptions = customers.reduce((acc, customer) => {
+      acc[customer._id] = customer.fullName; // Use fullName instead of name
+      return acc;
+    }, {} as { [key: string]: string });
+
+    // Show the modal for user input with professional styling
+    const { value: formData, isConfirmed } = await Swal.fire({
+      title: '<div style="font-size: 24px; font-weight: 600; color: #2c3e50; margin-bottom: 5px;">Assign SOC to Self Lifting</div>',
+      html: `
+        <style>
+          .form-container {
+            text-align: left;
+            padding: 10px 5px;
+            max-width: 450px;
+            margin: 0 auto;
+          }
+          .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+          }
+          .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+            text-align: left;
+          }
+          .form-control {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            transition: all 0.15s ease-in-out;
+          }
+          .form-control:focus {
+            color: #495057;
+            background-color: #fff;
+            border-color: #4a6da7;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(74, 109, 167, 0.25);
+          }
+          .form-select {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            transition: all 0.15s ease-in-out;
+          }
+          .form-select:focus {
+            border-color: #4a6da7;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(74, 109, 167, 0.25);
+          }
+          .swal-button-confirm, .swal-button-cancel {
+            font-weight: 500 !important;
+            padding: 8px 16px !important;
+            border-radius: 4px !important;
+          }
+          .swal-actions {
+            margin-top: 20px !important;
+          }
+        </style>
+        <div class="form-container">
+          <div class="form-group">
+            <label class="form-label" for="customer">Select Customer</label>
+            <select id="customer" class="form-select">
+              ${Object.entries(customerOptions)
+                .map(([id, name]) => `<option value="${id}">${name}</option>`)
+                .join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="truckNumber">Truck Number</label>
+            <input id="truckNumber" class="form-control" placeholder="Enter truck number">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="driverName">Driver Name</label>
+            <input id="driverName" class="form-control" placeholder="Enter driver name">
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Assign',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#4a6da7',
+      cancelButtonColor: '#6c757d',
+      buttonsStyling: true,
+      focusConfirm: false,
+      showLoaderOnConfirm: true,
+      backdrop: `rgba(0,0,0,0.4)`,
+      customClass: {
+        confirmButton: 'swal-button-confirm',
+        cancelButton: 'swal-button-cancel',
+        actions: 'swal-actions',
+        container: 'swal-container',
+        popup: 'animated fadeIn faster'
+      },
+      preConfirm: () => {
+        const customer = (document.getElementById('customer') as HTMLSelectElement).value;
+        const truckNumber = (document.getElementById('truckNumber') as HTMLInputElement).value;
+        const driverName = (document.getElementById('driverName') as HTMLInputElement).value;
+
+        if (!customer || !truckNumber || !driverName) {
+          Swal.showValidationMessage('<span style="color: #dc3545; font-weight: 500;">All fields are required</span>');
+          return false;
+        }
+
+        return { customer, truckNumber, driverName };
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+
+    if (isConfirmed && formData) {
+      // Prepare the payload
+      const payload = {
+        customer: formData.customer,
+        socNumber,
+        truckNumber: formData.truckNumber,
+        driverName: formData.driverName,
+      };
+
+      // Call the API to assign the SOC
+      await this.paymentService.assignSocToSelfList(payload).toPromise();
+
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: '<div style="color: #28a745; font-size: 24px; font-weight: 600;">Success!</div>',
+        html: '<div style="color: #2c3e50; font-size: 16px; margin: 10px 0;">SOC assigned to Self Lifting successfully.</div>',
+        timer: 2500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        backdrop: `rgba(0,0,0,0.4)`,
+        customClass: {
+          popup: 'animated fadeInDown faster'
+        }
+      });
+
+      // Refresh the payment details
+      this.loadPaymentDetails(this.paymentRef!._id);
     }
   } catch (error) {
-    console.error('Error assigning SOC to self list:', error);
-    this.showErrorNotification('Failed to assign SOC to self list');
+    console.error('Error assigning SOC to Self Lifting:', error);
+    Swal.fire({
+      icon: 'error',
+      title: '<div style="color: #dc3545; font-size: 24px; font-weight: 600;">Error</div>',
+      html: '<div style="color: #2c3e50; font-size: 16px; margin: 10px 0;">Failed to assign SOC to Self Lifting.</div>',
+      confirmButtonColor: '#4a6da7',
+      backdrop: `rgba(0,0,0,0.4)`,
+      customClass: {
+        confirmButton: 'btn btn-primary'
+      }
+    });
   }
 }
 
-/**
- * Builds a map of customer IDs to names for the selection dropdown
- * @param customers - Array of customer objects
- * @returns Object mapping customer IDs to names
- */
-private buildCustomerOptions(customers: any[]): { [key: string]: string } {
-  return customers.reduce((options, customer) => {
-    options[customer._id] = customer.fullName;
-    return options;
-  }, {} as { [key: string]: string });
-}
-
-/**
- * Displays the assignment form modal to collect user input
- * @param customerOptions - Mapping of customer IDs to display names
- * @returns Promise resolving to form data or null if cancelled
- */
-private async showAssignmentForm(customerOptions: { [key: string]: string }): Promise<any | null> {
-  const { value: formData, isConfirmed } = await Swal.fire({
-    title: '<h3 class="modal-title">Assign SOC to Self List</h3>',
-    html: this.buildAssignmentFormHTML(customerOptions),
-    showCancelButton: true,
-    confirmButtonText: '<span class="btn-text">Assign</span>',
-    cancelButtonText: '<span class="btn-text">Cancel</span>',
-    showLoaderOnConfirm: true,
-    preConfirm: this.validateAssignmentForm,
-    allowOutsideClick: () => !Swal.isLoading(),
-    customClass: {
-      container: 'custom-modal-container',
-      popup: 'custom-modal',
-      title: 'custom-modal-title',
-      confirmButton: 'custom-confirm-btn',
-      cancelButton: 'custom-cancel-btn'
-    }
-  });
-
-  return isConfirmed ? formData : null;
-}
-
-/**
- * Builds the HTML content for the assignment form
- * @param customerOptions - Mapping of customer IDs to display names
- * @returns HTML string for the form
- */
-private buildAssignmentFormHTML(customerOptions: { [key: string]: string }): string {
-  const customerOptionsHTML = Object.entries(customerOptions)
-    .map(([id, name]) => `<option value="${id}">${name}</option>`)
-    .join('');
-    
-  return `
-    <div class="form-container">
-      <div class="form-group">
-        <label for="customer" class="form-label">Select Customer:</label>
-        <select id="customer" class="form-control">
-          ${customerOptionsHTML}
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="truckNumber" class="form-label">Truck Number:</label>
-        <input id="truckNumber" class="form-control" placeholder="Enter truck number">
-      </div>
-      <div class="form-group">
-        <label for="driverName" class="form-label">Driver Name:</label>
-        <input id="driverName" class="form-control" placeholder="Enter driver name">
-      </div>
-    </div>
-  `;
-}
-
-/**
- * Validates the form input before submission
- * @returns Form data if valid, false if invalid
- */
-private validateAssignmentForm(): any {
-  const customer = (document.getElementById('customer') as HTMLSelectElement).value;
-  const truckNumber = (document.getElementById('truckNumber') as HTMLInputElement).value;
-  const driverName = (document.getElementById('driverName') as HTMLInputElement).value;
-
-  if (!customer || !truckNumber || !driverName) {
-    Swal.showValidationMessage('All fields are required.');
-    return false;
-  }
-
-  return { customer, truckNumber, driverName };
-}
-
-/**
- * Processes the SOC assignment with the collected data
- * @param socNumber - The SOC number to assign
- * @param formData - The collected form data
- */
-private async processSocAssignment(socNumber: string, formData: any): Promise<void> {
-  // Prepare the payload
-  const payload = {
-    customer: formData.customer,
-    socNumber,
-    truckNumber: formData.truckNumber,
-    driverName: formData.driverName,
-  };
-
-  // Submit assignment to API
-  await this.paymentService.assignSocToSelfList(payload).toPromise();
-
-  // Show success notification
-  this.showSuccessNotification('SOC assigned to self list successfully');
-
-  // Refresh payment details
-  this.loadPaymentDetails(this.paymentRef!._id);
-}
-
-/**
- * Shows a success notification
- * @param message - Success message to display
- */
-private showSuccessNotification(message: string): void {
-  Swal.fire({
-    title: '<h3 class="success-title">Success!</h3>',
-    html: `<p>${message}</p>`,
-    icon: 'success',
-    timer: 2000,
-    showConfirmButton: false,
-    customClass: {
-      popup: 'success-notification'
-    }
-  });
-}
-
-/**
- * Shows an error notification
- * @param message - Error message to display
- */
-private showErrorNotification(message: string): void {
-  Swal.fire({
-    title: 'Error',
-    text: message,
-    icon: 'error'
-  });
-}
-
-/**
- * Shows a warning notification
- * @param message - Warning message to display
- */
-private showWarningNotification(message: string): void {
-  Swal.fire({
-    title: 'Warning',
-    text: message,
-    icon: 'warning'
-  });
-}
   async bulkAssignToTruck(): Promise<void> {
     try {
       if (this.selectedSocs.length === 0) {
