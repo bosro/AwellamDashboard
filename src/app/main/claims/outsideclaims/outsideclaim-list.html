@@ -1,0 +1,162 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">OutSideLoad Claims Report </h1>
+        <p class="mt-1 text-sm text-gray-600">Generate and download claims reports</p>
+      </div>
+      <button
+        (click)="generateOutsideReport()"
+        [disabled]="!filterForm.valid || loading"
+        class="w-full md:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+        <i class="ri-file-excel-line mr-2"></i>
+        Download Report
+      </button>
+    </div>
+  
+    <!-- Date Range Filter -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <form [formGroup]="filterForm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Start Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <input
+              type="date"
+              formControlName="startDate"
+              class="w-full px-4 py-2 border rounded-lg"
+            />
+          </div>
+  
+          <!-- End Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <input
+              type="date"
+              formControlName="endDate"
+              class="w-full px-4 py-2 border rounded-lg"
+            />
+          </div>
+  
+          <!-- Select Plant (Commented Out) -->
+          <!--
+          <div>
+            <label for="plant" class="block text-sm font-medium text-gray-700">Select Plant:</label>
+            <select
+              id="plant"
+              (change)="onPlantSelect($event)"
+              class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+              <option value="">Select a Plant</option>
+              <option *ngFor="let plant of plants" [value]="plant._id">{{ plant.name }}</option>
+            </select>
+          </div>
+          -->
+  
+          <!-- Select Destination (Commented Out) -->
+          <!--
+          <div>
+            <label for="destination" class="block text-sm font-medium text-gray-700">Select Destination:</label>
+            <select
+              id="destination"
+              formControlName="destinationId"
+              class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+              <option value="">Select a Destination</option>
+              <option *ngFor="let destination of destinations" [value]="destination._id">{{ destination.destination }}</option>
+            </select>
+          </div>
+          -->
+  
+          <!-- Generate Report Button -->
+          <div class="flex items-end">
+            <button
+              (click)="getOutSideLOadDetails()"
+              [disabled]="!filterForm.valid || loading"
+              class="w-full md:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+              <i class="ri-search-line mr-2"></i>
+              Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-8">
+      <i class="ri-loader-4-line text-2xl animate-spin text-blue-600"></i>
+    </div>
+  
+    <!-- Claims Report Table -->
+    <div *ngIf="claimsData.length > 0" class="bg-white rounded-lg shadow overflow-auto">
+      <h2 class="text-xl font-semibold text-gray-900 p-4">OutSideLoad Claims Report Data</h2>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Truck</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Driver</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bags</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plant</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              
+              Destination
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let row of paginatedClaimsData">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.date  | date:'mediumDate' | date:'shortDate'}}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.customerName }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.truckNumber || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.driver || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.product }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.loadedBags }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.amount }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.outsideSoc }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.plant }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.destination || 'N/A' }}</td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <!-- Pagination -->
+      <div class="mt-4 flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+          Showing {{ (currentPage - 1) * pageSize + 1 }} to 
+          {{ Math.min(currentPage * pageSize, totalItems) }} of 
+          {{ totalItems }} results
+        </div>
+        <div class="flex space-x-2">
+          <button
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+            class="px-3 py-1 border rounded-lg hover:bg-gray-100 disabled:opacity-50">
+            Previous
+          </button>
+          <button
+            *ngFor="let page of [].constructor(totalPages); let i = index"
+            (click)="onPageChange(i + 1)"
+            [class.bg-blue-500]="currentPage === i + 1"
+            [class.text-white]="currentPage === i + 1"
+            class="px-3 py-1 border rounded-lg hover:bg-gray-100">
+            {{ i + 1 }}
+          </button>
+          <button
+            [disabled]="currentPage === totalPages"
+            (click)="onPageChange(currentPage + 1)"
+            class="px-3 py-1 border rounded-lg hover:bg-gray-100 disabled:opacity-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="claimsData.length === 0 && !loading" class="text-center py-8 text-gray-500">
+      No claims data found
+    </div>
+  </div>

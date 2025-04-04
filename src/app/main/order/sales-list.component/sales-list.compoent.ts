@@ -1,10 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
+import { PaymentService } from '../../../services/payment.service';
+import { Product, ProductsService } from '../../../services/products.service';
+import { forkJoin } from 'rxjs';
+import Swal from 'sweetalert2';
+
 interface Category {
   _id: string;
   name: string;
@@ -21,7 +26,7 @@ interface Plant {
 })
 export class SalesOrderListComponent implements OnInit {
   orders: Order[] = [];
-  filteredOrders: Order[] = [];
+  filteredOrders: any[] = [];
   loading = false;
   total = 0;
   pageSize = 10;
@@ -31,15 +36,18 @@ export class SalesOrderListComponent implements OnInit {
   categories: Category[] = [];
   plants: Plant[] = [];
   Math = Math;
+  products: Product[] = [];
+  allOrders: Order[] = []; // Keep this for backward compatibility
 
   private apiUrl = `${environment.apiUrl}`;
-onPlantSelect: any;
 
   constructor(
     private ordersService: OrdersService,
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private paymentService: PaymentService,
+    private productsService: ProductsService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -51,108 +59,221 @@ onPlantSelect: any;
       }),
       minAmount: [''],
       maxAmount: [''],
-      plant: [''],
-      category: ['']
+      plantId: [''],
+      category: [''],
+      productId: ['']
     });
   }
 
   ngOnInit(): void {
+    this.loading = true; // Start with loading state active
     this.loadInitialData();
     this.setupFilters();
-    this.loadOrders();
   }
 
   private loadInitialData(): void {
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
-      next: (response) => {
-        this.plants = response.plants;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading plants:', error);
-        this.loading = false;
-      }
-    });
+    
+    // Load plants first
+    this.http.get<any>(`${this.apiUrl}/plants/get`)
+      .subscribe({
+        next: (response) => {
+          this.plants = response.plants;
+          // After plants load, load the initial orders
+          this.loadOrders();
+        },
+        error: (error) => {
+          console.error('Error loading plants:', error);
+          this.loading = false;
+          Swal.fire('Error', 'Failed to load plant data. Please refresh the page.', 'error');
+        }
+      });
+  }
+
+  private loadProducts(plantId: string): void {
+    this.loading = true;
+    this.productsService.getProductByPlant(plantId)
+      .pipe(finalize(() => {
+        // Don't turn off loading here, as we'll be loading orders next
+      }))
+      .subscribe({
+        next: (response) => {
+          this.products = response.products;
+          // If we have a plantId, load the orders for that plant
+          this.loadPlantOrders(plantId);
+        },
+        error: (error) => {
+          console.error('Error loading products:', error);
+          this.loading = false;
+          Swal.fire('Error', 'Failed to load product data.', 'error');
+        }
+      });
+  }
+
+  toArray(value: any): any[] {
+    if (!value) return []; // Return empty array if value is null/undefined
+    return Array.isArray(value) ? value : [value]; // Convert object to array
+  }
+
+  private loadPlantOrders(plantId: string): void {
+    this.loading = true;
+    this.ordersService.getPlantOrders(plantId)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response: { orders: Order[] }) => {
+          this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
+          this.total = this.allOrders.length;
+          this.applyFilters();
+        },
+        error: (error: any) => {
+          console.error('Error loading plant orders:', error);
+          Swal.fire('Error', 'Failed to load orders for this plant.', 'error');
+        }
+      });
+  }
+
+  private loadProductOrders(productId: string): void {
+    this.loading = true;
+    this.ordersService.getProductOrders(productId)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.allOrders = response.orders.filter(order => order.status === 'DELIVERED');
+          this.total = this.allOrders.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading product orders:', error);
+          Swal.fire('Error', 'Failed to load orders for this product.', 'error');
+        }
+      });
   }
 
   private setupFilters(): void {
     this.filterForm.valueChanges
       .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
+        debounceTime(500), // Increased from 300ms to reduce API calls during typing
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
       )
       .subscribe(() => {
         this.currentPage = 1;
         this.applyFilters();
       });
-
-    this.filterForm.get('plant')?.valueChanges.subscribe(plantId => {
-      if (plantId) {
-        this.loadCategories(plantId);
-      } else {
-        this.categories = [];
-        this.filterForm.patchValue({ category: '' });
-      }
-    });
   }
 
-  private loadCategories(plantId: string): void {
-    this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
-      next: (response) => {
-        this.categories = response.categories;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-        this.loading = false;
+  onPlantSelect(event: any): void {
+    const plantId = event.target.value;
+    // Clear products when plant changes
+    this.products = [];
+    
+    if (plantId) {
+      this.loading = true;
+      // Load products for the selected plant
+      this.loadProducts(plantId);
+    } else {
+      // If no plant selected, load all orders
+      this.loadOrders();
+    }
+  }
+
+  onProductSelect(event: any): void {
+    const productId = event.target.value;
+    if (productId) {
+      this.loadProductOrders(productId);
+    } else {
+      // If product selection is cleared, fall back to plant orders or all orders
+      const plantId = this.filterForm.get('plantId')?.value;
+      if (plantId) {
+        this.loadPlantOrders(plantId);
+      } else {
+        this.loadOrders();
       }
-    });
+    }
   }
 
   loadOrders(): void {
     this.loading = true;
-    this.ordersService.getOrders().subscribe({
-      next: (response) => {
-        this.orders = response.orders.filter(order => order.status === 'DELIVERED');
-        this.total = this.orders.length;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading orders:', error);
-        this.loading = false;
-      }
-    });
+    this.ordersService.getDelieveredOrders()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.allOrders = response.orders;
+          this.total = this.allOrders.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+          Swal.fire('Error', 'Failed to load orders. Please try again.', 'error');
+        }
+      });
   }
 
   applyFilters(): void {
-    const { search, status, paymentStatus, dateRange, minAmount, maxAmount, plant, category } = this.filterForm.value;
+    const filters = this.filterForm.value;
+    
+    if (!this.allOrders || this.allOrders.length === 0) {
+      this.filteredOrders = [];
+      this.total = 0;
+      return;
+    }
 
-    this.filteredOrders = this.orders.filter(order => {
-      const matchesSearch = !search ||
-        order.customerId.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        order.orderNumber.toLowerCase().includes(search.toLowerCase());
+    let filtered = [...this.allOrders];
 
-      const matchesStatus = !status || order.status === status;
+    // Search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.customerId?.fullName?.toLowerCase().includes(searchTerm) ||
+        order.orderNumber?.toLowerCase().includes(searchTerm) ||
+        order.orderItems.some(item => 
+          item.product?.name?.toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-      const matchesPaymentStatus = !paymentStatus || order.paymentStatus === paymentStatus;
+    // Status filter
+    if (filters.status) {
+      filtered = filtered.filter(order => order.status === filters.status);
+    }
 
-      const matchesDateRange = (!dateRange.start || new Date(order.date) >= new Date(dateRange.start)) &&
-                               (!dateRange.end || new Date(order.date) <= new Date(dateRange.end));
+    // Payment status filter
+    if (filters.paymentStatus) {
+      filtered = filtered.filter(order => order.paymentStatus === filters.paymentStatus);
+    }
 
-      const matchesAmountRange = (!minAmount || order.totalAmount >= minAmount) &&
-        (!maxAmount || order.totalAmount <= maxAmount);
+    // Date range filter
+    if (filters.dateRange.start || filters.dateRange.end) {
+      const startDate = filters.dateRange.start ? new Date(filters.dateRange.start) : null;
+      const endDate = filters.dateRange.end ? new Date(filters.dateRange.end) : null;
 
-      const matchesPlant = !plant || order.categoryId.plantId._id === plant;
-      const matchesCategory = !category || order.categoryId._id === category;
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.date);
+        return (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+      });
+    }
 
-      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange && matchesPlant && matchesCategory;
-    });
+    // Amount filter
+    if (filters.minAmount) {
+      filtered = filtered.filter(order => order.totalAmount >= filters.minAmount);
+    }
+    if (filters.maxAmount) {
+      filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
+    }
 
-    this.total = this.filteredOrders.length;
-    this.filteredOrders = this.filteredOrders.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+    // Product filter
+    if (filters.product) {
+      filtered = filtered.filter(order => 
+        order.orderItems.some(item => item.product._id === filters.product)
+      );
+    }
+
+    this.filteredOrders = filtered;
+    this.total = filtered.length;
+
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredOrders = filtered.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
@@ -168,37 +289,83 @@ onPlantSelect: any;
     }
   }
 
-  toggleAllSelection(): void {
-    if (this.selectedOrders.size === this.filteredOrders.length) {
-      this.selectedOrders.clear();
-    } else {
-      this.filteredOrders.forEach(order => this.selectedOrders.add(order._id));
-    }
-  }
-
   deleteOrder(id: string): void {
-    if (confirm('Are you sure you want to delete this order?')) {
-      this.ordersService.deleteOrder(id).subscribe({
-        next: () => {
-          this.loadOrders();
-          this.router.navigate(['main/orders/saleslist']);
-        },
-        error: (error) => console.error('Error deleting order:', error)
-      });
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to delete this order?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading = true;
+        this.ordersService.deleteOrder(id)
+          .pipe(finalize(() => this.loading = false))
+          .subscribe({
+            next: () => {
+              this.loadOrders();
+              Swal.fire(
+                'Deleted!',
+                'The order has been deleted.',
+                'success'
+              );
+            },
+            error: (error) => {
+              console.error('Error deleting order:', error);
+              Swal.fire(
+                'Error!',
+                'There was an error deleting the order.',
+                'error'
+              );
+            }
+          });
+      }
+    });
   }
 
   toggleStatus(id: string): void {
-    this.ordersService.toggleOrderStatus(id).subscribe({
-      next: () => this.loadOrders(),
-      error: (error) => console.error('Error toggling status:', error)
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to change the status of this order?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, change it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading = true;
+        this.ordersService.toggleOrderDeliveredStatus(id)
+          .pipe(finalize(() => this.loading = false))
+          .subscribe({
+            next: () => {
+              this.loadOrders();
+              Swal.fire(
+                'Updated!',
+                'The order status has been changed.',
+                'success'
+              );
+            },
+            error: (error) => {
+              console.error('Error toggling status:', error);
+              Swal.fire(
+                'Error!',
+                'There was an error updating the order status.',
+                'error'
+              );
+            }
+          });
+      }
     });
   }
 
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
-    this.applyFilters();
+    this.products = [];
+    this.loadOrders(); // Reload all orders when clearing filters
   }
 
   getStatusClass(status: string): string {

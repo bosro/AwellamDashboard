@@ -1,0 +1,438 @@
+<!-- truck-statistics.component.html -->
+<div class="container mx-auto px-4 py-6">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Header Section -->
+    <div class="mb-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Truck Statistics</h1>
+          <p *ngIf="truck" class="text-gray-600 mt-1">
+            {{ truck.truckNumber }} | {{ truck.model }} | License: {{ truck.licensePlate }}
+          </p>
+        </div>
+        
+        <!-- Date Filter -->
+        <div class="mt-4 md:mt-0">
+          <form [formGroup]="dateFilterForm" (ngSubmit)="applyDateFilter()" class="flex flex-wrap items-end gap-2">
+            <div class="flex flex-col">
+              <label for="startDate" class="text-xs font-medium text-gray-700 mb-1">Start Date</label>
+              <input 
+                type="date" 
+                id="startDate" 
+                formControlName="startDate"
+                class="border rounded-md p-1 text-sm">
+            </div>
+            
+            <div class="flex flex-col">
+              <label for="endDate" class="text-xs font-medium text-gray-700 mb-1">End Date</label>
+              <input 
+                type="date" 
+                id="endDate" 
+                formControlName="endDate"
+                class="border rounded-md p-1 text-sm">
+            </div>
+            
+            <div class="flex gap-2">
+              <button 
+                type="submit" 
+                class="bg-blue-600 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-700">
+                Filter
+              </button>
+              <button 
+                type="button"
+                (click)="resetDateFilter()" 
+                class="bg-gray-200 text-gray-800 px-3 py-1 rounded-md text-sm hover:bg-gray-300">
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="flex mb-6 border-b">
+      <button 
+        class="py-2 px-4 font-medium" 
+        [ngClass]="{'text-blue-600 border-b-2 border-blue-600': activeTab === 'orders', 'text-gray-500': activeTab !== 'orders'}"
+        (click)="setActiveTab('orders')">
+        Delivered Orders
+      </button>
+      <button 
+        class="py-2 px-4 font-medium" 
+        [ngClass]="{'text-blue-600 border-b-2 border-blue-600': activeTab === 'expenses', 'text-gray-500': activeTab !== 'expenses'}"
+        (click)="setActiveTab('expenses')">
+        Expenses
+      </button>
+    </div>
+    
+    <!-- Delivered Orders Tab Content -->
+    <div *ngIf="activeTab === 'orders'">
+      <!-- View Toggle -->
+      <div class="flex justify-end mb-4">
+        <div class="inline-flex rounded-md shadow-sm">
+          <button
+            type="button"
+            class="px-4 py-2 text-sm font-medium border rounded-l-lg"
+            [ngClass]="{'bg-blue-600 text-white': !showOrdersChart, 'bg-white text-gray-700': showOrdersChart}"
+            (click)="toggleView('table', 'orders')">
+            Table
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 text-sm font-medium border-t border-b border-r rounded-r-lg"
+            [ngClass]="{'bg-blue-600 text-white': showOrdersChart, 'bg-white text-gray-700': !showOrdersChart}"
+            (click)="toggleView('chart', 'orders')">
+            Chart
+          </button>
+        </div>
+      </div>
+      
+      <!-- Orders Table View -->
+      <div *ngIf="!showOrdersChart && paginatedOrders.length > 0" class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plant</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SOC Number</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let order of paginatedOrders" class="hover:bg-gray-50">
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600">
+                  {{ order.orderNumber }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  {{ formatDate(order.date) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  {{ order.customerId.email }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  {{ order.plantId.name }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                  <div *ngFor="let item of order.orderItems">
+                    {{ item.product.name }}
+                  </div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <div *ngFor="let item of order.orderItems">
+                    {{ item.quantity }}
+                  </div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  <div *ngFor="let item of order.orderItems">
+                    {{ formatCurrency(item.price) }}
+                  </div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {{ formatCurrency(order.totalAmount) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  {{ order.assignedDriver?.name || 'N/A' }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span 
+                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': order.deliveryStatus === 'DELIVERED',
+                      'bg-yellow-100 text-yellow-800': order.deliveryStatus === 'PENDING',
+                      'bg-blue-100 text-blue-800': order.deliveryStatus === 'IN_TRANSIT'
+                    }">
+                    {{ order.deliveryStatus }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span 
+                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': order.paymentStatus === 'Paid',
+                      'bg-red-100 text-red-800': order.paymentStatus === 'Unpaid',
+                      'bg-yellow-100 text-yellow-800': order.paymentStatus === 'Partial'
+                    }">
+                    {{ order.paymentStatus }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                  {{ order.socNumber?.socNumber || 'N/A' }}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot class="bg-gray-50">
+              <tr>
+                <td colspan="7" class="px-4 py-3 text-sm font-medium text-gray-700 text-right">Total:</td>
+                <td colspan="5" class="px-4 py-3 text-sm font-medium text-gray-900">{{ formatCurrency(calculateTotal(deliveredOrders)) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
+        <!-- Pagination Controls -->
+        <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button 
+              (click)="previousPage()" 
+              [disabled]="currentPage === 1"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}">
+              Previous
+            </button>
+            <button 
+              (click)="nextPage()" 
+              [disabled]="currentPage >= totalPages"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              [ngClass]="{'opacity-50 cursor-not-allowed': currentPage >= totalPages}">
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+                to
+                <span class="font-medium">{{ Math.min(currentPage * pageSize, deliveredOrders.length) }}</span>
+                of
+                <span class="font-medium">{{ deliveredOrders.length }}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  (click)="goToPage(1)"
+                  [disabled]="currentPage === 1"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}">
+                  <span class="sr-only">First</span>
+                  <span class="h-5 w-5 flex justify-center items-center">«</span>
+                </button>
+                <button
+                  (click)="previousPage()"
+                  [disabled]="currentPage === 1"
+                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  [ngClass]="{'opacity-50 cursor-not-allowed': currentPage === 1}">
+                  <span class="sr-only">Previous</span>
+                  <span class="h-5 w-5 flex justify-center items-center">‹</span>
+                </button>
+                
+                <!-- Page Numbers -->
+                <ng-container *ngFor="let page of getPageNumbers()">
+                  <!-- <button
+                    *ngIf="page !== '...'"
+                    (click)="goToPage(page)"
+                    [ngClass]="{'bg-blue-50 border-blue-500 text-blue-600': currentPage === page, 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': currentPage !== page}"
+                    class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                    {{ page }}
+                  </button> -->
+                  <span
+                    *ngIf="page === '...'"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    ...
+                  </span>
+                </ng-container>
+                
+                <button
+                  (click)="nextPage()"
+                  [disabled]="currentPage >= totalPages"
+                  class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  [ngClass]="{'opacity-50 cursor-not-allowed': currentPage >= totalPages}">
+                  <span class="sr-only">Next</span>
+                  <span class="h-5 w-5 flex justify-center items-center">›</span>
+                </button>
+                <button
+                  (click)="goToPage(totalPages)"
+                  [disabled]="currentPage >= totalPages"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  [ngClass]="{'opacity-50 cursor-not-allowed': currentPage >= totalPages}">
+                  <span class="sr-only">Last</span>
+                  <span class="h-5 w-5 flex justify-center items-center">»</span>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Orders Chart View -->
+      <div *ngIf="showOrdersChart && deliveredOrders.length > 0" class="bg-white p-6 rounded-lg shadow-sm">
+        <h3 class="text-lg font-medium text-gray-700 mb-4">Orders Timeline</h3>
+        <p class="text-gray-500 italic">Note: Chart visualization would be implemented here using a chart library like Chart.js or Highcharts</p>
+        <!-- Placeholder for chart -->
+        <div class="h-64 bg-gray-100 rounded-md flex items-center justify-center">
+          <p class="text-gray-500">Orders Timeline Chart</p>
+        </div>
+      </div>
+      
+      <!-- No Orders Message -->
+      <div *ngIf="deliveredOrders.length === 0" class="bg-white p-6 rounded-lg shadow-sm text-center">
+        <p class="text-gray-500">No delivered orders found for this truck within the selected period.</p>
+      </div>
+    </div>
+    
+    <!-- Expenses Tab Content -->
+    <div *ngIf="activeTab === 'expenses' && expenses">
+      <!-- View Toggle -->
+      <div class="flex justify-end mb-4">
+        <div class="inline-flex rounded-md shadow-sm">
+          <button
+            type="button"
+            class="px-4 py-2 text-sm font-medium border rounded-l-lg"
+            [ngClass]="{'bg-blue-600 text-white': !showExpensesChart, 'bg-white text-gray-700': showExpensesChart}"
+            (click)="toggleView('table', 'expenses')">
+            Table
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 text-sm font-medium border-t border-b border-r rounded-r-lg"
+            [ngClass]="{'bg-blue-600 text-white': showExpensesChart, 'bg-white text-gray-700': !showExpensesChart}"
+            (click)="toggleView('chart', 'expenses')">
+            Chart
+          </button>
+        </div>
+      </div>
+      
+      <!-- Expense Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="text-sm font-medium text-gray-500">Total Expenses</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ expenses.data.summary.totalExpenses }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="text-sm font-medium text-gray-500">Total Amount</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ formatCurrency(expenses.data.summary.totalAmount) }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="text-sm font-medium text-gray-500">Average Expense</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ formatCurrency(expenses.data.summary.averageExpenseAmount) }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="text-sm font-medium text-gray-500">Monthly Average</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ formatCurrency(expenses.data.summary.averageMonthlyExpense) }}</p>
+        </div>
+      </div>
+      
+      <!-- Expense Chart View -->
+      <div *ngIf="showExpensesChart" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Expense Type Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <h3 class="text-lg font-medium text-gray-700 mb-4">Expenses by Type</h3>
+          <!-- Placeholder for pie chart -->
+          <div class="h-64 bg-gray-100 rounded-md flex items-center justify-center">
+            <p class="text-gray-500">Expense Type Distribution Chart</p>
+          </div>
+        </div>
+        
+        <!-- Monthly Expense Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <h3 class="text-lg font-medium text-gray-700 mb-4">Expenses by Month</h3>
+          <!-- Placeholder for bar chart -->
+          <div class="h-64 bg-gray-100 rounded-md flex items-center justify-center">
+            <p class="text-gray-500">Monthly Expense Chart</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Expense Table View -->
+      <div *ngIf="!showExpensesChart">
+        <!-- Expense Type Breakdown -->
+        <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+          <h3 class="px-6 py-3 text-lg font-medium text-gray-700 border-b">Expenses by Type</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let type of objectKeys(expenses.data.byExpenseType)" class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ type }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ expenses.data.byExpenseType[type].count }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatCurrency(expenses.data.byExpenseType[type].total) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Monthly Expense Breakdown -->
+        <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+          <h3 class="px-6 py-3 text-lg font-medium text-gray-700 border-b">Expenses by Month</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let month of objectKeys(expenses.data.byMonth)" class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ getMonthName(month) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ expenses.data.byMonth[month].count }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatCurrency(expenses.data.byMonth[month].total) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Top Expenses Table (always shown) -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <h3 class="px-6 py-3 text-lg font-medium text-gray-700 border-b">Top Expenses</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let expense of expenses.data.topExpenses" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(expense.date) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <span 
+                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    {{ expense.type }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ expense.description }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatCurrency(expense.amount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- No Expenses Message -->
+    <div *ngIf="activeTab === 'expenses' && !expenses" class="bg-white p-6 rounded-lg shadow-sm text-center">
+      <p class="text-gray-500">No expense data found for this truck within the selected period.</p>
+    </div>
+  </div>
+</div>
