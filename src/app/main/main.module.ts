@@ -90,6 +90,12 @@ const routes: Routes = [
         path: 'expenses',
         loadChildren: () => import('./expences/expense.module').then(m => m.ExpenseModule)
       },
+      {
+        path: 'fuel-management',
+        loadChildren: () => import('./fuel-management/fuel.module').then(m => m.FuelModule)
+      },
+
+      
 //     ],
 //   },
 // ];

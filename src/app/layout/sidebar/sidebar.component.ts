@@ -210,6 +210,7 @@ export class SidebarComponent implements OnInit {
     //     }
     //   ]
     // },
+  
 
     {
       title: 'Expenses',
@@ -248,7 +249,7 @@ export class SidebarComponent implements OnInit {
         
       ]
     },
-
+   
     {
       title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
@@ -411,17 +412,36 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
 
-    // {
-    //   title: 'Customer Management',
-    //   icon: 'ri-user-settings-line',
-    //   route: '/main/customers-management',
-    // },
+    {
+      title: 'Fuel Management',
+      icon: 'ri-shopping-cart-2-line',
+      expanded: false,
+      // roles: ['super_admin', 'manager'],
+      children: [
+        {
+          title: 'Fuel Dashboard',
+          route: '/main/fuel-management',
+          icon: 'ri-order-play-line'
+        },
+        {
+          title: 'Fuel Cards',
+          route: '/main/card',
+          icon: 'ri-order-play-line'
+        },
+        {
+          title: 'Fuel Purchase',
+          route: '/main/purchase',
+          icon: 'ri-store-2-line'
+        }
+      ]
+    },
+
     {
       title: 'Settings',
       icon: 'ri-user-settings-line',
       route: '/main/user-management',
       roles: ['super_admin']
-    },
+    }
   ];
 
   constructor(
