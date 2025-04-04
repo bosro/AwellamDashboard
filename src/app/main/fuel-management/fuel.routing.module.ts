@@ -8,7 +8,6 @@ import { FuelDashboardComponent } from './pages/fuel-dashboard/fuel-dashborad.co
 const routes: Routes = [
     {
         path: '',
-        component: FuelDashboardComponent,
 
 
         // path: 'dashboard',
