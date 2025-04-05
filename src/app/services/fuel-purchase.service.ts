@@ -9,8 +9,8 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class FuelPurchaseService {
-  private apiUrl = `${environment}/fuelpurchase`;
-  private trucksUrl = `${environment}`;
+  private apiUrl = `${environment.apiUrl}/fuelpurchase`;
+  private trucksUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) { }
 

@@ -147,6 +147,29 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
     {
+      title: 'Fuel Management',
+      icon: 'ri-shopping-cart-2-line',
+      expanded: false,
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer'],
+      children: [
+        {
+          title: 'Fuel Dashboard',
+          route: '/main/fuel-management/',
+          icon: 'ri-order-play-line',
+        },
+        {
+          title: 'Fuel Cards',
+          route: '/main/fuel-management/card',
+          icon: 'ri-order-play-line',
+        },
+        {
+          title: 'Fuel Purchase',
+          route: '/main/fuel-management/purchase',
+          icon: 'ri-store-2-line',
+        },
+      ],
+    },
+    {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
@@ -412,29 +435,7 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
 
-    {
-      title: 'Fuel Management',
-      icon: 'ri-shopping-cart-2-line',
-      expanded: false,
-      roles: ['Admin_Support'],
-      children: [
-        {
-          title: 'Fuel Dashboard',
-          route: '/main/fuel-management/',
-          icon: 'ri-order-play-line',
-        },
-        {
-          title: 'Fuel Cards',
-          route: '/main/fuel-management/card',
-          icon: 'ri-order-play-line',
-        },
-        {
-          title: 'Fuel Purchase',
-          route: '/main/fuel-management/purchase',
-          icon: 'ri-store-2-line',
-        },
-      ],
-    },
+  
 
     {
       title: 'Settings',

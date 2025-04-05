@@ -8,8 +8,8 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class FuelCardService {
-  private apiUrl = `${environment}/fuelcard`;
-  private plantsUrl = `${environment}`;
+  private apiUrl = `${environment.apiUrl}/fuelcard`;
+  private plantsUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) { }
 
