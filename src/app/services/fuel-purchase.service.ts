@@ -31,6 +31,6 @@ export class FuelPurchaseService {
   }
 
   getTrucks(params?: any): Observable<TruckResponse> {
-    return this.http.get<TruckResponse>(`${this.trucksUrl}/get`, { params });
+    return this.http.get<TruckResponse>(`${this.trucksUrl}/trucks/get`, { params });
   }
 }

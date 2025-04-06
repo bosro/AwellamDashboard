@@ -11,18 +11,18 @@
   </div>
   
   <div *ngIf="showForm" class="mb-6">
-    <!-- <app-fuel-purchase-form
+    <app-fuel-purchase-form
       [editMode]="editMode"
       [fuelPurchase]="selectedPurchase"
       (formSubmit)="onFormSubmit($event)"
       (cancelEdit)="closeForm()"
-    ></app-fuel-purchase-form> -->
+    ></app-fuel-purchase-form>
   </div>
   
-  <!-- <app-fuel-purchase-list
+  <app-fuel-purchase-list
     [fuelPurchases]="fuelPurchases"
     [loading]="isLoading"
     (editPurchase)="onEditPurchase($event)"
     (deletePurchase)="onDeletePurchase($event)"
-  ></app-fuel-purchase-list> -->
+  ></app-fuel-purchase-list>
 </div>

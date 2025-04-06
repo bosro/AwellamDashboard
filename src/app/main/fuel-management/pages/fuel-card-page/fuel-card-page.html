@@ -11,18 +11,18 @@
   </div>
   
   <div *ngIf="showForm" class="mb-6">
-    <!-- <app-fuel-card-form
+    <app-fuel-card-form
       [editMode]="editMode"
       [fuelCard]="selectedCard"
       (formSubmit)="onFormSubmit($event)"
       (cancelEdit)="closeForm()"
-    ></app-fuel-card-form> -->
+    ></app-fuel-card-form>
   </div>
   
-  <!-- <app-fuel-card-list
+  <app-fuel-card-list
     [fuelCards]="fuelCards"
     [loading]="isLoading"
     (editCard)="onEditCard($event)"
     (deleteCard)="onDeleteCard($event)"
-  ></app-fuel-card-list> -->
+  ></app-fuel-card-list>
 </div>

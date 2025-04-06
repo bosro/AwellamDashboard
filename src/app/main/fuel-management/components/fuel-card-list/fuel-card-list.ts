@@ -15,9 +15,9 @@ export class FuelCardListComponent {
     this.editCard.emit(card);
   }
   
-  onDelete(id: string): void {
-    if (id) {
-      this.deleteCard.emit(id);
+  onDelete(_id: string): void {
+    if (_id) {
+      this.deleteCard.emit(_id);
     }
   }
 }

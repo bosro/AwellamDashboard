@@ -11,13 +11,13 @@ export class FuelPurchaseListComponent {
   @Output() editPurchase = new EventEmitter<any>();
   @Output() deletePurchase = new EventEmitter<string>();
   
-  // onEdit(purchase: FuelPurchase): void {
-  //   this.editPurchase.emit(purchase);
-  // }
+  onEdit(purchase: FuelPurchase): void {
+    this.editPurchase.emit(purchase);
+  }
   
-  // onDelete(id: string): void {
-  //   if (id) {
-  //     this.deletePurchase.emit(id);
-  //   }
-  // }
+  onDelete(id: string): void {
+    if (id) {
+      this.deletePurchase.emit(id);
+    }
+  }
 }

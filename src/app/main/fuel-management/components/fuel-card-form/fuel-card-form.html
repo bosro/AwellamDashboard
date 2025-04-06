@@ -1,77 +1,81 @@
-<!-- src/app/main/fuel-management/components/fuel-card-form/fuel-card-form.html -->
 <div class="bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold mb-4">{{ editMode ? 'Edit' : 'Create' }} Fuel Card</h2>
+  <h2 class="text-xl font-semibold mb-4">{{ editMode ? 'Edit' : 'Create' }} Fuel Card</h2>
+  
+  <form [formGroup]="fuelCardForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <!-- Name -->
+    <div>
+      <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+      <input 
+        type="text" 
+        id="name" 
+        formControlName="name"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+      <div *ngIf="fuelCardForm.get('name')?.invalid && fuelCardForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
+        Name is required
+      </div>
+    </div>
     
-    <form [formGroup]="fuelCardForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-        <input 
-          type="text" 
-          id="name" 
-          formControlName="name"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-        <div *ngIf="fuelCardForm.get('name')?.invalid && fuelCardForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
-          Name is required
-        </div>
+    <!-- Description -->
+    <div>
+      <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      <textarea 
+        id="description" 
+        formControlName="description"
+        rows="3"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      ></textarea>
+      <div *ngIf="fuelCardForm.get('description')?.invalid && fuelCardForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
+        Description is required
       </div>
-      
-      <div>
-        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-        <textarea 
-          id="description" 
-          formControlName="description"
-          rows="3"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        ></textarea>
-        <div *ngIf="fuelCardForm.get('description')?.invalid && fuelCardForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
-          Description is required
-        </div>
+    </div>
+    
+    <!-- Balance -->
+    <div>
+      <label for="balance" class="block text-sm font-medium text-gray-700 mb-1">Balance</label>
+      <input 
+        type="number" 
+        id="balance" 
+        formControlName="balance"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+      <div *ngIf="fuelCardForm.get('balance')?.invalid && fuelCardForm.get('balance')?.touched" class="text-red-500 text-sm mt-1">
+        Balance must be a positive number
       </div>
-      
-      <div>
-        <label for="balance" class="block text-sm font-medium text-gray-700 mb-1">Balance</label>
-        <input 
-          type="number" 
-          id="balance" 
-          formControlName="balance"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-        <div *ngIf="fuelCardForm.get('balance')?.invalid && fuelCardForm.get('balance')?.touched" class="text-red-500 text-sm mt-1">
-          Balance must be a positive number
-        </div>
+    </div>
+    
+    <!-- Plant -->
+    <div>
+      <label for="plantId" class="block text-sm font-medium text-gray-700 mb-1">Plant</label>
+      <select 
+        id="plantId" 
+        formControlName="plantId"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">Select a plant</option>
+        <option *ngFor="let plant of plants" [value]="plant._id">{{ plant.name }}</option>
+      </select>
+      <div *ngIf="fuelCardForm.get('plantId')?.invalid && fuelCardForm.get('plantId')?.touched" class="text-red-500 text-sm mt-1">
+        Plant is required
       </div>
-      
-      <div>
-        <label for="plantId" class="block text-sm font-medium text-gray-700 mb-1">Plant</label>
-        <select 
-          id="plantId" 
-          formControlName="plantId"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select a plant</option>
-          <option *ngFor="let plant of plants" [value]="plant._id">{{ plant.name }}</option>
-        </select>
-        <div *ngIf="fuelCardForm.get('plantId')?.invalid && fuelCardForm.get('plantId')?.touched" class="text-red-500 text-sm mt-1">
-          Plant is required
-        </div>
-      </div>
-      
-      <div class="flex justify-end space-x-3 pt-4">
-        <button 
-          type="button" 
-          (click)="onCancel()"
-          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-        >
-          Cancel
-        </button>
-        <button 
-          type="submit" 
-          [disabled]="fuelCardForm.invalid || loading"
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          {{ editMode ? 'Update' : 'Create' }}
-        </button>
-      </div>
-    </form>
-  </div>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="flex justify-end space-x-3 pt-4">
+      <button 
+        type="button" 
+        (click)="onCancel()"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        [disabled]="fuelCardForm.invalid || loading"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+      >
+        {{ editMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </form>
+</div>

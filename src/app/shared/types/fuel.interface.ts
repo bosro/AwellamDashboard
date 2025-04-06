@@ -8,11 +8,12 @@ export interface Plant {
   }
   
   export interface FuelCard {
-    _id?: string;
+    _id: string;
+    id: string;
     name: string;
     description: string;
     balance: number;
-    plantId?: string | Plant;
+    plantId?:  any;
     createdAt?: string;
     updatedAt?: string;
     __v?: number;
@@ -37,7 +38,7 @@ export interface Plant {
   
   export interface TruckResponse {
     success: boolean;
-    data: Truck[];
+    trucks: Truck[];
   }
   
   export interface FuelPurchase {
