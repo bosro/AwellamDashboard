@@ -131,6 +131,8 @@ export interface DeliveredOrder {
   customerId: {
     _id: string;
     email: string;
+    fullName: string;
+    phoneNumber: string;
   };
   plantId: {
     _id: string;

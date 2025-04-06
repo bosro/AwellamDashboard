@@ -10,6 +10,11 @@
     <div class="mb-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
+          <button (click)="goBack()"
+          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors mt-2">
+          <i class="ri-arrow-left-line mr-2"></i>
+          Back to List
+        </button>
           <h1 class="text-2xl font-bold text-gray-800">Truck Statistics</h1>
           <p *ngIf="truck" class="text-gray-600 mt-1">
             {{ truck.truckNumber }} | {{ truck.model }} | License: {{ truck.licensePlate }}
@@ -122,7 +127,7 @@
                   {{ formatDate(order.date) }}
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                  {{ order.customerId.email }}
+                  {{ order.customerId.fullName }} - {{ order.customerId.phoneNumber }}
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                   {{ order.plantId.name }}

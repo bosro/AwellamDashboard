@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { TruckService } from '../../../services/truck.service';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 import { DeliveredOrder, ExpenseResponse } from '../../../shared/types/truck-operation.types';
 
 @Component({
@@ -41,7 +42,8 @@ export class TruckStatisticsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private truckService: TruckService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+     private router: Router
   ) {
     this.dateFilterForm = this.fb.group({
       startDate: [''],
@@ -94,6 +96,10 @@ export class TruckStatisticsComponent implements OnInit {
     } else {
       this.fetchExpenses(startDate, endDate);
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/main/transport/trucks/']);
   }
 
   fetchDeliveredOrders(startDate?: string, endDate?: string): void {
