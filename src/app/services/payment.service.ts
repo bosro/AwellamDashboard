@@ -162,6 +162,7 @@ export interface PaymentReference {
   orderType: string;
   chequeNumber: number;
   soc?: string;
+  plant: Plant
 }
 
 

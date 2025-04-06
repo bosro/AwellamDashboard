@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { OrderType, PaymentService } from '../../../services/payment.service';
 import { PaymentReference, Plant } from '../../../services/payment.service';
 import { Router } from '@angular/router';
@@ -46,14 +46,42 @@ export class PaymentListComponent implements OnInit {
     private http: HttpClient
   ) {
     this.paymentForm = this.fb.group({
-      paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
+      paymentRef: ['', [
+        Validators.required,
+        (control: AbstractControl) => {
+          const value = control.value;
+          const prPattern = /^PR\d{11}$/;
+      
+          // If it matches PR pattern OR it's a customer name (at least 2 letters)
+          if (prPattern.test(value) || /^[a-zA-Z\s]{2,}$/.test(value)) {
+            return null; // valid
+          }
+      
+          return { invalidRef: true }; // invalid
+        }
+      ]],
+      
       plantId: ['', Validators.required],
       orderType: ['', Validators.required],
       chequeNumber: ['', Validators.required]
     });
 
     this.editForm = this.fb.group({
-      paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
+      paymentRef: ['', [
+        Validators.required,
+        (control: AbstractControl) => {
+          const value = control.value;
+          const prPattern = /^PR\d{11}$/;
+      
+          // If it matches PR pattern OR it's a customer name (at least 2 letters)
+          if (prPattern.test(value) || /^[a-zA-Z\s]{2,}$/.test(value)) {
+            return null; // valid
+          }
+      
+          return { invalidRef: true }; // invalid
+        }
+      ]],
+      
       plantId: ['', Validators.required],
       orderType: ['', Validators.required],
       chequeNumber: ['', Validators.required]
@@ -149,7 +177,7 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
-  get  paginatedPayments(): PaymentReference[] {
+  get  paginatedPayments(): any[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return this.filteredPayments.slice(startIndex, startIndex + this.pageSize);
   }
