@@ -35,6 +35,7 @@ export class TruckStatisticsComponent implements OnInit {
   
   // Make Math available to the template
   Math = Math;
+  Array = Array; 
   
   // For expense breakdown
   objectKeys = Object.keys;

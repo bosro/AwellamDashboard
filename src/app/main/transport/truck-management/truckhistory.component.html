@@ -176,7 +176,25 @@
                   </span>
                 </td> -->
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                  {{ order.socNumber?.socNumber || 'N/A' }}
+                  <!-- Check if socNumbers or socNumber exists -->
+                  <ng-container *ngIf="order.socNumbers?.length > 0; else checkSingleSocNumber">
+                    <!-- Handle case where socNumbers is an array -->
+                    <div *ngFor="let soc of order.socNumbers">
+                      {{ soc.socNumber }}
+                    </div>
+                  </ng-container>
+                
+                  <!-- Check if socNumber is a single object -->
+                  <ng-template #checkSingleSocNumber>
+                    <ng-container *ngIf="order.socNumber; else noSocNumber">
+                      {{ order.socNumber.socNumber || 'N/A' }}
+                    </ng-container>
+                  </ng-template>
+                
+                  <!-- Handle case where neither socNumbers nor socNumber exists -->
+                  <ng-template #noSocNumber>
+                    N/A
+                  </ng-template>
                 </td>
               </tr>
             </tbody>

@@ -160,6 +160,7 @@ export interface DeliveredOrder {
   };
   assignedTruck: string;
   socNumber?: any;
+  socNumbers?:any
 }
 
 export interface ExpenseResponse {
