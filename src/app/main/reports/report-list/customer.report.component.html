@@ -10,17 +10,32 @@
       <form [formGroup]="filterForm" (ngSubmit)="loadCustomerAccount()"
         class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div>
+          <label for="customerSearch" class="block text-sm font-medium text-gray-700 mb-1">Search Customer</label>
+          <input
+            id="customerSearch"
+            type="text"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 mb-2"
+            placeholder="Search customer by name"
+            (input)="filterCustomers($event)"
+          />
+        
           <label for="customer" class="block text-sm font-medium text-gray-700 mb-1">Select Customer</label>
-          <select id="customer" formControlName="customerId"
+          <select
+            id="customer"
+            formControlName="customerId"
             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            [ngClass]="{'border-red-500': filterForm.get('customerId')?.invalid && filterForm.get('customerId')?.touched}">
+            [ngClass]="{'border-red-500': filterForm.get('customerId')?.invalid && filterForm.get('customerId')?.touched}"
+          >
             <option value="">-- Select Customer --</option>
-            <option *ngFor="let customer of customers" [value]="customer._id">
+            <option *ngFor="let customer of filteredCustomers" [value]="customer._id">
               {{ customer.fullName }}
             </option>
           </select>
-          <p *ngIf="filterForm.get('customerId')?.invalid && filterForm.get('customerId')?.touched"
-            class="mt-1 text-sm text-red-600">
+        
+          <p
+            *ngIf="filterForm.get('customerId')?.invalid && filterForm.get('customerId')?.touched"
+            class="mt-1 text-sm text-red-600"
+          >
             Please select a customer
           </p>
         </div>

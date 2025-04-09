@@ -15,6 +15,7 @@ export class CustomerSummaryComponent implements OnInit {
   customerAccount: any = null;
   loading = false;
   searchAttempted = false;
+  filteredCustomers: any[] = []
   
   // Activities pagination
   activities: any[] = [];
@@ -46,12 +47,20 @@ export class CustomerSummaryComponent implements OnInit {
   formatDate(date: Date): string {
     return date.toISOString().split('T')[0];
   }
+
+  filterCustomers(event: Event): void {
+    const searchValue = (event.target as HTMLInputElement).value.toLowerCase();
+    this.filteredCustomers = this.customers.filter((customer) =>
+      customer.fullName.toLowerCase().includes(searchValue)
+    );
+  }
   
   loadCustomers(): void {
     this.loading = true;
     this.customersService.getCustomers().subscribe({
       next: (response) => {
         this.customers = response.customers || [];
+        this.filteredCustomers = [...this.customers];
         this.loading = false;
       },
       error: (error) => {

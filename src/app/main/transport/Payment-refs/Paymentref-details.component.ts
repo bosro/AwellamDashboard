@@ -569,7 +569,7 @@ export class PaymentDetailComponent implements OnInit {
       return;
     }
 
-    const customers = customersResponse.customers;
+    let customers = customersResponse.customers;
 
     if (customers.length === 0) {
       Swal.fire({
@@ -585,13 +585,7 @@ export class PaymentDetailComponent implements OnInit {
       return;
     }
 
-    // Prepare customer options for the select field
-    const customerOptions = customers.reduce((acc, customer) => {
-      acc[customer._id] = customer.fullName; // Use fullName instead of name
-      return acc;
-    }, {} as { [key: string]: string });
-
-    // Show the modal for user input with professional styling
+    // Show the modal for user input
     const { value: formData, isConfirmed } = await Swal.fire({
       title: '<div style="font-size: 24px; font-weight: 600; color: #2c3e50; margin-bottom: 5px;">Assign SOC to Self Lifting</div>',
       html: `
@@ -664,10 +658,17 @@ export class PaymentDetailComponent implements OnInit {
         </style>
         <div class="form-container">
           <div class="form-group">
+            <label class="form-label" for="customerSearch">Search Customer</label>
+            <input id="customerSearch" class="form-control" placeholder="Search customer by name">
+          </div>
+          <div class="form-group">
             <label class="form-label" for="customer">Select Customer</label>
             <select id="customer" class="form-select">
-              ${Object.entries(customerOptions)
-                .map(([id, name]) => `<option value="${id}">${name}</option>`)
+              ${customers
+                .map(
+                  (customer) =>
+                    `<option value="${customer._id}">${customer.fullName}</option>`
+                )
                 .join('')}
             </select>
           </div>
@@ -689,13 +690,23 @@ export class PaymentDetailComponent implements OnInit {
       buttonsStyling: true,
       focusConfirm: false,
       showLoaderOnConfirm: true,
-      backdrop: `rgba(0,0,0,0.4)`,
-      customClass: {
-        confirmButton: 'swal-button-confirm',
-        cancelButton: 'swal-button-cancel',
-        actions: 'swal-actions',
-        container: 'swal-container',
-        popup: 'animated fadeIn faster'
+      didOpen: () => {
+        const searchInput = document.getElementById('customerSearch') as HTMLInputElement;
+        const customerSelect = document.getElementById('customer') as HTMLSelectElement;
+
+        // Add event listener for search input
+        searchInput.addEventListener('input', () => {
+          const searchValue = searchInput.value.toLowerCase();
+          customerSelect.innerHTML = customers
+            .filter((customer) =>
+              customer.fullName.toLowerCase().includes(searchValue)
+            )
+            .map(
+              (customer) =>
+                `<option value="${customer._id}">${customer.fullName}</option>`
+            )
+            .join('');
+        });
       },
       preConfirm: () => {
         const customer = (document.getElementById('customer') as HTMLSelectElement).value;

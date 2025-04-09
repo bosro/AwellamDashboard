@@ -80,12 +80,12 @@ export class ReportsService {
   }
 
 
-  getClaimsReportDetails(startDate: string, endDate: string,    destination: string,
-    plant: string,): Observable<SalesResponse> {
+  getClaimsReportDetails(startDate: string, endDate: string,    destinationId: string,
+    plantId: string,): Observable<SalesResponse> {
     return this.http.get<SalesResponse>(
       `${this.apiUrlll}/delivered-orders/view`, // Reuse the same endpoint
       {
-        params: { startDate, endDate ,destination, plant, },
+        params: { startDate, endDate ,destinationId, plantId, },
         responseType: 'json'
       }
     );

@@ -28,7 +28,8 @@ export class ClaimsReportComponent implements OnInit {
     this.filterForm = this.fb.group({
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      destinationId: ['', Validators.required]
+      destinationId: ['', Validators.required],
+      plantId: ['', Validators.required]
     });
   }
 
@@ -88,16 +89,14 @@ export class ClaimsReportComponent implements OnInit {
   onPlantSelect(event: any): void {
     const plantId = event.target.value;
     this.selectedPlant = this.plants.find(plant => plant._id === plantId) || null;
+    this.filterForm.patchValue({ plantId }); // Update plantId in the form
     this.loadDestinations();
   }
 
   getClaimsDetails(): void {
-    const { startDate, endDate,destinationId } = this.filterForm.value;
-    const destination = this.destinations.find(dest => dest._id === destinationId);
-    const location = destination ? destination.destination : ''; // Use destination name as location
-    const plant = this.selectedPlant ? this.selectedPlant.name : ''; // Use plant name
+    const { startDate, endDate, destinationId, plantId } = this.filterForm.value;
     this.loading = true;
-    this.reportsService.getClaimsReportDetails(startDate, endDate,location, plant, ).subscribe({
+    this.reportsService.getClaimsReportDetails(startDate, endDate, destinationId, plantId).subscribe({
       next: (response: any) => {
         console.log(response);
         this.claimsData = response.data.map((claim: any) => ({
@@ -122,18 +121,13 @@ export class ClaimsReportComponent implements OnInit {
   generateClaimsReport(): void {
     if (this.filterForm.invalid) return;
   
-    const { startDate, endDate, destinationId } = this.filterForm.value;
-  
-    // Get the destination name and plant name
-    const destination = this.destinations.find(dest => dest._id === destinationId);
-    const location = destination ? destination.destination : ''; // Use destination name as location
-    const plant = this.selectedPlant ? this.selectedPlant.name : ''; // Use plant name
+    const { startDate, endDate, destinationId, plantId } = this.filterForm.value;
   
     // Add pagination (default page = 1)
     const page = 1;
   
     // Call the service with all required parameters
-    this.reportsService.getClaimsReport(page, location, plant, startDate, endDate).subscribe({
+    this.reportsService.getClaimsReport(page, destinationId, plantId, startDate, endDate).subscribe({
       next: (blob: Blob) => {
         // Download the Excel file
         const url = window.URL.createObjectURL(blob);

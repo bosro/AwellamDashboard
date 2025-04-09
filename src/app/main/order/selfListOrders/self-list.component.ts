@@ -22,6 +22,7 @@ interface SelfListOrder {
   truckNumber: string;
   driverName: string;
   status: string;
+  amount: string;
   createdBy?: {
     _id: string;
     fullName: string;
@@ -50,6 +51,10 @@ export class SelfListComponent implements OnInit {
   showDeleteModal = false;
   showStatusModal = false;
   
+
+  amount: number | null = null;
+  amountError: string | null = null;
+
   // Pagination
   currentPage = 1;
   itemsPerPage = 10;
@@ -147,9 +152,18 @@ export class SelfListComponent implements OnInit {
 
   updateStatus(): void {
     if (!this.selectedOrder) return;
-    
+  
+    // Validate the amount
+    if (!this.amount || this.amount <= 0) {
+      this.error = 'Please enter a valid amount.';
+      return;
+    }
+  
     this.isLoading = true;
-    this.selfListService.updateOrderStatus(this.selectedOrder._id, 'completed')
+    this.error = ''; // Clear any previous errors
+  
+    // Call the service to update the order status with the amount
+    this.selfListService.updateOrderStatus(this.selectedOrder._id, 'completed', this.amount)
       .subscribe({
         next: () => {
           const index = this.orders.findIndex(order => order._id === this.selectedOrder?._id);
