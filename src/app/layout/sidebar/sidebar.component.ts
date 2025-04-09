@@ -79,7 +79,7 @@ export class SidebarComponent implements OnInit {
           icon: 'ri-play-list-add-fill',
         },
         {
-          title: 'Self List Orders',
+          title: 'Self Lift Orders',
           route: '/main/orders/selflist',
           icon: 'ri-play-list-add-fill',
         },
