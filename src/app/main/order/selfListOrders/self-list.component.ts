@@ -6,8 +6,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 interface Customer {
   _id: string;
-  name?: string;
-  phone?: string;
+  fullName?: string;
+  phoneNumber?: string;
 }
 
 interface SocNumber {
