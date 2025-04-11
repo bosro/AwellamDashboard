@@ -50,6 +50,9 @@ export class TransactionService {
          responseType: 'blob'
     });
   }
+  getDebtorsList<T>(): Observable<T> {
+    return this.http.get<T>(`${this.apiUrl}/transactions/debtors`);
+  }
   
 
   updateTransaction(id: string, transaction: Transaction): Observable<Transaction> {

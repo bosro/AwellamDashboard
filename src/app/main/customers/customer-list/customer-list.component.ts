@@ -5,6 +5,7 @@ import { Customer } from '../../../shared/types/customer.interface';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subscriber } from 'rxjs';
 import { TransactionService } from '../../../services/transaction.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html'
@@ -24,7 +25,8 @@ export class CustomerListComponent implements OnInit {
   constructor(
     private customersService: CustomersService,
     private transactionService: TransactionService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private route: Router
   ) {}
 
   ngOnInit(): void {
@@ -95,6 +97,10 @@ export class CustomerListComponent implements OnInit {
     } else {
       this.selectedCustomers.add(customerId);
     }
+  }
+
+  gotoDebtors(): void {
+    this.route.navigate(['/main/customers/debtors']);
   }
 
   getDebtors(){

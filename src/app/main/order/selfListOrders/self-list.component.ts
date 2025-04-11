@@ -23,6 +23,7 @@ interface SelfListOrder {
   driverName: string;
   status: string;
   amount: string;
+  price?: number;
   createdBy?: {
     _id: string;
     fullName: string;
@@ -35,6 +36,13 @@ interface ApiResponse {
   success: boolean;
   count: number;
   data: SelfListOrder[];
+}
+
+interface EditFormData {
+  customerId: string;
+  truckNumber: string;
+  driverName: string;
+  price: number | null;
 }
 
 @Component({
@@ -50,10 +58,22 @@ export class SelfListComponent implements OnInit {
   showDetailsModal = false;
   showDeleteModal = false;
   showStatusModal = false;
+  showEditModal = false;
   
+  // Customer list for the dropdown
+  customers: Customer[] = [];
 
   amount: number | null = null;
   amountError: string | null = null;
+  editError: string | null = null;
+
+  // Edit form data
+  editForm: EditFormData = {
+    customerId: '',
+    truckNumber: '',
+    driverName: '',
+    price: null
+  };
 
   // Pagination
   currentPage = 1;
@@ -70,6 +90,7 @@ export class SelfListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOrders();
+    this.loadCustomers();
     
     // Setup search with debounce
     this.searchControl.valueChanges
@@ -101,6 +122,18 @@ export class SelfListComponent implements OnInit {
       });
   }
 
+  loadCustomers(): void {
+    this.selfListService.getCustomers()
+      .subscribe({
+        next: (response: any) => {
+          this.customers = response.data;
+        },
+        error: (err) => {
+          console.error('Error loading customers:', err);
+        }
+      });
+  }
+
   openDetailsModal(order: SelfListOrder): void {
     this.selectedOrder = order;
     this.showDetailsModal = true;
@@ -128,6 +161,75 @@ export class SelfListComponent implements OnInit {
 
   closeStatusModal(): void {
     this.showStatusModal = false;
+    this.amount = null;
+    this.amountError = null;
+  }
+
+  openEditModal(order: SelfListOrder, event: Event): void {
+    event.stopPropagation(); // Prevent opening details modal
+    this.selectedOrder = order;
+    
+    // Initialize the edit form with the selected order's data
+    this.editForm = {
+      customerId: order.customer._id,
+      truckNumber: order.truckNumber,
+      driverName: order.driverName,
+      price: order.price || null
+    };
+    
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editError = null;
+  }
+
+  saveEditChanges(): void {
+    if (!this.selectedOrder) return;
+    
+    // Validate form data
+    if (!this.editForm.customerId) {
+      this.editError = 'Please select a customer.';
+      return;
+    }
+    
+    if (!this.editForm.truckNumber) {
+      this.editError = 'Please enter a truck number.';
+      return;
+    }
+    
+    if (!this.editForm.driverName) {
+      this.editError = 'Please enter a driver name.';
+      return;
+    }
+    
+    this.isLoading = true;
+    this.editError = null;
+    
+    this.selfListService.updateOrder(
+      this.selectedOrder._id,
+      this.editForm.customerId,
+      this.editForm.truckNumber,
+      this.editForm.driverName,
+      this.editForm.price
+    ).subscribe({
+      next: (response: any) => {
+        // Update the order in the local array
+        const index = this.orders.findIndex(order => order._id === this.selectedOrder?._id);
+        if (index !== -1 && response.data) {
+          this.orders[index] = response.data;
+        }
+        
+        this.closeEditModal();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.editError = 'Failed to update order. Please try again.';
+        this.isLoading = false;
+        console.error('Error updating order:', err);
+      }
+    });
   }
 
   deleteOrder(): void {
@@ -155,7 +257,7 @@ export class SelfListComponent implements OnInit {
   
     // Validate the amount
     if (!this.amount || this.amount <= 0) {
-      this.error = 'Please enter a valid amount.';
+      this.amountError = 'Please enter a valid amount.';
       return;
     }
   
@@ -169,6 +271,7 @@ export class SelfListComponent implements OnInit {
           const index = this.orders.findIndex(order => order._id === this.selectedOrder?._id);
           if (index !== -1) {
             this.orders[index].status = 'completed';
+            this.orders[index].amount = this.amount?.toString() || '';
           }
           this.closeStatusModal();
           this.isLoading = false;

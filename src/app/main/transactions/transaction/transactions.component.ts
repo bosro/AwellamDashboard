@@ -1,19 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CustomersService } from '../../../services/customer.service';
 import { TransactionService } from '../../../services/transaction.service';
 import { Transaction, TransactionType, PaymentMethod, BankName } from '../../../../types';
 import { Customer } from '../../../shared/types/customer.interface';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, Subscription, catchError, finalize, of } from 'rxjs';
 
 @Component({
   selector: 'app-transactions',
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.css']
 })
-export class TransactionComponent implements OnInit {
+export class TransactionComponent implements OnInit, OnDestroy {
   // Data collections
   customers: Customer[] = [];
   transactions: any[] = [];
+  filteredCustomers: Customer[] = [];
+  
+  // Store all transactions for client-side filtering
+  allTransactions: any[] = [];
+  filteredTransactions: any[] = [];
   
   // Filter variables
   selectedCustomerId: string = '';
@@ -27,15 +32,20 @@ export class TransactionComponent implements OnInit {
   
   // Search debounce
   private searchTerms = new Subject<string>();
+  private customerSearchTerms = new Subject<string>();
+  customerSearchTerm: string = '';
+  
+  // Subscriptions for cleanup
+  private subscriptions: Subscription[] = [];
   
   // Form data
   transactionForm: Partial<Transaction> = {
     type: TransactionType.PAYMENT,
     amount: 0,
     paymentMethod: PaymentMethod.CASH,
-    // paymentReference: '',
     bankName: '',
-    Reference:''
+    Reference: '',
+    date: new Date() // Set default date to today
   };
   
   // Modal states
@@ -59,6 +69,9 @@ export class TransactionComponent implements OnInit {
   totalTransactions: number = 0;
   totalAmount: number = 0;
   averageTransaction: number = 0;
+  
+  // Loading state
+  loading: boolean = false;
 
   constructor(
     private customerService: CustomersService,
@@ -67,137 +80,192 @@ export class TransactionComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCustomers();
-    this.setupSearchDebounce();
-    this.loadTransactions();
+    this.setupObservables();
+    this.loadAllTransactions(); // Load all transactions once
+  }
+  
+  ngOnDestroy(): void {
+    // Clean up all subscriptions to prevent memory leaks
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  setupSearchDebounce(): void {
-    this.searchTerms.pipe(
-      // Wait 300ms after each keystroke before considering the term
+  setupObservables(): void {
+    // Setup search term debounce
+    const searchSub = this.searchTerms.pipe(
       debounceTime(300),
-      
-      // Ignore if the search term is the same as the previous
       distinctUntilChanged(),
     ).subscribe(() => {
-      this.searchTransactions();
+      this.applyFiltersLocally();
     });
+    this.subscriptions.push(searchSub);
+    
+    // Setup customer search debounce
+    const customerSearchSub = this.customerSearchTerms.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    ).subscribe(() => {
+      this.filterCustomers();
+    });
+    this.subscriptions.push(customerSearchSub);
   }
 
   onSearchChange(): void {
     this.searchTerms.next(this.searchTerm);
   }
 
-  loadCustomers(): void {
-    this.customerService.getCustomers().subscribe(response => {
-      if (response && response.customers) {
-        this.customers = response.customers;
-      } else {
-        console.error('Invalid customer response:', response);
-        this.customers = [];
-      }
-    }, error => {
-      console.error('Error loading customers:', error);
-      this.customers = [];
-    });
-  }
-
-  loadTransactions(): void {
-    // Create filter parameters
-    const params: any = {
-      page: this.currentPage,
-      limit: this.pageSize
-    };
-
-    // Add optional filters if they have values
-    if (this.selectedCustomerId) {
-      params.customerId = this.selectedCustomerId;
-    }
-    
-    if (this.selectedType) {
-      params.type = this.selectedType;
-    }
-    
-    if (this.selectedPaymentMethod) {
-      params.paymentMethod = this.selectedPaymentMethod;
-    }
-    
-    if (this.selectedBankName) {
-      params.bankName = this.selectedBankName;
-    }
-    
-    if (this.startDate) {
-      params.startDate = this.startDate;
-    }
-    
-    if (this.endDate) {
-      params.endDate = this.endDate;
-    }
-    
-    if (this.searchTerm) {
-      params.search = this.searchTerm;
-    }
-
-    // Call API with proper parameters
-    this.transactionService.getTransactions(params).subscribe(
-      response => {
-        if (response && response.data) {
-          this.transactions = response.data;
-          this.totalPages = response.totalPages || 1;
-          this.totalItems = response.totalItems || 0;
-          
-          // Calculate statistics
-          this.calculateStatistics(response.data);
-        } else {
-          console.error('Invalid transaction response:', response);
-          this.transactions = [];
-          this.totalPages = 1;
-          this.totalItems = 0;
-          this.resetStatistics();
-        }
-      }, 
-      error => {
-        console.error('Error loading transactions:', error);
-        this.transactions = [];
-        this.totalPages = 1;
-        this.totalItems = 0;
-        this.resetStatistics();
-      }
-    );
-  }
-
-  resetStatistics(): void {
-    this.totalTransactions = 0;
-    this.totalAmount = 0;
-    this.averageTransaction = 0;
-  }
-
-  calculateStatistics(transactions: any[]): void {
-    this.totalTransactions = this.totalItems;
-    
-    // Calculate total amount
-    this.totalAmount = transactions.reduce((sum, transaction) => {
-      if (transaction.type === TransactionType.PAYMENT) {
-        return sum + transaction.amount;
-      } else if (transaction.type === TransactionType.CREDIT_NOTE) {
-        return sum - transaction.amount;
-      } else {
-        return sum + transaction.amount;
-      }
-    }, 0);
-    
-    // Calculate average
-    this.averageTransaction = transactions.length > 0 ? 
-      this.totalAmount / transactions.length : 0;
+  onCustomerSearchChange(): void {
+    this.customerSearchTerms.next(this.customerSearchTerm);
   }
 
   filterTransactions(): void {
-    this.currentPage = 1; // Reset to first page when filtering
-    this.loadTransactions();
+    this.applyFiltersLocally();
   }
 
-  searchTransactions(): void {
-    this.currentPage = 1; // Reset to first page when searching
-    this.loadTransactions();
+  filterCustomers(): void {
+    if (!this.customerSearchTerm.trim()) {
+      this.filteredCustomers = [...this.customers];
+      return;
+    }
+    
+    const searchTerm = this.customerSearchTerm.toLowerCase();
+    this.filteredCustomers = this.customers.filter(customer => 
+      customer.fullName.toLowerCase().includes(searchTerm) ||
+      (customer.email && customer.email.toLowerCase().includes(searchTerm)) ||
+      (customer.phoneNumber && customer.phoneNumber.toString().toLowerCase().includes(searchTerm))
+    );
+  }
+
+  loadCustomers(): void {
+    this.loading = true;
+    const customerSub = this.customerService.getCustomers().pipe(
+      finalize(() => this.loading = false),
+      catchError(error => {
+        console.error('Error loading customers:', error);
+        return of({ customers: [] });
+      })
+    ).subscribe({
+      next: (response) => {
+        if (response && response.customers) {
+          this.customers = response.customers;
+          this.filteredCustomers = [...this.customers]; // Initialize filtered list
+        } else {
+          console.error('Invalid customer response:', response);
+          this.customers = [];
+          this.filteredCustomers = [];
+        }
+      }
+    });
+    
+    this.subscriptions.push(customerSub);
+  }
+
+  loadAllTransactions(): void {
+    this.loading = true;
+    
+    // Get all transactions without pagination
+    const params: any = {
+      limit: 1000 // Large limit to get all transactions or adjust based on your needs
+    };
+
+    const transactionSub = this.transactionService.getTransactions(params).pipe(
+      finalize(() => this.loading = false),
+      catchError(error => {
+        console.error('Error loading transactions:', error);
+        return of({ data: [] });
+      })
+    ).subscribe({
+      next: (response) => {
+        if (response && response.data) {
+          this.allTransactions = response.data;
+          this.applyFiltersLocally(); // Apply initial filtering
+        } else {
+          console.error('Invalid transaction response:', response);
+          this.allTransactions = [];
+          this.applyFiltersLocally();
+        }
+      }
+    });
+    
+    this.subscriptions.push(transactionSub);
+  }
+
+  // Apply all filters locally
+  applyFiltersLocally(): void {
+    this.currentPage = 1; // Reset to first page when filtering
+    let filteredResults = [...this.allTransactions];
+    
+    // Apply customer filter
+    if (this.selectedCustomerId) {
+      filteredResults = filteredResults.filter(transaction => 
+        transaction.customer?._id === this.selectedCustomerId || transaction.customerId === this.selectedCustomerId
+      );
+    }
+    
+    // Apply transaction type filter
+    if (this.selectedType) {
+      filteredResults = filteredResults.filter(transaction => transaction.type === this.selectedType);
+    }
+    
+    // Apply payment method filter
+    if (this.selectedPaymentMethod) {
+      filteredResults = filteredResults.filter(transaction => transaction.paymentMethod === this.selectedPaymentMethod);
+    }
+    
+    // Apply bank name filter
+    if (this.selectedBankName && this.selectedPaymentMethod === PaymentMethod.BANK_TRANSFER) {
+      filteredResults = filteredResults.filter(transaction => transaction.bankName === this.selectedBankName);
+    }
+    
+    // Apply date range filters
+    if (this.startDate) {
+      const startDate = new Date(this.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      filteredResults = filteredResults.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate >= startDate;
+      });
+    }
+    
+    if (this.endDate) {
+      const endDate = new Date(this.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      filteredResults = filteredResults.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate <= endDate;
+      });
+    }
+    
+    // Apply search term
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const search = this.searchTerm.trim().toLowerCase();
+      filteredResults = filteredResults.filter(transaction => {
+        return (
+          (transaction.customer?.fullName && transaction.customer.fullName.toLowerCase().includes(search)) ||
+          (transaction.Reference && transaction.Reference.toLowerCase().includes(search)) ||
+          (transaction.bankName && transaction.bankName.toLowerCase().includes(search)) ||
+          (transaction.paymentMethod && transaction.paymentMethod.toLowerCase().includes(search))
+        );
+      });
+    }
+    
+    // Store all filtered transactions
+    this.filteredTransactions = filteredResults;
+    
+    // Update pagination data
+    this.totalItems = this.filteredTransactions.length;
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+    
+    // Apply pagination
+    this.applyPagination();
+    
+    // Calculate statistics on filtered data
+    this.calculateStatistics();
+  }
+  
+  applyPagination(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+    this.transactions = this.filteredTransactions.slice(startIndex, endIndex);
   }
 
   resetFilters(): void {
@@ -209,19 +277,49 @@ export class TransactionComponent implements OnInit {
     this.endDate = '';
     this.searchTerm = '';
     this.currentPage = 1;
-    this.loadTransactions();
+    this.applyFiltersLocally();
+  }
+
+  // Helper method to format date for display
+  formatDateForApi(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toISOString();
+  }
+
+  calculateStatistics(): void {
+    // Calculate statistics based on filtered transactions
+    this.totalTransactions = this.filteredTransactions.length;
+    
+    // Calculate total amount from filtered data
+    this.totalAmount = this.filteredTransactions.reduce((sum, transaction) => {
+      if (transaction.type === TransactionType.PAYMENT) {
+        return sum + transaction.amount;
+      } else if (transaction.type === TransactionType.CREDIT_NOTE) {
+        return sum - transaction.amount;
+      } else {
+        return sum + transaction.amount;
+      }
+    }, 0);
+    
+    // Calculate average
+    this.averageTransaction = this.totalTransactions > 0 ? 
+      this.totalAmount / this.totalTransactions : 0;
   }
 
   openModal(): void {
     this.showModal = true;
     this.isEditMode = false;
+    this.customerSearchTerm = '';
+    this.filteredCustomers = [...this.customers]; // Reset filtered customers
+    
+    // Set default values for new transaction
     this.transactionForm = {
       type: TransactionType.PAYMENT,
       amount: 0,
       paymentMethod: PaymentMethod.CASH,
-      // paymentReference: '',
       bankName: '',
-      Reference:''
+      Reference: '',
+      date: new Date() // Set default date to today
     };
   }
 
@@ -230,15 +328,23 @@ export class TransactionComponent implements OnInit {
   }
 
   openEditModal(transaction: any): void {
+    this.customerSearchTerm = '';
+    this.filteredCustomers = [...this.customers]; // Reset filtered customers
+    
+    // Format date properly if it exists
+    let transactionDate = transaction.date ? 
+      new Date(transaction.date) : 
+      new Date();
+    
     this.transactionForm = {
       _id: transaction._id,
       customerId: transaction.customer?._id || transaction.customerId,
       type: transaction.type,
       amount: transaction.amount,
       paymentMethod: transaction.paymentMethod,
-      // paymentReference: transaction.paymentReference || '',
       bankName: transaction.bankName || '',
-      Reference: transaction.Reference || ''
+      Reference: transaction.Reference || '',
+      date: transactionDate
     };
     this.showModal = true;
     this.isEditMode = true;
@@ -260,33 +366,40 @@ export class TransactionComponent implements OnInit {
       return;
     }
 
-    const newTransaction: Partial<Transaction> = {
-      customerId: this.transactionForm.customerId,
-      type: this.transactionForm.type!,
-      amount: this.transactionForm.amount!,
-      paymentMethod: this.transactionForm.paymentMethod!,
-      Reference: this.transactionForm.Reference
-    };
-
-    // Add bank name only if payment method is bank transfer
-    if (this.transactionForm.paymentMethod === PaymentMethod.BANK_TRANSFER) {
-      if (!this.transactionForm.bankName) {
-        alert("Please select a bank for bank transfers.");
-        return;
-      }
-      newTransaction.bankName = this.transactionForm.bankName;
+    if (!this.validateTransactionForm()) {
+      return;
     }
 
-    this.transactionService.addTransaction(newTransaction as any).subscribe(
-      transaction => {
-        this.closeModal();
-        this.loadTransactions(); // Reload to get updated list
-      },
-      error => {
+    this.loading = true;
+    const newTransaction: Partial<Transaction> = this.prepareTransactionData();
+
+    const addSub = this.transactionService.addTransaction(newTransaction as any).pipe(
+      finalize(() => this.loading = false),
+      catchError(error => {
         console.error('Error adding transaction:', error);
         alert('Failed to add transaction. Please try again.');
+        return of(null);
+      })
+    ).subscribe({
+      next: (response) => {
+        if (response) {
+          this.closeModal();
+          // Add the new transaction to our local array and reapply filters
+          if (response._id) {
+            // Find customer details to include in transaction
+            const customer = this.customers.find(c => c._id === newTransaction.customerId);
+            const transactionWithCustomer = {
+              ...response,
+              customer: customer
+            };
+            this.allTransactions.unshift(transactionWithCustomer);
+            this.applyFiltersLocally();
+          }
+        }
       }
-    );
+    });
+    
+    this.subscriptions.push(addSub);
   }
 
   updateTransaction(): void {
@@ -295,68 +408,120 @@ export class TransactionComponent implements OnInit {
       return;
     }
 
-    const updatedTransaction: Partial<Transaction> = {
-      _id: this.transactionForm._id,
+    if (!this.validateTransactionForm()) {
+      return;
+    }
+
+    this.loading = true;
+    const updatedTransaction: Partial<Transaction> = this.prepareTransactionData();
+
+    const updateSub = this.transactionService.updateTransaction(updatedTransaction._id!, updatedTransaction as any).pipe(
+      finalize(() => this.loading = false),
+      catchError(error => {
+        console.error('Error updating transaction:', error);
+        alert('Failed to update transaction. Please try again.');
+        return of(null);
+      })
+    ).subscribe({
+      next: (response) => {
+        if (response) {
+          this.closeModal();
+          
+          // Update in our local array
+          const index = this.allTransactions.findIndex(t => t._id === updatedTransaction._id);
+          if (index !== -1) {
+            const customer = this.customers.find(c => c._id === updatedTransaction.customerId);
+            this.allTransactions[index] = {
+              ...response,
+              customer: customer
+            };
+            this.applyFiltersLocally();
+          }
+        }
+      }
+    });
+    
+    this.subscriptions.push(updateSub);
+  }
+
+  validateTransactionForm(): boolean {
+    if (this.transactionForm.amount === undefined || this.transactionForm.amount <= 0) {
+      alert("Please enter a valid amount greater than zero.");
+      return false;
+    }
+
+    if (this.transactionForm.paymentMethod === PaymentMethod.BANK_TRANSFER && !this.transactionForm.bankName) {
+      alert("Please select a bank for bank transfers.");
+      return false;
+    }
+
+    return true;
+  }
+
+  prepareTransactionData(): Partial<Transaction> {
+    const transaction: Partial<Transaction> = {
+      _id: this.isEditMode ? this.transactionForm._id : undefined,
       customerId: this.transactionForm.customerId,
       type: this.transactionForm.type!,
       amount: this.transactionForm.amount!,
       paymentMethod: this.transactionForm.paymentMethod!,
-      Reference: this.transactionForm.Reference
+      Reference: this.transactionForm.Reference,
+      date: this.transactionForm.date
     };
 
     // Add bank name only if payment method is bank transfer
     if (this.transactionForm.paymentMethod === PaymentMethod.BANK_TRANSFER) {
-      if (!this.transactionForm.bankName) {
-        alert("Please select a bank for bank transfers.");
-        return;
-      }
-      updatedTransaction.bankName = this.transactionForm.bankName;
+      transaction.bankName = this.transactionForm.bankName;
     }
 
-    this.transactionService.updateTransaction(updatedTransaction._id!, updatedTransaction as any).subscribe(
-      transaction => {
-        this.closeModal();
-        this.loadTransactions(); // Reload to get updated list
-      },
-      error => {
-        console.error('Error updating transaction:', error);
-        alert('Failed to update transaction. Please try again.');
-      }
-    );
+    return transaction;
   }
 
   deleteTransaction(id: string): void {
     if (confirm("Are you sure you want to delete this transaction?")) {
-      this.transactionService.deleteTransaction(id).subscribe(
-        () => {
-          this.loadTransactions(); // Reload to get updated list
-        },
-        error => {
+      this.loading = true;
+      const deleteSub = this.transactionService.deleteTransaction(id).pipe(
+        finalize(() => this.loading = false),
+        catchError(error => {
           console.error('Error deleting transaction:', error);
           alert('Failed to delete transaction. Please try again.');
+          return of(null);
+        })
+      ).subscribe({
+        next: (response) => {
+          if (response !== null) {
+            // Remove from our local array
+            const index = this.allTransactions.findIndex(t => t._id === id);
+            if (index !== -1) {
+              this.allTransactions.splice(index, 1);
+              this.applyFiltersLocally();
+            }
+          }
         }
-      );
+      });
+      
+      this.subscriptions.push(deleteSub);
     }
   }
 
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.loadTransactions();
+      this.applyPagination();
     }
   }
 
   previousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.loadTransactions();
+      this.applyPagination();
     }
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
-      this.loadTransactions();
+      this.applyPagination();
     }
   }
 

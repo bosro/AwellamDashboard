@@ -296,14 +296,6 @@ export class SidebarComponent implements OnInit {
           route: '/main/customers/new',
           icon: 'i-user-add-line',
         },
-      ],
-    },
-    {
-      title: 'Customer Payment ',
-      icon: 'ri-bar-chart-2-line',
-      expanded: false,
-      roles: ['super_admin', 'Admin_Support'],
-      children: [
         {
           title: 'Payment Dashboard ',
           route: '/main/transaction/main',
@@ -314,34 +306,52 @@ export class SidebarComponent implements OnInit {
           route: '/main/transaction/list',
           icon: 'ri-list-view',
         },
-        // {
-        //   title: 'Pruchase Report ',
-        //   route: '/main/reports/purchase-list',
-        //   icon: 'ri-list-view'
-        // },
-        // {
-        //   title: 'SOC Report ',
-        //   route: '/main/reports/soc-report',
-        //   icon: 'ri-list-view'
-        // },
-
-        // {
-        //   title: 'Report Generator',
-        //   route: '/main/reports/generator',
-        //   icon: 'ri-ai-generate-text'
-        // },
-        // {
-        //   title: 'Report Schedule',
-        //   route: '/main/reports/scheduled',
-        //   icon: 'ri-calendar-2-line'
-        // },
-        // {
-        //   title: 'Report Templates',
-        //   route: '/main/reports/templates',
-        //   icon: 'ri-book-open-line'
-        // }
       ],
     },
+    // {
+    //   title: 'Customer Payment ',
+    //   icon: 'ri-bar-chart-2-line',
+    //   expanded: false,
+    //   roles: ['super_admin', 'Admin_Support'],
+    //   children: [
+    //     {
+    //       title: 'Payment Dashboard ',
+    //       route: '/main/transaction/main',
+    //       icon: 'ri-list-view',
+    //     },
+    //     {
+    //       title: 'Receive Payment ',
+    //       route: '/main/transaction/list',
+    //       icon: 'ri-list-view',
+    //     },
+    //     // {
+    //     //   title: 'Pruchase Report ',
+    //     //   route: '/main/reports/purchase-list',
+    //     //   icon: 'ri-list-view'
+    //     // },
+    //     // {
+    //     //   title: 'SOC Report ',
+    //     //   route: '/main/reports/soc-report',
+    //     //   icon: 'ri-list-view'
+    //     // },
+
+    //     // {
+    //     //   title: 'Report Generator',
+    //     //   route: '/main/reports/generator',
+    //     //   icon: 'ri-ai-generate-text'
+    //     // },
+    //     // {
+    //     //   title: 'Report Schedule',
+    //     //   route: '/main/reports/scheduled',
+    //     //   icon: 'ri-calendar-2-line'
+    //     // },
+    //     // {
+    //     //   title: 'Report Templates',
+    //     //   route: '/main/reports/templates',
+    //     //   icon: 'ri-book-open-line'
+    //     // }
+    //   ],
+    // },
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
