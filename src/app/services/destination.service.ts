@@ -6,7 +6,7 @@ import { environment } from '../environments/environment';
 export interface Destination {
   _id: string;
   plant: string;
-  bales: number;
+  cost: number;
   destination: string;
   rates: number;
 }
@@ -22,5 +22,10 @@ export class DestinationService {
       .pipe(
         map(response => response.destinations)  // Extract destinations array
       );
+  }
+
+ 
+  deleteDestination(destinationId: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/destination/delete/${destinationId}`);
   }
 }

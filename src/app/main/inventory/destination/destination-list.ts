@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DestinationService, Destination } from '../../../services/destination.service';
 import { PlantService, Plant } from '../../../services/plant.service';
 import { finalize } from 'rxjs';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-destination-list',
@@ -15,7 +17,7 @@ export class DestinationListComponent implements OnInit {
   filteredDestinations: Destination[] = [];
   loading: boolean = false;
 
-  constructor(private destinationService: DestinationService, private plantService: PlantService) {}
+  constructor(private destinationService: DestinationService, private plantService: PlantService, private router:Router) {}
 
   ngOnInit(): void {
     this.loadPlants();
@@ -55,6 +57,35 @@ export class DestinationListComponent implements OnInit {
           this.destinations = [];  // Clear previous destinations on error
         }
       });
+  }
+
+  editDestination(destinationId: string): void {
+    this.router.navigate([`/main/products/destination/edit/${destinationId}`]);
+  }
+
+
+  deleteDestination(destinationId: string): void {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won\'t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.destinationService.deleteDestination(destinationId).subscribe({
+          next: () => {
+            Swal.fire('Deleted!', 'The destination has been deleted.', 'success');
+            this.loadDestinations();
+          },
+          error: (error) => {
+            console.error('Error deleting destination:', error);
+            Swal.fire('Error!', 'Failed to delete the destination.', 'error');
+          }
+        });
+      }
+    });
   }
   
 
