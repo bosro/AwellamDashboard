@@ -126,7 +126,7 @@ export class SelfListComponent implements OnInit {
     this.selfListService.getCustomers()
       .subscribe({
         next: (response: any) => {
-          this.customers = response.data;
+          this.customers = response.customers;
         },
         error: (err) => {
           console.error('Error loading customers:', err);
@@ -256,22 +256,22 @@ export class SelfListComponent implements OnInit {
     if (!this.selectedOrder) return;
   
     // Validate the amount
-    if (!this.amount || this.amount <= 0) {
-      this.amountError = 'Please enter a valid amount.';
-      return;
-    }
+    // if (!this.amount || this.amount <= 0) {
+    //   this.amountError = 'Please enter a valid amount.';
+    //   return;
+    // }
   
     this.isLoading = true;
     this.error = ''; // Clear any previous errors
   
     // Call the service to update the order status with the amount
-    this.selfListService.updateOrderStatus(this.selectedOrder._id, 'completed', this.amount)
+    this.selfListService.updateOrderStatus(this.selectedOrder._id, 'completed',)
       .subscribe({
         next: () => {
           const index = this.orders.findIndex(order => order._id === this.selectedOrder?._id);
           if (index !== -1) {
             this.orders[index].status = 'completed';
-            this.orders[index].amount = this.amount?.toString() || '';
+            // this.orders[index].amount = this.amount?.toString() || '';
           }
           this.closeStatusModal();
           this.isLoading = false;
