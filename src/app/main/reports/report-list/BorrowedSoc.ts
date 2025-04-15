@@ -27,7 +27,7 @@ export class BorrowedSocComponent implements OnInit {
   showPayLoadModal = false;
   showPaymentDetailsModal = false;
   selectedSoc: any = null;
-  paymentFee: number | null = null;
+  // paymentFee: number | null = null;
   paymentRef: string = '';
   productName: string = '';
   inputSocNumber: string = '';
@@ -135,7 +135,7 @@ export class BorrowedSocComponent implements OnInit {
     // Initialize with current values as suggestions
     this.inputSocNumber = soc.socNumber; 
     this.inputPlantName = soc.plantId.name;
-    this.paymentFee = null;
+    // this.paymentFee = null;
     this.paymentRef = '';
     this.productName = '';
     this.showPayLoadModal = true;
@@ -146,7 +146,7 @@ export class BorrowedSocComponent implements OnInit {
     this.selectedSoc = null;
     this.inputSocNumber = '';
     this.inputPlantName = '';
-    this.paymentFee = null;
+    // this.paymentFee = null;
     this.paymentRef = '';
     this.productName = '';
   }
@@ -162,10 +162,10 @@ export class BorrowedSocComponent implements OnInit {
       return;
     }
     
-    if (!this.paymentFee || this.paymentFee <= 0) {
-      alert('Please enter a valid payment fee.');
-      return;
-    }
+    // if (!this.paymentFee || this.paymentFee <= 0) {
+    //   alert('Please enter a valid payment fee.');
+    //   return;
+    // }
 
     if (!this.paymentRef.trim()) {
       alert('Please enter a payment reference.');
@@ -179,7 +179,7 @@ export class BorrowedSocComponent implements OnInit {
 
     const payload = {
       socNumber: this.inputSocNumber,
-      paymentFee: this.paymentFee,
+      // paymentFee: this.paymentFee,
       paymentRef: this.paymentRef,
       plantName: this.inputPlantName,
       productName: this.productName,
@@ -198,7 +198,7 @@ export class BorrowedSocComponent implements OnInit {
             // Update both the main status and the payment details status
             this.borrowedSocs[index].status = 'paid';
             this.borrowedSocs[index].paymentDetails = {
-              paymentFee: this.paymentFee,
+              // paymentFee: this.paymentFee,
               paymentRef: this.paymentRef,
               plantName: this.inputPlantName,
               productName: this.productName,
