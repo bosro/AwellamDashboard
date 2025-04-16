@@ -1,5 +1,3 @@
-// src/app/components/imprest-detail/imprest-detail.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Imprest } from '../imprest.model';
@@ -7,6 +5,7 @@ import { ImprestService } from '../../../../services/imprest.service';
 import { ExpenseService, Expense } from '../../../../services/expense.service';
 import { ExpenseTypeService } from '../../../../services/expenseType.service'
 import { TruckService } from '../../../../services/truck.service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-imprest-detail',
@@ -21,6 +20,17 @@ export class ImprestDetailComponent implements OnInit {
   imprestId: string = '';
   trucks: any[] = [];
   expenseTypes: any[] = [];
+  Math = Math;
+  
+  // Track expenses and balances 
+  totalExpensesSum: number = 0;
+  remainingBalance: number = 0;
+  
+  // Pagination properties
+  itemsPerPage = 10;
+  currentPage = 1;
+  totalPages = 1;
+  paginatedExpenses: any[] = [];
 
   constructor(
     private imprestService: ImprestService,
@@ -42,7 +52,7 @@ export class ImprestDetailComponent implements OnInit {
       }
     });
     this.loadTrucks();
-    this.loadExpenseTypes()
+    this.loadExpenseTypes();
   }
 
   loadImprestDetail(): void {
@@ -51,6 +61,8 @@ export class ImprestDetailComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.imprestDetail = response.data;
+          this.calculateExpensesAndBalance();
+          this.updatePagination();
         } else {
           this.error = 'Failed to load imprest details';
         }
@@ -62,10 +74,124 @@ export class ImprestDetailComponent implements OnInit {
       }
     });
   }
+
+  calculateExpensesAndBalance(): void {
+    if (!this.imprestDetail || !this.imprestDetail.expenses) return;
+    
+    // Sort expenses by date
+    this.imprestDetail.expenses.sort((a: any, b: any) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    
+    // Calculate total expenses
+    this.totalExpensesSum = this.imprestDetail.expenses.reduce((sum: number, expense: any) => {
+      return sum + expense.amount;
+    }, 0);
+    
+    // Calculate remaining balance based on INITIAL amount
+    this.remainingBalance = (this.imprestDetail.amount+ this.imprestDetail.carryforward) - this.totalExpensesSum;
+    
+    // Assign running balance to each expense starting from INITIAL amount
+    let runningBalance = this.imprestDetail.amount+this.imprestDetail.carryforward;
+    
+    this.imprestDetail.expenses.forEach((expense: any) => {
+      runningBalance -= expense.amount;
+      expense.runningBalance = runningBalance;
+    });
+  }
+
+  updatePagination(): void {
+    if (!this.imprestDetail || !this.imprestDetail.expenses) return;
+    
+    this.totalPages = Math.ceil(this.imprestDetail.expenses.length / this.itemsPerPage);
+    this.setPage(this.currentPage);
+  }
+
+  setPage(page: number): void {
+    if (page < 1 || page > this.totalPages || !this.imprestDetail) return;
+    
+    this.currentPage = page;
+    const startIndex = (page - 1) * this.itemsPerPage;
+    const endIndex = Math.min(startIndex + this.itemsPerPage, this.imprestDetail.expenses.length);
+    this.paginatedExpenses = this.imprestDetail.expenses.slice(startIndex, endIndex);
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.setPage(this.currentPage - 1);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.setPage(this.currentPage + 1);
+    }
+  }
+
+  exportToExcel(): void {
+    if (!this.imprestDetail) return;
+
+    // Create header with imprest information
+    const imprestInfo = [
+      ['Imprest Details'],
+      [''],
+      ['Description', this.imprestDetail.description],
+      ['Date', this.formatDate(this.imprestDetail.date)],
+      ['Initial Amount', this.imprestDetail.amount],
+      ['Total Expenses', this.totalExpensesSum],
+      ['Remaining Balance', this.remainingBalance],
+      ['Status', this.imprestDetail.status],
+      ['Created', this.formatDate(this.imprestDetail.createdAt)],
+      ['']  // Empty row for spacing
+    ];
+
+    // Create expense data for export
+    const expenseHeaders = ['Date', 'Description', 'Account Type', 'Recipient', 'Amount', 'Status', 'Truck', 'Running Balance'];
+    
+    const expenseData = this.imprestDetail.expenses.map((expense: any) => [
+      this.formatDate(expense.date),
+      expense.description,
+      expense.accountType,
+      expense.recipient,
+      expense.amount,
+      expense.status,
+      expense.truckId ? `${expense.truckId.truckNumber} ${expense.truckId.driver ? `(${expense.truckId.driver.name})` : ''}` : 'N/A',
+      expense.runningBalance
+    ]);
+
+    // Combine headers and data
+    const exportData = [
+      ...imprestInfo,
+      ['Expenses'],
+      expenseHeaders,
+      ...expenseData
+    ];
+
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(exportData);
+
+    // Style the header rows
+    const headerRange = XLSX.utils.decode_range('A1:B1');  // Imprest Details header
+    for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: headerRange.s.r, c: col });
+      if (!worksheet[cellAddress]) worksheet[cellAddress] = {};
+      worksheet[cellAddress].s = { font: { bold: true, sz: 14 } };
+    }
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Imprest Details');
+
+    // Save the workbook
+    const fileName = `Imprest_${this.imprestDetail.description.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  }
+
   openEditModal(expense: any): void {
     this.selectedExpense = { ...expense };
     this.isModalOpen = true;
   }
+
   goBack(): void {
     this.router.navigate(['/main/expenses/imprest']);
   }
@@ -110,7 +236,6 @@ export class ImprestDetailComponent implements OnInit {
     this.selectedExpense = null;
   }
 
-
   loadTrucks(): void {
     this.truckService.getTrucks().subscribe({
       next: (response) => {
@@ -132,7 +257,6 @@ export class ImprestDetailComponent implements OnInit {
       }
     });
   }
-
 
   handleSave(expense: any): void {
     if (this.selectedExpense && this.selectedExpense._id) {
@@ -161,7 +285,16 @@ export class ImprestDetailComponent implements OnInit {
   }
 
   formatDate(dateString: string | Date): string {
-    return new Date(dateString).toLocaleDateString();
+    const date = new Date(dateString);
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
   }
 
   formatCurrency(amount: number): string {

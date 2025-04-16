@@ -75,7 +75,7 @@ export class CustomerDetailsComponent implements OnInit {
   showAddPaymentForm = false;
   noteForm: FormGroup;
   emailForm: FormGroup;
-  orders!: Order[];
+  orders!: any[];
   selectedOrder: any;
   transactions: any[] = [];
 
@@ -127,6 +127,16 @@ export class CustomerDetailsComponent implements OnInit {
       targetCustomerId: ['', Validators.required]
     });
   }
+
+  isArray(value: any): boolean {
+  return Array.isArray(value);
+}
+
+hasSocData(order: any): boolean {
+  // Check if either socNumbers exists (even if empty array) or socNumber exists
+  return (order.socNumbers !== undefined) || 
+         (order.socNumber !== undefined && order.socNumber !== null);
+}
 
   // Add missing methods for component functionality
   editAddress(address: any): void {

@@ -122,151 +122,210 @@
 </div>
 </div>
 
-<div  class="bg-white rounded-lg shadow">
-<div class="p-6">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-medium text-gray-900">Order History</h2>
-    <button 
-      [routerLink]="['/main/orders/processing']"
-      [queryParams]="{customerId: customer._id}"
-      class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-      <i class="ri-add-line mr-2"></i>
-      New Order
-    </button>
-  </div>
-  
-  <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC Ref</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
-          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"></th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let order of orders">
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm font-medium text-gray-900">{{order?.socNumber?.socNumber || 'N/A' }}</div>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">{{order.updatedAt | date:'mediumDate' }}</div>
-            <div class="text-xs text-gray-500">{{order.updatedAt ? (order.updatedAt | date:'shortTime') : 'N/A' }}</div>
-          </td>
 
-          <td class="px-6 py-4">
-            <div class="text-sm font-medium text-gray-900">{{ order?.orderItems?.[0]?.product?.name || 'N/A' }}</div>
-            <!-- <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div> -->
-          </td>
+</div>
 
+</div>
 
-          <td class="px-6 py-4">
-            <!-- <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div> -->
-            <div class="text-sm font-medium text-gray-900">Quantity: {{ order?.orderItems?.[0]?.quantity || 'N/A'}}</div>
-          </td>
-
-          <td class="px-6 py-4">
-            <!-- <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div> -->
-            <div class="text-sm font-medium text-gray-900"> {{ order?.orderItems?.[0]?.price || 'N/A'}}</div>
-          </td>
-
-          <td class="px-6 py-4">
-            <!-- <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div> -->
-            <div class="text-sm font-medium text-gray-900"> {{ order?.assignedDriver?.name || 'N/A'}}</div>
-          </td>
-         
-         
-          <!-- <td class="px-6 py-4">
-            <div class="text-sm text-gray-900">{{order.items.length}} items</div>
-            <div class="text-xs text-gray-500">
-              {{order.items[0].name}}
-              <span *ngIf="order.items.length > 1">
-                + {{order.items.length - 1}} more
-              </span>
+<div *ngIf="activeTab === 'orders'" class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+  <!-- Customer Info -->
+  <div class="col-span-2 space-y-6">
+    <!-- Basic Information -->
+    <div class="bg-white rounded-lg shadow" *ngIf="customer">
+      <div class="p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Summary Information</h2>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-500">Full Name</label>
+            <p class="mt-1 text-sm text-gray-900">{{customer.fullName}}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-500">Email</label>
+            <p class="mt-1 text-sm text-gray-900">{{customer.email}}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-500">Phone</label>
+            <p class="mt-1 text-sm text-gray-900">{{customer.phoneNumber}}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-500">Address</label>
+            <p class="mt-1 text-sm text-gray-900">{{customer.address}}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-500">Balance</label>
+            <div [ngClass]="{'bg-red-100 text-red-800': customer.balance < 0, 'bg-green-100 text-green-800': customer.balance >= 0}" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full mb-2">
+              {{ customer.balance  | currency:'GHC':'symbol':'1.2-2' }}
             </div>
-          </td> -->
-          <!-- <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm font-medium text-gray-900">${{order.total | number:'1.2-2'}}</div>
-            <div *ngIf="order.discount" class="text-xs text-green-600">
-              -${{order.discount | number:'1.2-2'}} discount
-            </div>
-          </td> -->
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span [ngClass]="{
-              'bg-yellow-100 text-yellow-800': order.status === 'PENDING',
-              'bg-blue-100 text-blue-800': order.status === 'processing',
-              'bg-purple-100 text-purple-800': order.status === 'shipped',
-              'bg-green-100 text-green-800': order.status === 'DELIVERED',
-              'bg-red-100 text-red-800': order.status === 'cancelled',
-              'bg-gray-100 text-gray-800': order.status === 'refunded'
-            }" class="px-2 py-1 text-xs font-medium rounded-full">
-              {{order.status}}
-            </span>
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <div class="flex justify-end space-x-3">
-              <button 
-              [routerLink]="['/main/orders/details', order._id]"
-                class="text-blue-600 hover:text-blue-900">
-                <i class="ri-eye-line"></i>
-              </button>
-              <button 
-              [routerLink]="['/main/orders/edit', order?._id]"
-                class="text-blue-600 hover:text-blue-900">
-                <i class="ri-edit-line"></i>
-              </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-              <button 
+    <!-- Transactions -->
+    <div  class="bg-white rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-medium text-gray-900">Order History</h2>
+          <button 
+            [routerLink]="['/main/orders/processing']"
+            [queryParams]="{customerId: customer._id}"
+            class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <i class="ri-add-line mr-2"></i>
+            New Order
+          </button>
+        </div>
+        
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC Ref</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"></th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let order of orders">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    <!-- Case 1: socNumbers exists and has items -->
+                    <ng-container *ngIf="order.socNumbers && order.socNumbers.length > 0">
+                      <ul>
+                        <li *ngFor="let soc of order.socNumbers">{{ soc.socNumber }}</li>
+                      </ul>
+                    </ng-container>
+                
+                    <!-- Case 2: socNumbers exists but is empty AND socNumber exists -->
+                    <ng-container *ngIf="(order.socNumbers && order.socNumbers.length === 0) && order.socNumber">
+                      <div>{{ order.socNumber.socNumber }}</div>
+                    </ng-container>
+                
+                    <!-- Case 3: socNumbers doesn't exist but socNumber exists -->
+                    <ng-container *ngIf="!order.socNumbers && order.socNumber">
+                      <div>{{ order.socNumber.socNumber }}</div>
+                    </ng-container>
+                
+                    <!-- Case 4: No SOC data available -->
+                    <ng-container *ngIf="(!order.socNumbers || order.socNumbers.length === 0) && !order.socNumber">
+                      <div>N/A</div>
+                    </ng-container>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{order.updatedAt | date:'mediumDate' }}</div>
+                  <div class="text-xs text-gray-500">{{order.updatedAt ? (order.updatedAt | date:'shortTime') : 'N/A' }}</div>
+                </td>
+      
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{{ order?.orderItems?.[0]?.product?.name || 'N/A' }}</div>
+                  <!-- <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div> -->
+                </td>
+      
+      
+                <td class="px-6 py-4">
+                  <!-- <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div> -->
+                  <div class="text-sm font-medium text-gray-900">Quantity: {{ order?.orderItems?.[0]?.quantity || 'N/A'}}</div>
+                </td>
+      
+                <td class="px-6 py-4">
+                  <!-- <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div> -->
+                  <div class="text-sm font-medium text-gray-900"> {{ order?.orderItems?.[0]?.price || 'N/A'}}</div>
+                </td>
+      
+                <td class="px-6 py-4">
+                  <!-- <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div> -->
+                  <div class="text-sm font-medium text-gray-900"> {{ order?.assignedDriver?.name || 'N/A'}}</div>
+                </td>
+               
+               
+                <!-- <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">{{order.items.length}} items</div>
+                  <div class="text-xs text-gray-500">
+                    {{order.items[0].name}}
+                    <span *ngIf="order.items.length > 1">
+                      + {{order.items.length - 1}} more
+                    </span>
+                  </div>
+                </td> -->
+                <!-- <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">${{order.total | number:'1.2-2'}}</div>
+                  <div *ngIf="order.discount" class="text-xs text-green-600">
+                    -${{order.discount | number:'1.2-2'}} discount
+                  </div>
+                </td> -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [ngClass]="{
+                    'bg-yellow-100 text-yellow-800': order.status === 'PENDING',
+                    'bg-blue-100 text-blue-800': order.status === 'processing',
+                    'bg-purple-100 text-purple-800': order.status === 'shipped',
+                    'bg-green-100 text-green-800': order.status === 'DELIVERED',
+                    'bg-red-100 text-red-800': order.status === 'cancelled',
+                    'bg-gray-100 text-gray-800': order.status === 'refunded'
+                  }" class="px-2 py-1 text-xs font-medium rounded-full">
+                    {{order.status}}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-3">
+                    <button 
+                    [routerLink]="['/main/orders/details', order._id]"
+                      class="text-blue-600 hover:text-blue-900">
+                      <i class="ri-eye-line"></i>
+                    </button>
+                    <button 
+                    [routerLink]="['/main/orders/edit', order?._id]"
+                      class="text-blue-600 hover:text-blue-900">
+                      <i class="ri-edit-line"></i>
+                    </button>
+      
+                    <button 
+                
+                      (click)="PrintOrder(order._id)"
+                      class="text-red-600 hover:text-red-900">
+                      <i class="ri-printer-line"></i>
+                    </button>
+                    <!-- <button 
+                      *ngIf="order.status === 'pending'"
+                      (click)="cancelOrder(order.id)"
+                      class="text-red-600 hover:text-red-900">
+                      <i class="ri-close-circle-line"></i>
+                    </button> -->
+                    <button 
+                      *ngIf="order.status === 'pending'"
+                      (click)="cancelOrder(order._id)"
+                      class="text-red-600 hover:text-red-900">
+                      <i class="ri-close-circle-line"></i>
+                    </button>
+                    
+                  </div>
+                </td>
+              </tr>
           
-                (click)="PrintOrder(order._id)"
-                class="text-red-600 hover:text-red-900">
-                <i class="ri-printer-line"></i>
-              </button>
-              <!-- <button 
-                *ngIf="order.status === 'pending'"
-                (click)="cancelOrder(order.id)"
-                class="text-red-600 hover:text-red-900">
-                <i class="ri-close-circle-line"></i>
-              </button> -->
-              <button 
-                *ngIf="order.status === 'pending'"
-                (click)="cancelOrder(order._id)"
-                class="text-red-600 hover:text-red-900">
-                <i class="ri-close-circle-line"></i>
-              </button>
-              
-            </div>
-          </td>
-        </tr>
-    
-        <!-- Loading State -->
-        <tr *ngIf="loading">
-          <td colspan="6" class="px-6 py-4">
-            <div class="flex justify-center">
-              <i class="ri-loader-4-line animate-spin text-blue-600 text-2xl"></i>
-            </div>
-          </td>
-        </tr>
-    
-        <!-- No Orders -->
-        <tr *ngIf="!loading && orders.length === 0">
-          <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-            No orders found for this customer
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              <!-- Loading State -->
+              <tr *ngIf="loading">
+                <td colspan="6" class="px-6 py-4">
+                  <div class="flex justify-center">
+                    <i class="ri-loader-4-line animate-spin text-blue-600 text-2xl"></i>
+                  </div>
+                </td>
+              </tr>
+          
+              <!-- No Orders -->
+              <tr *ngIf="!loading && orders.length === 0">
+                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                  No orders found for this customer
+                </td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
+      </div>
+  </div>
 </div>
-</div>
-</div>
-
-</div>
-
-
 
 
 <div *ngIf="activeTab === 'Payments'" class="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -529,3 +588,147 @@
   </div>
 
 </div>
+
+
+
+
+<!-- <div  class="bg-white rounded-lg shadow">
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-medium text-gray-900">Order History</h2>
+      <button 
+        [routerLink]="['/main/orders/processing']"
+        [queryParams]="{customerId: customer._id}"
+        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <i class="ri-add-line mr-2"></i>
+        New Order
+      </button>
+    </div>
+    
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC Ref</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Price</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"></th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let order of orders">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{order?.socNumber?.socNumber || 'N/A' }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{order.updatedAt | date:'mediumDate' }}</div>
+              <div class="text-xs text-gray-500">{{order.updatedAt ? (order.updatedAt | date:'shortTime') : 'N/A' }}</div>
+            </td>
+  
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ order?.orderItems?.[0]?.product?.name || 'N/A' }}</div>
+              <div class="text-sm font-medium text-gray-900">Quantity: {{ order.orderItems[0].quantity}}</div>
+            </td>
+  
+  
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+              <div class="text-sm font-medium text-gray-900">Quantity: {{ order?.orderItems?.[0]?.quantity || 'N/A'}}</div>
+            </td>
+  
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+              <div class="text-sm font-medium text-gray-900"> {{ order?.orderItems?.[0]?.price || 'N/A'}}</div>
+            </td>
+  
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ order.orderItems[0].product.name }}</div>
+              <div class="text-sm font-medium text-gray-900"> {{ order?.assignedDriver?.name || 'N/A'}}</div>
+            </td>
+           
+           
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-900">{{order.items.length}} items</div>
+              <div class="text-xs text-gray-500">
+                {{order.items[0].name}}
+                <span *ngIf="order.items.length > 1">
+                  + {{order.items.length - 1}} more
+                </span>
+              </div>
+            </td> 
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">${{order.total | number:'1.2-2'}}</div>
+              <div *ngIf="order.discount" class="text-xs text-green-600">
+                -${{order.discount | number:'1.2-2'}} discount
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [ngClass]="{
+                'bg-yellow-100 text-yellow-800': order.status === 'PENDING',
+                'bg-blue-100 text-blue-800': order.status === 'processing',
+                'bg-purple-100 text-purple-800': order.status === 'shipped',
+                'bg-green-100 text-green-800': order.status === 'DELIVERED',
+                'bg-red-100 text-red-800': order.status === 'cancelled',
+                'bg-gray-100 text-gray-800': order.status === 'refunded'
+              }" class="px-2 py-1 text-xs font-medium rounded-full">
+                {{order.status}}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex justify-end space-x-3">
+                <button 
+                [routerLink]="['/main/orders/details', order._id]"
+                  class="text-blue-600 hover:text-blue-900">
+                  <i class="ri-eye-line"></i>
+                </button>
+                <button 
+                [routerLink]="['/main/orders/edit', order?._id]"
+                  class="text-blue-600 hover:text-blue-900">
+                  <i class="ri-edit-line"></i>
+                </button>
+  
+                <button 
+            
+                  (click)="PrintOrder(order._id)"
+                  class="text-red-600 hover:text-red-900">
+                  <i class="ri-printer-line"></i>
+                </button>
+                 <button 
+                  *ngIf="order.status === 'pending'"
+                  (click)="cancelOrder(order.id)"
+                  class="text-red-600 hover:text-red-900">
+                  <i class="ri-close-circle-line"></i>
+                </button>
+                <button 
+                  *ngIf="order.status === 'pending'"
+                  (click)="cancelOrder(order._id)"
+                  class="text-red-600 hover:text-red-900">
+                  <i class="ri-close-circle-line"></i>
+                </button>
+                
+              </div>
+            </td>
+          </tr>
+      
+          Loading State
+          <tr *ngIf="loading">
+            <td colspan="6" class="px-6 py-4">
+              <div class="flex justify-center">
+                <i class="ri-loader-4-line animate-spin text-blue-600 text-2xl"></i>
+              </div>
+            </td>
+          </tr>
+      
+          No Orders
+          <tr *ngIf="!loading && orders.length === 0">
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+              No orders found for this customer
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  </div>
+  </div> -->

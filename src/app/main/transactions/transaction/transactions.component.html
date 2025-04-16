@@ -474,6 +474,10 @@
           <p class="text-sm text-gray-500">Reference</p>
           <p class="font-medium">{{ selectedTransaction?.Reference || 'None' }}</p>
         </div>
+        <div>
+          <p class="text-sm text-gray-500">CreatedBy</p>
+          <p class="font-medium">{{ selectedTransaction?.createdBy?.fullName || 'N/A' }}</p>
+        </div>
         
         <div>
           <p class="text-sm text-gray-500">Balance After Transaction</p>
