@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
@@ -39,6 +39,12 @@ export class SalesOrderListComponent implements OnInit {
   products: Product[] = [];
   allOrders: Order[] = []; // Keep this for backward compatibility
 
+
+  showPriceModal = false;
+priceForm: FormGroup;
+selectedOrderId: string | null = null;
+submitting = false;
+
   private apiUrl = `${environment.apiUrl}`;
 
   constructor(
@@ -63,13 +69,100 @@ export class SalesOrderListComponent implements OnInit {
       category: [''],
       productId: ['']
     });
+
+    this.priceForm = this.fb.group({
+      price: ['', [Validators.required, Validators.min(0)]]
+    });
   }
 
+  
   ngOnInit(): void {
-    this.loading = true; // Start with loading state active
+    this.loading = true;
+    
+    // Set default date range to one week
+    const today = new Date();
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(today.getDate() - 7);
+    
+    this.filterForm.get('dateRange')?.setValue({
+      start: oneWeekAgo.toISOString().split('T')[0],
+      end: today.toISOString().split('T')[0]
+    });
+    
     this.loadInitialData();
     this.setupFilters();
   }
+  
+
+  openPriceModal(orderId: string): void {
+    this.selectedOrderId = orderId;
+    this.showPriceModal = true;
+    
+    // Find the order to get its current price
+    const order = this.filteredOrders.find(o => o._id === orderId);
+    if (order && order.orderItems && order.orderItems.length > 0) {
+      this.priceForm.get('price')?.setValue(order.orderItems[0].price || 0);
+    } else {
+      this.priceForm.get('price')?.setValue(0);
+    }
+  }
+  
+  closePriceModal(): void {
+    this.showPriceModal = false;
+    this.selectedOrderId = null;
+    this.priceForm.reset();
+  }
+  
+ // Updated submitPriceUpdate method
+submitPriceUpdate(): void {
+  if (this.priceForm.invalid || !this.selectedOrderId) {
+    return;
+  }
+  
+  this.submitting = true;
+  
+  // Simplified data structure to match backend expectations
+  const data = {
+    price: Number(this.priceForm.value.price)
+  };
+  
+  this.ordersService.updateOrderPrice(this.selectedOrderId, data)
+    .pipe(finalize(() => {
+      this.submitting = false;
+    }))
+    .subscribe({
+      next: (response) => {
+        console.log('Price update response:', response);
+        
+        // Update the order in the filtered orders list with the fully updated order from response
+        // const index = this.filteredOrders.findIndex(o => o._id === this.selectedOrderId);
+        // if (index !== -1 && response.updatedOrder) {
+        //   this.filteredOrders[index] = response.updatedOrder;
+        // }
+        
+        // // Also update in the allOrders array
+        // const allOrdersIndex = this.allOrders.findIndex(o => o._id === this.selectedOrderId);
+        // if (allOrdersIndex !== -1 && response.updatedOrder) {
+        //   this.allOrders[allOrdersIndex] = response.updatedOrder;
+        // }
+        
+        Swal.fire({
+          title: 'Success',
+          html: `
+            Order price has been updated successfully<br>
+
+          `,
+          icon: 'success'
+        });
+        
+        this.closePriceModal();
+      },
+      error: (error) => {
+        console.error('Error updating order price:', error);
+        Swal.fire('Error', 'Failed to update order price: ' + (error.error?.details || error.message || 'Unknown error'), 'error');
+      }
+    });
+}
 
   private loadInitialData(): void {
     this.loading = true;
@@ -193,7 +286,14 @@ export class SalesOrderListComponent implements OnInit {
 
   loadOrders(): void {
     this.loading = true;
-    this.ordersService.getDelieveredOrders()
+    
+    // Get date range values from the form
+    const dateRange = this.filterForm.get('dateRange')?.value;
+    const startDate = dateRange?.start || this.getOneWeekAgoDate();
+    const endDate = dateRange?.end || new Date().toISOString().split('T')[0];
+    
+    // Call the service with date parameters
+    this.ordersService.getDelieveredOrders(startDate, endDate)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (response) => {
@@ -206,6 +306,14 @@ export class SalesOrderListComponent implements OnInit {
           Swal.fire('Error', 'Failed to load orders. Please try again.', 'error');
         }
       });
+  }
+  
+  // Helper method to get the date from one week ago
+  getOneWeekAgoDate(): string {
+    const today = new Date();
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(today.getDate() - 7);
+    return oneWeekAgo.toISOString().split('T')[0]; // Format as YYYY-MM-DD
   }
 
   applyFilters(): void {

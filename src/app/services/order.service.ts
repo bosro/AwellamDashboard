@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -101,11 +101,34 @@ export class OrdersService {
   getOrders(): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/get`);
   }
-  getPendingOrders(): Observable<OrderResponse> {
-    return this.http.get<OrderResponse>(`${this.apiUrl}/get/pending`);
+  getPendingOrders(startDate?: string, endDate?: string): Observable<OrderResponse> {
+    let url = `${this.apiUrl}/get/pending`;
+    
+    // Add query parameters if provided
+    if (startDate || endDate) {
+      const params = new HttpParams()
+        .set('startDate', startDate || '')
+        .set('endDate', endDate || '');
+      
+      return this.http.get<OrderResponse>(url, { params });
+    }
+    
+    return this.http.get<OrderResponse>(url);
   }
-  getDelieveredOrders(): Observable<OrderResponse> {
-    return this.http.get<OrderResponse>(`${this.apiUrl}/get/delivered`);
+
+  getDelieveredOrders(startDate?: string, endDate?: string): Observable<OrderResponse> {
+    let url = `${this.apiUrl}/get/delivered`;
+    
+    // Add query parameters if provided
+    if (startDate || endDate) {
+      const params = new HttpParams()
+        .set('startDate', startDate || '')
+        .set('endDate', endDate || '');
+      
+      return this.http.get<OrderResponse>(url, { params });
+    }
+    
+    return this.http.get<OrderResponse>(url);
   }
 
   getProductOrders(productId: string): Observable<OrderResponse> {
@@ -115,6 +138,9 @@ export class OrdersService {
   getPlantOrders(plantId: string): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/plant/${plantId}`);
   }
+
+
+
 
 
 
@@ -133,6 +159,11 @@ export class OrdersService {
   editOrder(id: string, data: any): Observable<Order> {
     return this.http.put<Order>(`${this.apiUrl}/edit/${id}`, data);
   }
+
+  updateOrderPrice(id: string, data: any): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/update/${id}`, data);
+  }
+
 
   deleteOrder(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/orders/${id}`);
