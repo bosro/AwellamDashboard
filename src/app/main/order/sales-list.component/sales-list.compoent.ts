@@ -79,19 +79,22 @@ submitting = false;
   ngOnInit(): void {
     this.loading = true;
     
-    // Set default date range to one week
     const today = new Date();
+    const oneDayAhead = new Date(today);
+    oneDayAhead.setDate(today.getDate() + 1); // Add 1 day
+  
     const oneWeekAgo = new Date(today);
     oneWeekAgo.setDate(today.getDate() - 7);
-    
+  
     this.filterForm.get('dateRange')?.setValue({
       start: oneWeekAgo.toISOString().split('T')[0],
-      end: today.toISOString().split('T')[0]
+      end: oneDayAhead.toISOString().split('T')[0] // Use oneDayAhead here
     });
-    
+  
     this.loadInitialData();
     this.setupFilters();
   }
+  
   
 
   openPriceModal(orderId: string): void {
@@ -286,12 +289,19 @@ submitPriceUpdate(): void {
 
   loadOrders(): void {
     this.loading = true;
-    
+  
     // Get date range values from the form
     const dateRange = this.filterForm.get('dateRange')?.value;
     const startDate = dateRange?.start || this.getOneWeekAgoDate();
-    const endDate = dateRange?.end || new Date().toISOString().split('T')[0];
-    
+  
+    // Set default endDate to one day ahead of today
+    let endDate = dateRange?.end;
+    if (!endDate) {
+      const oneDayAhead = new Date();
+      oneDayAhead.setDate(oneDayAhead.getDate() + 1);
+      endDate = oneDayAhead.toISOString().split('T')[0];
+    }
+  
     // Call the service with date parameters
     this.ordersService.getDelieveredOrders(startDate, endDate)
       .pipe(finalize(() => this.loading = false))
