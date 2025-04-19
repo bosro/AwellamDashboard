@@ -28,8 +28,8 @@ export class OrderEditComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
-      price: ['', Validators.required],
-      quantity: ['', Validators.required],
+      price: ['', ],
+      quantity: ['', ],
       assignedTruck: ['']
     });
   }
@@ -37,6 +37,7 @@ export class OrderEditComponent implements OnInit {
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
+    this.getTrucks()
   }
 
   loadOrder(): void {
@@ -68,8 +69,10 @@ export class OrderEditComponent implements OnInit {
     this.loading = true;
     this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.productId}`).subscribe({
       next: (response) => {
-        this.trucks = response.trucks;
+        this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
         this.loading = false;
+
+        console.log(this.productId)
         Swal.fire({
           title: "Driver Fetched Successfully!",
           icon: "success",
@@ -81,7 +84,7 @@ export class OrderEditComponent implements OnInit {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "No driver found holding this product category or from this plant!",
+          text: "No trucks found holding products!",
         });
         this.loading = false;
       },

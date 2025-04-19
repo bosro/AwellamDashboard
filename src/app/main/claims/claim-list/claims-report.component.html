@@ -10,7 +10,7 @@
   <!-- Date Range Filter -->
   <div class="bg-white rounded-lg shadow p-4 mb-6">
     <form [formGroup]="filterForm">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <!-- Start Date -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
@@ -50,6 +50,7 @@
           <select
             id="destination"
             formControlName="destinationId"
+            (change)="onDestinationSelect($event)"
             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
           >
             <option value="">Select a Destination</option>
@@ -57,16 +58,45 @@
           </select>
         </div>
 
-        <!-- Generate Report Button -->
-        <div class="flex items-end">
-          <button
-            (click)="generateClaimsReport()"
-            [disabled]="!filterForm.valid || loading"
-            class="w-full md:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
-            <i class="ri-file-excel-line mr-2"></i>
-            Generate Report
-          </button>
+        <!-- Filter by Destination Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Destination</label>
+          <input
+            type="text"
+            formControlName="destinationName"
+            placeholder="Type to filter destinations..."
+            class="w-full px-4 py-2 border rounded-lg"
+          />
         </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <!-- Search Button -->
+        <button
+          (click)="getClaimsDetails()"
+          [disabled]="!filterForm.valid || loading"
+          class="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400">
+          <i class="ri-search-line mr-2"></i>
+          Search
+        </button>
+
+        <!-- Export All Button -->
+        <button
+          (click)="generateClaimsReport()"
+          [disabled]="!filterForm.valid || loading"
+          class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+          <i class="ri-file-excel-line mr-2"></i>
+          Export All
+        </button>
+
+        <!-- Export Filtered Button -->
+        <button
+          (click)="exportFilteredData()"
+          [disabled]="filteredClaimsData.length === 0 || loading"
+          class="flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400">
+          <i class="ri-file-excel-line mr-2"></i>
+          Export Filtered Data
+        </button>
       </div>
     </form>
   </div>
@@ -77,37 +107,153 @@
   </div>
 
   <!-- Claims Report Table -->
-
-  <div *ngIf="claimsData.length > 0" class="bg-white rounded-lg shadow">
-
-    <h2 class="text-xl font-semibold text-gray-900 p-4">Claims Report Data</h2>
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DATE</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DRIVER</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CATEGORY</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DESTINATION</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SOC</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">QTY</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">RATE</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AMOUNT (100%)</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AMOUNT (95%)</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <tr *ngFor="let row of claimsData">
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.DATE }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.DRIVER }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.CATEGORY }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.DESTINATION }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.SOC }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.QTY }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.RATE }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['AMOUNT (100%)'] }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['AMOUNT (95%)'] }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-4 flex justify-between items-center border-b">
+      <h2 class="text-xl font-semibold text-gray-900">Claims Report Data</h2>
+      <div class="text-sm text-gray-500">
+        Showing {{ filteredClaimsData.length }} items
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DATE OF DISPATCH</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DESTINATION</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DRIVER</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">INVOICES/WAYBILL NO.</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">QTY</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">RATE(100%)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">RATE(95%)</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AMOUNT</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let row of paginatedData">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['DATE OF DISPATCH'] }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.DESTINATION }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.DRIVER }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['INVOICES/WAYBILL NO.'] }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.QTY }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['RATE(100%)'] }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row['RATE(95%)'] }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ row.AMOUNT | currency:'GHS':'symbol':'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="filteredClaimsData.length === 0">
+            <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No data available</td>
+          </tr>
+          
+          <!-- Summary Rows -->
+          <tr *ngIf="filteredClaimsData.length > 0">
+            <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ totalQuantity }}</td>
+            <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ totalAmount | currency:'GHS':'symbol':'1.2-2' }}</td>
+          </tr>
+          
+          <!-- GETFL/NHIL Row -->
+          <tr *ngIf="filteredClaimsData.length > 0">
+            <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">GETFL/NHIL(6%)</td>
+            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ getflNhil | currency:'GHS':'symbol':'1.2-2' }}</td>
+          </tr>
+          
+          <!-- Subtotal Row -->
+          <tr *ngIf="filteredClaimsData.length > 0">
+            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ (totalAmount + getflNhil) | currency:'GHS':'symbol':'1.2-2' }}</td>
+          </tr>
+          
+          <!-- VAT Row -->
+          <tr *ngIf="filteredClaimsData.length > 0">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">VAT(15%)</td>
+            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ vat | currency:'GHS':'symbol':'1.2-2' }}</td>
+          </tr>
+          
+          <!-- Grand Total Row -->
+          <tr *ngIf="filteredClaimsData.length > 0">
+            <td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">TOTAL</td>
+            <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900"></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{{ grandTotal | currency:'GHS':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination Controls -->
+    <div class="p-4 flex items-center justify-between border-t border-gray-200">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button 
+          (click)="previousPage()" 
+          [disabled]="currentPage === 1"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+          Previous
+        </button>
+        <button 
+          (click)="nextPage()" 
+          [disabled]="currentPage === totalPages"
+          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+          Next
+        </button>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Showing
+            <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+            to
+            <span class="font-medium">{{ 
+              (currentPage * pageSize) > totalItems ? totalItems : (currentPage * pageSize) 
+            }}</span>
+            of
+            <span class="font-medium">{{ totalItems }}</span>
+            results
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <!-- Previous Page -->
+            <button
+              (click)="previousPage()"
+              [disabled]="currentPage === 1"
+              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+              <span class="sr-only">Previous</span>
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            
+            <!-- Page Numbers - Show only 5 pages at a time centered around current page -->
+            <ng-container *ngFor="let i of [].constructor(totalPages); let idx = index">
+              <button
+                *ngIf="(idx + 1 >= currentPage - 2 && idx + 1 <= currentPage + 2) || idx + 1 === 1 || idx + 1 === totalPages"
+                (click)="goToPage(idx + 1)"
+                [ngClass]="{'bg-blue-50 border-blue-500 text-blue-600': currentPage === idx + 1}"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                {{ idx + 1 }}
+              </button>
+              <!-- Add ellipsis if needed -->
+              <span 
+                *ngIf="(idx + 1 === currentPage - 3 && currentPage > 4) || (idx + 1 === currentPage + 3 && currentPage < totalPages - 3)"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                ...
+              </span>
+            </ng-container>
+            
+            <!-- Next Page -->
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+              <span class="sr-only">Next</span>
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
