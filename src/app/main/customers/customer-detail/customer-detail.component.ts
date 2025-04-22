@@ -9,6 +9,8 @@ import { OrdersService } from '../../../services/order.service';
 import printJS from 'print-js';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
+import { finalize } from 'rxjs';
 
 interface CustomerOrder {
   id: string;
@@ -79,6 +81,11 @@ export class CustomerDetailsComponent implements OnInit {
   selectedOrder: any;
   transactions: any[] = [];
 
+    showPriceModal = false;
+  priceForm: FormGroup;
+  selectedOrderId: string | null = null;
+  submitting = false;
+
   // New properties for merge functionality
   showMergeModal = false;
   mergeLoading = false;
@@ -125,6 +132,10 @@ export class CustomerDetailsComponent implements OnInit {
     this.mergeForm = this.fb.group({
       sourceCustomerId: ['', Validators.required],
       targetCustomerId: ['', Validators.required]
+    });
+
+    this.priceForm = this.fb.group({
+      price: ['', [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -272,6 +283,79 @@ hasSocData(order: any): boolean {
     });
   }
 
+
+
+    openPriceModal(orderId: string): void {
+      this.selectedOrderId = orderId;
+      this.showPriceModal = true;
+      
+      // Find the order to get its current price
+      const order = this.orders.find(o => o._id === orderId);
+      if (order && order.orderItems && order.orderItems.length > 0) {
+        this.priceForm.get('price')?.setValue(order.orderItems[0].price || 0);
+      } else {
+        this.priceForm.get('price')?.setValue(0);
+      }
+    }
+    
+    closePriceModal(): void {
+      this.showPriceModal = false;
+      this.selectedOrderId = null;
+      this.priceForm.reset();
+    }
+    
+   // Updated submitPriceUpdate method
+  submitPriceUpdate(): void {
+    if (this.priceForm.invalid || !this.selectedOrderId) {
+      return;
+    }
+    
+    this.submitting = true;
+    
+    // Simplified data structure to match backend expectations
+    const data = {
+      price: Number(this.priceForm.value.price)
+    };
+    
+    this.ordersService.updateOrderPrice(this.selectedOrderId, data)
+      .pipe(finalize(() => {
+        this.submitting = false;
+      }))
+      .subscribe({
+        next: (response) => {
+          console.log('Price update response:', response);
+          
+          // Update the order in the filtered orders list with the fully updated order from response
+          // const index = this.filteredOrders.findIndex(o => o._id === this.selectedOrderId);
+          // if (index !== -1 && response.updatedOrder) {
+          //   this.filteredOrders[index] = response.updatedOrder;
+          // }
+          
+          // // Also update in the allOrders array
+          // const allOrdersIndex = this.allOrders.findIndex(o => o._id === this.selectedOrderId);
+          // if (allOrdersIndex !== -1 && response.updatedOrder) {
+          //   this.allOrders[allOrdersIndex] = response.updatedOrder;
+          // }
+          
+          Swal.fire({
+            title: 'Success',
+            html: `
+              Order price has been updated successfully<br>
+  
+            `,
+            icon: 'success'
+          });
+          
+          this.closePriceModal();
+        },
+        error: (error) => {
+          console.error('Error updating order price:', error);
+          Swal.fire('Error', 'Failed to update order price: ' + (error.error?.details || error.message || 'Unknown error'), 'error');
+        }
+      });
+  }
+
+  
   filterCustomers(): void {
     if (!this.searchTerm) {
       this.filteredCustomers = this.customersList;

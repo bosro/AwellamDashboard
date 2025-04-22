@@ -8,7 +8,7 @@
       <!-- Back to List -->
     </button>
     <div>
-      <p class="mt-1 text-2xl font-semibold  text-gray-900">{{order?.customerId?.fullName}}</p>
+      <p class="mt-1 text-2xl font-semibold  text-gray-900"  [routerLink]="['/main/customers/details', order?.customerId?._id]">{{order?.customerId?.fullName}}</p>
       
       <h1 class="text-sm  text-gray-900">
         Order #{{order?.orderNumber}}
