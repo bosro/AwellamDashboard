@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class SecureHttpInterceptor implements HttpInterceptor {
-  private readonly TOKEN_KEY = 'transport_token'; // Match the key from AuthService
+  private readonly TOKEN_KEY = 'transport_token';
 
   constructor(private router: Router) {}
   
@@ -25,23 +25,31 @@ export class SecureHttpInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     
-    // Get the access token using the same key as AuthService
+    // Get the access token
     const accessToken = localStorage.getItem(this.TOKEN_KEY);
     
-    // Clone the request with updated URL and headers
-    let modifiedRequest = request.clone({
-      url: request.url.includes('http') ? request.url : `${environment.apiUrl}${request.url}`,
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      })
-    });
-
+    // Check if the request contains FormData (like file uploads)
+    const isFormData = request.body instanceof FormData;
+    
+    // Create base headers
+    let headers = new HttpHeaders();
+    
+    // Only set Content-Type for non-FormData requests
+    // For FormData/file uploads, browser will set the correct Content-Type with boundary
+    if (!isFormData) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
+    
     // Add token if available
     if (accessToken) {
-      modifiedRequest = modifiedRequest.clone({
-        headers: modifiedRequest.headers.set('Authorization', `Bearer ${accessToken}`)
-      });
+      headers = headers.set('Authorization', `Bearer ${accessToken}`);
     }
+    
+    // Clone the request with updated URL and headers
+    const modifiedRequest = request.clone({
+      url: request.url.includes('http') ? request.url : `${environment.apiUrl}${request.url}`,
+      headers: headers
+    });
 
     return next.handle(modifiedRequest).pipe(
       retry(1),

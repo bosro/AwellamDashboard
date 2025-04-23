@@ -445,7 +445,12 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
 
-  
+    {
+      title: 'Banks',
+      icon: 'ri-user-settings-line',
+      route: '/main/banks',
+      roles: ['super_admin'],
+    },
 
     {
       title: 'Settings',
