@@ -1,16 +1,31 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { PaymentReference, SocNumber as BaseSocNumber } from '../../../services/payment.service';
+
+interface SocNumber extends BaseSocNumber {
+  paymentDetails?: {
+    paymentRef: string;
+    plantName: string;
+    productName: string;
+    socNumber: string;
+    status: string;
+    paidAt?: Date;
+  };
+}
+import { PaymentService } from '../../../services/payment.service';
+import { AnimationKeyframesSequenceMetadata } from '@angular/animations';
 
 @Component({
-  selector: 'app-borrowed-soc',
+  selector: 'app-payment-reference-socs',
   templateUrl: './BorrowedSoc.html'
 })
-export class BorrowedSocComponent implements OnInit {
-  borrowedSocs: any[] = [];
-  filteredSocs: any[] = [];
+export class PaymentReferenceSocsComponent implements OnInit {
+  paymentReferenceId: string = '';
+  paymentReference: PaymentReference | null = null;
+  borrowedSocs: SocNumber[] = [];
+  filteredSocs: SocNumber[] = [];
   socNumberFilter = new FormControl('');
   
   // Pagination properties
@@ -26,17 +41,23 @@ export class BorrowedSocComponent implements OnInit {
   // Modal properties
   showPayLoadModal = false;
   showPaymentDetailsModal = false;
-  selectedSoc: any = null;
-  // paymentFee: number | null = null;
+  selectedSoc: any | null = null;
   paymentRef: string = '';
   productName: string = '';
   inputSocNumber: string = '';
   inputPlantName: string = '';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private paymentService: PaymentService,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
-    this.fetchBorrowedSocs();
+    this.route.params.subscribe(params => {
+      this.paymentReferenceId = params['id'];
+      this.fetchPaymentReference();
+      this.fetchBorrowedSocsByPaymentRef();
+    });
     
     // Set up filter with debounce
     this.socNumberFilter.valueChanges
@@ -50,15 +71,41 @@ export class BorrowedSocComponent implements OnInit {
       });
   }
 
-  fetchBorrowedSocs(): void {
+  fetchPaymentReference(): void {
     this.loading = true;
-    this.http.get(`${environment.apiUrl}/soc/getsoc/isborrowed`)
+    this.paymentService.getPaymentReferenceDetails(this.paymentReferenceId)
       .subscribe({
-        next: (response: any) => {
-          this.borrowedSocs = response.borrowedSocs;
+        next: (response) => {
+          this.paymentReference = response.paymentReference;
+  
+          // Sync the status of SOCs with paymentDetails.status if available
+          if (this.paymentReference?.socNumbers) {
+            this.paymentReference.socNumbers.forEach((soc: any) => {
+              if (soc.paymentDetails?.status?.toLowerCase() === 'paid') {
+                soc.status = 'paid'; // Sync the main status with paymentDetails.status
+              }
+            });
+          }
+  
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Failed to load payment reference details. Please try again later.';
+          console.error('Error fetching payment reference:', err);
+          this.loading = false;
+        }
+      });
+  }
+
+  fetchBorrowedSocsByPaymentRef(): void {
+    this.loading = true;
+    this.paymentService.getPaymentReferenceDetails(this.paymentReferenceId)
+      .subscribe({
+        next: (response) => {
+          this.borrowedSocs = response.paymentReference.socNumbers || [];
           
           // Process each SOC to ensure consistency between paymentDetails.status and SOC status
-          this.borrowedSocs.forEach(soc => {
+          this.borrowedSocs.forEach((soc:any) => {
             if (soc.paymentDetails && soc.paymentDetails.status === 'Paid') {
               soc.status = 'Paid'; // Ensure main status is synced
             }
@@ -130,13 +177,12 @@ export class BorrowedSocComponent implements OnInit {
   }
 
   // Modal logic
-  openPayLoadModal(soc: any): void {
+  openPayLoadModal(soc: SocNumber): void {
     this.selectedSoc = soc;
     // Initialize with current values as suggestions
     this.inputSocNumber = soc.socNumber; 
     this.inputPlantName = soc.plantId.name;
-    // this.paymentFee = null;
-    this.paymentRef = '';
+    this.paymentRef = this.paymentReference?.paymentRef || '';
     this.productName = '';
     this.showPayLoadModal = true;
   }
@@ -146,7 +192,6 @@ export class BorrowedSocComponent implements OnInit {
     this.selectedSoc = null;
     this.inputSocNumber = '';
     this.inputPlantName = '';
-    // this.paymentFee = null;
     this.paymentRef = '';
     this.productName = '';
   }
@@ -161,11 +206,6 @@ export class BorrowedSocComponent implements OnInit {
       alert('Please enter a plant name.');
       return;
     }
-    
-    // if (!this.paymentFee || this.paymentFee <= 0) {
-    //   alert('Please enter a valid payment fee.');
-    //   return;
-    // }
 
     if (!this.paymentRef.trim()) {
       alert('Please enter a payment reference.');
@@ -179,7 +219,6 @@ export class BorrowedSocComponent implements OnInit {
 
     const payload = {
       socNumber: this.inputSocNumber,
-      // paymentFee: this.paymentFee,
       paymentRef: this.paymentRef,
       plantName: this.inputPlantName,
       productName: this.productName,
@@ -188,17 +227,16 @@ export class BorrowedSocComponent implements OnInit {
 
     this.loading = true; // Show loading state while request is processing
 
-    // Use the selected SOC's ID for the API call, but use the manually entered values for the payload
-    this.http.put(`${environment.apiUrl}/soc/paySoc/${this.selectedSoc._id}`, payload)
+    // Use the selected SOC's ID for the API call
+    this.paymentService.paySoc(this.selectedSoc!._id, payload)
       .subscribe({
-        next: (response: any) => {
+        next: (response) => {
           // Update the local SOC object with payment details and correct status
-          const index = this.borrowedSocs.findIndex(soc => soc._id === this.selectedSoc._id);
+          const index = this.borrowedSocs.findIndex(soc => soc._id === this.selectedSoc!._id);
           if (index !== -1) {
             // Update both the main status and the payment details status
             this.borrowedSocs[index].status = 'paid';
             this.borrowedSocs[index].paymentDetails = {
-              // paymentFee: this.paymentFee,
               paymentRef: this.paymentRef,
               plantName: this.inputPlantName,
               productName: this.productName,
@@ -217,7 +255,7 @@ export class BorrowedSocComponent implements OnInit {
           this.closePayLoadModal();
           
           // Refresh data from server to ensure everything is in sync
-          this.fetchBorrowedSocs();
+          this.fetchBorrowedSocsByPaymentRef();
         },
         error: (err) => {
           console.error('Error updating status:', err);
@@ -228,7 +266,7 @@ export class BorrowedSocComponent implements OnInit {
   }
 
   // View payment details modal
-  openPaymentDetailsModal(soc: any): void {
+  openPaymentDetailsModal(soc: SocNumber): void {
     this.selectedSoc = soc;
     this.showPaymentDetailsModal = true;
   }
@@ -240,8 +278,7 @@ export class BorrowedSocComponent implements OnInit {
 
   // Check if SOC has payment details
   hasPaymentDetails(soc: any): boolean {
-    return soc.status.toLowerCase() === 'paid' || 
-           (soc.paymentDetails && soc.paymentDetails.status && 
-            soc.paymentDetails.status.toLowerCase() === 'paid');
+    return soc.status?.toLowerCase() === 'paid' || 
+         (soc.paymentDetails?.status?.toLowerCase() === 'paid');
   }
 }

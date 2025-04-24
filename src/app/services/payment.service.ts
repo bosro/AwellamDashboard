@@ -338,4 +338,21 @@ export class PaymentService {
   createSocNumber(paymentRefId: string, socData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/soc/create/${paymentRefId}`, socData);
   }
+
+  // New methods added for the borrowed payment references feature
+  getBorrowedPaymentReferences(): Observable<PaymentResponse> {
+    return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/borrowedpaymentreferences`);
+  }
+
+  getBorrowedSocsByPaymentRef(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/payment/get/${id}`);
+  }
+
+  getAllBorrowedSocs(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/soc/getsoc/isborrowed`);
+  }
+
+  paySoc(socId: string, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/soc/paySoc/${socId}`, payload);
+  }
 }

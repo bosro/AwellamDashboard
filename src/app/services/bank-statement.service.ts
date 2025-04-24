@@ -1,6 +1,6 @@
 // services/bank-statement.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -71,7 +71,33 @@ export class BankStatementService {
     return this.http.get<BankTransaction>(`${this.apiUrl}/transaction/${transactionId}`);
   }
 
+  deleteTransaction(transactionId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/entry/${transactionId}`);
+  }
+
   deleteUploadById(uploadId: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/uploads/${uploadId}`);
+  }
+
+  filterUploads( filters: any): Observable<any> {
+    let params = new HttpParams();
+    
+    if (filters.startDate) {
+      params = params.set('startDate', filters.startDate);
+    }
+    
+    if (filters.endDate) {
+      params = params.set('endDate', filters.endDate);
+    }
+    
+    if (filters.reference) {
+      params = params.set('reference', filters.reference);
+    }
+    
+    if (filters.amount !== null) {
+      params = params.set('amount', filters.amount.toString());
+    }
+    
+    return this.http.get(`${this.apiUrl}/uploads/filter`, { params });
   }
 }

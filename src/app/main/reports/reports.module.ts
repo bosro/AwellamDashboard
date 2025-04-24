@@ -8,9 +8,10 @@ import { SalesReportComponent} from './report-list/sales-report.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PurchasingReportComponent } from './report-list/purchasing-report.component';
 import { SOCReportComponent } from './report-list/soc-report.component';
-import { BorrowedSocComponent } from './report-list/BorrowedSoc';
+import {  PaymentReferenceSocsComponent } from './report-list/BorrowedSoc';
 import { CustomerSummaryComponent } from './report-list/customer.report.component';
 import { SocTableComponent } from './report-list/ActiveSoc.list';
+import { BorrowedPaymentReferencesComponent } from './report-list/BorrowedPaymentRef';
 
 
 @NgModule({
@@ -18,9 +19,11 @@ import { SocTableComponent } from './report-list/ActiveSoc.list';
     SalesReportComponent,
     PurchasingReportComponent,
     SOCReportComponent,
-    BorrowedSocComponent,
+    // BorrowedSocComponent,
     CustomerSummaryComponent,
-    SocTableComponent
+    SocTableComponent,
+    BorrowedPaymentReferencesComponent,
+    PaymentReferenceSocsComponent
     // ReportListComponent,
     // ReportViewerComponent,
     // ReportGeneratorComponent,
