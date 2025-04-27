@@ -1,5 +1,5 @@
 <!-- self-list.component.html -->
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto  py-6">
     <div class="bg-white rounded-lg shadow-md p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">Self Lift Orders</h1>
       
@@ -40,7 +40,9 @@
           <thead class="bg-gray-100">
             <tr>
               <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SOC Number</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
               <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
+
               <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
               <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
               <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
@@ -55,6 +57,7 @@
                 (click)="openDetailsModal(order)"
                 class="hover:bg-gray-50 cursor-pointer">
               <td class="px-4 py-4 whitespace-nowrap">{{ order.socNumber.socNumber }}</td>
+              <td class="px-4 py-4 whitespace-nowrap">{{ order.socNumber.productId.name || 'N/A'}}</td>
               <td class="px-4 py-4 whitespace-nowrap">{{ order.truckNumber }}</td>
               <td class="px-4 py-4 whitespace-nowrap">{{ order.customer.fullName }}</td>
               <td class="px-4 py-4 whitespace-nowrap">{{ order.amount  || 'N/A'}}</td>
@@ -153,6 +156,15 @@
               <span class="text-gray-500 text-sm">SOC Number</span>
               <p class="font-medium">{{ selectedOrder.socNumber.socNumber }}</p>
             </div>
+
+            <div>
+              <span class="text-gray-500 text-sm">Product </span>
+              <p class="font-medium">{{ selectedOrder.socNumber.productId.name || 'N/A'}} </p>
+            </div>
+
+            
+          
+            <!-- <td class="px-4 py-4 whitespace-nowrap">{{ order.productId.name }}</td> -->
             <div>
               <span class="text-gray-500 text-sm">Customer ID</span>
               <p class="font-medium">{{ selectedOrder.customer.fullName }}</p>

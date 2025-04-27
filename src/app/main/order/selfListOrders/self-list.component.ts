@@ -51,10 +51,10 @@ interface EditFormData {
 //   styleUrls: ['./self-list.component.css']
 })
 export class SelfListComponent implements OnInit {
-  orders: SelfListOrder[] = [];
+  orders: any[] = [];
   isLoading = false;
   error = '';
-  selectedOrder: SelfListOrder | null = null;
+  selectedOrder: any | null = null;
   showDetailsModal = false;
   showDeleteModal = false;
   showStatusModal = false;

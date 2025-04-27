@@ -66,8 +66,8 @@ interface Communication {
 export class CustomerDetailsComponent implements OnInit {
   customer!: Customer;
   loading = false;
-  tabs: Array<'overview' | 'orders' | 'Payments' | 'notes'> = ['overview', 'orders', 'Payments', 'notes'];
-  activeTab: 'overview' | 'orders' | 'Payments' | 'notes' = 'overview';
+  tabs: Array<'overview' | 'orders' | 'Payments' | 'notes' | 'SelfLifting'> = ['overview', 'orders', 'Payments', 'notes','SelfLifting'];
+  activeTab: 'overview' | 'orders' | 'Payments' | 'notes' | 'SelfLifting' = 'overview' 
   // orders: CustomerOrder[] = [];
   communications: Communication[] = [];
   showNoteForm = false;
@@ -78,6 +78,7 @@ export class CustomerDetailsComponent implements OnInit {
   noteForm: FormGroup;
   emailForm: FormGroup;
   orders!: any[];
+  selfliftorder!: any[];
   selectedOrder: any;
   transactions: any[] = [];
 
@@ -209,6 +210,7 @@ hasSocData(order: any): boolean {
         this.loadCustomer(params['id']);
       }
       this.loadCustomerTransactions(params['id']);
+      this.loadSelfLiftOrders(params['id'])
     });
   }
 
@@ -216,6 +218,14 @@ hasSocData(order: any): boolean {
     if (id) {
       this.customersService.getCustomerTransactions(id).subscribe(response => {
         this.transactions = response.data;
+      });
+    }
+  }
+
+  loadSelfLiftOrders(id: string): void {
+    if (id) {
+      this.customersService.getSelfLiftOrder(id).subscribe(response => {
+        this.selfliftorder = response.data;
       });
     }
   }

@@ -22,6 +22,7 @@ export interface TransactionResponse {
 export class CustomersService {
   private apiUrl = `${environment.apiUrl}/customers`;
   private apiUrll = `${environment.apiUrl}/transactions`;
+  private apiUrlll = `${environment.apiUrl}/selflist`;
 
   constructor(private http: HttpClient) {}
 
@@ -39,6 +40,9 @@ export class CustomersService {
 
   getCustomerById(id: string): Observable<{ customer: Customer }> {
     return this.http.get<{ customer: Customer }>(`${this.apiUrl}/get/${id}`);
+  }
+  getSelfLiftOrder(id: string): Observable< any > {
+    return this.http.get< any >(`${this.apiUrlll}/orders/${id}`);
   }
 
 
