@@ -4,6 +4,7 @@ import { CustomerListComponent } from './customer-list/customer-list.component';
 import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { CustomerDetailsComponent } from './customer-detail/customer-detail.component';
 import { DebtorsComponent } from './customer-list/debtors-list.component';
+import { BulkSmsComponent } from './customer-list/bulk-sms.component';
 
 
 const routes: Routes = [
@@ -16,6 +17,7 @@ const routes: Routes = [
       { path: 'edit/:id', component: CustomerFormComponent },
       { path: 'details/:id', component: CustomerDetailsComponent },
       { path: 'debtors', component: DebtorsComponent },
+      { path: 'bulk-sms', component: BulkSmsComponent },
       // { path: 'analytics', component: CustomerAnalyticsComponent },
       // { path: 'segments', component: CustomerSegmentsComponent }
     ]

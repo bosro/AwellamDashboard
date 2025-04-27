@@ -7,6 +7,7 @@ import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { CustomerDetailsComponent } from './customer-detail/customer-detail.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DebtorsComponent } from './customer-list/debtors-list.component';
+import { BulkSmsComponent } from './customer-list/bulk-sms.component';
 
 
 @NgModule({
@@ -15,6 +16,7 @@ import { DebtorsComponent } from './customer-list/debtors-list.component';
     CustomerFormComponent,
     CustomerDetailsComponent,
     DebtorsComponent,
+    BulkSmsComponent
   ],
   imports: [
     CommonModule,

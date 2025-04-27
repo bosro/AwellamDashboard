@@ -29,6 +29,11 @@ export class CustomersService {
     return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`);
     }
     
+
+
+    sendBulkSms(message: string): Observable<any> {
+      return this.http.post(`${this.apiUrl}/bulk-sms`, { message });
+    }
   
 
 
