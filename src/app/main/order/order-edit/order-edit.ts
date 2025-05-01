@@ -18,6 +18,7 @@ export class OrderEditComponent implements OnInit {
   trucks: any[] = [];
   order: any;
   productId: string = '';
+  maxDate: string = '';
   private apiUrl = `${environment.apiUrl}`;
 
   constructor(
@@ -30,7 +31,9 @@ export class OrderEditComponent implements OnInit {
     this.orderForm = this.fb.group({
       price: ['', ],
       quantity: ['', ],
-      assignedTruck: ['']
+      assignedTruck: [''],
+      date: ['']
+
     });
   }
 
@@ -38,6 +41,8 @@ export class OrderEditComponent implements OnInit {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
     this.getTrucks()
+    const today = new Date();
+    this.maxDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
   }
 
   loadOrder(): void {
@@ -51,7 +56,8 @@ export class OrderEditComponent implements OnInit {
 
         this.orderForm.patchValue({
           price: this.order.price,
-          assignedTruck: this.order.truckId?._id
+          assignedTruck: this.order.truckId?._id,
+          date:this.order.date,
         });
         this.loading = false;
         this.getTrucks();
