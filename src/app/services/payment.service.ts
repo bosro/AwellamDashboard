@@ -212,6 +212,15 @@ export class PaymentService {
   getSoc(socId:any): Observable<PaymentResponse> {
     return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/soc/${socId}`);
   }
+
+  calculateTotalPriceForAll(): Observable<PaymentResponse> {
+    return this.http.put<PaymentResponse>(`${this.apiUrl}/payment/calculate-cost/all`, {}, { responseType: 'json' });
+  }
+
+  calculateCostForPR(id: string): Observable<PaymentDetailResponse> {
+    return this.http.put<PaymentDetailResponse>(`${this.apiUrl}/payment/calculate-cost/${id}`, {}, { responseType: 'json' });
+  }
+  
   getPaymentReferencesWithActiveSoc(): Observable<PaymentResponse> {
     return this.http.get<PaymentResponse>(`${this.apiUrl}/payment/active-soc`);
   }

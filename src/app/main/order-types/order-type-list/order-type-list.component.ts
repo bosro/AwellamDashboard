@@ -28,7 +28,7 @@ export class OrderTypeListComponent implements OnInit {
   loadOrderTypes(): void {
     this.orderTypeService.getAllOrderTypes().subscribe({
       next: (response) => {
-        this.orderTypes = response;
+        this.orderTypes = response.data;
       },
       error: (err) => {
         this.error = 'Failed to load order types.';

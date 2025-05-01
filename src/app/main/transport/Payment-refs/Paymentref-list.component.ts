@@ -6,6 +6,7 @@ import { PaymentReference, Plant } from '../../../services/payment.service';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { OrderTypeService } from '../../../services/order-type.service';
 
 @Component({
   selector: 'app-payment-list',
@@ -21,7 +22,8 @@ export class PaymentListComponent implements OnInit {
   paymentForm: FormGroup;
   editForm: FormGroup;
   filterForm: FormGroup;
-  orderTypes = Object.values(OrderType);
+  orderTypes: any[] = [];
+  // orderTypes = Object.values(OrderType);
   submitting = false;
   editModalVisible = false;
   selectedPayment: PaymentReference | null = null;
@@ -43,7 +45,8 @@ export class PaymentListComponent implements OnInit {
     private paymentService: PaymentService,
     private router: Router,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private orderTypeService: OrderTypeService,
   ) {
     this.paymentForm = this.fb.group({
       paymentRef: ['', [
@@ -101,7 +104,21 @@ export class PaymentListComponent implements OnInit {
     this.loadPlants();
     this.setupFilters();
     this.loadPRs();
+    this.loadOrderTypes()
     // this.getPayments()
+  }
+
+
+  loadOrderTypes(): void {
+    this.orderTypeService.getAllOrderTypes().subscribe({
+      next: (response) => {
+        this.orderTypes = response.data;
+      },
+      error: (err) => {
+        this.error = 'Failed to load order types.';
+        console.error(err);
+      },
+    });
   }
 
   navigateToPRsWithoutSOCs(): void {
@@ -199,6 +216,34 @@ export class PaymentListComponent implements OnInit {
 
   openDetails(id: string): void {
     this.router.navigate([`main/transport/payment-ref/${id}`]);
+  }
+
+  calculateTotalAmount(paymentId: string): void {
+    this.paymentService.calculateCostForPR(paymentId).subscribe({
+      next: (response) => {
+        console.log(`Total amount for payment reference ${paymentId}:`,);
+        alert(`Total amount for payment reference ${paymentId}:`);
+      },
+      error: (err) => {
+        console.error('Error calculating total amount:', err);
+        alert('Failed to calculate total amount. Please try again.');
+      },
+    });
+  }
+
+
+
+  calculateTotalPriceForAll(): void {
+    this.paymentService.calculateTotalPriceForAll().subscribe({
+      next: (response) => {
+        console.log('Total price for all SOCs:');
+        // alert(`Total price for all SOCs: ${response.totalCost}`);
+      },
+      error: (err) => {
+        console.error('Error calculating total price for all SOCs:', err);
+        alert('Failed to calculate total price for all SOCs. Please try again.');
+      },
+    });
   }
 
   loadPlants(): void {

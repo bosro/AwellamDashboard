@@ -6,6 +6,7 @@ import { PaymentReference, Plant } from '../../../services/payment.service';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { OrderTypeService } from '../../../services/order-type.service';
 
 @Component({
   selector: 'app-payment-list-without-soc',
@@ -21,7 +22,7 @@ export class PaymentListWithoutSocComponent implements OnInit {
   paymentForm: FormGroup;
   editForm: FormGroup;
   filterForm: FormGroup;
-  orderTypes = Object.values(OrderType);
+  orderTypes: any[] = [];
   submitting = false;
   editModalVisible = false;
   selectedPayment: PaymentReference | null = null;
@@ -43,7 +44,9 @@ export class PaymentListWithoutSocComponent implements OnInit {
     private paymentService: PaymentService,
     private router: Router,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+        private orderTypeService: OrderTypeService,
+    
   ) {
     this.paymentForm = this.fb.group({
       paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
@@ -72,6 +75,20 @@ export class PaymentListWithoutSocComponent implements OnInit {
     // this.loadPRsWithoutActiveSOCs();
     // this.loadPRs();
     this.loadPayments();
+    this.loadOrderTypes()
+  }
+
+
+  loadOrderTypes(): void {
+    this.orderTypeService.getAllOrderTypes().subscribe({
+      next: (response) => {
+        this.orderTypes = response.data;
+      },
+      error: (err) => {
+        this.error = 'Failed to load order types.';
+        console.error(err);
+      },
+    });
   }
 
   loadPRsWithoutActiveSOCs(): void {
