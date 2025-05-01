@@ -94,6 +94,7 @@ const routes: Routes = [
         path: 'fuel-management',
         loadChildren: () => import('./fuel-management/fuel.module').then(m => m.FuelModule)
       },
+      { path: 'order-types', loadChildren: () => import('./order-types/orderType.module').then(m => m.OrderTypeModule) },
 
     // In your main routing module (e.g., app-routing.module.ts)
 { path: 'banks', loadChildren: () => import('./bank/bank.module').then(m => m.BankModule),canActivate: [AuthGuard], },

@@ -1,0 +1,97 @@
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Order Types</h1>
+  
+    <button
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
+      (click)="openModal()"
+    >
+      Create New Order Type
+    </button>
+  
+    <div *ngIf="error" class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="orderTypes.length === 0" class="text-gray-500">No order types found.</div>
+  
+    <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+      <thead>
+        <tr class="bg-gray-50">
+          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
+          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Amount</th>
+          <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let orderType of orderTypes" class="hover:bg-gray-50">
+          <td class="px-4 py-2">{{ orderType.name }}</td>
+          <td class="px-4 py-2">{{ orderType.amount | currency }}</td>
+          <td class="px-4 py-2">
+            <button
+              class="text-blue-600 hover:text-blue-800"
+              (click)="openModal(orderType)"
+            >
+              Edit
+            </button>
+            <button
+              class="text-red-600 hover:text-red-800 ml-4"
+              (click)="deleteOrderType(orderType._id)"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Modal -->
+    <div
+      *ngIf="showModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">
+          {{ isEditMode ? 'Edit Order Type' : 'Create Order Type' }}
+        </h2>
+  
+        <form [formGroup]="orderTypeForm" (ngSubmit)="saveOrderType()">
+          <div class="mb-4">
+            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              id="name"
+              formControlName="name"
+              type="text"
+              class="block w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+  
+          <div class="mb-4">
+            <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+            <input
+              id="amount"
+              formControlName="amount"
+              type="number"
+              class="block w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+  
+          <div class="flex justify-end space-x-2">
+            <button
+              type="button"
+              class="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              (click)="closeModal()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-600 text-white px-4 py-2 rounded"
+              [disabled]="orderTypeForm.invalid"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

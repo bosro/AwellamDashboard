@@ -71,9 +71,18 @@ export class CustomerListComponent implements OnInit {
 
   applyFilters(): void {
     const { search } = this.filterForm.value;
-    this.allFilteredCustomers = this.customers.filter(customer =>
-      !search || customer.fullName.toLowerCase().includes(search.toLowerCase())
-    );
+  
+    // Filter customers by fullName or phoneNumber
+    this.allFilteredCustomers = this.customers.filter(customer => {
+      const searchTerm = search?.toLowerCase() || '';
+      return (
+        !searchTerm || 
+        customer.fullName.toLowerCase().includes(searchTerm) || 
+        customer.phoneNumber.toString().includes(searchTerm)
+      );
+    });
+  
+    // Update total count and paginate the filtered customers
     this.total = this.allFilteredCustomers.length;
     this.paginateCustomers();
   }
