@@ -56,7 +56,8 @@ export class PaymentListWithoutSocComponent implements OnInit {
     });
 
     this.editForm = this.fb.group({
-      paymentRef: ['', [Validators.required, Validators.pattern(/^PR\d{11}$/)]],
+      paymentRef: ['', [Validators.required 
+      ]],
       plantId: ['', Validators.required],
       orderType: ['', Validators.required],
       chequeNumber: ['', Validators.required]

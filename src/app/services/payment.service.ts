@@ -159,7 +159,7 @@ export interface PaymentReference {
   socNumbers: SocNumber[];
   createdAt: string;
   updatedAt: string;
-  orderType: string;
+  orderType: any[];
   chequeNumber: number;
   soc?: string;
   plant: Plant
