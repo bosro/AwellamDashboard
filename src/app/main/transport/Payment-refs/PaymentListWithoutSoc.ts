@@ -15,7 +15,7 @@ import { OrderTypeService } from '../../../services/order-type.service';
 export class PaymentListWithoutSocComponent implements OnInit {
   payments: PaymentReference[] = [];
   filteredPayments: PaymentReference[] = [];
-  plants: Plant[] = [];
+  plants: any[] = [];
   loading = false;
   error: string | null = null;
   showForm = false;
@@ -35,7 +35,7 @@ export class PaymentListWithoutSocComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 20;
   totalItems = 0;
 
   private readonly apiUrl = `${environment.apiUrl}`;
