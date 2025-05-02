@@ -76,6 +76,7 @@ export class PaymentListWithoutSocComponent implements OnInit {
     // this.loadPRs();
     this.loadPayments();
     this.loadOrderTypes()
+    this.loadPlants()
   }
 
 
@@ -207,7 +208,7 @@ export class PaymentListWithoutSocComponent implements OnInit {
 
   loadPlants(): void {
     this.loading = true;
-    this.http.get<{ plants: Plant[] }>(`${this.apiUrl}/plants/get`).subscribe({
+    this.http.get<{ plants: any[] }>(`${this.apiUrl}/plants/get`).subscribe({
       next: (response) => {
         this.plants = response.plants;
         this.loading = false;
