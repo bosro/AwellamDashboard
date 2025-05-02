@@ -20,7 +20,7 @@ const environments = {
 
 
 
-const currentEnvironment = 'production';
+const currentEnvironment = 'development';
 
 export const environment = environments[currentEnvironment];
 

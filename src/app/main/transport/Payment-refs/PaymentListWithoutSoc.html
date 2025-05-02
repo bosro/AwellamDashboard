@@ -133,8 +133,8 @@
               </label>
               <select formControlName="orderType" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Order Type</option>
-                <option *ngFor="let type of orderTypes" [value]="type">
-                  {{type}}
+                <option *ngFor="let type of orderTypes" [value]="type._id">
+                  {{type.name}}
                 </option>
               </select>
             </div>
@@ -303,8 +303,8 @@
               </label>
               <select formControlName="orderType" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 <option value="">Select Order Type</option>
-                <option *ngFor="let type of orderTypes" [value]="type">
-                  {{type}}
+                <option *ngFor="let type of orderTypes" [value]="type._id">
+                  {{type.name}}
                 </option>
               </select>
             </div>
