@@ -60,9 +60,12 @@
                 </span>
               </td>
               <td class="px-4 py-4 text-sm">
-                <div class="truncate">
-                  {{ transaction.matchedToCustomerId?.fullName || 'N/A' }}
-                </div>
+
+                  <div class="truncate">
+                    {{ transaction.orderType?.name || transaction.matchedToCustomerId?.fullName || 'N/A' }}
+                  </div>
+                  
+
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm">
                 <div class="flex space-x-2">

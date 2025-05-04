@@ -13,6 +13,9 @@ export interface BankTransaction {
   matched: boolean;
   matchedToCustomerId: any;
   uploadId: string;
+  orderType:{
+    name:string
+  }
 }
 
 export interface BankUpload {
