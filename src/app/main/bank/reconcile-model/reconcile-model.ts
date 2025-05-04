@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { BankTransaction, BankStatementService } from '../../../services/bank-statement.service';
 import { CustomersService } from '../../../services/customer.service';
+import { OrderTypeService } from '../../../services/order-type.service';
 import { Customer } from '../../../shared/types/customer.interface';
 
 @Component({
@@ -17,36 +18,36 @@ export class ReconcileModalComponent implements OnInit {
   reconcileForm: FormGroup;
   loading = false;
   searchLoading = false;
+  orderTypesLoading = true;
   error = '';
   customers: Customer[] = [];
-  allCustomers: Customer[] = []; // Store all customers for local filtering
+  allCustomers: Customer[] = [];
+  orderTypes: any[] = [];
+  selectedOrderType: string = '';
+  activeTab: 'customers' | 'orderType' = 'customers';
 
   constructor(
     private fb: FormBuilder,
     private customerService: CustomersService,
-    private bankStatementService: BankStatementService
+    private bankStatementService: BankStatementService,
+    private orderTypeService: OrderTypeService
   ) {
     this.reconcileForm = this.fb.group({
-      customerId: ['', [Validators.required]],
+      customerId: ['', Validators.required],
       searchTerm: [''],
     });
   }
 
   ngOnInit(): void {
     this.loadCustomers();
+    this.loadOrderTypes();
 
-    // Setup local search with debounce
     this.reconcileForm.get('searchTerm')?.valueChanges
-      .pipe(
-        debounceTime(300), // Wait 300ms after the user stops typing
-        distinctUntilChanged() // Only emit if the value changes
-      )
+      .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe((term: string) => {
         if (!term.trim()) {
-          // If the search term is empty, reset to all customers
           this.customers = [...this.allCustomers];
         } else {
-          // Filter customers locally based on the search term
           this.customers = this.allCustomers.filter((customer: Customer) =>
             customer.fullName.toLowerCase().includes(term.toLowerCase())
           );
@@ -57,11 +58,24 @@ export class ReconcileModalComponent implements OnInit {
   loadCustomers(): void {
     this.customerService.getCustomers().subscribe({
       next: (response) => {
-        this.allCustomers = response.customers; // Store all customers for filtering
-        this.customers = [...this.allCustomers]; // Initialize the displayed customers
+        this.allCustomers = response.customers;
+        this.customers = [...this.allCustomers];
       },
       error: (err) => {
         this.error = 'Failed to load customers: ' + err.message;
+      },
+    });
+  }
+
+  loadOrderTypes(): void {
+    this.orderTypeService.getAllOrderTypes().subscribe({
+      next: (response) => {
+        this.orderTypes = response.data;
+        this.orderTypesLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load order types.';
+        this.orderTypesLoading = false;
       },
     });
   }
@@ -70,10 +84,8 @@ export class ReconcileModalComponent implements OnInit {
     this.close.emit();
   }
 
-  onSubmit(): void {
-    if (this.reconcileForm.invalid) {
-      return;
-    }
+  onSubmitCustomer(): void {
+    if (this.reconcileForm.invalid) return;
 
     const customerId = this.reconcileForm.value.customerId;
 
@@ -82,12 +94,31 @@ export class ReconcileModalComponent implements OnInit {
       next: (response) => {
         this.loading = false;
         this.transactionReconciled.emit(response.transaction);
-        this.onClose(); // Close the modal after successful reconciliation
+        this.onClose();
       },
       error: (err) => {
         this.loading = false;
         this.error = err.error?.error || 'Failed to reconcile transaction';
       },
     });
+  }
+
+  onSubmitOrderType(): void {
+    if (!this.selectedOrderType) return;
+
+    this.loading = true;
+    this.bankStatementService
+      .reconcileTransactionWithOrderType(this.transaction._id, this.selectedOrderType)
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.transactionReconciled.emit(response.transaction);
+          this.onClose();
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.error || 'Failed to reconcile with order type';
+        },
+      });
   }
 }

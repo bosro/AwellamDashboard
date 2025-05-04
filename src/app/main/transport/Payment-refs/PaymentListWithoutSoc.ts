@@ -183,7 +183,7 @@ export class PaymentListWithoutSocComponent implements OnInit {
     });
   }
 
-  get paginatedPayments(): PaymentReference[] {
+  get paginatedPayments(): any[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return this.filteredPayments.slice(startIndex, startIndex + this.pageSize);
   }

@@ -67,6 +67,12 @@ export class BankStatementService {
     return this.http.post<any>(`${this.apiUrl}/reconcile`, { transactionId, customerId });
   }
 
+  reconcileTransactionWithOrderType(transactionId: string, orderTypeId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/reconcile/order-type`, { transactionId, orderTypeId });
+  }
+
+ 
+
   getTransaction(transactionId: string): Observable<BankTransaction> {
     return this.http.get<BankTransaction>(`${this.apiUrl}/transaction/${transactionId}`);
   }

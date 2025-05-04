@@ -124,6 +124,7 @@ export interface SocNumber {
   socNumber: string;
   quantity: number;
   plantId: Plant;
+  price:number;
   categoryId: Category;
   productId: Product;
   status: string;

@@ -164,9 +164,29 @@
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div class="ml-4">
-                <div class="text-sm font-medium text-gray-900">
-                  {{ transaction.customer?.fullName || 'Unknown Customer' }}
+                <!-- Customer -->
+                <div *ngIf="transaction.customer?.fullName; else unknownCustomer">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ transaction.customer.fullName }}
+                  </div>
                 </div>
+                <ng-template #unknownCustomer>
+                  <div class="text-sm font-medium text-gray-900">
+                    Unknown Customer
+                  </div>
+                </ng-template>
+              
+                <!-- Order Type -->
+                <div *ngIf="transaction.orderType?.name; else unknownOrderType">
+                  <div class="text-sm text-gray-500">
+                    {{ transaction.orderType.name }}
+                  </div>
+                </div>
+                <ng-template #unknownOrderType>
+                  <div class="text-sm text-gray-500">
+                    Unknown Order Type
+                  </div>
+                </ng-template>
               </div>
             </div>
           </td>
@@ -446,9 +466,23 @@
         </div>
         
         <div class="grid grid-cols-2 gap-4">
-          <div>
+          <div *ngIf="selectedTransaction?.customer?.fullName">
             <p class="text-sm text-gray-500">Customer</p>
-            <p class="font-medium">{{ selectedTransaction?.customer?.fullName }}</p>
+            <p class="font-medium">{{ selectedTransaction.customer.fullName }}</p>
+          </div>
+          <div *ngIf="!selectedTransaction?.customer?.fullName">
+            <p class="text-sm text-gray-500">Customer</p>
+            <p class="font-medium">Unknown Customer</p>
+          </div>
+        
+          <!-- Order Type -->
+          <div *ngIf="selectedTransaction?.orderType?.name">
+            <p class="text-sm text-gray-500">Order Type</p>
+            <p class="font-medium">{{ selectedTransaction.orderType.name }}</p>
+          </div>
+          <div *ngIf="!selectedTransaction?.orderType?.name">
+            <p class="text-sm text-gray-500">Order Type</p>
+            <p class="font-medium">Unknown Order Type</p>
           </div>
           
           <div>

@@ -25,7 +25,7 @@
       <tbody>
         <tr *ngFor="let orderType of orderTypes" class="hover:bg-gray-50">
           <td class="px-4 py-2">{{ orderType.name }}</td>
-          <td class="px-4 py-2">{{ orderType.amount | currency }}</td>
+          <td class="px-4 py-2">GHC {{ orderType.amount }}</td>
           <td class="px-4 py-2">
             <button
               class="text-blue-600 hover:text-blue-800"

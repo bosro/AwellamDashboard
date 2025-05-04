@@ -200,27 +200,27 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <tr *ngFor="let payment of paginatedPayments">
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-gray-900">{{payment.paymentRef}}</div>
+              <div class="text-sm font-medium text-gray-900">{{ payment.paymentRef || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-gray-900">{{payment.chequeNumber}}</div>
+              <div class="text-sm font-medium text-gray-900">{{ payment.chequeNumber || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{payment.plantId.name}}</div>
+              <div class="text-sm text-gray-900">{{ payment.plantId?.[0]?.name || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{payment.orderType|| 'N/A'}}</div>
+              <div class="text-sm text-gray-900">{{ payment.orderType?.[0]?.name || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{payment.costofPaymentRef || 'N/A'}}</div>
+              <div class="text-sm text-gray-900">{{ payment.costofPaymentRef || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-500">{{payment.createdAt | date:'medium'}}</div>
+              <div class="text-sm text-gray-500">{{ payment.createdAt ? (payment.createdAt | date:'medium') : 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right">
-              <button (click)="calculateTotalAmount(payment._id)" class="text-yellow-600 hover:text-blue-900 mr-2">
+              <!-- <button (click)="calculateTotalAmount(payment._id)" class="text-yellow-600 hover:text-blue-900 mr-2">
                 Calculate Cost
-              </button>
+              </button> -->
               <button (click)="openDetails(payment._id)" class="text-blue-600 hover:text-blue-900 mr-2">
                 View Details
               </button>
