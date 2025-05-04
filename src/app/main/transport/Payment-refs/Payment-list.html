@@ -212,7 +212,9 @@
               <div class="text-sm text-gray-900">{{ payment.orderType?.[0]?.name || 'N/A' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ payment.costofPaymentRef || 'N/A' }}</div>
+              <div class="text-sm text-gray-900">
+                {{ payment.costofPaymentRef ? (payment.costofPaymentRef | currency:'GHC':'symbol':'1.2-2') : 'N/A' }}
+              </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="text-sm text-gray-500">{{ payment.createdAt ? (payment.createdAt | date:'medium') : 'N/A' }}</div>
