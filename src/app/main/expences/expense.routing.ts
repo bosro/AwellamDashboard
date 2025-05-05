@@ -6,6 +6,7 @@ import { ExpenseDashboardComponent } from './expenseDashboard/expenseDashboard';
 import { ImprestListComponent } from './imprest/imprest-list/imprest-list.component';
 import { ImprestFormComponent } from './imprest/imprest-form/imprest-form.component';
 import { ImprestDetailComponent } from './imprest/imprest-details/imprest-details.component';
+import { GeneralExpenseComponent } from './general-expense/general-expense.component';
 
 const routes: Routes = [
     {
@@ -27,10 +28,7 @@ const routes: Routes = [
                 component: ExpenseListComponent
             },
          
-            {
-                path: 'general',
-                component: ExpenseListComponent
-            },
+            { path: 'general', component: GeneralExpenseComponent },
             // Nested Imprest routes
             {
                 path: 'imprest',

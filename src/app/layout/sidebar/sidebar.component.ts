@@ -267,9 +267,10 @@ export class SidebarComponent implements OnInit {
           icon: 'i-user-add-line',
         },
         {
-          title: 'General Expenses',
+          title: 'Banks/General Expenses',
           route: '/main/expenses/general',
           icon: 'i-user-add-line',
+          roles: ['super_admin'], // Only visible to super admin
         },
         {
           title: 'Imprest',
@@ -452,7 +453,7 @@ export class SidebarComponent implements OnInit {
       roles: ['super_admin'],
     },
     {
-      title: 'OrderTypes',
+      title: 'Suppliers',
       icon: 'ri-user-settings-line',
       route: '/main/order-types',
       roles: ['super_admin'],

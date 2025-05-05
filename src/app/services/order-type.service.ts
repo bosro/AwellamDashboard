@@ -8,6 +8,7 @@ import { environment } from '../environments/environment';
 })
 export class OrderTypeService {
   private apiUrl = `${environment.apiUrl}/order-types`;
+  private apiUrll = `${environment.apiUrl}/payment`;
 
   constructor(private http: HttpClient) {}
 
@@ -29,6 +30,11 @@ export class OrderTypeService {
   // Update an OrderType
   updateOrderType(id: string, data: { name: string; amount: number }): Observable<any> {
     return this.http.put(`${this.apiUrl}/edit/${id}`, data);
+  }
+
+   // Fetch payment references by orderTypeId
+   getPaymentReferences(orderTypeId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrll}/payment-references/${orderTypeId}/get`);
   }
 
   // Delete an OrderType

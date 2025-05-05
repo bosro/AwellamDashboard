@@ -37,6 +37,10 @@ export class ExpenseService {
     return this.http.get(`${this.baseUrl}/get`);
   }
 
+  getGeneralExpense(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/general`);
+  }
+
   getById(id: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/get/${id}`);
   }

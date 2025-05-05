@@ -23,7 +23,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let orderType of orderTypes" class="hover:bg-gray-50">
+        <tr *ngFor="let orderType of orderTypes" class="hover:bg-gray-50" [routerLink]="'/main/order-types/' + orderType._id">
           <td class="px-4 py-2">{{ orderType.name }}</td>
           <td class="px-4 py-2">
             {{ orderType.amount ? (orderType.amount | currency:'GHC':'symbol':'1.2-2') : '0' }}

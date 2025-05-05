@@ -20,6 +20,7 @@ import { ExpenseDashboardComponent } from './expenseDashboard/expenseDashboard';
 import { ImprestListComponent } from './imprest/imprest-list/imprest-list.component';
 import { ImprestFormComponent } from './imprest/imprest-form/imprest-form.component';
 import { ImprestDetailComponent } from './imprest/imprest-details/imprest-details.component';
+import { GeneralExpenseComponent } from './general-expense/general-expense.component';
 // import { ImprestService } from './imprest/services/imprest.service';
 
 // const routes: Routes = [
@@ -34,6 +35,7 @@ import { ImprestDetailComponent } from './imprest/imprest-details/imprest-detail
     ExpenseListComponent,
     ExpenseModalComponent,
     ExpenseTypeComponent,
+    GeneralExpenseComponent,
     // ExpenseTypeModalComponent,
     ExpenseDashboardComponent,
     // Imprest Components
