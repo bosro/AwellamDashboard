@@ -305,7 +305,7 @@ export class PaymentService {
     );
   }
 
-  deleteSoc(paymentRefId: string, socId: string): Observable<DeleteSocResponse> {
+  deleteSoc( socId: string): Observable<DeleteSocResponse> {
     return this.http.delete<DeleteSocResponse>(
       `${this.apiUrl}/soc/delete/${socId}`
     );

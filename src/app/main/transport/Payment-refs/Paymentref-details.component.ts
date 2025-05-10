@@ -63,7 +63,7 @@ export class PaymentDetailComponent implements OnInit {
       quantity: ['', ],
       plantId: ['', Validators.required],
       productId: ['', Validators.required],
-      destinationId: ['', Validators.required],
+      destinationId: ['', ],
     });
 
     // Initialize edit form
@@ -484,7 +484,7 @@ export class PaymentDetailComponent implements OnInit {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed && this.paymentRef) {
-        this.paymentService.deleteSoc(this.paymentRef._id, socId)
+        this.paymentService.deleteSoc( socId)
           .subscribe({
             next: () => {
               Swal.fire(

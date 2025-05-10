@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { PaymentService } from '../../../services/payment.service';
+import Swal from 'sweetalert2';
 
 interface Plant {
   _id: string;
@@ -76,11 +78,11 @@ export class SocTableComponent implements OnInit {
     Math = Math;
   // Modal properties
   showModal: boolean = false;
-  selectedSoc: SOC | null = null;
+  selectedSoc: any | null = null;
   
   private apiUrl = `${environment.apiUrl}`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,  private paymentService: PaymentService,) { }
 
   ngOnInit(): void {
     this.getPlants();
@@ -157,6 +159,36 @@ export class SocTableComponent implements OnInit {
     });
   }
 
+
+   deleteSoc(socId: string): void {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'This action cannot be undone',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed ) {
+          this.paymentService.deleteSoc( socId)
+            .subscribe({
+              next: () => {
+                Swal.fire(
+                  'Deleted!',
+                  'SOC has been deleted.',
+                  'success'
+                );
+                this.fetchSOCs();
+              },
+              error: (error) => {
+                console.error('Error deleting SOC:', error);
+                Swal.fire('Error', error.error?.message || 'Failed to delete SOC', 'error');
+              }
+            });
+        }
+      });
+    }
   getProducts(plantId: string): void {
     if (!plantId) {
       // Get all products or filter from existing socList
