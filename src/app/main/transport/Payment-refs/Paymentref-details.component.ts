@@ -55,9 +55,9 @@ export class PaymentDetailComponent implements OnInit {
     // Initialize create form
     this.socForm = this.fb.group({
       socNumber: ['', [
-        Validators.required, 
-        Validators.minLength(12), 
-        Validators.maxLength(12),
+        // Validators.required, 
+        // Validators.minLength(12), 
+        // Validators.maxLength(12),
         Validators.pattern(/^SOC\d{9}$/)
       ]],
       quantity: ['', ],
@@ -137,7 +137,7 @@ export class PaymentDetailComponent implements OnInit {
       error: (error) => {
         console.error('Error loading all SOCs:', error);
         this.bulkAssignLoading = false;
-        Swal.fire('Error', 'Failed to load all SOCs', 'error');
+        Swal.fire('Warning', 'No active SOC numbers found for this plant', 'warning');
       },
     });
   }
@@ -207,7 +207,7 @@ export class PaymentDetailComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error loading destinations:', error);
-            Swal.fire('Error', 'Failed to load destinations', 'error');
+            Swal.fire('Warning', 'No active SOC numbers found for this plant', 'warning');
           },
         });
 
