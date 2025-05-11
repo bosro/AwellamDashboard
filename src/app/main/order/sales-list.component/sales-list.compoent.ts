@@ -38,10 +38,13 @@ export class SalesOrderListComponent implements OnInit {
   Math = Math;
   products: Product[] = [];
   allOrders: Order[] = []; // Keep this for backward compatibility
+  maxDate: string = '';
 
 
   showPriceModal = false;
+    showDateModal = false;
 priceForm: FormGroup;
+dateForm: FormGroup;
 selectedOrderId: string | null = null;
 submitting = false;
 
@@ -73,6 +76,10 @@ submitting = false;
     this.priceForm = this.fb.group({
       price: ['', [Validators.required, Validators.min(0)]]
     });
+
+    this.dateForm = this.fb.group({
+      date: ['', [Validators.required]]
+    });
   }
 
   
@@ -93,6 +100,9 @@ submitting = false;
   
     this.loadInitialData();
     this.setupFilters();
+
+
+    this.maxDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
   }
   
   
@@ -163,6 +173,76 @@ submitPriceUpdate(): void {
       error: (error) => {
         console.error('Error updating order price:', error);
         Swal.fire('Error', 'Failed to update order price: ' + (error.error?.details || error.message || 'Unknown error'), 'error');
+      }
+    });
+}
+
+  openDateModal(orderId: string): void {
+    this.selectedOrderId = orderId;
+    this.showDateModal = true;
+    
+    // Find the order to get its current price
+    const order = this.filteredOrders.find(o => o._id === orderId);
+    if (order && order.orderItems && order.orderItems.length > 0) {
+      this.dateForm.get('date')?.setValue(order.date || 0);
+    } else {
+      this.dateForm.get('date')?.setValue(0);
+    }
+  }
+  
+  closeDateModal(): void {
+    this.showDateModal = false;
+    this.selectedOrderId = null;
+    this.dateForm.reset();
+  }
+  
+ // Updated submitPriceUpdate method
+submitDateUpdate(): void {
+  if (this.dateForm.invalid || !this.selectedOrderId) {
+    return;
+  }
+  
+  this.submitting = true;
+  
+  // Simplified data structure to match backend expectations
+  const data = {
+    date: this.dateForm.value.date
+  };
+  
+  this.ordersService.updateOrderDate(this.selectedOrderId,  data)
+    .pipe(finalize(() => {
+      this.submitting = false;
+    }))
+    .subscribe({
+      next: (response) => {
+        console.log('Date update response:', response);
+        
+        // Update the order in the filtered orders list with the fully updated order from response
+        // const index = this.filteredOrders.findIndex(o => o._id === this.selectedOrderId);
+        // if (index !== -1 && response.updatedOrder) {
+        //   this.filteredOrders[index] = response.updatedOrder;
+        // }
+        
+        // // Also update in the allOrders array
+        // const allOrdersIndex = this.allOrders.findIndex(o => o._id === this.selectedOrderId);
+        // if (allOrdersIndex !== -1 && response.updatedOrder) {
+        //   this.allOrders[allOrdersIndex] = response.updatedOrder;
+        // }
+        
+        Swal.fire({
+          title: 'Success',
+          html: `
+            Order Date has been updated successfully<br>
+
+          `,
+          icon: 'success'
+        });   
+        
+        this.closeDateModal();
+      },
+      error: (error) => {
+        console.error('Error updating order date:', error);
+        Swal.fire('Error', 'Failed to update order date: ' + (error.error?.details || error.message || 'Unknown error'), 'error');
       }
     });
 }

@@ -165,6 +165,10 @@ export class OrdersService {
   }
 
 
+    updateOrderDate(id: string, data: any): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/updatedata/${id}`, data);
+  }
+
   deleteOrder(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/orders/${id}`);
   }
