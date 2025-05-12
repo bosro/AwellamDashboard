@@ -31,7 +31,9 @@ interface SocNumber {
   plantId: Plant;
   categoryId?: { _id: string; name: string };
   productId: Product;
-  destinationId?: string;
+  destinationId?: {
+    destination: string;
+  };
   orderType?: string;
   status: string;
   borrowedOrder: boolean;
