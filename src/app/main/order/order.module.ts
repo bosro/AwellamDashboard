@@ -13,6 +13,7 @@ import { OrderEditComponent } from './order-edit/order-edit';
 import { SalesOrderListComponent } from './sales-list.component/sales-list.compoent';
 import { OutSideOrdersTableComponent } from './outsideLoad/outsideLoadOrder';
 import { SelfListComponent } from './selfListOrders/self-list.component';
+import { InvoiceGeneratorComponent } from './invoice/invoice-component';
 
 
 
@@ -25,7 +26,8 @@ import { SelfListComponent } from './selfListOrders/self-list.component';
     OrderEditComponent,
     SalesOrderListComponent,
     OutSideOrdersTableComponent,
-    SelfListComponent
+    SelfListComponent,
+    InvoiceGeneratorComponent
   ],
   imports: [
     CommonModule,
