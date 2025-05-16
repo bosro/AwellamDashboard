@@ -37,6 +37,13 @@ export class InvoiceGeneratorComponent implements OnInit {
     bankDetails: 'Bankers: Stanbik Bank Ghana, Tema Industrial Area'
   };
 
+  // Private property to store calculated values
+  private calculatedValues: any = {
+    netAmount: 0,
+    vatAmount: 0,
+    finalAmount: 0
+  };
+
   // Generate unique invoice number in format 2025/02276
   get invoiceNumber(): string {
     const date = new Date();
@@ -85,18 +92,22 @@ export class InvoiceGeneratorComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
     this.setupFormSubscriptions();
+    // Calculate initial totals
+    this.calculateTotals();
   }
 
   loadProducts(): void {
     this.isLoading = true;
     this.invoiceService.getProducts({ inStock: true }).subscribe({
       next: (response) => {
-        this.products = response.products;
+        this.products = response.products || response || [];
         this.filteredProducts = [...this.products];
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading products:', error);
+        this.products = [];
+        this.filteredProducts = [];
         this.isLoading = false;
       }
     });
@@ -131,7 +142,7 @@ export class InvoiceGeneratorComponent implements OnInit {
   selectProduct(product: Product): void {
     this.invoiceForm.patchValue({
       description: product.name,
-      unitPrice: product.costprice 
+      unitPrice: product.costprice  
     });
     this.isProductDropdownOpen = false;
     this.calculateTotals();
@@ -159,19 +170,12 @@ export class InvoiceGeneratorComponent implements OnInit {
     }
     
     // Round to 2 decimal places
-    netAmount = Math.round(netAmount * 100) / 100;
-    vatAmount = Math.round(vatAmount * 100) / 100;
-    finalAmount = Math.round(finalAmount * 100) / 100;
-    
-    // Store calculated values for preview
     this.calculatedValues = {
-      netAmount,
-      vatAmount,
-      finalAmount
+      netAmount: Math.round(netAmount * 100) / 100,
+      vatAmount: Math.round(vatAmount * 100) / 100,
+      finalAmount: Math.round(finalAmount * 100) / 100
     };
   }
-
-  private calculatedValues: any = {};
 
   onSubmit(): void {
     if (this.invoiceForm.valid) {
@@ -209,7 +213,7 @@ export class InvoiceGeneratorComponent implements OnInit {
     
     // Configure html2pdf options for exact PDF matching
     const opt = {
-      margin: [15, 15, 15, 15],
+      margin: [10, 10, 10, 10],
       filename: `proforma-invoice-${this.invoiceNumber.replace('/', '-')}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
@@ -238,6 +242,9 @@ export class InvoiceGeneratorComponent implements OnInit {
       html2pdf().set(opt).from(element).save().then(() => {
         // Remove print styles after PDF generation
         this.removePrintStyles();
+      }).catch((error: any) => {
+        console.error('Error generating PDF:', error);
+        this.removePrintStyles();
       });
     }
   }
@@ -256,25 +263,24 @@ export class InvoiceGeneratorComponent implements OnInit {
     style.id = 'print-styles';
     style.innerHTML = `
       @media print {
-        * {
-          visibility: hidden;
+        .no-print {
+          display: none !important;
         }
-        #invoice-content, #invoice-content * {
-          visibility: visible;
-        }
+        
         #invoice-content {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          background: white !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-shadow: none !important;
+          border: none !important;
         }
         
-        /* Ensure proper spacing for print */
-        .invoice-table {
-          page-break-inside: avoid;
+        /* Hide action buttons when printing */
+        .action-buttons {
+          display: none !important;
         }
         
+        /* Ensure proper page breaks */
         .invoice-header {
           page-break-inside: avoid;
         }
@@ -283,9 +289,13 @@ export class InvoiceGeneratorComponent implements OnInit {
           page-break-inside: avoid;
         }
         
-        /* Hide action buttons when printing */
-        .action-buttons {
-          display: none !important;
+        table {
+          page-break-inside: auto;
+        }
+        
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
         }
       }
     `;
@@ -315,7 +325,8 @@ export class InvoiceGeneratorComponent implements OnInit {
       vatAmount: this.invoiceData.vatAmount,
       finalAmount: this.invoiceData.finalAmount,
       invoiceNumber: this.invoiceNumber,
-      invoiceDate: new Date().toISOString()
+      invoiceDate: new Date().toISOString(),
+      vatExclusive: this.invoiceData.vatExclusive
     };
     
     this.invoiceService.saveInvoice(invoiceRequest).subscribe({
@@ -348,22 +359,30 @@ export class InvoiceGeneratorComponent implements OnInit {
     this.showPreview = false;
     this.showAllInvoices = false;
     this.isProductDropdownOpen = false;
-    this.calculatedValues = {};
+    this.calculatedValues = {
+      netAmount: 0,
+      vatAmount: 0,
+      finalAmount: 0
+    };
   }
 
-  // New methods for logo path and invoice management
+  // Logo path method
   getLogoPath(): string {
-    return this.invoiceForm.get('companyLogoPath')?.value || 'assets/images/logo.png';
+    const logoPath = this.invoiceForm.get('companyLogoPath')?.value;
+    return logoPath || 'assets/images/logo.png';
   }
 
+  // Formatting methods
   formatCurrency(amount: number): string {
-    return (amount || 0).toLocaleString('en-US', {
+    if (amount === null || amount === undefined) return '0.00';
+    return Number(amount).toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
   }
 
   formatQuantity(quantity: number): string {
+    if (quantity === null || quantity === undefined) return '0';
     // Format without decimal places if it's a whole number
     if (quantity % 1 === 0) {
       return quantity.toString();
@@ -373,9 +392,18 @@ export class InvoiceGeneratorComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('en-GB');
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const suffix = this.getOrdinalSuffix(day);
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).replace(/\d+/, `${day}${suffix}`);
   }
 
+  // Invoice management methods
   viewAllInvoices(): void {
     this.showPreview = false;
     this.showAllInvoices = true;
@@ -390,18 +418,19 @@ export class InvoiceGeneratorComponent implements OnInit {
     this.isLoadingInvoices = true;
     this.invoiceService.getAllInvoices().subscribe({
       next: (invoices) => {
-        this.allInvoices = invoices;
+        this.allInvoices = invoices || [];
         this.isLoadingInvoices = false;
       },
       error: (error) => {
         console.error('Error loading invoices:', error);
+        this.allInvoices = [];
         this.isLoadingInvoices = false;
       }
     });
   }
 
   viewInvoice(invoice: any): void {
-    this.invoiceData = invoice;
+    this.invoiceData = { ...invoice };
     this.showAllInvoices = false;
     this.showPreview = true;
   }
@@ -409,18 +438,22 @@ export class InvoiceGeneratorComponent implements OnInit {
   editExistingInvoice(invoice: any): void {
     this.invoiceForm.patchValue({
       companyLogoPath: invoice.companyLogoPath || '',
-      customerName: invoice.customerName,
-      customerAddress: invoice.customerAddress,
-      description: invoice.description,
-      quantity: invoice.quantity,
-      unitPrice: invoice.unitPrice,
-      vatRate: invoice.vatRate,
-      vatExclusive: invoice.vatExclusive
+      customerName: invoice.customerName || '',
+      customerAddress: invoice.customerAddress || '',
+      description: invoice.description || '',
+      quantity: invoice.quantity || 1,
+      unitPrice: invoice.unitPrice || 0,
+      vatRate: invoice.vatRate || this.VAT_RATE,
+      vatExclusive: invoice.vatExclusive !== undefined ? invoice.vatExclusive : true
     });
+    
+    // Update calculated values
+    this.calculateTotals();
     this.showAllInvoices = false;
     this.showPreview = false;
   }
 
+  // Product dropdown methods
   toggleProductDropdown(): void {
     this.isProductDropdownOpen = !this.isProductDropdownOpen;
   }
