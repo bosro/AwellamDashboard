@@ -1,0 +1,131 @@
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Expense Types</h1>
+      <button 
+        (click)="openCreateModal()" 
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+      >
+        Add Expense Type
+      </button>
+    </div>
+  
+    <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+      <p>{{ error }}</p>
+    </div>
+    
+    <!-- Modal Form -->
+    <div *ngIf="isModalOpen" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto">
+        <h2 class="text-xl font-semibold mb-4">
+          {{ selectedExpenseType?._id ? 'Edit' : 'Create' }} Expense Type
+        </h2>
+        
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="mb-4">
+            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+            <input 
+              type="text" 
+              id="name" 
+              formControlName="name" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+            <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-500 text-sm mt-1">
+              Name is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+            <select 
+              id="category" 
+              formControlName="category" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value="" disabled>Select Category</option>
+              <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+            </select>
+            <div *ngIf="form.get('category')?.invalid && form.get('category')?.touched" class="text-red-500 text-sm mt-1">
+              Category is required
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+            <select 
+              id="status" 
+              formControlName="status" 
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          
+          <div class="flex justify-end space-x-3 pt-4">
+            <button 
+              type="button" 
+              (click)="onCancel()" 
+              class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="form.invalid" 
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  
+    <div class="overflow-x-auto bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngIf="isLoading">
+            <td colspan="4" class="px-6 py-4 text-center">Loading...</td>
+          </tr>
+          <tr *ngIf="!isLoading && expenseTypes.length === 0">
+            <td colspan="4" class="px-6 py-4 text-center">No expense types found</td>
+          </tr>
+          <tr *ngFor="let expenseType of expenseTypes">
+            <td class="px-6 py-4 whitespace-nowrap">{{ expenseType.name }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">{{ expenseType.category }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [ngClass]="{
+                'px-2 py-1 text-xs rounded-full': true,
+                'bg-green-100 text-green-800': expenseType.status === 'active',
+                'bg-red-100 text-red-800': expenseType.status === 'inactive'
+              }">
+                {{ expenseType.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button 
+                (click)="openEditModal(expenseType)" 
+                class="text-indigo-600 hover:text-indigo-900 mr-3"
+              >
+                Edit
+              </button>
+              <button 
+                (click)="deleteExpenseType(expenseType._id!)" 
+                class="text-red-600 hover:text-red-900"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>

@@ -1,0 +1,252 @@
+<!-- src/app/components/imprest-detail/imprest-detail.component.html -->
+
+<div class="container mx-auto px-4 py-8">
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ error }}
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center my-8">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+
+  <div *ngIf="!loading && imprestDetail">
+    <!-- Header with Navigation -->
+    <div class="flex items-center mb-6">
+      <button (click)="goBack()" class="mr-4 text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      </button>
+      <h1 class="text-2xl font-bold text-gray-800 flex-1">Imprest Details</h1>
+      <div class="space-x-3">
+        <button (click)="exportToExcel()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded shadow">
+          Export to Excel
+        </button>
+        <button (click)="editImprest()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow">
+          Edit
+        </button>
+        <button (click)="deleteImprest()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded shadow">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Imprest Info Card -->
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+      <div class="px-6 py-4 border-b">
+        <h2 class="text-xl font-semibold">Imprest Information</h2>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm text-gray-500">Description</p>
+            <p class="font-medium">{{ imprestDetail.description }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Date</p>
+            <p class="font-medium">{{ formatDate(imprestDetail.date) }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Initial Amount</p>
+            <p class="font-medium">{{ formatCurrency(imprestDetail.amount) }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Total Available</p>
+            <p class="font-medium">{{ formatCurrency(imprestDetail.currentBalance) }}</p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">CarryForward </p>
+            <p class="font-medium">{{ formatCurrency(imprestDetail?.carryforward) || 'N/A'}}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Current Balance</p>
+            <p class="font-medium text-lg" [ngClass]="{'text-red-600': remainingBalance < 0, 'text-green-600': remainingBalance >= 0}">
+              {{ formatCurrency(remainingBalance) }}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Status</p>
+            <span [ngClass]="getStatusColor(imprestDetail.status)" 
+                  class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+              {{ imprestDetail.status }}
+            </span>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Created</p>
+            <p class="font-medium">{{ formatDate(imprestDetail.createdAt) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance Summary Card -->
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+      <div class="px-6 py-4 border-b">
+        <h2 class="text-xl font-semibold">Running Balance Summary</h2>
+      </div>
+      <div class="p-6">
+        <div class="flex flex-wrap items-center">
+          <div class="flex-1 min-w-[150px] mb-4 md:mb-0">
+            <p class="text-sm text-gray-500">Initial Amount</p>
+            <p class="font-medium">{{ formatCurrency(imprestDetail.amount) }}</p>
+          </div>
+          <div class="flex-1 min-w-[150px] mb-4 md:mb-0">
+            <p class="text-sm text-gray-500">Total Expenses</p>
+            <p class="font-medium">{{ formatCurrency(totalExpensesSum) }}</p>
+          </div>
+          <div class="flex-1 min-w-[150px]">
+            <p class="text-sm text-gray-500">Remaining Balance</p>
+            <p class="font-medium text-xl" [ngClass]="{'text-red-600': remainingBalance < 0, 'text-green-600': remainingBalance >= 0}">
+              {{ formatCurrency(remainingBalance) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expenses Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h2 class="text-xl font-semibold">Expenses</h2>
+        <div class="text-sm text-gray-500">
+          <span class="font-medium">{{ imprestDetail.expenses.length }}</span> expenses recorded
+        </div>
+      </div>
+      
+      <div *ngIf="imprestDetail.expenses.length === 0" class="p-6 text-center text-gray-500">
+        No expenses recorded for this imprest.
+      </div>
+      
+      <div *ngIf="imprestDetail.expenses.length > 0" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipient</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Running Balance</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let expense of paginatedExpenses">
+              <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(expense.updatedAt) }}</td>
+              <td class="px-6 py-4">{{ expense.description }}</td>
+              <td class="px-6 py-4 capitalize">{{ expense.accountType }}</td>
+              <td class="px-6 py-4">{{ expense.recipient }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ formatCurrency(expense.amount) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap" [ngClass]="{'text-red-600': expense.runningBalance < 0, 'text-green-600': expense.runningBalance >= 0}">
+                {{ formatCurrency(expense.runningBalance) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span [ngClass]="getStatusColor(expense.status)" 
+                      class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                  {{ expense.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span *ngIf="expense.truckId">
+                  {{ expense.truckId.truckNumber }}
+                  <span *ngIf="expense.truckId.driver" class="text-gray-500">({{ expense.truckId.driver.name }})</span>
+                </span>
+                <span *ngIf="!expense.truckId" class="text-gray-400">N/A</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button 
+                  (click)="openEditModal(expense)" 
+                  class="text-indigo-600 hover:text-indigo-900 mr-3"
+                >
+                  Edit
+                </button>
+                <button 
+                  (click)="deleteExpense(expense._id)" 
+                  class="text-red-600 hover:text-red-900"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Pagination controls -->
+        <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200 bg-gray-50">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button 
+              (click)="previousPage()" 
+              [disabled]="currentPage === 1"
+              [ngClass]="{'cursor-not-allowed opacity-50': currentPage === 1}"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            <button 
+              (click)="nextPage()" 
+              [disabled]="currentPage === totalPages"
+              [ngClass]="{'cursor-not-allowed opacity-50': currentPage === totalPages}"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing 
+                <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+                to 
+                <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, imprestDetail.expenses.length) }}</span>
+                of 
+                <span class="font-medium">{{ imprestDetail.expenses.length }}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button 
+                  (click)="previousPage()" 
+                  [disabled]="currentPage === 1"
+                  [ngClass]="{'cursor-not-allowed opacity-50': currentPage === 1}"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  Page {{ currentPage }} of {{ totalPages }}
+                </span>
+                <button 
+                  (click)="nextPage()" 
+                  [disabled]="currentPage === totalPages"
+                  [ngClass]="{'cursor-not-allowed opacity-50': currentPage === totalPages}"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                >
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-expense-modal 
+*ngIf="isModalOpen" 
+[expense]="selectedExpense" 
+[trucks]="trucks"
+[expenseTypes]="expenseTypes"
+(save)="handleSave($event)" 
+(cancel)="closeModal()"
+></app-expense-modal>
