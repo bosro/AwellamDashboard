@@ -142,7 +142,7 @@ export class InvoiceGeneratorComponent implements OnInit {
   selectProduct(product: Product): void {
     this.invoiceForm.patchValue({
       description: product.name,
-      unitPrice: product.costprice  
+      unitPrice: product.costprice 
     });
     this.isProductDropdownOpen = false;
     this.calculateTotals();
@@ -250,12 +250,321 @@ export class InvoiceGeneratorComponent implements OnInit {
   }
 
   printInvoice(): void {
-    this.addPrintStyles();
-    window.print();
-    // Remove print styles after a delay to allow printing to complete
-    setTimeout(() => {
-      this.removePrintStyles();
-    }, 1000);
+    // Get the invoice content
+    const invoiceContent = document.getElementById('invoice-content');
+    if (!invoiceContent) return;
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank', 'width=900,height=650');
+    if (!printWindow) return;
+
+    // Clone the invoice content
+    const clonedContent = invoiceContent.cloneNode(true) as HTMLElement;
+    
+    // Create the print document with compact styling
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Proforma Invoice - ${this.invoiceNumber}</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.2;
+            color: black;
+            background: white;
+            padding: 15px;
+          }
+          
+          @page {
+            size: A4;
+            margin: 0.3in;
+          }
+          
+          /* Compact header */
+          .invoice-header {
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+          }
+          
+          /* Company logo and name */
+          .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+          }
+          
+          .logo-placeholder {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            margin-right: 12px;
+          }
+          
+          .logo-stripe {
+            width: 4px;
+            height: 100%;
+          }
+          
+          .logo-center {
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14pt;
+            color: white;
+          }
+          
+          .bg-green-500 { background-color: #10b981; }
+          .bg-blue-600 { background-color: #2563eb; }
+          .bg-yellow-500 { background-color: #eab308; }
+          .bg-orange-500 { background-color: #f97316; }
+          .bg-gray-800 { background-color: #1f2937; }
+          
+          h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            margin: 0;
+          }
+          
+          /* Compact company address */
+          .company-address {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 9pt;
+            line-height: 1.1;
+          }
+          
+          /* Invoice title */
+          .invoice-title {
+            text-align: center;
+            margin-bottom: 8px;
+          }
+          
+          .invoice-title h2 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+          }
+          
+          /* Ref and date */
+          .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 9pt;
+            font-weight: 500;
+          }
+          
+          /* Bill to section */
+          .bill-to {
+            margin-bottom: 10px;
+          }
+          
+          .bill-to h3 {
+            font-size: 9pt;
+            font-weight: bold;
+            margin-bottom: 3px;
+          }
+          
+          .bill-to p {
+            font-size: 9pt;
+            margin: 1px 0;
+          }
+          
+          /* Compact table */
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+            font-size: 9pt;
+          }
+          
+          table, th, td {
+            border: 1.5px solid black;
+          }
+          
+          th, td {
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+          }
+          
+          th {
+            font-weight: bold;
+            background-color: white;
+            font-size: 8pt;
+            line-height: 1.1;
+          }
+          
+          td {
+            font-size: 9pt;
+          }
+          
+          /* Summary rows */
+          .summary-row td {
+            padding: 2px 3px;
+            font-size: 8pt;
+          }
+          
+          .total-row {
+            font-weight: bold;
+          }
+          
+          .total-row td {
+            padding: 4px 3px;
+            font-size: 10pt;
+          }
+          
+          /* Compact footer */
+          .invoice-footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 8pt;
+            page-break-inside: avoid;
+          }
+          
+          .footer-line {
+            margin: 6px 0;
+          }
+          
+          .colorful-line {
+            height: 2px;
+            display: flex;
+            max-width: 300px;
+            margin: 4px auto;
+          }
+          
+          .colorful-line div {
+            flex: 1;
+          }
+          
+          /* Text utilities */
+          .text-center { text-align: center; }
+          .text-left { text-align: left; }
+          .text-right { text-align: right; }
+          .font-bold { font-weight: bold; }
+          .font-medium { font-weight: 500; }
+          
+          /* Hide elements by class */
+          .no-print { display: none !important; }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-header">
+          <!-- Company logo and name -->
+          <div class="logo-section">
+            <div class="logo-placeholder">
+              <div class="logo-stripe bg-green-500"></div>
+              <div class="logo-stripe bg-blue-600"></div>
+              <div class="logo-stripe bg-yellow-500"></div>
+              <div class="logo-stripe bg-orange-500"></div>
+              <div class="logo-center bg-gray-800">A</div>
+            </div>
+            <h1>${this.companyInfo.name}</h1>
+          </div>
+          
+          <!-- Company address -->
+          <div class="company-address">
+            <p>${this.companyInfo.poBox}, ${this.companyInfo.city}, ${this.companyInfo.country}</p>
+            <p>${this.companyInfo.phone.replace('Tel: ', '')}</p>
+            <p>${this.companyInfo.email.replace('Email: ', '')}</p>
+          </div>
+          
+          <!-- Invoice title -->
+          <div class="invoice-title">
+            <h2>PROFORMA INVOICE</h2>
+          </div>
+          
+          <!-- Ref and date -->
+          <div class="invoice-details">
+            <div>Ref: ${this.invoiceNumber}</div>
+            <div>${this.currentDate}</div>
+          </div>
+          
+          <!-- Bill to -->
+          <div class="bill-to">
+            <h3>BILL TO:</h3>
+            <p class="font-bold">${this.invoiceData?.customerName || ''}</p>
+            ${this.invoiceData?.customerAddress ? `<p>${this.invoiceData.customerAddress}</p>` : ''}
+          </div>
+        </div>
+        
+        <!-- Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>QTY</th>
+              <th>DESCRIPTION<br/>(50kg)</th>
+              <th>UNIT<br/>PRICE</th>
+              <th>NET<br/>AMOUNT<br/>VAT<br/>EXCLUSIVE<br/>(GHS)</th>
+              <th>FINAL<br/>AMOUNT<br/>(GHS)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${this.formatQuantity(this.invoiceData?.quantity || 0)}</td>
+              <td>${this.invoiceData?.description || ''}</td>
+              <td>${this.formatCurrency(this.invoiceData?.unitPrice || 0)}</td>
+              <td>${this.formatCurrency(this.invoiceData?.netAmount || 0)}</td>
+              <td>${this.formatCurrency(this.invoiceData?.finalAmount || 0)}</td>
+            </tr>
+            <tr class="summary-row">
+              <td colspan="3"></td>
+              <td class="text-right font-medium">Total Net Amount</td>
+              <td class="font-medium">${this.formatCurrency(this.invoiceData?.netAmount || 0)}</td>
+            </tr>
+            <tr class="summary-row">
+              <td colspan="3"></td>
+              <td class="text-right">GETF/NHIL/CVD 6%</td>
+              <td>0.00</td>
+            </tr>
+            <tr class="summary-row">
+              <td colspan="3"></td>
+              <td class="text-right">VAT ${this.invoiceData?.vatRate || 0}%</td>
+              <td>${this.formatCurrency(this.invoiceData?.vatAmount || 0)}</td>
+            </tr>
+            <tr class="total-row">
+              <td colspan="3"></td>
+              <td class="text-right">Total</td>
+              <td>${this.formatCurrency(this.invoiceData?.finalAmount || 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Footer -->
+        <div class="invoice-footer">
+          <p class="footer-line font-medium">P.O Box SC 349, Tema - Ghana &nbsp;&nbsp;&nbsp; Tel: +233 244541775 / +233 207046620 &nbsp;&nbsp;&nbsp; Email: awellamghana@gmail.com</p>
+          <div class="colorful-line">
+            <div class="bg-green-500"></div>
+            <div class="bg-blue-600"></div>
+            <div class="bg-yellow-500"></div>
+            <div class="bg-orange-500"></div>
+          </div>
+          <p class="footer-line font-medium">Bankers: Stanbik Bank Ghana, Tema Industrial Area</p>
+        </div>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    };
   }
 
   private addPrintStyles(): void {
@@ -263,39 +572,93 @@ export class InvoiceGeneratorComponent implements OnInit {
     style.id = 'print-styles';
     style.innerHTML = `
       @media print {
-        .no-print {
-          display: none !important;
+        /* Hide everything first */
+        body * {
+          visibility: hidden;
         }
         
-        #invoice-content {
-          width: 100% !important;
+        /* Show only the invoice content */
+        #invoice-content, #invoice-content * {
+          visibility: visible;
+        }
+        
+        /* Reset body and html for print */
+        html, body {
           margin: 0 !important;
           padding: 0 !important;
+          width: 100% !important;
+          height: auto !important;
+          background: white !important;
+          font-size: 12pt !important;
+        }
+        
+        /* Position invoice content */
+        #invoice-content {
+          position: absolute !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+          max-width: none !important;
+          margin: 0 !important;
+          padding: 20px !important;
           box-shadow: none !important;
           border: none !important;
+          background: white !important;
         }
         
-        /* Hide action buttons when printing */
-        .action-buttons {
+        /* Ensure proper page sizing */
+        @page {
+          size: A4;
+          margin: 0.5in;
+        }
+        
+        /* Hide action buttons and navigation */
+        .action-buttons,
+        .no-print,
+        nav,
+        header,
+        .navbar,
+        .header,
+        .search,
+        .sidebar {
           display: none !important;
+          visibility: hidden !important;
         }
         
-        /* Ensure proper page breaks */
-        .invoice-header {
-          page-break-inside: avoid;
-        }
-        
+        /* Ensure footer is visible */
         .invoice-footer {
           page-break-inside: avoid;
+          margin-top: auto;
         }
         
+        /* Table styling for print */
         table {
+          width: 100% !important;
+          border-collapse: collapse !important;
           page-break-inside: auto;
         }
         
         tr {
           page-break-inside: avoid;
           page-break-after: auto;
+        }
+        
+        th, td {
+          border: 1px solid black !important;
+          padding: 8px !important;
+          text-align: center !important;
+        }
+        
+        /* Header styling */
+        .invoice-header {
+          page-break-inside: avoid;
+          margin-bottom: 20px;
+        }
+        
+        /* Ensure text is visible */
+        * {
+          color: black !important;
+          background: transparent !important;
         }
       }
     `;

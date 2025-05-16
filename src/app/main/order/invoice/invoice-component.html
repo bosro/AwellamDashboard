@@ -2,7 +2,7 @@
   <div class="max-w-5xl mx-auto">
     
     <!-- Form Section -->
-    <div class="bg-white rounded-lg shadow-sm border p-8 mb-8" *ngIf="!showPreview">
+    <div class="bg-white rounded-lg shadow-sm border p-8 mb-8 no-print" *ngIf="!showPreview">
       <h2 class="text-xl font-semibold text-gray-800 mb-8 text-center">Create Proforma Invoice</h2>
       
       <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -170,7 +170,7 @@
     </div>
 
     <!-- View All Invoices Section -->
-    <div class="bg-white rounded-lg shadow-sm border p-8" *ngIf="showAllInvoices">
+    <div class="bg-white rounded-lg shadow-sm border p-8 no-print" *ngIf="showAllInvoices">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-800">All Invoices</h2>
         <button
@@ -238,7 +238,7 @@
       </div>
       
       <!-- Action Buttons -->
-      <div class="action-buttons flex flex-wrap justify-center gap-3 p-4 border-b border-gray-200 relative z-10">
+      <div class="action-buttons flex flex-wrap justify-center gap-3 p-4 border-b border-gray-200 relative z-10 no-print">
         <button
           (click)="downloadPDF()"
           class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
@@ -265,7 +265,7 @@
           class="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
           </svg>
           Save
         </button>
@@ -329,6 +329,13 @@
                 <h1 class="text-3xl font-bold text-gray-800">{{ companyInfo.name }}</h1>
               </div>
             </div>
+          </div>
+
+          <!-- Company Address -->
+          <div class="text-center mb-8">
+            <p class="text-sm text-gray-600">{{ companyInfo.poBox }}, {{ companyInfo.city }}, {{ companyInfo.country }}</p>
+            <p class="text-sm text-gray-600">{{ companyInfo.phone.replace('Tel: ', '') }}</p>
+            <p class="text-sm text-gray-600">{{ companyInfo.email.replace('Email: ', '') }}</p>
           </div>
 
           <!-- Invoice Title and Details -->
