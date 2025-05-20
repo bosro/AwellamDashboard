@@ -111,7 +111,7 @@ export class CustomerSummaryComponent implements OnInit {
               activity.paymentStatus : 
               (activity.balanceAfter >= 0 ? 'Completed' : 'Partial'),
             displayReference: activity.type === 'order' ? 
-              activity.orderNumber : 
+              activity.socNumber : 
               (activity.paymentReference || activity.Reference || 'N/A'),
             displayDate: activity.formattedDate
           };
