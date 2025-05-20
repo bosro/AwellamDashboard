@@ -1,4 +1,3 @@
-<!-- customer.report.component.html -->
 <div class="container mx-auto p-4">
   <div class="bg-white shadow-lg rounded-lg overflow-hidden">
     <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
@@ -98,10 +97,13 @@
             <div class="space-y-2">
               <p><span class="font-medium">Total Orders:</span> {{customerAccount.data.accountSummary.totalOrders}}</p>
               <p><span class="font-medium">Total Order Amount:</span> GHS
-                {{customerAccount.data.accountSummary.totalOrderAmount}}</p>
-              <p><span class="font-medium">Total Paid:</span> GHS {{customerAccount.data.accountSummary.totalPaid}}</p>
+                {{customerAccount.data.accountSummary.totalOrderAmount.toLocaleString()}}</p>
+              <p><span class="font-medium">Total Paid:</span> GHS {{customerAccount.data.accountSummary.totalPaid.toLocaleString()}}</p>
               <p><span class="font-medium">Current Balance:</span> GHS
-                {{customerAccount.data.accountSummary.currentBalance}}</p>
+                {{customerAccount.data.accountSummary.currentBalance.toLocaleString()}}</p>
+              <p><span class="font-medium">Report Period:</span> 
+                {{formatDisplayDate(customerAccount.data.accountSummary.reportPeriod.from)}} to 
+                {{formatDisplayDate(customerAccount.data.accountSummary.reportPeriod.to)}}</p>
             </div>
           </div>
         </div>
@@ -121,7 +123,7 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reference</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
                   <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
-                  <!-- <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Status</th> -->
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Balance Before</th>
                   <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Balance After</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Additional Info</th>
                 </tr>
@@ -145,7 +147,7 @@
 
                   <!-- Reference -->
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{activity.type === 'order' ? activity.orderNumber : activity.Reference}}
+                    {{activity.type === 'order' ? activity.orderNumber : activity.Reference || activity.paymentReference}}
                   </td>
 
                   <!-- Details -->
@@ -165,17 +167,23 @@
 
                   <!-- Amount -->
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
-                    GHS {{activity.type === 'order' ? activity.totalAmount : activity.amount}}
+                    GHS {{(activity.type === 'order' ? activity.totalAmount : activity.amount).toLocaleString()}}
                   </td>
 
-                 
+                  <!-- Balance Before -->
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right" [ngClass]="{
+                'text-red-600': activity.balanceBefore > 0,
+                'text-green-600': activity.balanceBefore <= 0
+              }">
+                    GHS {{(activity.balanceBefore || 0).toLocaleString()}}
+                  </td>
 
                   <!-- Balance After -->
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-right" [ngClass]="{
                 'text-red-600': activity.balanceAfter > 0,
                 'text-green-600': activity.balanceAfter <= 0
               }">
-                    GHS {{activity.balanceAfter || 'N/A'}}
+                    GHS {{(activity.balanceAfter || 0).toLocaleString()}}
                   </td>
 
                   <!-- Additional Info -->
@@ -196,8 +204,39 @@
             </table>
           </div>
 
-
-
+          <!-- Pagination Controls -->
+          <div class="px-6 py-4 flex justify-between items-center border-t border-gray-200">
+            <div class="text-sm text-gray-700">
+              Showing 
+              <span class="font-medium">{{ (currentActivityPage - 1) * activityPageSize + 1 }}</span> to 
+              <span class="font-medium">{{ Math.min(currentActivityPage * activityPageSize, activities.length) }}</span> of 
+              <span class="font-medium">{{ activities.length }}</span> results
+            </div>
+            <div class="flex space-x-1">
+              <button 
+                class="px-2 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                [disabled]="currentActivityPage === 1"
+                [ngClass]="{'opacity-50 cursor-not-allowed': currentActivityPage === 1}"
+                (click)="changeActivityPage(currentActivityPage - 1)">
+                Previous
+              </button>
+              <ng-container *ngFor="let page of getPaginationPages()">
+                <button 
+                  class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium"
+                  [ngClass]="{'bg-blue-600 text-white': currentActivityPage === page, 'text-gray-700 hover:bg-gray-50': currentActivityPage !== page}"
+                  (click)="changeActivityPage(page)">
+                  {{ page }}
+                </button>
+              </ng-container>
+              <button 
+                class="px-2 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                [disabled]="currentActivityPage === totalActivityPages"
+                [ngClass]="{'opacity-50 cursor-not-allowed': currentActivityPage === totalActivityPages}"
+                (click)="changeActivityPage(currentActivityPage + 1)">
+                Next
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- No Data Message -->
@@ -207,3 +246,4 @@
       </div>
     </div>
   </div>
+</div>
