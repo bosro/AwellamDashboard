@@ -10,6 +10,7 @@ import { TransactionsComponent } from './transaction/transaction.component';
 import { ReconcileModalComponent } from './reconcile-model/reconcile-model';
 import { AddBankModalComponent } from './add-bank/add-bank-model';
 import { BankRoutingModule } from './bank.module-routing';
+import { TransactionComponent } from './all-transaction/all-transaction';
 
 
 
@@ -20,7 +21,8 @@ import { BankRoutingModule } from './bank.module-routing';
     BankUploadsComponent,
     TransactionsComponent,
     ReconcileModalComponent,
-    AddBankModalComponent
+    AddBankModalComponent,
+    TransactionComponent
   ],
   imports: [
     CommonModule,

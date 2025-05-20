@@ -164,6 +164,14 @@ export class OrdersService {
     return this.http.put<Order>(`${this.apiUrl}/update/${id}`, data);
   }
 
+  updateOrderPriority(orderId: string, orderPriority: any) {
+    return this.http.patch<{ success: boolean }>(
+      `${this.apiUrl}/${orderId}/priority`,
+      {orderPriority}
+    );
+  }
+  
+
 
     updateOrderDate(id: string, data: any): Observable<Order> {
     return this.http.put<Order>(`${this.apiUrl}/updatedata/${id}`, data);

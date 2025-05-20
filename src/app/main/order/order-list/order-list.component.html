@@ -6,6 +6,82 @@
   </div>
 </div>
 
+<!-- Priority Modal -->
+<div *ngIf="showPriorityModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-medium text-gray-900">Update Priority</h3>
+      <button 
+        type="button"
+        (click)="closePriorityModal()"
+        class="text-gray-400 hover:text-gray-500">
+        <i class="ri-close-line text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="py-4 space-y-3">
+      <button 
+        (click)="updatePriorityStatus(currentOrderId, 'LOW')" 
+        class="w-full px-4 py-3 flex items-center justify-between border rounded-lg hover:bg-gray-50">
+        <div class="flex items-center">
+          <span class="bg-gray-100 text-gray-800 px-2 py-1 text-xs font-medium rounded-full mr-3">Low</span>
+          <span class="text-sm font-medium text-gray-900">Low Priority</span>
+        </div>
+        <i class="ri-arrow-right-line text-gray-400"></i>
+      </button>
+      
+      <button 
+        (click)="updatePriorityStatus(currentOrderId, 'NORMAL')" 
+        class="w-full px-4 py-3 flex items-center justify-between border rounded-lg hover:bg-gray-50">
+        <div class="flex items-center">
+          <span class="bg-blue-100 text-blue-800 px-2 py-1 text-xs font-medium rounded-full mr-3">Normal</span>
+          <span class="text-sm font-medium text-gray-900">Normal Priority</span>
+        </div>
+        <i class="ri-arrow-right-line text-gray-400"></i>
+      </button>
+      
+      <button 
+        (click)="updatePriorityStatus(currentOrderId, 'MEDIUM')" 
+        class="w-full px-4 py-3 flex items-center justify-between border rounded-lg hover:bg-gray-50">
+        <div class="flex items-center">
+          <span class="bg-yellow-100 text-yellow-800 px-2 py-1 text-xs font-medium rounded-full mr-3">Medium</span>
+          <span class="text-sm font-medium text-gray-900">Medium Priority</span>
+        </div>
+        <i class="ri-arrow-right-line text-gray-400"></i>
+      </button>
+      
+      <button 
+        (click)="updatePriorityStatus(currentOrderId, 'HIGH')" 
+        class="w-full px-4 py-3 flex items-center justify-between border rounded-lg hover:bg-gray-50">
+        <div class="flex items-center">
+          <span class="bg-orange-100 text-orange-800 px-2 py-1 text-xs font-medium rounded-full mr-3">High</span>
+          <span class="text-sm font-medium text-gray-900">High Priority</span>
+        </div>
+        <i class="ri-arrow-right-line text-gray-400"></i>
+      </button>
+      
+      <button 
+        (click)="updatePriorityStatus(currentOrderId, 'CRITICAL')" 
+        class="w-full px-4 py-3 flex items-center justify-between border rounded-lg hover:bg-gray-50">
+        <div class="flex items-center">
+          <span class="bg-red-100 text-red-800 px-2 py-1 text-xs font-medium rounded-full mr-3">Critical</span>
+          <span class="text-sm font-medium text-gray-900">Critical Priority</span>
+        </div>
+        <i class="ri-arrow-right-line text-gray-400"></i>
+      </button>
+    </div>
+    
+    <div class="mt-5 flex justify-end">
+      <button
+        type="button"
+        (click)="closePriorityModal()"
+        class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="flex justify-between items-center mb-6">
   <div>
     <h1 class="text-2xl font-semibold text-gray-900">Orders</h1>
@@ -114,6 +190,7 @@
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Ref</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>
@@ -132,7 +209,7 @@
           <div class="text-sm font-medium text-gray-900">Quantity: {{ order?.orderItems[0]?.quantity || '0'}}</div>
         </td>
         <td class="px-6 py-4">
-         <div class="text-sm font-medium text-gray-900">{{order?.socNumber || 'N/A'}}</div>
+          <div class="text-sm font-medium text-gray-900">{{order?.socNumber || 'N/A'}}</div>
         </td>
         <td class="px-6 py-4">
           <div class="text-sm text-gray-900">{{order?.updatedAt | date:'mediumDate' }}</div>
@@ -144,11 +221,27 @@
             {{order?.status || 'N/A'}}
           </span>
         </td>
+        
+        <!-- Priority Status Cell -->
+        <td class="px-6 py-4">
+          <button 
+            (click)="openPriorityModal(order._id, $event)" 
+            class="flex items-center space-x-2 px-2 py-1 border border-transparent hover:border-gray-200 rounded-lg"
+            (click)="$event.stopPropagation()">
+            <span [ngClass]="getPriorityStatusClass(order?.priorityValue || 0)"
+                  class="px-2 py-1 text-xs font-medium rounded-full">
+              {{getPriorityStatusText(order?.priorityValue || 0)}}
+            </span>
+            <i class="ri-edit-line text-gray-400 text-xs"></i>
+          </button>
+        </td>
+
         <td class="px-6 py-4 text-right text-sm font-medium">
           <div class="flex justify-end space-x-3">
             <button 
               [routerLink]="['/main/orders/edit', order?._id]"
-              class="text-yellow-600 hover:text-yellow-700">
+              class="text-yellow-600 hover:text-yellow-700"
+              (click)="$event.stopPropagation()">
               <i class="ri-edit-line"></i>
             </button>
             <button 
@@ -157,11 +250,6 @@
               (click)="$event.stopPropagation()">
               <i class="ri-eye-line"></i>
             </button>
-            <!-- <button 
-              (click)="toggleStatus(order._id, $event)"
-              class="text-green-600 hover:text-green-900">
-              <i class="ri-refresh-line"></i>
-            </button> -->
             <button 
               (click)="deleteOrder(order._id, $event)"
               class="text-red-600 hover:text-red-900">

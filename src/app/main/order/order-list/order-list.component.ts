@@ -37,6 +37,10 @@ export class OrderListComponent implements OnInit {
   Math = Math;
   products!: Product[];
   allOrders: Order[] = []; // Store all orders for frontend filtering
+  
+  // Modal properties
+  showPriorityModal = false;
+  currentOrderId: string = '';
 
   private apiUrl = `${environment.apiUrl}`;
 
@@ -272,25 +276,98 @@ export class OrderListComponent implements OnInit {
     }
   }
 
-  toggleStatus(id: string, event?: Event): void {
-    if (event) {
-      event.stopPropagation(); // Prevent row click
-    }
+  // toggleStatus(id: string, newStatus: string, event?: Event): void {
+  //   if (event) {
+  //     event.stopPropagation(); // Prevent row click
+  //   }
     
-    this.loading = true;
-    this.ordersService.toggleOrderStatus(id)
-      .pipe(finalize(() => this.loading = false))
-      .subscribe({
-        next: () => this.loadOrders(),
-        error: (error) => console.error('Error toggling status:', error)
-      });
-  }
+  //   this.loading = true;
+  //   this.ordersService.updatePriorityStatus(id, newStatus)
+  //     .pipe(finalize(() => this.loading = false))
+  //     .subscribe({
+  //       next: () => this.loadOrders(),
+  //       error: (error) => console.error('Error updating status:', error)
+  //     });
+  // }
 
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
     this.products = [];
     this.loadOrders(); // Reload all orders when clearing filters
+  }
+
+  // Open priority modal
+  openPriorityModal(orderId: string, event: Event): void {
+    if (event) {
+      event.stopPropagation(); // Prevent row click
+    }
+    this.currentOrderId = orderId;
+    this.showPriorityModal = true;
+  }
+
+  // Close priority modal
+  closePriorityModal(): void {
+    this.showPriorityModal = false;
+    this.currentOrderId = '';
+  }
+
+  // Convert priority string to number
+  private priorityStringToNumber(priorityString: string): number {
+    const priorityMap: { [key: string]: number } = {
+      'Low': 0,
+      'Normal': 1,
+      'Medium': 2,
+      'High': 3,
+      'Critical': 4
+    };
+    return priorityMap[priorityString] ?? 0; // Default to Low (0) if not found
+  }
+
+  // Update priority with string value
+// Update priority with string value - send the string directly, not a number
+updatePriorityStatus(orderId: string, orderPriority: string): void {
+  this.loading = true;
+  // Send the priority string directly without converting to number
+  this.ordersService.updateOrderPriority(orderId,  orderPriority )
+    .pipe(finalize(() => {
+      this.loading = false;
+      this.closePriorityModal();
+    }))
+    .subscribe({
+      next: () => {
+        // Refresh the order list
+        this.loadOrders();
+      },
+      error: (error) => {
+        console.error('Error updating order priority:', error);
+        alert('Failed to update order priority');
+      }
+    });
+}
+  
+  // Method to get priority status text based on priority number
+  getPriorityStatusText(priority: number): string {
+    const priorityText: { [key: number]: string } = {
+      0: 'Low',
+      1: 'Normal',
+      2: 'Medium',
+      3: 'High',
+      4: 'Critical'
+    };
+    return priorityText[priority] || 'Unknown';
+  }
+  
+  // Method to get CSS class based on priority number
+  getPriorityStatusClass(priority: number): string {
+    const priorityClasses: { [key: number]: string } = {
+      0: 'bg-gray-100 text-gray-800',    // Low
+      1: 'bg-blue-100 text-blue-800',    // Normal
+      2: 'bg-yellow-100 text-yellow-800', // Medium
+      3: 'bg-orange-100 text-orange-800', // High
+      4: 'bg-red-100 text-red-800'       // Critical
+    };
+    return priorityClasses[priority] || 'bg-gray-100 text-gray-800';
   }
 
   getStatusClass(status: string): string {
