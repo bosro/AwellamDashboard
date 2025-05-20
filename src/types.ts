@@ -113,3 +113,84 @@ export interface Category {
     country: string;
     password?: string;
   }
+
+
+  // app.interfaces.ts
+
+/*********************
+ * Enums
+ *********************/
+
+
+
+/*********************
+ * Interfaces
+ *********************/
+
+
+
+// Transaction Interface
+export interface Transaction {
+  _id?: string;
+  customerId: string;
+  type: TransactionType;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  paymentReference?: string;
+  bankName?: string; // Add this field
+  date?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  Reference:'';
+  // date:number
+}
+
+// API Response for Fetching Transactions
+export interface TransactionsResponse {
+  success: boolean;
+  data: Transaction[];
+}
+
+// API Response for a Single Transaction
+export interface SingleTransactionResponse {
+  success: boolean;
+  data: Transaction;
+}
+
+// API Response for Fetching Customers
+export interface CustomersResponse {
+  success: boolean;
+  data: Customer[];
+}
+
+// API Response for a Single Customer
+export interface SingleCustomerResponse {
+  success: boolean;
+  data: Customer;
+}
+
+export enum TransactionType {
+  PAYMENT = "PAYMENT",
+  // CREDIT_ADDED='CREDIT_ADDED',
+  CREDIT_NOTE='CREDIT_NOTE',
+  // CREDIT_REMOVED='CREDIT_REMOVED',
+  DEBIT_NOTE = 'DEBIT_NOTE',
+  // DEDIT_NOTE_REMOVED = 'DEBIT_NOTE_REMOVED'
+}
+
+export enum PaymentMethod {
+  CASH = "cash",
+  CREDIT_CARD = "credit_card",
+  BANK_TRANSFER = "bank_transfer",
+  MOBILE_PAYMENT = "mobile_money",
+}
+
+export enum BankName {
+  FIRST_ATLANTIC_BANK = "First Atlantic Bank",
+  GCB_BANK = "GCB Bank",
+  BANK_OF_AFRICA = "Bank of Africa",
+  STANBIC_BANK = "Stanbic Bank",
+  NIB_BANK = "NIB Bank",
+  ECOBANK_AWELLAM_ENTERPRISE = "Ecobank - Awellam Enterprise",
+  ECOBANK_INSHIRAPA_CONSTRUCTIONS = "Ecobank - Inshirapa Constructions",
+}

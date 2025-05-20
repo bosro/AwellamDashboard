@@ -1,0 +1,45 @@
+<!-- transactions.component.html -->
+<div class="p-4 max-w-7xl mx-auto">
+  <h1 class="text-2xl font-bold mb-4">Bank Transactions</h1>
+
+  <!-- Filter Section -->
+  <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+    <form (ngSubmit)="onFilter()" class="flex flex-col md:flex-row gap-4 items-center">
+      <div class="flex flex-col">
+        <label class="text-sm font-medium">Start Date</label>
+        <input type="date" [(ngModel)]="startDate" name="startDate" class="border rounded p-2" required />
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text-sm font-medium">End Date</label>
+        <input type="date" [(ngModel)]="endDate" name="endDate" class="border rounded p-2" required />
+      </div>
+
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2 md:mt-6">
+        Filter
+      </button>
+    </form>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-100 text-left text-sm font-semibold">
+        <tr>
+          <th class="px-4 py-2">Date</th>
+          <th class="px-4 py-2">Customer</th>
+          <th class="px-4 py-2">Order Type</th>
+          <th class="px-4 py-2">Amount</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 text-sm">
+        <tr *ngFor="let tx of transactions">
+          <td class="px-4 py-2">{{ tx.date | date: 'mediumDate' }}</td>
+          <td class="px-4 py-2">{{ tx.matchedToCustomerId?.fullName || 'N/A' }}</td>
+          <td class="px-4 py-2">{{ tx.orderType?.name || 'N/A' }}</td>
+          <td class="px-4 py-2">₵{{ tx.amount?.toFixed(2) || '0.00' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

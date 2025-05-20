@@ -1,0 +1,196 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+  <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">Manage Transaction</h2>
+      <button (click)="onClose()" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Transaction Details -->
+    <div class="bg-gray-100 p-4 rounded-lg mb-4 shadow-sm border border-gray-200">
+      <h3 class="text-lg font-semibold mb-2 text-gray-800">Transaction Details</h3>
+      <p><strong>Date:</strong> {{ transaction.date | date }}</p>
+      <p><strong>Reference:</strong> {{ transaction.reference }}</p>
+      <p><strong>Amount:</strong> <span [ngClass]="getAmountClass()">GHC {{ transaction.amount }}</span></p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      {{ error }}
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b mb-4">
+      <button 
+        (click)="activeTab = 'customer'" 
+        [ngClass]="{'border-blue-500 text-blue-600': activeTab === 'customer', 'border-transparent': activeTab !== 'customer'}"
+        class="px-4 py-2 border-b-2 transition-colors focus:outline-none">
+        Customer
+      </button>
+      <button 
+        (click)="activeTab = 'payment'" 
+        [ngClass]="{'border-blue-500 text-blue-600': activeTab === 'payment', 'border-transparent': activeTab !== 'payment'}"
+        class="px-4 py-2 border-b-2 transition-colors focus:outline-none">
+        Payment
+      </button>
+    </div>
+
+    <!-- Customer Tab -->
+    <div *ngIf="activeTab === 'customer'">
+      <form [formGroup]="reconcileForm" (ngSubmit)="onSubmitCustomer()">
+        <div class="mb-4">
+          <label for="searchTerm" class="block text-gray-700 mb-2 font-medium">Search Customer</label>
+          <input 
+            type="text" 
+            id="searchTerm" 
+            formControlName="searchTerm" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+            placeholder="Type to search customers">
+        </div>
+
+        <div class="mb-4">
+          <label for="customerId" class="block text-gray-700 mb-2 font-medium">Select Customer</label>
+          <select 
+            id="customerId" 
+            formControlName="customerId" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">-- Select a customer --</option>
+            <option *ngFor="let customer of customers" [value]="customer._id">
+              {{ customer.fullName }} (Balance: GHC {{ customer.balance }})
+            </option>
+          </select>
+        </div>
+
+        <div class="flex justify-end">
+          <button 
+            type="button" 
+            (click)="onClose()" 
+            class="px-4 py-2 mr-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md transition-colors">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            [disabled]="reconcileForm.invalid || loading" 
+            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors">
+            Reconcile
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Payment Tab -->
+    <div *ngIf="activeTab === 'payment'">
+      <!-- Transaction Details (Repeated in Payment Tab) -->
+      <!-- <div class="bg-gray-100 p-4 rounded-lg mb-4 shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Transaction Details</h3>
+        <p><strong>Date:</strong> {{ transaction.date | date }}</p>
+        <p><strong>Reference:</strong> {{ transaction.reference }}</p>
+        <p><strong>Amount:</strong> <span [ngClass]="getAmountClass()">GHC {{ transaction.amount }}</span></p>
+      </div> -->
+      
+      <!-- Sub-Tabs -->
+      <div class="flex border-b mb-4">
+        <button 
+          (click)="onSubTabChange('suppliers')" 
+          [ngClass]="{'border-blue-500 text-blue-600': activeSubTab === 'suppliers', 'border-transparent': activeSubTab !== 'suppliers'}"
+          class="px-4 py-2 border-b-2 transition-colors focus:outline-none">
+          Suppliers
+        </button>
+        <button 
+          (click)="onSubTabChange('expenseType')" 
+          [ngClass]="{'border-blue-500 text-blue-600': activeSubTab === 'expenseType', 'border-transparent': activeSubTab !== 'expenseType'}"
+          class="px-4 py-2 border-b-2 transition-colors focus:outline-none">
+          Expense
+        </button>
+      </div>
+
+      <!-- Suppliers Sub-Tab -->
+      <div *ngIf="activeSubTab === 'suppliers'">
+        <form [formGroup]="expenseForm" (ngSubmit)="onSubmitSupplier()">
+          <div class="mb-4">
+            <label for="orderTypeId" class="block text-gray-700 mb-2 font-medium">Select Supplier</label>
+            <select 
+              id="orderTypeId" 
+              formControlName="orderTypeId" 
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">-- Select a supplier --</option>
+              <option *ngFor="let orderType of orderTypes" [value]="orderType._id">
+                {{ orderType.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="flex justify-end">
+            <button 
+              type="button" 
+              (click)="onClose()" 
+              class="px-4 py-2 mr-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md transition-colors">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="!expenseForm.get('orderTypeId')?.value || loading" 
+              class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors">
+              Reconcile with Supplier
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Expense Sub-Tab -->
+      <div *ngIf="activeSubTab === 'expenseType'">
+        <form [formGroup]="expenseForm" (ngSubmit)="onSubmitExpense()">
+          <div class="mb-4">
+            <label for="expenseType" class="block text-gray-700 mb-2 font-medium">Expense Type</label>
+            <select 
+              id="expenseType" 
+              formControlName="expenseType" 
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">-- Select an expense type --</option>
+              <option *ngFor="let expenseType of expenseTypes" [value]="expenseType._id">
+                {{ expenseType.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label for="amount" class="block text-gray-700 mb-2 font-medium">Amount</label>
+            <input 
+              type="number" 
+              id="amount" 
+              formControlName="amount" 
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+              placeholder="Enter amount">
+          </div>
+
+          <div class="mb-4">
+            <label for="description" class="block text-gray-700 mb-2 font-medium">Description</label>
+            <textarea 
+              id="description" 
+              formControlName="description" 
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+              placeholder="Enter description"></textarea>
+          </div>
+
+          <div class="flex justify-end">
+            <button 
+              type="button" 
+              (click)="onClose()" 
+              class="px-4 py-2 mr-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md transition-colors">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="!expenseForm.get('expenseType')?.value || loading" 
+              class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed transition-colors">
+              Create Expense
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

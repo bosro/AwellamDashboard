@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface Order {
+  totalPrice: any;
 items: any;
   _id: string;
   customerId: {
@@ -20,17 +21,23 @@ items: any;
     price: number; // Changed to number
     _id: string;
   }[];
-  categoryId:{
+  assignedDriver:{
     _id: string,
-    name:string,
-    plantId:{
-      _id:string,
-      name:string
-    }
+    name: string
+
   };
   socNumber:{
+    toLowerCase(): unknown;
     _id: string,
-    socNumber: string
+    socNumber: string,
+    destinationId:{
+      _id: string,
+      destination: string
+    }
+  };
+  plantId:{
+    _id:string,
+    name:string
   };
   deliveryAddress: string;
   totalAmount: number; // Changed to number
@@ -39,6 +46,7 @@ items: any;
   deliveryStatus: string;
   orderNumber: string;
   date: string;
+  actualDeliveryDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +60,7 @@ export interface OrderResponse {
 interface OrdersResponse {
   message: string;
   order: {
+    socNumber: { _id: string; socNumber: string; };
     categoryId: { _id: string; name: string; plantId: { _id: string; name: string; }; };
     _id: string;
     status: string;
@@ -92,17 +101,80 @@ export class OrdersService {
   getOrders(): Observable<OrderResponse> {
     return this.http.get<OrderResponse>(`${this.apiUrl}/get`);
   }
+  getPendingOrders(startDate?: string, endDate?: string): Observable<OrderResponse> {
+    let url = `${this.apiUrl}/get/pending`;
+    
+    // Add query parameters if provided
+    if (startDate || endDate) {
+      const params = new HttpParams()
+        .set('startDate', startDate || '')
+        .set('endDate', endDate || '');
+      
+      return this.http.get<OrderResponse>(url, { params });
+    }
+    
+    return this.http.get<OrderResponse>(url);
+  }
 
-  getOrderById(id: string): Observable<OrdersResponse> {
-    return this.http.get<OrdersResponse>(`${this.apiUrl}/get/${id}`);
+  getDelieveredOrders(startDate?: string, endDate?: string): Observable<OrderResponse> {
+    let url = `${this.apiUrl}/get/delivered`;
+    
+    // Add query parameters if provided
+    if (startDate || endDate) {
+      const params = new HttpParams()
+        .set('startDate', startDate || '')
+        .set('endDate', endDate || '');
+      
+      return this.http.get<OrderResponse>(url, { params });
+    }
+    
+    return this.http.get<OrderResponse>(url);
+  }
+
+  getProductOrders(productId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/product/${productId}`);
+  }
+
+  getPlantOrders(plantId: string): Observable<OrderResponse> {
+    return this.http.get<OrderResponse>(`${this.apiUrl}/plant/${plantId}`);
+  }
+
+
+
+
+
+
+
+  getOrderById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/get/${id}`);
   }
 
   toggleOrderStatus(id: string): Observable<Order> {
     return this.http.patch<Order>(`${this.apiUrl}/${id}/toggle-status`, {});
   }
+  toggleOrderDeliveredStatus(id: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.apiUrl}/${id}/status`, {});
+  }
 
   editOrder(id: string, data: any): Observable<Order> {
     return this.http.put<Order>(`${this.apiUrl}/edit/${id}`, data);
+  }
+
+  updateOrderPrice(id: string, data: any): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/update/${id}`, data);
+  }
+
+  updateOrderPriority(orderId: string, orderPriority: any) {
+    return this.http.patch<{ success: boolean }>(
+      `${this.apiUrl}/${orderId}/priority`,
+      {orderPriority}
+    );
+  }
+  
+
+
+    updateOrderDate(id: string, data: any): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/updatedata/${id}`, data);
   }
 
   deleteOrder(id: string): Observable<any> {

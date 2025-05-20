@@ -37,7 +37,7 @@ interface UserFilters {
   templateUrl: './user-management.component.html'
 })
 export class UserManagementComponent implements OnInit {
-  users: User[] = [];
+  users: any[] = [];
   selectedUsers: Set<string> = new Set();
   loading = false;
   metrics!: UserMetrics;
@@ -52,7 +52,7 @@ export class UserManagementComponent implements OnInit {
 
   // @Input() user: any;
   
-  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support'];
+  roles = ['Loading_officer', 'super_admin', 'Stocks_Manager', 'Admin_Support','Accounting-Officer'];
 
   roleClasses: Record<string, string> = {
     Loading_officer: 'bg-purple-100 text-purple-800',

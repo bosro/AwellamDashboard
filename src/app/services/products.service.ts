@@ -15,12 +15,7 @@ costprice: number;
     _id: string;
     name: string
   };
-  destinationId: {
-    _id:string,
-    rates: number,
-    cost: number,
-    destination: string
-  }
+  totalStock: number;
 }
 
 
@@ -53,6 +48,9 @@ export class ProductsService {
     }
     return this.http.get<ProductsResponse>(`${this.apiUrl}/get`, { params: httpParams });
   }
+  getProductByPlant(plantId: string): Observable<{ products: Product[] }> {
+     return this.http.get<{ products: Product[]}>(`${this.apiUrl}/get/${plantId}`);
+   }
 
   getProductById(id: string): Observable<Product> {
     return this.http.get<{ message: string, product: Product }>(`${this.apiUrl}/${id}`)
