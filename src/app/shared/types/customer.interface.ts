@@ -9,5 +9,6 @@ name: any;
   balance: number;
   createdAt: string;
   updatedAt: string;
-  totalOrders :number
+  totalOrders :number;
+  plantId: string
 }
