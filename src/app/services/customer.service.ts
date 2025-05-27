@@ -52,7 +52,7 @@ export class CustomersService {
 
   
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
-    return this.http.post<Customer>(`${this.apiUrl}/create`, customer);
+    return this.http.post<Customer>(`${this.apiUrl}/add`, customer);
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {
