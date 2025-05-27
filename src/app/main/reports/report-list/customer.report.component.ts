@@ -112,7 +112,7 @@ export class CustomerSummaryComponent implements OnInit {
               (activity.balanceAfter >= 0 ? 'Completed' : 'Partial'),
             displayReference: activity.type === 'order' ? 
               activity.socNumber : 
-              (activity.paymentReference || activity.Reference || activity.paymentMethod),
+              ( activity.paymentMethod || activity.paymentReference ||  activity.Reference ),
             displayDate: activity.formattedDate
           };
         });
