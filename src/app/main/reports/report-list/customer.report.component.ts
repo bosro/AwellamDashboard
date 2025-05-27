@@ -177,7 +177,7 @@ export class CustomerSummaryComponent implements OnInit {
     doc.setTextColor(255, 255, 255); // White text
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('COMPANY NAME', pageWidth / 2, 15, { align: 'center' });
+    doc.text('AWELLAM', pageWidth / 2, 15, { align: 'center' });
     
     // Add report title
     doc.setFontSize(20);
@@ -407,7 +407,7 @@ export class CustomerSummaryComponent implements OnInit {
         </table>
       </div>
       <div class="footer">
-        Generated on ${new Date().toLocaleDateString()} by Your Company Name
+        Generated on ${new Date().toLocaleDateString()} by Awellam
       </div>
     `;
 
