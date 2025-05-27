@@ -112,7 +112,7 @@ export class CustomerSummaryComponent implements OnInit {
               (activity.balanceAfter >= 0 ? 'Completed' : 'Partial'),
             displayReference: activity.type === 'order' ? 
               activity.socNumber : 
-              (activity.paymentReference || activity.Reference || 'N/A'),
+              (activity.paymentReference || activity.Reference || activity.paymentMethod),
             displayDate: activity.formattedDate
           };
         });
@@ -244,7 +244,7 @@ export class CustomerSummaryComponent implements OnInit {
     doc.text('Type', margin + colWidth, tableTop + 5);
     doc.text('Reference', margin + colWidth * 2, tableTop + 5);
     doc.text('Amount', margin + colWidth * 3, tableTop + 5);
-    doc.text('Balance Before', margin + colWidth * 4, tableTop + 5);
+    // doc.text('Balance Before', margin + colWidth * 4, tableTop + 5);
     doc.text('Balance After', margin + colWidth * 5, tableTop + 5);
     
     // Set table content font
@@ -274,7 +274,7 @@ export class CustomerSummaryComponent implements OnInit {
         doc.text('Type', margin + colWidth, yPos + 5);
         doc.text('Reference', margin + colWidth * 2, yPos + 5);
         doc.text('Amount', margin + colWidth * 3, yPos + 5);
-        doc.text('Balance Before', margin + colWidth * 4, yPos + 5);
+        // doc.text('Balance Before', margin + colWidth * 4, yPos + 5);
         doc.text('Balance After', margin + colWidth * 5, yPos + 5);
         
         yPos += tableHeaderHeight;
@@ -292,9 +292,9 @@ export class CustomerSummaryComponent implements OnInit {
       // Add row data
       doc.text(activity.displayDate || activity.formattedDate, margin + 4, yPos + 5);
       doc.text(activity.displayType, margin + colWidth, yPos + 5);
-      doc.text(activity.displayReference || '', margin + colWidth * 2, yPos + 5);
+      doc.text(activity.paymentMethod || '', margin + colWidth * 2, yPos + 5);
       doc.text(`GHS ${activity.displayAmount.toLocaleString()}`, margin + colWidth * 3, yPos + 5);
-      doc.text(`GHS ${(activity.balanceBefore || 0).toLocaleString()}`, margin + colWidth * 4, yPos + 5);
+      // doc.text(`GHS ${(activity.balanceBefore || 0).toLocaleString()}`, margin + colWidth * 4, yPos + 5);
       doc.text(`GHS ${(activity.balanceAfter || 0).toLocaleString()}`, margin + colWidth * 5, yPos + 5);
       
       yPos += rowHeight;
@@ -392,7 +392,7 @@ export class CustomerSummaryComponent implements OnInit {
                 <td>${activity.displayType}</td>
                 <td>${activity.displayReference || ''}</td>
                 <td>${activity.type === 'order' ? 
-                      `${activity.plantName} | ${activity.Product.join(', ')}` : 
+                      ` ${activity.Product.join(', ')}` : 
                       activity.paymentMethod || ''}</td>
                 <td class="text-right">GHS ${activity.displayAmount.toLocaleString()}</td>
                 <td class="text-right ${activity.balanceBefore > 0 ? 'balance-positive' : 'balance-negative'}">
