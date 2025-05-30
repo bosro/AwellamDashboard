@@ -9,6 +9,11 @@ export interface OrderResponse {
   message: string;
   orders: Order[];
 }
+export interface TransactionResponse {
+  message: string;
+  data: any[];
+}
+
 
 
 @Injectable({
@@ -16,6 +21,8 @@ export interface OrderResponse {
 })
 export class CustomersService {
   private apiUrl = `${environment.apiUrl}/customers`;
+  private apiUrll = `${environment.apiUrl}/transactions`;
+  private apiUrlll = `${environment.apiUrl}/selflist`;
 
   constructor(private http: HttpClient) {}
 
@@ -23,15 +30,29 @@ export class CustomersService {
     return this.http.get<{ customers: Customer[]; total: number }>(`${this.apiUrl}/get`);
     }
     
+
+
+    sendBulkSms(message: string): Observable<any> {
+      return this.http.post(`${this.apiUrl}/bulk-sms`, { message });
+    }
   
 
 
   getCustomerById(id: string): Observable<{ customer: Customer }> {
     return this.http.get<{ customer: Customer }>(`${this.apiUrl}/get/${id}`);
   }
+  getSelfLiftOrder(id: string): Observable< any > {
+    return this.http.get< any >(`${this.apiUrlll}/orders/${id}`);
+  }
+
+
+  getCustomerTransactions(id: string, params?: any): Observable<TransactionResponse> {
+    return this.http.get<TransactionResponse>(`${this.apiUrll}/get/${id}/transactions`, { params });
+  }
+
   
   createCustomer(customer: Partial<Customer>): Observable<Customer> {
-    return this.http.post<Customer>(`${this.apiUrl}/create`, customer);
+    return this.http.post<Customer>(`${this.apiUrl}/add`, customer);
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {

@@ -1,0 +1,71 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+  <h2 class="text-xl font-semibold mb-4">{{ editMode ? 'Edit' : 'Create' }} Fuel Purchase</h2>
+  
+  <form [formGroup]="purchaseForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <!-- Truck Selection -->
+    <div>
+      <label for="truckId" class="block text-sm font-medium text-gray-700 mb-1">Truck</label>
+      <select 
+        id="truckId" 
+        formControlName="truckId"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">Select a truck</option>
+        <option *ngFor="let truck of trucks" [value]="truck._id">
+          {{ truck.truckNumber }} - {{ truck.driver?.name || 'No Driver Assigned' }}
+        </option>
+      </select>
+      <div *ngIf="purchaseForm.get('truckId')?.invalid && purchaseForm.get('truckId')?.touched" class="text-red-500 text-sm mt-1">
+        Truck is required
+      </div>
+    </div>
+    
+    <!-- Fuel Card Selection -->
+    <div>
+      <label for="fuelCardId" class="block text-sm font-medium text-gray-700 mb-1">Fuel Card</label>
+      <select 
+        id="fuelCardId" 
+        formControlName="fuelCardId"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="">Select a fuel card</option>
+        <option *ngFor="let card of fuelCards" [value]="card._id">{{ card.name }}</option>
+      </select>
+      <div *ngIf="purchaseForm.get('fuelCardId')?.invalid && purchaseForm.get('fuelCardId')?.touched" class="text-red-500 text-sm mt-1">
+        Fuel card is required
+      </div>
+    </div>
+    
+    <!-- Amount Input -->
+    <div>
+      <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+      <input 
+        type="number" 
+        id="amount" 
+        formControlName="amount"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+      <div *ngIf="purchaseForm.get('amount')?.invalid && purchaseForm.get('amount')?.touched" class="text-red-500 text-sm mt-1">
+        Amount must be greater than 0
+      </div>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="flex justify-end space-x-3 pt-4">
+      <button 
+        type="button" 
+        (click)="onCancel()"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        [disabled]="purchaseForm.invalid || loading"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+      >
+        {{ editMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </form>
+</div>

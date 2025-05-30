@@ -18,6 +18,7 @@ export class OrderEditComponent implements OnInit {
   trucks: any[] = [];
   order: any;
   productId: string = '';
+  maxDate: string = '';
   private apiUrl = `${environment.apiUrl}`;
 
   constructor(
@@ -28,15 +29,20 @@ export class OrderEditComponent implements OnInit {
     private http: HttpClient
   ) {
     this.orderForm = this.fb.group({
-      price: ['', Validators.required],
-      quantity: ['', Validators.required],
-      assignedTruck: ['']
+      price: ['', ],
+      quantity: ['', ],
+      assignedTruck: [''],
+      date: ['']
+
     });
   }
 
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id') || '';
     this.loadOrder();
+    this.getTrucks()
+    const today = new Date();
+    this.maxDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
   }
 
   loadOrder(): void {
@@ -50,7 +56,8 @@ export class OrderEditComponent implements OnInit {
 
         this.orderForm.patchValue({
           price: this.order.price,
-          assignedTruck: this.order.truckId?._id
+          assignedTruck: this.order.truckId?._id,
+          date:this.order.date,
         });
         this.loading = false;
         this.getTrucks();
@@ -68,8 +75,10 @@ export class OrderEditComponent implements OnInit {
     this.loading = true;
     this.http.get<any>(`${this.apiUrl}/trucks/get/trucks/${this.productId}`).subscribe({
       next: (response) => {
-        this.trucks = response.trucks;
+        this.trucks = response.trucks.filter((truck: any) => truck.status === 'active');
         this.loading = false;
+
+        console.log(this.productId)
         Swal.fire({
           title: "Driver Fetched Successfully!",
           icon: "success",
@@ -81,7 +90,7 @@ export class OrderEditComponent implements OnInit {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "No driver found holding this product category or from this plant!",
+          text: "No trucks found holding products!",
         });
         this.loading = false;
       },

@@ -5,19 +5,24 @@ import { CustomersRoutingModule } from './customers-routing.module';
 import { CustomerListComponent } from './customer-list/customer-list.component';
 import { CustomerFormComponent } from './customer-form/customer-form.component';
 import { CustomerDetailsComponent } from './customer-detail/customer-detail.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DebtorsComponent } from './customer-list/debtors-list.component';
+import { BulkSmsComponent } from './customer-list/bulk-sms.component';
 
 
 @NgModule({
   declarations: [
     CustomerListComponent,
     CustomerFormComponent,
-    CustomerDetailsComponent
+    CustomerDetailsComponent,
+    DebtorsComponent,
+    BulkSmsComponent
   ],
   imports: [
     CommonModule,
     CustomersRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule
   ]
 })
 export class CustomersModule { }

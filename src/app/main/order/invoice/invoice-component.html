@@ -1,0 +1,435 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+    
+    <!-- Form Section -->
+    <div class="bg-white rounded-lg shadow-sm border p-8 mb-8 no-print" *ngIf="!showPreview">
+      <h2 class="text-xl font-semibold text-gray-800 mb-8 text-center">Create Proforma Invoice</h2>
+      
+      <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Logo File Path -->
+         
+
+          <!-- Customer Name -->
+          <div>
+            <label for="customerName" class="block text-sm font-medium text-gray-700 mb-2">
+              Customer Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="customerName"
+              formControlName="customerName"
+              class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="invoiceForm.get('customerName')?.invalid && invoiceForm.get('customerName')?.touched"
+              placeholder="Enter customer name"
+            />
+            <div *ngIf="invoiceForm.get('customerName')?.invalid && invoiceForm.get('customerName')?.touched" 
+                 class="text-red-500 text-sm mt-1">
+              Customer name is required
+            </div>
+          </div>
+
+          <!-- Customer Address -->
+          <div>
+            <label for="customerAddress" class="block text-sm font-medium text-gray-700 mb-2">
+              Customer Address
+            </label>
+            <input
+              type="text"
+              id="customerAddress"
+              formControlName="customerAddress"
+              class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter customer address"
+            />
+          </div>
+
+          <!-- Product/Description with Dropdown -->
+          <div class="relative">
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+              Product/Description <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="description"
+              formControlName="description"
+              (click)="onDescriptionClick()"
+              (blur)="onDescriptionBlur()"
+              (input)="toggleProductDropdown()"
+              class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="invoiceForm.get('description')?.invalid && invoiceForm.get('description')?.touched"
+              placeholder="Search or enter description"
+              autocomplete="off"
+            />
+            
+            <!-- Product Dropdown -->
+            <div *ngIf="isProductDropdownOpen && filteredProducts.length > 0" 
+                 class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+              <div *ngFor="let product of filteredProducts" 
+                   (click)="selectProduct(product)"
+                   class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                <div class="font-medium text-gray-900">{{ product.name }}</div>
+                <div class="text-sm text-gray-600">GHS {{ formatCurrency(product.costprice || product.price || 0) }}</div>
+              </div>
+            </div>
+            
+            <div *ngIf="invoiceForm.get('description')?.invalid && invoiceForm.get('description')?.touched" 
+                 class="text-red-500 text-sm mt-1">
+              Product description is required
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div>
+            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">
+              Quantity <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              id="quantity"
+              formControlName="quantity"
+              min="0.01"
+              step="0.01"
+              class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="invoiceForm.get('quantity')?.invalid && invoiceForm.get('quantity')?.touched"
+            />
+            <div *ngIf="invoiceForm.get('quantity')?.invalid && invoiceForm.get('quantity')?.touched" 
+                 class="text-red-500 text-sm mt-1">
+              Quantity must be greater than 0
+            </div>
+          </div>
+
+          <!-- Unit Price -->
+          <div>
+            <label for="unitPrice" class="block text-sm font-medium text-gray-700 mb-2">
+              Unit Price (GHS) <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              id="unitPrice"
+              formControlName="unitPrice"
+              min="0.01"
+              step="0.01"
+              class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              [class.border-red-500]="invoiceForm.get('unitPrice')?.invalid && invoiceForm.get('unitPrice')?.touched"
+              placeholder="0.00"
+            />
+            <div *ngIf="invoiceForm.get('unitPrice')?.invalid && invoiceForm.get('unitPrice')?.touched" 
+                 class="text-red-500 text-sm mt-1">
+              Unit price must be greater than 0
+            </div>
+          </div>
+
+          <!-- VAT Rate -->
+          <div>
+            <label for="vatRate" class="block text-sm font-medium text-gray-700 mb-2">
+              VAT Rate (%)
+            </label>
+            <input
+              type="number"
+              id="vatRate"
+              formControlName="vatRate"
+              min="0"
+              max="100"
+              step="0.1"
+              class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- VAT Exclusive/Inclusive Toggle -->
+        <div class="flex items-center space-x-3 pt-4">
+          <input
+            type="checkbox"
+            id="vatExclusive"
+            formControlName="vatExclusive"
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label for="vatExclusive" class="text-sm font-medium text-gray-700">
+            Prices are VAT Exclusive (VAT will be added)
+          </label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex justify-center gap-4 pt-6">
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-md transition duration-200"
+          >
+            Generate Invoice
+          </button>
+          
+          <button
+            type="button"
+            (click)="viewAllInvoices()"
+            class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-md transition duration-200"
+          >
+            View All Invoices
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- View All Invoices Section -->
+    <div class="bg-white rounded-lg shadow-sm border p-8 no-print" *ngIf="showAllInvoices">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">All Invoices</h2>
+        <button
+          (click)="hideAllInvoices()"
+          class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition duration-200"
+        >
+          Close
+        </button>
+      </div>
+      
+      <div *ngIf="isLoadingInvoices" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p class="mt-2 text-gray-600">Loading invoices...</p>
+      </div>
+      
+      <div *ngIf="!isLoadingInvoices && allInvoices.length === 0" class="text-center py-8">
+        <p class="text-gray-500">No invoices found.</p>
+      </div>
+      
+      <div *ngIf="!isLoadingInvoices && allInvoices.length > 0" class="overflow-x-auto">
+        <table class="w-full border-collapse border border-gray-200">
+          <thead>
+            <tr class="bg-gray-800 text-white">
+              <th class="border border-gray-200 px-4 py-3 text-left text-sm font-medium">Invoice No.</th>
+              <th class="border border-gray-200 px-4 py-3 text-left text-sm font-medium">Customer</th>
+              <th class="border border-gray-200 px-4 py-3 text-left text-sm font-medium">Date</th>
+              <th class="border border-gray-200 px-4 py-3 text-right text-sm font-medium">Amount</th>
+              <th class="border border-gray-200 px-4 py-3 text-center text-sm font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let invoice of allInvoices" class="hover:bg-gray-50">
+              <td class="border border-gray-200 px-4 py-3 font-medium">{{ invoice.invoiceNumber }}</td>
+              <td class="border border-gray-200 px-4 py-3">{{ invoice.customerName }}</td>
+              <td class="border border-gray-200 px-4 py-3">{{ formatDate(invoice.invoiceDate) }}</td>
+              <td class="border border-gray-200 px-4 py-3 text-right font-medium">GHS {{ formatCurrency(invoice.finalAmount) }}</td>
+              <td class="border border-gray-200 px-4 py-3 text-center">
+                <button
+                  (click)="viewInvoice(invoice)"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm mr-2"
+                >
+                  View
+                </button>
+                <button
+                  (click)="editExistingInvoice(invoice)"
+                  class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm"
+                >
+                  Edit
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Enhanced Invoice Preview Section -->
+    <div class="bg-white rounded-lg shadow-sm border relative overflow-hidden" *ngIf="showPreview && invoiceData">
+      
+      <!-- Diagonal Watermark -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="text-6xl font-bold text-gray-100 opacity-3 transform -rotate-45 whitespace-nowrap">
+          {{ companyInfo.name }}
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="action-buttons flex flex-wrap justify-center gap-3 p-4 border-b border-gray-200 relative z-10 no-print">
+        <button
+          (click)="downloadPDF()"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          PDF
+        </button>
+        
+        <button
+          (click)="printInvoice()"
+          class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+          Print
+        </button>
+        
+        <button
+          (click)="saveInvoice()"
+          [disabled]="isSaving"
+          class="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+          </svg>
+          Save
+        </button>
+        
+        <button
+          (click)="editInvoice()"
+          class="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Edit
+        </button>
+        
+        <button
+          (click)="createNewInvoice()"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          New
+        </button>
+        
+        <button
+          (click)="viewAllInvoices()"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm flex items-center gap-2 transition duration-200"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+          </svg>
+          View All
+        </button>
+      </div>
+
+      <!-- Enhanced Invoice Content -->
+      <div id="invoice-content" class="bg-white relative z-10" style="max-width: 210mm; margin: 0 auto;">
+        
+        <!-- Enhanced Header with Logo Colors -->
+        <div class="invoice-header px-10 py-8">
+          <!-- Logo and Company Name -->
+          <div class="flex items-center justify-center mb-8">
+            <div class="flex items-center gap-4">
+              <!-- Logo with colorful stripes -->
+              <div *ngIf="getLogoPath()" class="flex-shrink-0">
+                <img [src]="getLogoPath()" alt="Company Logo" class="h-16 w-auto object-contain">
+              </div>
+              <div *ngIf="!getLogoPath()" class="flex-shrink-0">
+                <!-- Logo placeholder with colors from the actual logo -->
+                <div class="w-16 h-16 flex">
+                  <div class="w-2 bg-green-500"></div>
+                  <div class="w-2 bg-blue-600"></div>
+                  <div class="w-2 bg-yellow-500"></div>
+                  <div class="w-2 bg-orange-500"></div>
+                  <div class="w-8 bg-gray-800 flex items-center justify-center text-white font-bold text-xl">A</div>
+                </div>
+              </div>
+              
+              <!-- Company Name -->
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800">{{ companyInfo.name }}</h1>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company Address -->
+          <div class="text-center mb-8">
+            <p class="text-sm text-gray-600">{{ companyInfo.poBox }}, {{ companyInfo.city }}, {{ companyInfo.country }}</p>
+            <p class="text-sm text-gray-600">{{ companyInfo.phone.replace('Tel: ', '') }}</p>
+            <p class="text-sm text-gray-600">{{ companyInfo.email.replace('Email: ', '') }}</p>
+          </div>
+
+          <!-- Invoice Title and Details -->
+          <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">PROFORMA INVOICE</h2>
+            <div class="flex justify-between items-center">
+              <div class="text-left">
+                <p class="text-sm font-medium">Ref: {{ invoiceNumber }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium">{{ currentDate }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bill To Section -->
+          <div class="mb-8">
+            <h3 class="text-sm font-bold text-gray-800 mb-3">BILL TO:</h3>
+            <div class="text-sm">
+              <p class="font-semibold text-gray-800">{{ invoiceData.customerName }}</p>
+              <p *ngIf="invoiceData.customerAddress" class="text-gray-600">{{ invoiceData.customerAddress }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Table - Matching PDF Style -->
+        <div class="px-10 pb-8">
+          <table class="w-full border-collapse border-2 border-black">
+            <!-- Table Header -->
+            <thead>
+              <tr class="bg-white">
+                <th class="border border-black px-4 py-3 text-center text-sm font-bold">QTY</th>
+                <th class="border border-black px-4 py-3 text-center text-sm font-bold">DESCRIPTION<br/>(50kg)</th>
+                <th class="border border-black px-4 py-3 text-center text-sm font-bold">UNIT PRICE</th>
+                <th class="border border-black px-4 py-3 text-center text-sm font-bold">NET<br/>AMOUNT<br/>VAT<br/>EXCLUSIVE<br/>(GHS)</th>
+                <th class="border border-black px-4 py-3 text-center text-sm font-bold">FINAL<br/>AMOUNT<br/>(GHS)</th>
+              </tr>
+            </thead>
+            
+            <!-- Table Body -->
+            <tbody>
+              <tr class="bg-white">
+                <td class="border border-black px-4 py-4 text-center">{{ formatQuantity(invoiceData.quantity) }}</td>
+                <td class="border border-black px-4 py-4 text-center">{{ invoiceData.description }}</td>
+                <td class="border border-black px-4 py-4 text-center">{{ formatCurrency(invoiceData.unitPrice) }}</td>
+                <td class="border border-black px-4 py-4 text-center">{{ formatCurrency(invoiceData.netAmount) }}</td>
+                <td class="border border-black px-4 py-4 text-center">{{ formatCurrency(invoiceData.finalAmount) }}</td>
+              </tr>
+              
+              <!-- Summary Rows -->
+              <tr class="bg-white">
+                <td colspan="3" class="border border-black px-4 py-2"></td>
+                <td class="border border-black px-4 py-2 text-right font-medium">Total Net Amount</td>
+                <td class="border border-black px-4 py-2 text-center font-medium">{{ formatCurrency(invoiceData.netAmount) }}</td>
+              </tr>
+              <tr class="bg-white">
+                <td colspan="3" class="border border-black px-4 py-2"></td>
+                <td class="border border-black px-4 py-2 text-right">GETF/NHIL/CVD<span class="ml-2">6%</span></td>
+                <td class="border border-black px-4 py-2 text-center">0.00</td>
+              </tr>
+              <tr class="bg-white">
+                <td colspan="3" class="border border-black px-4 py-2"></td>
+                <td class="border border-black px-4 py-2 text-right">VAT<span class="ml-2">{{ invoiceData.vatRate }}%</span></td>
+                <td class="border border-black px-4 py-2 text-center">{{ formatCurrency(invoiceData.vatAmount) }}</td>
+              </tr>
+              <tr class="bg-white">
+                <td colspan="3" class="border border-black px-4 py-3"></td>
+                <td class="border border-black px-4 py-3 text-right font-bold text-lg">Total</td>
+                <td class="border border-black px-4 py-3 text-center font-bold text-lg">{{ formatCurrency(invoiceData.finalAmount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer - Matching PDF Style -->
+        <div class="px-10 py-6">
+          <!-- Company Details Footer -->
+          <div class="text-center text-sm space-y-1">
+            <p class="font-medium">P.O Box SC 349, Tema - Ghana &nbsp;&nbsp;&nbsp; Tel: +233 244541775 / +233 207046620 &nbsp;&nbsp;&nbsp; Email: awellamghanagmail.com</p>
+            
+            <!-- Colorful underline matching logo colors -->
+            <div class="flex justify-center mt-3">
+              <div class="flex h-1 w-full max-w-lg">
+                <div class="flex-1 bg-green-500"></div>
+                <div class="flex-1 bg-blue-600"></div>
+                <div class="flex-1 bg-yellow-500"></div>
+                <div class="flex-1 bg-orange-500"></div>
+              </div>
+            </div>
+            
+            <p class="font-medium mt-3">Bankers: Stanbik Bank Ghana, Tema Industrial Area</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -30,6 +30,7 @@ export interface User {
   lastLogin: string | null;
   createdAt: string;
   updatedAt: string;
+  plantId: string;
   __v: number;
   status?: 'active' | 'inactive'; // Optional, inferred from your metrics logic
 }
@@ -112,6 +113,7 @@ export class AuthService {
         localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
         localStorage.setItem('admin', JSON.stringify(admin));
         localStorage.setItem('userRole', admin.role); // Store user role in local storage
+        localStorage.setItem('plantId', admin.plantId)
         this.currentUserSubject.next(admin);
         this.isAuthenticatedSubject.next(true); // Update authentication status
         console.log('Access Token:', accessToken);

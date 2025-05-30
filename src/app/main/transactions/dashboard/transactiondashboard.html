@@ -1,0 +1,108 @@
+<div class="bg-white shadow-md rounded-lg p-6">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Bank Transactions Dashboard</h1>
+      
+      <!-- Timeframe selector -->
+      <div class="flex space-x-2">
+        <button 
+          (click)="changeTimeframe('week')" 
+          [ngClass]="{'bg-blue-600 text-white': timeframe === 'week', 'bg-gray-200 text-gray-700': timeframe !== 'week'}"
+          class="px-3 py-1 rounded-md text-sm font-medium">
+          Week
+        </button>
+        <button 
+          (click)="changeTimeframe('month')" 
+          [ngClass]="{'bg-blue-600 text-white': timeframe === 'month', 'bg-gray-200 text-gray-700': timeframe !== 'month'}"
+          class="px-3 py-1 rounded-md text-sm font-medium">
+          Month
+        </button>
+        <button 
+          (click)="changeTimeframe('quarter')" 
+          [ngClass]="{'bg-blue-600 text-white': timeframe === 'quarter', 'bg-gray-200 text-gray-700': timeframe !== 'quarter'}"
+          class="px-3 py-1 rounded-md text-sm font-medium">
+          Quarter
+        </button>
+        <button 
+          (click)="changeTimeframe('year')" 
+          [ngClass]="{'bg-blue-600 text-white': timeframe === 'year', 'bg-gray-200 text-gray-700': timeframe !== 'year'}"
+          class="px-3 py-1 rounded-md text-sm font-medium">
+          Year
+        </button>
+      </div>
+    </div>
+    
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+        <p class="text-sm text-gray-500">Total Bank Transactions</p>
+        <p class="text-2xl font-bold">{{ totalBankTransactions }}</p>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+        <p class="text-sm text-gray-500">Total Bank Amount</p>
+        <p class="text-2xl font-bold" [ngClass]="getAmountColor(totalBankAmount)">
+          {{ totalBankAmount | currency:'GHC' }}
+        </p>
+      </div>
+    </div>
+  
+    <!-- Loading indicator -->
+    <div *ngIf="loading" class="flex justify-center items-center p-8">
+      <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="ml-2 text-gray-700">Loading transaction data...</span>
+    </div>
+  
+    <!-- No data message -->
+    <div *ngIf="!loading && bankTransactions.length === 0" class="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="text-lg font-medium text-gray-700">No bank transactions found</p>
+      <p class="text-gray-500 mt-1">Try selecting a different time period</p>
+    </div>
+  
+    <!-- Bank Transactions List -->
+    <div *ngIf="!loading && bankTransactions.length > 0">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4">Transactions by Bank</h2>
+      
+      <div class="space-y-4 mb-6">
+        <div *ngFor="let bank of bankTransactions" class="bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="font-medium text-gray-800">{{ bank.bank }}</h3>
+            <div class="flex items-center space-x-4">
+              <span class="text-sm font-semibold" [ngClass]="getAmountColor(bank.totalAmount)">
+                {{ bank.totalAmount | currency:'GHC' }}
+              </span>
+              <span class="text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-full">
+                {{ bank.count }} transactions
+              </span>
+            </div>
+          </div>
+          
+          <!-- Progress bar -->
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-blue-600 h-2.5 rounded-full" [style.width]="getProgressBarWidth(bank.totalAmount)"></div>
+          </div>
+          
+          <!-- Details -->
+          <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-gray-500">
+            <div>
+              <span class="block">Average:</span>
+              <span class="font-medium text-gray-700">{{ bank.averageAmount | currency:'GHC' }}</span>
+            </div>
+            <div>
+              <span class="block">Payments:</span>
+              <span class="font-medium text-green-600">{{ bank.paymentCount }}</span>
+            </div>
+            <div>
+              <span class="block">Refunds:</span>
+              <span class="font-medium text-red-600">{{ bank.refundCount }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

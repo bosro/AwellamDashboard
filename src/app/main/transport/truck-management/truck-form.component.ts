@@ -19,7 +19,7 @@ export class TruckFormComponent implements OnInit {
     this.truckForm = this.fb.group({
       truckNumber: ['', Validators.required],
       capacity: ['', Validators.required],
-      status: ['active', Validators.required],
+      isAwellamLoad: ['true', ],
     });
   }
 
