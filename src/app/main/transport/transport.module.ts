@@ -27,6 +27,7 @@ import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.compon
 import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
 import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
 import { TruckStatisticsComponent } from './truck-management/truckhistory.component';
+import { TransportIncomeComponent } from './transportIncome/transaportIncome.component';
 
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
@@ -48,6 +49,7 @@ import { TruckStatisticsComponent } from './truck-management/truckhistory.compon
     PaymentListComponent,
     PaymentListWithoutSocComponent,
     TruckStatisticsComponent,
+    TransportIncomeComponent,
     // PaymentListComponent,
     // InventoryListComponent,
     // InventoryFormComponent,

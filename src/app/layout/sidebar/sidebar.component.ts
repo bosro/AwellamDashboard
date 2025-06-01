@@ -191,6 +191,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/transport/inventory-list',
           icon: 'ri-database-2-line',
         },
+         {
+          title: 'Transport-Income',
+          route: '/main/transport/transport-Income',
+          icon: 'ri-database-2-line',
+        },
 
         // {
         //   title: 'Operations',
