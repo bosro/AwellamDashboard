@@ -20,8 +20,8 @@ export class TruckStatisticsComponent implements OnInit {
   dateFilterForm: FormGroup;
   
   // Data
-  deliveredOrders: DeliveredOrder[] = [];
-  paginatedOrders: DeliveredOrder[] = [];
+  deliveredOrders: any[] = [];
+  paginatedOrders: any[] = [];
   expenses: ExpenseResponse | null = null;
   
   // Pagination
