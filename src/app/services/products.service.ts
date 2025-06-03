@@ -10,7 +10,7 @@ export interface Product {
   name: string;
 costprice: number;
   inStock: boolean;
-  sellingprice: number;
+  sellingPrice: number;
   image: string;
   plantId:{
     _id: string;

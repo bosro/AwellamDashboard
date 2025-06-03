@@ -32,7 +32,7 @@ export class ProductFormComponent implements OnInit {
     this.productForm = this.fb.group({
       name: ['', Validators.required],
       costprice: ['', [Validators.required, Validators.min(0)]],
-      sellingprice: ['', [Validators.required, Validators.min(0)]],
+      sellingPrice: ['', [Validators.required, Validators.min(0)]],
       plantId: ['', Validators.required],
       totalStock: ['', [Validators.required, Validators.min(0)]],
       inStock: [true],
@@ -86,7 +86,7 @@ export class ProductFormComponent implements OnInit {
       const productData = {
         name: formValue.name,
         costprice: Number(formValue.costprice),
-        sellingprice: Number(formValue.sellingprice),
+        sellingPrice: Number(formValue.sellingPrice),
         plantId: formValue.plantId,
         totalStock: Number(formValue.totalStock),
         inStock: formValue.inStock,
@@ -126,7 +126,7 @@ export class ProductFormComponent implements OnInit {
             name: product?.name,
             costprice: product.costprice,
             plantId: product.plantId,
-            sellingprice: product.sellingprice,
+            sellingPrice: product.sellingPrice,
             totalStock: product.totalStock,
             inStock: product.inStock,
             image: product.image,
