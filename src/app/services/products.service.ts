@@ -10,7 +10,8 @@ export interface Product {
   name: string;
 costprice: number;
   inStock: boolean;
-  sellingPrice: number;
+  retailPrice: number;
+  whosalePrice:number;
   image: string;
   plantId:{
     _id: string;
