@@ -1,0 +1,93 @@
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-6">Fuel Management Dashboard</h1>
+    
+    <div *ngIf="isLoading" class="text-center py-10">
+      <p class="text-gray-500">Loading dashboard data...</p>
+    </div>
+    
+    <div *ngIf="!isLoading" class="space-y-6">
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-700">Total Fuel Cards</h3>
+          <p class="text-3xl font-bold text-blue-600 mt-2">{{ fuelCards.length }}</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-700">Total Balance</h3>
+          <p class="text-3xl font-bold text-green-600 mt-2">{{ totalBalance }}</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold text-gray-700">Total Fuel Purchases</h3>
+          <p class="text-3xl font-bold text-orange-600 mt-2">{{ totalPurchases }}</p>
+        </div>
+      </div>
+      
+      <!-- Recent Purchases -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">Recent Fuel Purchases</h2>
+        
+        <div *ngIf="recentPurchases.length === 0" class="py-6 text-center">
+          <p class="text-gray-500">No fuel purchases recorded yet.</p>
+        </div>
+        
+        <div *ngIf="recentPurchases.length > 0" class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fuel Card</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let purchase of recentPurchases">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ (purchase.truckId ) ? purchase.truckId.truckNumber : 'N/A' }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    {{ (purchase.fuelCardId ) ? purchase.fuelCardId.name : 'N/A' }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ purchase.amount }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-500">{{ purchase.createdAt | date }}</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-4 text-right">
+          <a routerLink="../../fuel-management/purchase" class="text-blue-600 hover:text-blue-800">View all purchases →</a>
+        </div>
+      </div>
+      
+      <!-- Quick Links -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold mb-3">Fuel Cards</h3>
+          <p class="text-gray-600 mb-4">Manage your truck fuel cards, add balances, and track expenditures.</p>
+          <a routerLink="../../fuel-management/card" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Manage Fuel Cards
+          </a>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold mb-3">Fuel Purchases</h3>
+          <p class="text-gray-600 mb-4">Record and track all fuel purchases for your truck fleet.</p>
+          <a routerLink="../../fuel-management/purchase" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Manage Purchases
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  

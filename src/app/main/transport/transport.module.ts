@@ -25,6 +25,9 @@ import { DisbursementModalComponent } from './driverlist/driver-details/disburse
 import { InventoryDetailsComponent } from './inventory-detail/inventory-detail.component';
 import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
 import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
+import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
+import { TruckStatisticsComponent } from './truck-management/truckhistory.component';
+import { TransportIncomeComponent } from './transportIncome/transaportIncome.component';
 
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
@@ -44,6 +47,9 @@ import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
     StockDisbursementComponent,
     PaymentDetailComponent,
     PaymentListComponent,
+    PaymentListWithoutSocComponent,
+    TruckStatisticsComponent,
+    TransportIncomeComponent,
     // PaymentListComponent,
     // InventoryListComponent,
     // InventoryFormComponent,

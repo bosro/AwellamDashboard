@@ -20,6 +20,9 @@ import { DestinationListComponent } from '../inventory/destination/destination-l
 import { StockDisbursementComponent } from './stock-disbursement/stock-disbursement.component';
 import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
 import { PaymentDetailComponent } from './Payment-refs/Paymentref-details.component';
+import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
+import { TruckStatisticsComponent } from './truck-management/truckhistory.component';
+import { TransportIncomeComponent } from './transportIncome/transaportIncome.component';
 // import { PaymentRefListComponent } from './Payment-refs/Paymentref-list.component';
 // import { PaymentRefDetailComponent } from './Payment-refs/Paymentref-details.component';
 
@@ -28,11 +31,14 @@ const routes: Routes = [
     path: '',
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'trucks/statistics/:id', component: TruckStatisticsComponent },
       { path: 'dashboard', component: TransportDashboardComponent },
       { path: 'drivers/new', component: DriverFormComponent },
       { path: 'drivers/:id', component: DriverDetailsComponent },
       { path: 'drivers/:id/edit', component: DriverFormComponent },
       { path: 'drivers', component: DriverListComponent },
+      { path: 'transport-Income', component: TransportIncomeComponent },
+      
       { path: 'trucks', component: TruckManagementComponent },
       { path: 'trucks/new', component: TruckFormComponent },
       { path: 'trucks/details/:id', component: TruckDetailComponent },
@@ -44,7 +50,9 @@ const routes: Routes = [
       { path: 'destination', component: DestinationListComponent },
       { path: 'disbursement', component: StockDisbursementComponent },
       {path:'paymentrefs', component: PaymentListComponent},
-      {path:'payment-ref/:id' , component: PaymentDetailComponent}
+      {path:'payment-ref/:id' , component: PaymentDetailComponent},
+      {path:'without-socs', component: PaymentListWithoutSocComponent},
+      
     ],
   },
 ];

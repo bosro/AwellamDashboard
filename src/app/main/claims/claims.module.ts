@@ -7,11 +7,13 @@ import { ClaimsRoutingModule } from './claims-routing.module';
 // import { ClaimApprovalComponent } from './claim-approval/claim-approval.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {  ClaimsReportComponent } from './claim-list/claim-list.component';
+import { OutsideClaimsReportComponent } from './outsideclaims/outsideclaim-list';
 
 
 @NgModule({
   declarations: [
-ClaimsReportComponent
+ClaimsReportComponent,
+OutsideClaimsReportComponent
     // ClaimFormComponent,
     // ClaimDetailsComponent,
     // ClaimApprovalComponent,

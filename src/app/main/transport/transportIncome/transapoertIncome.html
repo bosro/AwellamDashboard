@@ -1,0 +1,383 @@
+<!-- transport-income.component.html -->
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">Transport Income Management</h1>
+      <p class="text-gray-600 mt-2">Manage transport incomes and receipts</p>
+    </div>
+
+    <!-- Message Alert -->
+    <div *ngIf="message" 
+         class="mb-6 p-4 rounded-md"
+         [ngClass]="messageType === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg *ngIf="messageType === 'success'" class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <svg *ngIf="messageType === 'error'" class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="font-medium">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-2 text-gray-600">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-lg shadow-sm mb-6">
+      <nav class="flex space-x-8 px-6" aria-label="Tabs">
+        <button (click)="setActiveTab('create')"
+                [ngClass]="activeTab === 'create' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+          Receive Income
+        </button>
+        <button (click)="setActiveTab('list')"
+                [ngClass]="activeTab === 'list' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+          Income List
+        </button>
+        <button (click)="setActiveTab('edit')"
+                [ngClass]="activeTab === 'edit' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+          Edit Income
+        </button>
+        <button (click)="setActiveTab('receipts')"
+                [ngClass]="activeTab === 'receipts' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+         Deposite
+        </button>
+        <button (click)="setActiveTab('upload')"
+                [ngClass]="activeTab === 'upload' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none">
+           Deposite to Bank
+        </button>
+      </nav>
+    </div>
+
+    <!-- Create Transport Income Tab -->
+    <div *ngIf="activeTab === 'create'" class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">Receive New Transport Income</h2>
+      <form [formGroup]="createForm" (ngSubmit)="onCreateSubmit()" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="customer" class="block text-sm font-medium text-gray-700">Customer</label>
+            <input type="text" 
+                   id="customer"
+                   formControlName="customer"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                   placeholder="Enter customer name">
+            <div *ngIf="createForm.get('customer')?.invalid && createForm.get('customer')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Customer name is required
+            </div>
+          </div>
+
+          <div>
+            <label for="driver" class="block text-sm font-medium text-gray-700">Truck & Driver</label>
+            <select
+              id="truck"
+              formControlName="truck"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="">Select Truck & Driver</option>
+              <option *ngFor="let truck of trucks" [value]="truck._id">
+                {{ truck.truckNumber }} - {{ truck.driver?.name || 'No Driver' }}
+              </option>
+            </select>
+            <div *ngIf="createForm.get('truck')?.invalid && createForm.get('truck')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Driver is required
+            </div>
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+            <input type="number" 
+                   id="amount"
+                   formControlName="amount"
+                   step="0.01"
+                   min="0"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                   placeholder="Enter amount">
+            <div *ngIf="createForm.get('amount')?.invalid && createForm.get('amount')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Valid amount is required
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" 
+                  [disabled]="createForm.invalid || loading"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            Save Receive Income
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Transport Income List Tab -->
+    <div *ngIf="activeTab === 'list'" class="bg-white rounded-lg shadow-sm">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Transport Income List</h2>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created By</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let income of transportIncomes" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ income.customer }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ income.truck.truckNumber }} -  {{ income.truck.driver?.name || income.driver }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatCurrency(income.amount) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ income.createdBy?.fullName || 'Unknown' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                <button (click)="startEdit(income)"
+                        class="text-blue-600 hover:text-blue-900">
+                  Edit
+                </button>
+                <button (click)="updateReceiptAmount(income._id!)"
+                        class="text-green-600 hover:text-green-900">
+                  Update Amount
+                </button>
+                <button (click)="deleteIncome(income._id!)"
+                        class="text-red-600 hover:text-red-900">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="transportIncomes.length === 0" class="text-center py-12">
+          <p class="text-gray-500">No transport incomes found</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Transport Income Tab -->
+    <div *ngIf="activeTab === 'edit'" class="bg-white rounded-lg shadow-sm p-6">
+      <div *ngIf="!editingIncome" class="text-center py-12">
+        <p class="text-gray-500">Select an income from the list to edit</p>
+        <button (click)="setActiveTab('list')" 
+                class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+          Go to Income List
+        </button>
+      </div>
+
+      <div *ngIf="editingIncome">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Edit Transport Income</h2>
+          <button (click)="cancelEdit()" 
+                  class="text-gray-500 hover:text-gray-700">
+            Cancel
+          </button>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="onEditSubmit()" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="edit-customer" class="block text-sm font-medium text-gray-700">Customer</label>
+              <input type="text" 
+                     id="edit-customer"
+                     formControlName="customer"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label for="edit-driver" class="block text-sm font-medium text-gray-700">Driver</label>
+              <input type="text" 
+                     id="edit-driver"
+                     formControlName="driver"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div class="md:col-span-2">
+              <label for="edit-amount" class="block text-sm font-medium text-gray-700">Amount</label>
+              <input type="number" 
+                     id="edit-amount"
+                     formControlName="amount"
+                     step="0.01"
+                     min="0"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-3">
+            <button type="button" 
+                    (click)="cancelEdit()"
+                    class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400">
+              Cancel
+            </button>
+            <button type="submit" 
+                    [disabled]="editForm.invalid || loading"
+                    class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+              Update Income
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Receipts Tab -->
+    <div *ngIf="activeTab === 'receipts'" class="bg-white rounded-lg shadow-sm">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">All Receipts</h2>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted At</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let receipt of receipts; let i = index" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ receipt.customer }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ receipt.driver?.name || receipt.driver }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatCurrency(receipt.receiptAmount) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                      [ngClass]="getStatusColor(receipt.status)">
+                  {{ receipt.status | titlecase }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ receipt.submittedAt | date:'short' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                <button *ngIf="receipt.status === 'pending'"
+                        (click)="updateReceiptStatus(receipt.transportIncomeId, i, 'approved')"
+                        class="text-green-600 hover:text-green-900">
+                  Approve
+                </button>
+                <button *ngIf="receipt.status === 'pending'"
+                        (click)="updateReceiptStatus(receipt.transportIncomeId, i, 'rejected')"
+                        class="text-red-600 hover:text-red-900">
+                  Reject
+                </button>
+                <button (click)="viewReceiptFile(receipt.receiptUrl.split('/').pop())"
+                        class="text-blue-600 hover:text-blue-900">
+                  View
+                </button>
+                <button (click)="deleteReceiptEntry(receipt._id)"
+                        class="text-red-600 hover:text-red-900">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="receipts.length === 0" class="text-center py-12">
+          <p class="text-gray-500">No receipts found</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Receipt Tab -->
+    <div *ngIf="activeTab === 'upload'" class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">Upload Receipt</h2>
+      <form [formGroup]="receiptForm" (ngSubmit)="onReceiptSubmit()" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="transportIncomeId" class="block text-sm font-medium text-gray-700">Transport Income</label>
+            <select id="transportIncomeId"
+                    formControlName="transportIncomeId"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <option value="">Select Transport Income</option>
+              <option *ngFor="let income of transportIncomes" [value]="income._id">
+                {{ income.customer }} - {{ income.driver?.name || income.driver }} ({{ formatCurrency(income.amount) }})
+              </option>
+            </select>
+            <div *ngIf="receiptForm.get('transportIncomeId')?.invalid && receiptForm.get('transportIncomeId')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Please select a transport income
+            </div>
+          </div>
+
+          <div>
+            <label for="receiptAmount" class="block text-sm font-medium text-gray-700">Receipt Amount</label>
+            <input type="number" 
+                   id="receiptAmount"
+                   formControlName="amount"
+                   step="0.01"
+                   min="0"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                   placeholder="Enter receipt amount">
+            <div *ngIf="receiptForm.get('amount')?.invalid && receiptForm.get('amount')?.touched" 
+                 class="mt-1 text-sm text-red-600">
+              Valid amount is required
+            </div>
+          </div>
+
+          <div>
+            <label for="submittedBy" class="block text-sm font-medium text-gray-700">Submitted By (Optional)</label>
+            <input type="text" 
+                   id="submittedBy"
+                   formControlName="submittedBy"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                   placeholder="Enter submitter name/ID">
+          </div>
+
+          <div>
+            <label for="receipt" class="block text-sm font-medium text-gray-700">Receipt File</label>
+            <input type="file" 
+                   id="receipt"
+                   (change)="onFileSelect($event)"
+                   accept="image/*,.pdf"
+                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <p class="mt-1 text-sm text-gray-500">PNG, JPG, PDF up to 10MB</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" 
+                  [disabled]="receiptForm.invalid || !selectedFile || loading"
+                  class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            Upload Deposite Slip
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
