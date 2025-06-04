@@ -76,11 +76,11 @@
             </label>
             <input 
               type="number"
-              formControlName="whosalePrice"
+              formControlName="wholesalePrice"
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               [ngClass]="{'border-red-500': productForm.get('wholesalePrice')?.touched && productForm.get('wholesalePrice')?.invalid}"
             >
-            <div *ngIf="productForm.get('whosalePrice')?.touched && productForm.get('whosalePrice')?.invalid" 
+            <div *ngIf="productForm.get('wholesalePrice')?.touched && productForm.get('wholesalePrice')?.invalid" 
                  class="text-red-500 text-sm mt-1">
               Valid price is required
             </div>

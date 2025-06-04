@@ -11,7 +11,7 @@ export interface Product {
 costprice: number;
   inStock: boolean;
   retailPrice: number;
-  whosalePrice:number;
+  wholesalePrice:number;
   image: string;
   plantId:{
     _id: string;
