@@ -8,6 +8,9 @@ import { CustomerDetailsComponent } from './customer-detail/customer-detail.comp
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DebtorsComponent } from './customer-list/debtors-list.component';
 import { BulkSmsComponent } from './customer-list/bulk-sms.component';
+import { CustomerReceiptsComponent } from './customer-receipts/customer-receipts.component';
+import { CustomerReceipts } from './customer-list/customer-receipts.component';
+// import { CustomerReceiptsComponent } from './customer-list/customer-receipts.component';
 
 
 @NgModule({
@@ -16,7 +19,9 @@ import { BulkSmsComponent } from './customer-list/bulk-sms.component';
     CustomerFormComponent,
     CustomerDetailsComponent,
     DebtorsComponent,
-    BulkSmsComponent
+    BulkSmsComponent,
+    CustomerReceiptsComponent,
+    CustomerReceipts
   ],
   imports: [
     CommonModule,

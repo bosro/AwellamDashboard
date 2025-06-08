@@ -102,6 +102,11 @@
                                 class="text-blue-600 hover:text-blue-900">
                                 <i class="ri-edit-line"></i>
                             </button>
+
+                             <button [routerLink]="['/main/customers/receipts', customer._id]"
+                                class="text-blue-600 hover:text-blue-900">
+                                <i class="ri-receipt-line"></i>
+                            </button>
                             <button (click)="deleteCustomer(customer._id)"
                                 class="text-red-600 hover:text-red-900">
                                 <i class="ri-delete-bin-line"></i>

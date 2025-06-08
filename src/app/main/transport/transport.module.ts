@@ -28,6 +28,7 @@ import { PaymentListComponent } from './Payment-refs/Paymentref-list.component';
 import { PaymentListWithoutSocComponent } from './Payment-refs/PaymentListWithoutSoc';
 import { TruckStatisticsComponent } from './truck-management/truckhistory.component';
 import { TransportIncomeComponent } from './transportIncome/transaportIncome.component';
+import { DepositManagementComponent } from './Deposite-Income/deposite-income-component';
 
 // import { MetricsCardComponent } from '../dashboard/metrics-card/metrics-card.component';
 
@@ -50,6 +51,7 @@ import { TransportIncomeComponent } from './transportIncome/transaportIncome.com
     PaymentListWithoutSocComponent,
     TruckStatisticsComponent,
     TransportIncomeComponent,
+    DepositManagementComponent,
     // PaymentListComponent,
     // InventoryListComponent,
     // InventoryFormComponent,

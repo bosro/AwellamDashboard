@@ -302,6 +302,11 @@ export class SidebarComponent implements OnInit {
           route: '/main/customers/new',
           icon: 'i-user-add-line',
         },
+         {
+          title: 'Payment Receipts',
+          route: '/main/customers/receipts',
+          icon: 'ri-list-view',
+        },
         {
           title: 'Payment Dashboard ',
           route: '/main/transaction/main',
@@ -312,6 +317,8 @@ export class SidebarComponent implements OnInit {
           route: '/main/transaction/list',
           icon: 'ri-list-view',
         },
+
+       
       ],
     },
     // {
