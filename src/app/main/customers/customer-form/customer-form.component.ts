@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CustomersService } from '../../../services/customer.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { PlantService } from '../../../services/plant.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-customer-form',
@@ -15,18 +17,20 @@ export class CustomerFormComponent implements OnInit {
   loading = false;
   saving = false;
   currentCustomer: any;
-
+  plants: any[] = []; // Adjust type as necessary
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
     private customerService: CustomersService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+      private plantService: PlantService,
   ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.checkEditMode();
+    this.loadPlants();
   }
 
   private initForm(): void {
@@ -35,7 +39,9 @@ export class CustomerFormComponent implements OnInit {
         fullName: ['', Validators.required],
         address: ['', Validators.required],
         email: ['', ],
-        phoneNumber: ['', Validators.required]
+        phoneNumber: ['', Validators.required],
+        balance:['', Validators.required],
+        plantId: ['', Validators.required]
       })
     });
   }
@@ -57,6 +63,18 @@ export class CustomerFormComponent implements OnInit {
     }
   }
 
+    private loadPlants(): void {
+      this.loading = true;
+      this.plantService.getPlants()
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: (response) => {
+            this.plants = response.plants;
+          },
+          error: (error) => console.error('Error loading plants:', error)
+        });
+    }
+
   private loadCustomer(id: string): void {
     this.loading = true;
     this.customerService.getCustomerById(id).subscribe({
@@ -68,7 +86,9 @@ export class CustomerFormComponent implements OnInit {
             fullName: customer.fullName,
             address: customer.address,
             email: customer.email,
-            phoneNumber: customer.phoneNumber
+            phoneNumber: customer.phoneNumber,
+            balance:customer.balance,
+            plantId: customer.plantId // Assuming plantId is an object with _id
           }
         });
         this.loading = false;

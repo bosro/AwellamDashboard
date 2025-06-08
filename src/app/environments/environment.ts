@@ -1,19 +1,29 @@
-export const environment = {
-    // apiUrl: 'https://newawellambcckend.onrender.com/api'
-    // apiUrl:"http://127.0.0.1:3000/api"
-    apiUrl:"https://awellamgh.com/api"
-}
+const environments = {
+    development: {
+        apiUrl: "http://127.0.0.1:3000/api",
 
-export const url ={
-    // url:"https://newawellambcckend.onrender.com/api"
-    apiUrl:"https://awellamgh.com/api"
+  production: false
+    },
+    production: {
+        apiUrl: "https://awellamgh.com/api",
+
+  production: true
+    },
+    staging: {
+        apiUrl: "https://newawellambcckend.onrender.com/api",
+
+  production: false
+    }
+};
 
 
 
 
 
+const currentEnvironment = 'production';
 
+export const environment = environments[currentEnvironment];
 
-
-    // apiUrl:"http://127.0.0.1:3000/api"
-}
+export const url = {
+    apiUrl: environment.apiUrl
+};

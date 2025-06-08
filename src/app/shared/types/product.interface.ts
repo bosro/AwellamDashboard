@@ -8,6 +8,7 @@ export interface Product {
   }
   inStock: boolean;
   image: string;
+  totalStock:number;
 
 }
 

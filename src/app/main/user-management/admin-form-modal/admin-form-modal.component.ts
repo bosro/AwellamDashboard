@@ -1,6 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { Plant, PlantService } from '../../../services/plant.service';
+import { finalize } from 'rxjs/internal/operators/finalize';
+// import { PaymentService } from '../../../services/payment.service';
 
 @Component({
   selector: 'app-admin-form-modal',
@@ -81,9 +84,25 @@ import { AuthService } from '../../../core/services/auth.service';
                   <option value="super_admin">Super Admin</option>
                   <option value="Stocks_Manager">Stocks Manager</option>
                   <option value="Admin_Support">Admin Support</option>
+                  <option value="Accounting-Officer">Accounting-Officer</option>
                 </select>
               </div>
+
+
+              <div>
+        <label class="block text-sm font-medium text-gray-700">Plant</label>
+        <select 
+          formControlName="plantId"
+          class="mt-1 block w-full px-3 py-2 border rounded-md"
+          [class.border-red-500]="adminForm.get('plantId')?.invalid && adminForm.get('plantId')?.touched">
+          <option value="">Select Plant</option>
+          <option *ngFor="let plant of plants " [value]="plant._id">{{plant?.name}}</option>
+        </select>
+      </div>
             </div>
+
+
+           
 
             <!-- Error Message -->
             <div *ngIf="error" class="text-red-600 text-sm">
@@ -120,17 +139,32 @@ export class AdminFormModalComponent implements OnInit {
   adminForm: FormGroup;
   loading: boolean = false;
   error: string | null = null;
+  plants!: Plant[];
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private plantService: PlantService
   ) {
     this.adminForm = this.createForm();
   }
 
   ngOnInit() {
     this.initializeForm();
+    this.loadPlants()
   }
+
+   loadPlants(): void {
+        this.loading = true;
+        this.plantService.getPlants()
+          .pipe(finalize(() => this.loading = false))
+          .subscribe({
+            next: (response) => {
+              this.plants = response.plants;
+            },
+            error: (error) => console.error('Error loading plants:', error)
+          });
+      }
 
   ngOnChanges() {
     if (this.visible) {
@@ -144,7 +178,8 @@ export class AdminFormModalComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       phoneNumber: [''],
-      role: ['Loading_officer', Validators.required]
+      role: ['Loading_officer', Validators.required],
+      plantId: ['']
     });
   }
 
@@ -158,7 +193,8 @@ export class AdminFormModalComponent implements OnInit {
         fullName: this.user.fullName,
         email: this.user.email,
         phoneNumber: this.user.phoneNumber,
-        role: this.user.role
+        role: this.user.role,
+        plantId: this.user.plantId
       });
     } else {
       this.adminForm.reset({

@@ -18,16 +18,28 @@ interface Destination {
   destination: string;
 }
 
+interface Driver {
+  _id: string;
+  name: string;
+}
+
 interface SocNumber {
   _id: string;
   socNumber: string;
   quantity: number;
+  totalquantity: number;
   plantId: Plant;
-  categoryId: { _id: string; name: string };
+  categoryId?: { _id: string; name: string };
   productId: Product;
-  orderType: string;
+  destinationId?: {
+    destination: string;
+  };
+  orderType?: string;
+  status: string;
+  borrowedOrder: boolean;
   createdAt: string;
   updatedAt: string;
+  assignedTruck?: string;
 }
 
 interface Truck {
@@ -35,17 +47,24 @@ interface Truck {
   truckNumber: string;
   capacity: number;
   expenses: number;
+  loadedbags?: number;
   status: string;
   productId: Product | null;
   orderId: string | null;
   plantId: Plant | null;
-  categoryId: { _id: string; name: string } | null;
+  categoryId?: { _id: string; name: string } | null;
   socNumber: SocNumber | null;
+  socNumbers?: SocNumber[];
   LoadStatus: string;
   isAwellamLoad: boolean;
   amountReceived: number;
   customerName?: string;
   destinationId?: Destination;
+  driver?: Driver;
+  deliveredOrders?: string[];
+  expenditure?: any[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 @Component({
@@ -54,7 +73,7 @@ interface Truck {
 })
 export class TruckDetailComponent implements OnInit {
   loading = true;
-  truck!: Truck ;
+  truck!: Truck;
 
   constructor(
     private route: ActivatedRoute,
@@ -82,6 +101,22 @@ export class TruckDetailComponent implements OnInit {
       }
     });
   }
+
+  unloadSOCNumber(truckId: string): void {
+    this.truckService.unloadSOCfromTruck(truckId ,{}).subscribe({
+      next: (response) => {
+        // this.truck = response.truck;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading truck details:', error);
+        this.loading = false;
+        Swal.fire('Error', 'Failed to clear truck details', 'error');
+      }
+    });
+  }
+
+  
 
   goBack(): void {
     this.router.navigate(['/main/transport/trucks/']);

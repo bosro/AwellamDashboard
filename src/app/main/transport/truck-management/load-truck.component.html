@@ -133,16 +133,16 @@
       <label class="block text-sm font-medium text-gray-700 mb-1"> Number of Bags </label>
       <input
         type="number"
-        formControlName="capacity"
+        formControlName="loadedbags"
         min="1"
         class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        [class.border-red-500]="loadTruckForm.get('capacity')!.touched && loadTruckForm.get('capacity')!.invalid"
+        [class.border-red-500]="loadTruckForm.get('loadedbags')!.touched && loadTruckForm.get('loadedbags')!.invalid"
       />
       <div
-        *ngIf="loadTruckForm.get('capacity')?.touched && loadTruckForm.get('capacity')?.invalid"
+        *ngIf="loadTruckForm.get('loadedbags')?.touched && loadTruckForm.get('loadedbags')?.invalid"
         class="mt-1 text-sm text-red-600"
       >
-        {{ getErrorMessage('capacity') }}
+        {{ getErrorMessage('loadedbags') }}
       </div>
     </div>
 
@@ -151,20 +151,20 @@
       <label class="block text-sm font-medium text-gray-700 mb-1"> SOC Number </label>
       <input
         type="text"
-        formControlName="socNumber"
+        formControlName="OutsideSoc"
         placeholder="SOC123456789"
         class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        [class.border-red-500]="loadTruckForm.get('socNumber')!.touched && loadTruckForm.get('socNumber')!.invalid"
+        [class.border-red-500]="loadTruckForm.get('OutsideSoc')!.touched && loadTruckForm.get('OutsideSoc')!.invalid"
       />
       <div
-        *ngIf="loadTruckForm.get('socNumber')?.touched && loadTruckForm.get('socNumber')?.invalid"
+        *ngIf="loadTruckForm.get('OutsideSoc')?.touched && loadTruckForm.get('OutsideSoc')?.invalid"
         class="mt-1 text-sm text-red-600"
       >
-        {{ getErrorMessage('socNumber') }}
+        {{ getErrorMessage('OutsideSoc') }}
       </div>
     </div>
 
-    <!-- <div>
+    <div>
       <label class="block text-sm font-medium text-gray-700 mb-1"> Amount Received </label>
       <input
         type="number"
@@ -179,7 +179,7 @@
       >
         {{ getErrorMessage('amountReceived') }}
       </div>
-    </div> -->
+    </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1"> Customer Name</label>
       <input

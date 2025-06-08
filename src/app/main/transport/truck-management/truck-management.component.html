@@ -4,27 +4,23 @@
       <h1 class="text-2xl font-semibold text-gray-900">Truck Management</h1>
     </div>
     <div class="flex space-x-3 max-[430px]:flex-col">
-      <button
-          (click)="goBack()"
-          class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors mt-2"
-        >
-          <i class="ri-arrow-left-line mr-2"></i>
-          Back to List
-        </button>
-      <button 
-      class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
-      (click)='loadTruck()'>
-      <i class="ri-add-line mr-2"></i>
-       Outside Load Invoices
-    </button>
+      <button (click)="goBack()"
+        class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors mt-2">
+        <i class="ri-arrow-left-line mr-2"></i>
+        Back to List
+      </button>
+      <button class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
+        (click)='loadTruck()'>
+        <i class="ri-add-line mr-2"></i>
+        Outside Load Invoices
+      </button>
       <!-- <button 
         class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
         (click)='loadTruck()'>
         <i class="ri-add-line mr-2"></i>
         Load Awellam Load Invoices
       </button> -->
-      <button 
-        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
+      <button class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-3"
         (click)="addTruck()">
         <i class="ri-add-line mr-2"></i>
         Add New Truck
@@ -75,7 +71,7 @@
 
 
 
-  
+
 
   <!-- Filters -->
   <div class="bg-white rounded-lg shadow p-4 mb-6">
@@ -83,10 +79,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input
-            type="text"
-            formControlName="searchTerm"
-            placeholder="Search trucks..."
+          <input type="text" formControlName="searchTerm" placeholder="Search trucks..."
             class="w-full px-4 py-2 border rounded-lg">
         </div>
 
@@ -108,9 +101,13 @@
     <table class="w-full text-sm text-left text-gray-500">
       <thead class="text-xs text-gray-700 uppercase bg-gray-50">
         <tr>
+          <th scope="col" class="py-3 px-6">Actual Assigned Date</th>
           <th scope="col" class="py-3 px-6">Truck Number</th>
+
           <th scope="col" class="py-3 px-6">Status</th>
-          <th scope="col" class="py-3 px-6">Bags</th>
+          <th scope="col" class="py-3 px-6">Truck Capacity</th>
+          <th scope="col" class="py-3 px-6">Loaded Bags</th>
+
           <th scope="col" class="py-3 px-6">Driver</th>
           <th scope="col" class="py-3 px-6">Expenses</th>
           <th scope="col" class="py-3 px-6">Actions</th>
@@ -118,25 +115,36 @@
       </thead>
       <tbody>
         <tr *ngFor="let truck of filteredTrucks" class="bg-white border-b hover:bg-gray-50">
+
+          <td class="py-4 px-6 font-medium text-gray-900">
+            <div class="text-sm text-gray-900">{{truck.updatedAt ? (truck.updatedAt | date:'mediumDate') : 'N/A'}}</div>
+            <div class="text-sm text-gray-900">{{truck.updatedAt ? (truck.updatedAt |  date:'shortTime') : 'N/A'}}</div>
+          </td>
           <td class="py-4 px-6 font-medium text-gray-900">{{truck.truckNumber}}</td>
           <td class="py-4 px-6">
             <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusClass(truck.status)">
               {{truck.status}}
             </span>
           </td>
-          <td class="py-4 px-6">{{truck.capacity}} Products</td>
+          <td class="py-4 px-6">{{truck.capacity}} Bags</td>
+          <td class="py-4 px-6">{{truck.loadedbags}} Products</td>
           <td class="py-4 px-6">{{truck.driver?.name || 'No driver assigned'}}</td>
           <td class="py-4 px-6">GHC {{truck.expenses}}</td>
+
+          
           <td class="py-4 px-6">
             <div class="flex items-center space-x-3">
-              <button 
-                class="text-blue-600 hover:text-blue-900"
-                (click)="viewTruckDetails(truck._id)">
+              <button class="text-red-600 hover:text-blue-900" (click)="viewTruckHistory(truck._id)">
                 <i class="ri-eye-line text-lg"></i>
               </button>
-              <button 
-                (click)="deleteTruck(truck._id)"
-                class="text-red-600 hover:text-red-900">
+              <button class="text-blue-600 hover:text-blue-900" (click)="viewTruckDetails(truck._id)">
+                <i class="ri-eye-line text-lg"></i>
+              </button>
+              <button class="text-blue-600 hover:text-blue-900" (click)="openEditModal(truck)">
+                <i class="ri-edit-fill   text-lg"></i>
+              </button>
+
+              <button (click)="deleteTruck(truck._id)" class="text-red-600 hover:text-red-900">
                 <i class="ri-delete-bin-line"></i>
               </button>
             </div>
@@ -168,18 +176,101 @@
       Showing {{(currentPage - 1) * pageSize + 1}} to {{Math.min(currentPage * pageSize, total)}} of {{total}} entries
     </div>
     <div class="flex items-center space-x-2">
-      <button 
-        [disabled]="currentPage === 1"
-        (click)="onPageChange(currentPage - 1)"
+      <button [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)"
         class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
         <i class="ri-arrow-left-s-line"></i>
       </button>
-      <button 
-        [disabled]="currentPage * pageSize >= total"
-        (click)="onPageChange(currentPage + 1)"
+      <button [disabled]="currentPage * pageSize >= total" (click)="onPageChange(currentPage + 1)"
         class="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 disabled:opacity-50">
         <i class="ri-arrow-right-s-line"></i>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h2 class="text-xl font-semibold mb-4">Edit Truck Details</h2>
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Truck Number</label>
+          <input type="text" formControlName="truckNumber" class="w-full px-4 py-2 border rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Capacity (Bags)</label>
+          <input type="number" formControlName="capacity" class="w-full px-4 py-2 border rounded-lg" />
+        </div>
+        <!-- <div>
+          <label class="block text-sm font-medium text-gray-700">Loaded Bags</label>
+          <input
+            type="number"
+            formControlName="loadedbags"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div> -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Is Awellam Load</label>
+          <select
+            formControlName="isAwellamLoad"
+            class="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="true">True</option>
+            <option value="false">False</option>
+            <!-- <option value="maintenance">Maintenance</option> -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <select
+            formControlName="status"
+            class="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <!-- <option value="maintenance">Maintenance</option> -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">LOADED STATUS</label>
+          <select
+            formControlName="LoadStatus"
+            class="w-full px-4 py-2 border rounded-lg"
+          >
+            <option value="LOADED">LOADED</option>
+            <option value="NOTLOADED">NOTLOADED</option>
+            <option value="DELIEVERED">DELIEVERED</option>
+            <!-- <option value="maintenance">Maintenance</option> -->
+          </select>
+        </div>
+        <!-- <div>
+          <label class="block text-sm font-medium text-gray-700">Expenses (GHC)</label>
+          <input
+            type="number"
+            formControlName="expenses"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div> -->
+        <!-- <div>
+          <label class="block text-sm font-medium text-gray-700">Driver</label>
+          <input
+            type="text"
+            formControlName="driver"
+            class="w-full px-4 py-2 border rounded-lg"
+          />
+        </div> -->
+      </div>
+      <div class="flex justify-end space-x-4 mt-6">
+        <button type="button" (click)="closeModal()"
+          class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="editForm.invalid"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          Save Changes
+        </button>
+      </div>
+    </form>
   </div>
 </div>

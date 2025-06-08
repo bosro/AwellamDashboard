@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PlantService, Plant } from '../../../services/plant.service';
 import { finalize } from 'rxjs/operators';
 
@@ -12,10 +12,13 @@ export class DestinationFormComponent implements OnInit {
   destinationForm: FormGroup;
   loading = false;
   plants: Plant[] = [];
+  isEditMode = false;
+  destinationId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private plantService: PlantService,
+    private route: ActivatedRoute,
     private router: Router
   ) {
     this.destinationForm = this.fb.group({
@@ -28,6 +31,13 @@ export class DestinationFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPlants();
+    this.route.paramMap.subscribe(params => {
+      this.destinationId = params.get('id');
+      if (this.destinationId) {
+        this.isEditMode = true;
+        this.loadDestination(this.destinationId);
+      }
+    });
   }
 
   private loadPlants(): void {
@@ -42,19 +52,52 @@ export class DestinationFormComponent implements OnInit {
       });
   }
 
+  private loadDestination(id: string): void {
+    this.loading = true;
+    this.plantService.getDestinationById(id)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.destinationForm.patchValue({
+            destination: response.destination.destination,
+            plantId: response.destination.plantId._id, // Ensure plantId is correctly set
+            rates: response.destination.rates,
+            cost: response.destination.cost
+          });
+          console.log('Form Values:', this.destinationForm.value); // Debugging statement
+        },
+        error: (error) => console.error('Error loading destination:', error)
+      });
+  }
+
   onSubmit(): void {
     if (this.destinationForm.valid) {
       this.loading = true;
-      this.plantService.createDestination(this.destinationForm.value)
-        .pipe(finalize(() => this.loading = false))
-        .subscribe({
-          next: () => {
-            this.router.navigate(['/main/categories/list']);
-          },
-          error: (error) => {
-            console.error('Error creating category:', error);
-          }
-        });
+      const destinationData = this.destinationForm.value;
+
+      if (this.isEditMode && this.destinationId) {
+        this.plantService.updateDestination(this.destinationId, destinationData)
+          .pipe(finalize(() => this.loading = false))
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/main/categories/list']);
+            },
+            error: (error) => {
+              console.error('Error updating destination:', error);
+            }
+          });
+      } else {
+        this.plantService.createDestination(destinationData)
+          .pipe(finalize(() => this.loading = false))
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/main/categories/list']);
+            },
+            error: (error) => {
+              console.error('Error creating destination:', error);
+            }
+          });
+      }
     } else {
       Object.keys(this.destinationForm.controls).forEach(key => {
         const control = this.destinationForm.get(key);

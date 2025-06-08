@@ -1,4 +1,5 @@
 export interface Customer {
+name: any;
   // [x: string]: Customer | undefined;
   _id: string;
   fullName: string;
@@ -8,5 +9,6 @@ export interface Customer {
   balance: number;
   createdAt: string;
   updatedAt: string;
-  totalOrders :number
+  totalOrders :number;
+  plantId: string
 }

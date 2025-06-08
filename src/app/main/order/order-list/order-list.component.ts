@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Order, OrdersService } from '../../../services/order.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
+import { PaymentService } from '../../../services/payment.service';
+import { Product, ProductsService } from '../../../services/products.service';
+import { forkJoin } from 'rxjs';
 
 interface Category {
   _id: string;
@@ -20,25 +24,33 @@ interface Plant {
   templateUrl: './order-list.component.html'
 })
 export class OrderListComponent implements OnInit {
-  orders: Order[] = [];
-  filteredOrders: Order[] = [];
+  orders: any[] = [];
+  filteredOrders: any[] = [];
   loading = false;
   total = 0;
-  pageSize = 10;
+  pageSize = 15;
   currentPage = 1;
   selectedOrders = new Set<string>();
   filterForm: FormGroup;
   categories: Category[] = [];
   plants: Plant[] = [];
   Math = Math;
+  products!: Product[];
+  allOrders: Order[] = []; // Store all orders for frontend filtering
+  
+  // Modal properties
+  showPriorityModal = false;
+  currentOrderId: string = '';
 
   private apiUrl = `${environment.apiUrl}`;
-onPlantSelect: any;
 
   constructor(
     private ordersService: OrdersService,
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router,
+    private paymentService: PaymentService,
+    private productsService: ProductsService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -50,112 +62,186 @@ onPlantSelect: any;
       }),
       minAmount: [''],
       maxAmount: [''],
-      plant: [''],
-      category: ['']
+      plantId: [''],
+      category: [''],
+      productId: ['']
     });
   }
 
   ngOnInit(): void {
-    this.loadInitialData();
-    this.setupFilters();
-    this.loadOrders();
+    // Load in sequence to avoid multiple parallel requests
+    this.loadPlantsAndInitialize();
   }
 
-
-  EditOrder(){
-    
-  }
-  private loadInitialData(): void {
+  private loadPlantsAndInitialize(): void {
     this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/plants/get`).subscribe({
-      next: (response) => {
-        this.plants = response.plants;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading plants:', error);
-        this.loading = false;
-      }
-    });
+    this.http.get<any>(`${this.apiUrl}/plants/get`)
+      .pipe(finalize(() => {
+        // Don't set loading to false here, we're loading orders next
+        this.setupFilters();
+        this.loadOrders();
+      }))
+      .subscribe({
+        next: (response) => {
+          this.plants = response.plants;
+        },
+        error: (error) => {
+          console.error('Error loading plants:', error);
+          this.loading = false; // Only set to false on error
+        }
+      });
   }
 
   private setupFilters(): void {
     this.filterForm.valueChanges
       .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
+        debounceTime(500), // Increased from 300ms to reduce API calls
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
       )
       .subscribe(() => {
         this.currentPage = 1;
         this.applyFilters();
       });
-
-    this.filterForm.get('plant')?.valueChanges.subscribe(plantId => {
-      if (plantId) {
-        this.loadCategories(plantId);
-      } else {
-        this.categories = [];
-        this.filterForm.patchValue({ category: '' });
-      }
-    });
   }
 
-  private loadCategories(plantId: string): void {
-    this.loading = true;
-    this.http.get<any>(`${this.apiUrl}/category/plants/${plantId}`).subscribe({
-      next: (response) => {
-        this.categories = response.categories;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-        this.loading = false;
+  onPlantSelect(event: any): void {
+    const plantId = event.target.value;
+    this.loading = true; // Start loading before API calls
+    
+    if (plantId) {
+      // Load products and orders in parallel
+      forkJoin({
+        products: this.productsService.getProductByPlant(plantId),
+        orders: this.ordersService.getPlantOrders(plantId)
+      })
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.products = response.products.products;
+          this.allOrders = response.orders.orders.filter(order => order.status === 'PENDING');
+          this.total = this.allOrders.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading plant data:', error);
+        }
+      });
+    } else {
+      // Reset products
+      this.products = [];
+      // Reload all orders
+      this.loadOrders();
+    }
+  }
+
+  onProductSelect(event: any): void {
+    const productId = event.target.value;
+    if (productId) {
+      this.loading = true;
+      this.ordersService.getProductOrders(productId)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: (response) => {
+            this.allOrders = response.orders.filter(order => order.status === 'PENDING');
+            this.total = this.allOrders.length;
+            this.applyFilters();
+          },
+          error: (error) => {
+            console.error('Error loading product orders:', error);
+          }
+        });
+    } else {
+      // If product selection cleared, revert to previous state
+      const plantId = this.filterForm.get('plantId')?.value;
+      if (plantId) {
+        this.onPlantSelect({ target: { value: plantId } });
+      } else {
+        this.loadOrders();
       }
-    });
+    }
   }
 
   loadOrders(): void {
     this.loading = true;
-    this.ordersService.getOrders().subscribe({
-      next: (response) => {
-        this.orders = response.orders.filter(order => order.status === 'PENDING');
-        this.total = this.orders.length;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading orders:', error);
-        this.loading = false;
-      }
-    });
+    this.ordersService.getPendingOrders()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.allOrders = response.orders;
+          this.total = this.allOrders.length;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Error loading orders:', error);
+        }
+      });
   }
 
   applyFilters(): void {
-    const { search, status, paymentStatus, dateRange, minAmount, maxAmount, plant, category } = this.filterForm.value;
+    const filters = this.filterForm.value;
+    
+    if (!this.allOrders || this.allOrders.length === 0) {
+      this.filteredOrders = [];
+      this.total = 0;
+      return;
+    }
 
-    this.filteredOrders = this.orders.filter(order => {
-      const matchesSearch = !search ||
-        order.customerId.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        order.orderNumber.toLowerCase().includes(search.toLowerCase());
+    let filtered = [...this.allOrders];
 
-      const matchesStatus = !status || order.status === status;
+    // Search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filtered = filtered.filter(order => 
+        order.customerId?.fullName?.toLowerCase().includes(searchTerm) ||
+        order.orderNumber?.toLowerCase().includes(searchTerm) ||
+        order.orderItems.some(item => 
+          item.product?.name?.toLowerCase().includes(searchTerm)
+        )
+      );
+    }
 
-      const matchesPaymentStatus = !paymentStatus || order.paymentStatus === paymentStatus;
+    // Status filter
+    if (filters.status) {
+      filtered = filtered.filter(order => order.status === filters.status);
+    }
 
-      const matchesDateRange = (!dateRange.start || new Date(order.date) >= new Date(dateRange.start)) &&
-                               (!dateRange.end || new Date(order.date) <= new Date(dateRange.end));
+    // Payment status filter
+    if (filters.paymentStatus) {
+      filtered = filtered.filter(order => order.paymentStatus === filters.paymentStatus);
+    }
 
-      const matchesAmountRange = (!minAmount || order.totalAmount >= minAmount) &&
-        (!maxAmount || order.totalAmount <= maxAmount);
+    // Date range filter
+    if (filters.dateRange.start || filters.dateRange.end) {
+      const startDate = filters.dateRange.start ? new Date(filters.dateRange.start) : null;
+      const endDate = filters.dateRange.end ? new Date(filters.dateRange.end) : null;
 
-      const matchesPlant = !plant || order.categoryId.plantId._id === plant;
-      const matchesCategory = !category || order.categoryId._id === category;
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.date);
+        return (!startDate || orderDate >= startDate) && (!endDate || orderDate <= endDate);
+      });
+    }
 
-      return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateRange && matchesAmountRange && matchesPlant && matchesCategory;
-    });
+    // Amount filter
+    if (filters.minAmount) {
+      filtered = filtered.filter(order => order.totalAmount >= filters.minAmount);
+    }
+    if (filters.maxAmount) {
+      filtered = filtered.filter(order => order.totalAmount <= filters.maxAmount);
+    }
 
-    this.total = this.filteredOrders.length;
-    this.filteredOrders = this.filteredOrders.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+    // Product filter
+    if (filters.product) {
+      filtered = filtered.filter(order => 
+        order.orderItems.some(item => item.product._id === filters.product)
+      );
+    }
+
+    this.total = filtered.length;
+    
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.filteredOrders = filtered.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
@@ -171,34 +257,117 @@ onPlantSelect: any;
     }
   }
 
-  toggleAllSelection(): void {
-    if (this.selectedOrders.size === this.filteredOrders.length) {
-      this.selectedOrders.clear();
-    } else {
-      this.filteredOrders.forEach(order => this.selectedOrders.add(order._id));
+  deleteOrder(id: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation(); // Prevent row click
     }
-  }
-
-  deleteOrder(id: string): void {
+    
     if (confirm('Are you sure you want to delete this order?')) {
-      this.ordersService.deleteOrder(id).subscribe({
-        next: () => this.loadOrders(),
-        error: (error) => console.error('Error deleting order:', error)
-      });
+      this.loading = true;
+      this.ordersService.deleteOrder(id)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: () => {
+            this.loadOrders();
+            this.router.navigate(['main/orders/list']);
+          },
+          error: (error) => console.error('Error deleting order:', error)
+        });
     }
   }
 
-  toggleStatus(id: string): void {
-    this.ordersService.toggleOrderStatus(id).subscribe({
-      next: () => this.loadOrders(),
-      error: (error) => console.error('Error toggling status:', error)
-    });
-  }
+  // toggleStatus(id: string, newStatus: string, event?: Event): void {
+  //   if (event) {
+  //     event.stopPropagation(); // Prevent row click
+  //   }
+    
+  //   this.loading = true;
+  //   this.ordersService.updatePriorityStatus(id, newStatus)
+  //     .pipe(finalize(() => this.loading = false))
+  //     .subscribe({
+  //       next: () => this.loadOrders(),
+  //       error: (error) => console.error('Error updating status:', error)
+  //     });
+  // }
 
   clearFilters(): void {
     this.filterForm.reset();
     this.currentPage = 1;
-    this.applyFilters();
+    this.products = [];
+    this.loadOrders(); // Reload all orders when clearing filters
+  }
+
+  // Open priority modal
+  openPriorityModal(orderId: string, event: Event): void {
+    if (event) {
+      event.stopPropagation(); // Prevent row click
+    }
+    this.currentOrderId = orderId;
+    this.showPriorityModal = true;
+  }
+
+  // Close priority modal
+  closePriorityModal(): void {
+    this.showPriorityModal = false;
+    this.currentOrderId = '';
+  }
+
+  // Convert priority string to number
+  private priorityStringToNumber(priorityString: string): number {
+    const priorityMap: { [key: string]: number } = {
+      'Low': 0,
+      'Normal': 1,
+      'Medium': 2,
+      'High': 3,
+      'Critical': 4
+    };
+    return priorityMap[priorityString] ?? 0; // Default to Low (0) if not found
+  }
+
+  // Update priority with string value
+// Update priority with string value - send the string directly, not a number
+updatePriorityStatus(orderId: string, orderPriority: string): void {
+  this.loading = true;
+  // Send the priority string directly without converting to number
+  this.ordersService.updateOrderPriority(orderId,  orderPriority )
+    .pipe(finalize(() => {
+      this.loading = false;
+      this.closePriorityModal();
+    }))
+    .subscribe({
+      next: () => {
+        // Refresh the order list
+        this.loadOrders();
+      },
+      error: (error) => {
+        console.error('Error updating order priority:', error);
+        alert('Failed to update order priority');
+      }
+    });
+}
+  
+  // Method to get priority status text based on priority number
+  getPriorityStatusText(priority: number): string {
+    const priorityText: { [key: number]: string } = {
+      0: 'Low',
+      1: 'Normal',
+      2: 'Medium',
+      3: 'High',
+      4: 'Critical'
+    };
+    return priorityText[priority] || 'Unknown';
+  }
+  
+  // Method to get CSS class based on priority number
+  getPriorityStatusClass(priority: number): string {
+    const priorityClasses: { [key: number]: string } = {
+      0: 'bg-gray-100 text-gray-800',    // Low
+      1: 'bg-blue-100 text-blue-800',    // Normal
+      2: 'bg-yellow-100 text-yellow-800', // Medium
+      3: 'bg-orange-100 text-orange-800', // High
+      4: 'bg-red-100 text-red-800'       // Critical
+    };
+    return priorityClasses[priority] || 'bg-gray-100 text-gray-800';
   }
 
   getStatusClass(status: string): string {

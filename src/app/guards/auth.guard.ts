@@ -6,8 +6,6 @@ import {
   RouterStateSnapshot 
 } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
-import { Observable, of } from 'rxjs';
-import { take, tap, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -21,28 +19,20 @@ export class AuthGuard implements CanActivate {
     console.log('Authenticated:', isAuthenticated);
   
     if (!isAuthenticated) {
-      this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
-      return true;
+      console.log('User not authenticated, redirecting to login');
+      this.router.navigate(['/auth/login'], { 
+        queryParams: { returnUrl: state.url } 
+      });
+      return false; // Changed to return false when not authenticated
     }
-    return true;
-  
-  
-  
-  
+    
+    // Check for required roles if specified in route data
+    if (route.data['roles'] && !this.authService.hasRole(route.data['roles'])) {
+      console.log('User does not have required role');
+      this.router.navigate(['/unauthorized']);
+      return false;
+    }
 
-    // If not authenticated synchronously, check asynchronously
-    // return this.authService.isAuthenticated$().pipe(
-    //   take(1),
-    //   map((isAuth) => {
-    //     if (!isAuth) {
-    //       console.log('User is not authenticated, redirecting to login');
-    //       this.router.navigate(['/auth/login'], {
-    //         queryParams: { returnUrl: state.url },
-    //       });
-    //       return false;
-    //     }
-    //     return true;
-    //   })
-    // );
+    return true;
   }
 }

@@ -1,0 +1,541 @@
+<div class="bg-white shadow-md rounded-lg p-6">
+  <!-- Header Section -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Transactions</h1>
+    <button (click)="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition duration-200 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Add Transaction
+    </button>
+  </div>
+  
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="flex justify-center items-center py-4">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+    <span class="ml-3 text-gray-600">Loading transactions...</span>
+  </div>
+  
+  <!-- Filter Section -->
+  <div class="bg-gray-50 p-4 rounded-lg mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-700">Filter Transactions</h2>
+      <button (click)="resetFilters()" class="text-blue-600 hover:text-blue-800 text-sm">
+        Reset Filters
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label for="customerSelect" class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+        <select 
+          id="customerSelect" 
+          [(ngModel)]="selectedCustomerId" 
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Customers</option>
+          <option *ngFor="let customer of customers" [value]="customer._id">{{ customer.fullName }}</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="transactionType" class="block text-sm font-medium text-gray-700 mb-1">Transaction Type</label>
+        <select 
+          id="transactionType" 
+          [(ngModel)]="selectedType" 
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Types</option>
+          <option *ngFor="let type of transactionTypes" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="paymentMethod" class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+        <select 
+          id="paymentMethod" 
+          [(ngModel)]="selectedPaymentMethod" 
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Methods</option>
+          <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div *ngIf="selectedPaymentMethod === 'bank_transfer'">
+        <label for="bankName" class="block text-sm font-medium text-gray-700 mb-1">Bank</label>
+        <select 
+          id="bankName" 
+          [(ngModel)]="selectedBankName" 
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Banks</option>
+          <option *ngFor="let bank of bankNames" [value]="bank">{{ bank }}</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+        <input 
+          type="date" 
+          id="startDate" 
+          [(ngModel)]="startDate" 
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      
+      <div>
+        <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+        <input 
+          type="date" 
+          id="endDate" 
+          [(ngModel)]="endDate" 
+          class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+      </div>
+    </div>
+    
+    <div class="mt-4 flex justify-end">
+      <button 
+        (click)="filterTransactions()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition duration-200">
+        Apply Filters
+      </button>
+    </div>
+  </div>
+  
+  <!-- Transaction Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+      <p class="text-sm text-gray-500">Total Transactions</p>
+      <p class="text-2xl font-bold">{{ totalTransactions }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+      <p class="text-sm text-gray-500">Total Amount</p>
+      <p class="text-2xl font-bold">{{ totalAmount | currency:'GHC' }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+      <p class="text-sm text-gray-500">Average Transaction</p>
+      <p class="text-2xl font-bold">{{ averageTransaction | currency:'GHC' }}</p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="relative mb-6">
+    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="onSearchChange()"
+      placeholder="Search customer name, payment reference, or bank..." 
+      class="w-full pl-10 p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500">
+  </div>
+  
+  <!-- Transactions Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Customer
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Amount
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Type
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Payment Method
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Bank
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Date
+          </th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let transaction of transactions" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="ml-4">
+                <!-- Customer -->
+                <div *ngIf="transaction.customer?.fullName; else unknownCustomer">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ transaction.customer.fullName }}
+                  </div>
+                </div>
+                <ng-template #unknownCustomer>
+                  <div class="text-sm font-medium text-gray-900">
+                    Unknown Customer
+                  </div>
+                </ng-template>
+              
+                <!-- Order Type -->
+                <div *ngIf="transaction.orderType?.name; else unknownOrderType">
+                  <div class="text-sm text-gray-500">
+                    {{ transaction.orderType.name }}
+                  </div>
+                </div>
+                <ng-template #unknownOrderType>
+                  <div class="text-sm text-gray-500">
+                    Unknown Order Type
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div [ngClass]="getAmountClass(transaction.type)" class="text-sm font-semibold">
+              {{ transaction.type === 'payment' ? '+' : transaction.type === 'refund' ? '-' : '' }}{{ transaction.amount | currency:'GHC' }}
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span [ngClass]="getTypeClass(transaction.type)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+              {{ transaction.type }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ transaction.paymentMethod }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <span *ngIf="transaction.paymentMethod === 'bank_transfer'" class="font-medium text-gray-700">
+              {{ transaction.bankName || 'Not specified' }}
+            </span>
+            <span *ngIf="transaction.paymentMethod !== 'bank_transfer'">-</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ transaction.date | date:'MMM d, y, h:mm a' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button (click)="viewTransactionDetails(transaction)" class="text-blue-600 hover:text-blue-900 mr-3">
+              View
+            </button>
+            <button (click)="openEditModal(transaction)" class="text-indigo-600 hover:text-indigo-900 mr-3">
+              Edit
+            </button>
+            <button (click)="deleteTransaction(transaction._id)" class="text-red-600 hover:text-red-900">
+              Delete
+            </button>
+          </td>
+        </tr>
+        
+        <!-- Empty State -->
+        <tr *ngIf="transactions.length === 0">
+          <td colspan="7" class="px-6 py-10 text-center text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p class="text-lg font-medium">No transactions found</p>
+            <p class="mt-1">Try adjusting your filters or add a new transaction</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Pagination -->
+  <div class="flex items-center justify-between mt-4 bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+    <div class="flex-1 flex justify-between sm:hidden">
+      <button 
+        (click)="previousPage()" 
+        [disabled]="currentPage === 1" 
+        [ngClass]="{'bg-gray-100 text-gray-400 cursor-not-allowed': currentPage === 1, 'bg-white text-gray-700 hover:bg-gray-50': currentPage !== 1}"
+        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md">
+        Previous
+      </button>
+      <button 
+        (click)="nextPage()" 
+        [disabled]="currentPage === totalPages" 
+        [ngClass]="{'bg-gray-100 text-gray-400 cursor-not-allowed': currentPage === totalPages, 'bg-white text-gray-700 hover:bg-gray-50': currentPage !== totalPages}"
+        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md">
+        Next
+      </button>
+    </div>
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-700">
+          Showing 
+          <span class="font-medium">{{ transactions.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }}</span>
+          to
+          <span class="font-medium">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
+          of
+          <span class="font-medium">{{ totalItems }}</span>
+          results
+        </p>
+      </div>
+      <div>
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          <button
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium"
+            [ngClass]="{'text-gray-300 cursor-not-allowed': currentPage === 1, 'text-gray-500 hover:bg-gray-50': currentPage !== 1}">
+            <span class="sr-only">Previous</span>
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <ng-container *ngFor="let page of getPaginationArray()">
+            <button
+              (click)="goToPage(page)"
+              [ngClass]="{'bg-blue-50 border-blue-500 text-blue-600': currentPage === page, 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': currentPage !== page}"
+              class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+              {{ page }}
+            </button>
+          </ng-container>
+          <button
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium"
+            [ngClass]="{'text-gray-300 cursor-not-allowed': currentPage === totalPages, 'text-gray-500 hover:bg-gray-50': currentPage !== totalPages}">
+            <span class="sr-only">Next</span>
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Transaction Modal -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900">{{ isEditMode ? 'Edit Transaction' : 'Add Transaction' }}</h3>
+        <button (click)="closeModal()" class="text-gray-400 hover:text-gray-500">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <!-- Customer Search Field -->
+        <div>
+          <label for="customerSearch" class="block text-sm font-medium text-gray-700 mb-1">Search Customer</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="customerSearch" 
+              [(ngModel)]="customerSearchTerm" 
+              (input)="onCustomerSearchChange()"
+              placeholder="Search by name, email, or phone..." 
+              class="w-full pl-10 p-2.5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+        
+        <div>
+          <label for="modalCustomerSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Customer</label>
+          <select 
+            id="modalCustomerSelect" 
+            [(ngModel)]="transactionForm.customerId" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <option value="">-- Select Customer --</option>
+            <option *ngFor="let customer of filteredCustomers" [value]="customer._id">{{ customer.fullName }}</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="modalAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-500 sm:text-sm">GHC</span>
+            </div>
+            <input 
+              type="number" 
+              id="modalAmount" 
+              [(ngModel)]="transactionForm.amount" 
+              step="0.01"
+              class="w-full pl-12 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+        
+        <!-- Date Field (New) -->
+        <div>
+          <label for="modalDate" class="block text-sm font-medium text-gray-700 mb-1">Transaction Date</label>
+          <input 
+            type="date" 
+            id="modalDate" 
+            [(ngModel)]="transactionForm.date" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <div>
+          <label for="modalType" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select 
+            id="modalType" 
+            [(ngModel)]="transactionForm.type" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <option *ngFor="let type of transactionTypes" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="modalPaymentMethod" class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+          <select 
+            id="modalPaymentMethod" 
+            [(ngModel)]="transactionForm.paymentMethod" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+          </select>
+        </div>
+        
+        <!-- Bank Name Select (conditionally shown) -->
+        <div *ngIf="transactionForm.paymentMethod === 'bank_transfer'">
+          <label for="modalBankName" class="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+          <select 
+            id="modalBankName" 
+            [(ngModel)]="transactionForm.bankName" 
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <option value="">-- Select Bank --</option>
+            <option *ngFor="let bank of bankNames" [value]="bank">{{ bank }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="modalPaymentReference" class="block text-sm font-medium text-gray-700 mb-1">Reference</label>
+          <input 
+            type="text" 
+            id="modalPaymentReference" 
+            [(ngModel)]="transactionForm.Reference" 
+            placeholder="Optional reference number"
+            class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+        </div>
+      </div>
+      
+      <div class="mt-6 flex justify-end space-x-3">
+        <button 
+          (click)="closeModal()" 
+          class="px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-md shadow-sm text-sm font-medium">
+          Cancel
+        </button>
+        <button 
+          (click)="isEditMode ? updateTransaction() : addTransaction()" 
+          class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md shadow-sm text-sm font-medium">
+          {{ isEditMode ? 'Update Transaction' : 'Add Transaction' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Transaction Details Modal -->
+<div *ngIf="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Transaction Details</h3>
+        <button (click)="closeDetailsModal()" class="text-gray-400 hover:text-gray-500">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div [ngClass]="{
+            'bg-green-100 text-green-800': selectedTransaction?.type === 'payment',
+            'bg-red-100 text-red-800': selectedTransaction?.type === 'refund'
+          }" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full mb-2">
+            {{ selectedTransaction?.type }}
+          </div>
+          
+          <div class="text-2xl font-bold mb-2">
+            {{ selectedTransaction?.amount | currency:"GHC" }}
+          </div>
+          
+          <div class="text-sm text-gray-500">
+            {{ selectedTransaction?.date | date:'MMMM d, y, h:mm a' }}
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div *ngIf="selectedTransaction?.customer?.fullName">
+            <p class="text-sm text-gray-500">Customer</p>
+            <p class="font-medium">{{ selectedTransaction.customer.fullName }}</p>
+          </div>
+          <div *ngIf="!selectedTransaction?.customer?.fullName">
+            <p class="text-sm text-gray-500">Customer</p>
+            <p class="font-medium">Unknown Customer</p>
+          </div>
+        
+          <!-- Order Type -->
+          <div *ngIf="selectedTransaction?.orderType?.name">
+            <p class="text-sm text-gray-500">Order Type</p>
+            <p class="font-medium">{{ selectedTransaction.orderType.name }}</p>
+          </div>
+          <div *ngIf="!selectedTransaction?.orderType?.name">
+            <p class="text-sm text-gray-500">Order Type</p>
+            <p class="font-medium">Unknown Order Type</p>
+          </div>
+          
+          <div>
+            <p class="text-sm text-gray-500">Payment Method</p>
+            <p class="font-medium">{{ selectedTransaction?.paymentMethod }}</p>
+          </div>
+        </div>
+        
+        <!-- Bank Information (conditionally shown) -->
+        <div *ngIf="selectedTransaction?.paymentMethod === 'bank_transfer'">
+          <p class="text-sm text-gray-500">Bank</p>
+          <p class="font-medium bg-blue-50 text-blue-700 px-2 py-1 rounded inline-block">
+            {{ selectedTransaction?.bankName || 'Not specified' }}
+          </p>
+        </div>
+        
+        <div>
+          <p class="text-sm text-gray-500">Payment Reference</p>
+          <p class="font-medium">{{ selectedTransaction?.paymentReference || 'None' }}</p>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-500">Reference</p>
+          <p class="font-medium">{{ selectedTransaction?.Reference || 'None' }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">CreatedBy</p>
+          <p class="font-medium">{{ selectedTransaction?.createdBy?.fullName || 'N/A' }}</p>
+        </div>
+        
+        <div>
+          <p class="text-sm text-gray-500">Balance After Transaction</p>
+          <div [ngClass]="{'bg-red-100 text-red-800': selectedTransaction?.balanceAfter < 0, 'bg-green-100 text-green-800': selectedTransaction?.balanceAfter >= 0}" class="px-2 py-2 inline-flex text-xs leading-5 font-semibold rounded-full mt-2">
+            {{ selectedTransaction?.balanceAfter | currency:'GHC':'symbol':'1.2-2' }}
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 border-t border-gray-200 pt-4">
+        <div class="text-xs text-gray-500">
+          <p>Transaction ID: {{ selectedTransaction?._id }}</p>
+          <p>Created: {{ selectedTransaction?.createdAt | date:'MMM d, y, h:mm a' }}</p>
+          <p>Last Updated: {{ selectedTransaction?.updatedAt | date:'MMM d, y, h:mm a' }}</p>
+        </div>
+      </div>
+      
+      <div class="mt-6 flex justify-end">
+        <button 
+          (click)="closeDetailsModal()" 
+          class="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md shadow-sm text-sm font-medium">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

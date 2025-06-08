@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { CustomersService } from '../../../services/customer.service';
 import { Customer } from '../../../shared/types/customer.interface';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-
+import { Subscriber } from 'rxjs';
+import { TransactionService } from '../../../services/transaction.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html'
@@ -18,10 +20,13 @@ export class CustomerListComponent implements OnInit {
   selectedCustomers = new Set<string>();
   filterForm!: FormGroup;
   Math = Math;
+  allFilteredCustomers: Customer[] = [];
 
   constructor(
     private customersService: CustomersService,
-    private fb: FormBuilder
+    private transactionService: TransactionService,
+    private fb: FormBuilder,
+    private route: Router
   ) {}
 
   ngOnInit(): void {
@@ -66,22 +71,33 @@ export class CustomerListComponent implements OnInit {
 
   applyFilters(): void {
     const { search } = this.filterForm.value;
-    this.filteredCustomers = this.customers.filter(customer =>
-      !search || customer.fullName.toLowerCase().includes(search.toLowerCase())
-    );
-    this.total = this.filteredCustomers.length;
+  
+    // Filter customers by fullName or phoneNumber
+    this.allFilteredCustomers = this.customers.filter(customer => {
+      const searchTerm = search?.toLowerCase() || '';
+      return (
+        !searchTerm || 
+        customer.fullName.toLowerCase().includes(searchTerm) || 
+        customer.phoneNumber.toString().includes(searchTerm)
+      );
+    });
+  
+    // Update total count and paginate the filtered customers
+    this.total = this.allFilteredCustomers.length;
     this.paginateCustomers();
   }
 
   paginateCustomers(): void {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.filteredCustomers = this.filteredCustomers.slice(startIndex, endIndex);
+    this.filteredCustomers = this.allFilteredCustomers.slice(startIndex, endIndex);
   }
 
   onPageChange(page: number): void {
-    this.currentPage = page;
-    this.paginateCustomers();
+    if (page >= 1 && page <= Math.ceil(this.total / this.pageSize)) {
+      this.currentPage = page;
+      this.paginateCustomers();
+    }
   }
 
   toggleSelection(customerId: string): void {
@@ -91,6 +107,26 @@ export class CustomerListComponent implements OnInit {
       this.selectedCustomers.add(customerId);
     }
   }
+
+  gotoDebtors(): void {
+    this.route.navigate(['/main/customers/debtors']);
+  }
+
+  getDebtors(){
+    this.transactionService.getDebtors().subscribe({
+      next: (blob: Blob) => {
+        // Download the Excel file
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `debtors-list.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => console.error('Error exporting debtors:', error)
+    });
+  }
+  
 
   toggleAllSelection(): void {
     if (this.selectedCustomers.size === this.filteredCustomers.length) {

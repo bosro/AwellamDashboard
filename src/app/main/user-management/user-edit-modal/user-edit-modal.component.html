@@ -70,6 +70,19 @@
         </select>
       </div>
 
+      
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Plant</label>
+        <select 
+          formControlName="plant"
+          class="mt-1 block w-full px-3 py-2 border rounded-md"
+          [class.border-red-500]="userForm.get('plant')?.invalid && userForm.get('plant')?.touched">
+          <option value="">Select Role</option>
+          <option *ngFor="let plant of plants " [value]="plant._id">{{plant?.name}}</option>
+        </select>
+      </div>
+
       <div class="flex justify-end space-x-3">
         <button 
           type="button"

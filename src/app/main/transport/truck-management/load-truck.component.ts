@@ -34,13 +34,13 @@ export class LoadTruckComponent implements OnInit {
   ) {
     this.loadTruckForm = this.fb.group({
       truckId: ['', Validators.required],
-      capacity: ['', [Validators.required, Validators.min(1)]],
-      socNumber: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
+      loadedbags: ['', [Validators.required, Validators.min(1)]],
+      OutsideSoc: ['', [Validators.required, Validators.pattern(/^SOC\d{9}$/)]],
       plantId: ['', Validators.required],
       // categoryId: ['', Validators.required],
       productId: ['', Validators.required],
       customerName:['', Validators.required],
-      // amountReceived: ['', Validators.required],
+      amountReceived: ['', Validators.required],
       destinationId: ['', Validators.required] // Add destinationId form control
     });
   }

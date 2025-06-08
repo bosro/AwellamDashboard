@@ -7,6 +7,8 @@ import { OrderAnalyticsComponent } from './order-analytics/order-analytics.compo
 import { OrderEditComponent } from './order-edit/order-edit';
 import { SalesOrderListComponent } from './sales-list.component/sales-list.compoent';
 import { OutSideOrdersTableComponent } from './outsideLoad/outsideLoadOrder';
+import { SelfListComponent } from './selfListOrders/self-list.component';
+import { InvoiceGeneratorComponent } from './invoice/invoice-component';
 
 const routes: Routes = [
   {
@@ -17,9 +19,11 @@ const routes: Routes = [
       {path:'saleslist', component: SalesOrderListComponent},
       {path:'outsideload', component: OutSideOrdersTableComponent},
       { path: 'details/:id', component: OrderDetailsComponent },
+      { path: 'selflist', component: SelfListComponent },
       { path: 'processing', component: OrderProcessingComponent },
       { path: 'analytics', component: OrderAnalyticsComponent },
-      {path:'edit/:id' , component:OrderEditComponent}
+      {path:'edit/:id' , component:OrderEditComponent},
+      {path:'invoice' , component: InvoiceGeneratorComponent}
     ]
   }
 ];

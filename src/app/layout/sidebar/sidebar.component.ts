@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output, HostListener } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  HostListener,
+} from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -16,11 +23,11 @@ interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
   @Output() sidebarToggled = new EventEmitter<void>();
-  
+
   isSidebarOpen = false;
   isCollapsed: boolean = false;
   isMobileSidebarOpen: boolean = false;
@@ -31,41 +38,52 @@ export class SidebarComponent implements OnInit {
       title: 'Dashboard',
       icon: 'ri-dashboard-line',
       route: '/main/dashboard',
-      roles: ['super_admin', 'Admin_Support', 'Loading_officer', 'Stocks_Manager', ]
+      roles: [
+        'super_admin',
+        'Admin_Support',
+        'Loading_officer',
+        'Stocks_Manager',
+        'Accounting-Officer',
+      ],
     },
     {
       title: 'Orders',
       icon: 'ri-file-list-3-line',
       expanded: false,
-      roles: ['super_admin', 'Admin_Support', ],
+      roles: ['super_admin', 'Admin_Support'],
       // roles: ['admin', 'manager'],
       children: [
         {
           title: 'Order Analytics',
           route: '/main/orders/analytics',
-          icon: 'ri-pie-chart-2-line'
+          icon: 'ri-pie-chart-2-line',
         },
-         {
+        {
           title: 'Create Order',
           route: '/main/orders/processing',
-          icon: 'ri-play-list-add-fill'
+          icon: 'ri-play-list-add-fill',
         },
         {
           title: 'Order List',
           route: '/main/orders/list',
-          icon: 'ri-file-list-2-line'
+          icon: 'ri-file-list-2-line',
         },
         {
           title: 'Sales List',
           route: '/main/orders/saleslist',
-          icon: 'ri-file-list-2-line'
+          icon: 'ri-file-list-2-line',
         },
         {
           title: 'Outside Load Order',
           route: '/main/orders/outsideload',
-          icon: 'ri-play-list-add-fill'
-        }
-      ]
+          icon: 'ri-play-list-add-fill',
+        },
+        {
+          title: 'Self Lift Orders',
+          route: '/main/orders/selflist',
+          icon: 'ri-play-list-add-fill',
+        },
+      ],
     },
     {
       title: 'Inventory',
@@ -81,30 +99,29 @@ export class SidebarComponent implements OnInit {
         {
           title: 'Product List',
           route: '/main/products/list',
-          icon: 'ri-file-list-2-line'
+          icon: 'ri-file-list-2-line',
         },
         {
           title: 'Product Inventory',
           route: '/main/products/inventory',
-          icon: 'ri-file-list-3-line'
+          icon: 'ri-file-list-3-line',
         },
-        {
-          title: 'Purchase Overview',
-          route: '/main/purchasing',
-          icon: 'ri-order-play-line'
-        },
+        // {
+        //   title: 'Purchase Overview',
+        //   route: '/main/purchasing',
+        //   icon: 'ri-order-play-line'
+        // },
         {
           title: 'Destinations',
           route: '/main/inventory/destination',
-          icon: 'ri-exchange-funds-line'
+          icon: 'ri-exchange-funds-line',
         },
         // {
         //   title: 'Disbursements',
         //   route: '/main/inventory/disbursement',
         //   icon: 'ri-exchange-funds-line'
         // },
-        
-      ]
+      ],
     },
     // {
     //   title: 'Products',
@@ -116,7 +133,7 @@ export class SidebarComponent implements OnInit {
     //       route: '/main/products/list',
     //       icon: 'ri-file-list-2-line'
     //     },
-        
+
     //     // {
     //     //   title: 'Product Categories',
     //     //   route: '/main/products/categories',
@@ -130,6 +147,29 @@ export class SidebarComponent implements OnInit {
     //   ]
     // },
     {
+      title: 'Fuel Management',
+      icon: 'ri-shopping-cart-2-line',
+      expanded: false,
+      roles: ['super_admin', 'Admin_Support', 'Loading_officer'],
+      children: [
+        {
+          title: 'Fuel Dashboard',
+          route: '/main/fuel-management/',
+          icon: 'ri-order-play-line',
+        },
+        {
+          title: 'Fuel Cards',
+          route: '/main/fuel-management/card',
+          icon: 'ri-order-play-line',
+        },
+        {
+          title: 'Fuel Purchase',
+          route: '/main/fuel-management/purchase',
+          icon: 'ri-store-2-line',
+        },
+      ],
+    },
+    {
       title: 'Transport',
       icon: 'ri-truck-line',
       expanded: false,
@@ -138,13 +178,23 @@ export class SidebarComponent implements OnInit {
         {
           title: 'Dashboard',
           route: '/main/transport/dashboard',
-          icon: 'ri-speed-up-line'
+          icon: 'ri-speed-up-line',
+        },
+        {
+          title: 'Payment Ref /SOCs ',
+          route: '/main/transport/paymentrefs',
+          icon: 'ri-database-2-line',
         },
 
         {
           title: 'Stock Overview',
           route: '/main/transport/inventory-list',
-          icon: 'ri-database-2-line'
+          icon: 'ri-database-2-line',
+        },
+         {
+          title: 'Transport-Income',
+          route: '/main/transport/transport-Income',
+          icon: 'ri-database-2-line',
         },
 
         // {
@@ -155,23 +205,19 @@ export class SidebarComponent implements OnInit {
         {
           title: 'Trucks',
           route: '/main/transport/trucks',
-          icon: 'ri-truck-fill'
+          icon: 'ri-truck-fill',
         },
         {
           title: 'Drivers',
           route: '/main/transport/drivers',
-          icon: 'ri-caravan-line'
+          icon: 'ri-caravan-line',
         },
         {
           title: 'Disbursements',
           route: '/main/transport/disbursement',
-          icon: 'ri-exchange-funds-line'
+          icon: 'ri-exchange-funds-line',
         },
-        {
-          title: 'Payment Ref /SOCs ',
-          route: '/main/transport/paymentrefs',
-          icon: 'ri-database-2-line'
-        },
+
         // {
         //   title: 'Fuel Analytics',
         //   route: '/main/transport/fuel-analytics',
@@ -182,9 +228,9 @@ export class SidebarComponent implements OnInit {
         //   route: '/main/transport/maintenance-history',
         //   icon: 'ri-tools-line'
         // }
-      ]
+      ],
     },
-    
+
     // {
     //   title: 'Purchasing',
     //   icon: 'ri-shopping-cart-2-line',
@@ -205,6 +251,41 @@ export class SidebarComponent implements OnInit {
     // },
 
     {
+      title: 'Expenses',
+      icon: 'ri-user-settings-line',
+      expanded: false,
+      roles: ['super_admin', 'Admin_Support', 'Accounting-Officer'],
+      children: [
+        {
+          title: ' Dashboard',
+          route: '/main/expenses/dashboard',
+          icon: 'ri-group-line',
+        },
+        // {
+        //   title: 'Expense Types',
+        //   route: '/main/expenses/expense-types',
+        //   icon: 'ri-group-line'
+        // },
+        {
+          title: 'Transport Expenses',
+          route: '/main/expenses/transport',
+          icon: 'i-user-add-line',
+        },
+        {
+          title: 'Banks/General Expenses',
+          route: '/main/expenses/general',
+          icon: 'i-user-add-line',
+          roles: ['super_admin'], // Only visible to super admin
+        },
+        {
+          title: 'Imprest',
+          route: '/main/expenses/imprest',
+          icon: 'i-user-add-line',
+        },
+      ],
+    },
+
+    {
       title: 'Customers Mgt',
       icon: 'ri-user-settings-line',
       expanded: false,
@@ -214,16 +295,76 @@ export class SidebarComponent implements OnInit {
         {
           title: 'Customers',
           route: '/main/customers/list',
-          icon: 'ri-group-line'
+          icon: 'ri-group-line',
         },
         {
           title: 'Add Customer',
           route: '/main/customers/new',
-          icon: 'i-user-add-line'
+          icon: 'i-user-add-line',
         },
+         {
+          title: 'Payment Receipts',
+          route: '/main/customers/receipts',
+          icon: 'ri-list-view',
+        },
+        {
+          title: 'Payment Dashboard ',
+          route: '/main/transaction/main',
+          icon: 'ri-list-view',
+        },
+        {
+          title: 'Receive Payment ',
+          route: '/main/transaction/list',
+          icon: 'ri-list-view',
+        },
+
        
-      ]
+      ],
     },
+    // {
+    //   title: 'Customer Payment ',
+    //   icon: 'ri-bar-chart-2-line',
+    //   expanded: false,
+    //   roles: ['super_admin', 'Admin_Support'],
+    //   children: [
+    //     {
+    //       title: 'Payment Dashboard ',
+    //       route: '/main/transaction/main',
+    //       icon: 'ri-list-view',
+    //     },
+    //     {
+    //       title: 'Receive Payment ',
+    //       route: '/main/transaction/list',
+    //       icon: 'ri-list-view',
+    //     },
+    //     // {
+    //     //   title: 'Pruchase Report ',
+    //     //   route: '/main/reports/purchase-list',
+    //     //   icon: 'ri-list-view'
+    //     // },
+    //     // {
+    //     //   title: 'SOC Report ',
+    //     //   route: '/main/reports/soc-report',
+    //     //   icon: 'ri-list-view'
+    //     // },
+
+    //     // {
+    //     //   title: 'Report Generator',
+    //     //   route: '/main/reports/generator',
+    //     //   icon: 'ri-ai-generate-text'
+    //     // },
+    //     // {
+    //     //   title: 'Report Schedule',
+    //     //   route: '/main/reports/scheduled',
+    //     //   icon: 'ri-calendar-2-line'
+    //     // },
+    //     // {
+    //     //   title: 'Report Templates',
+    //     //   route: '/main/reports/templates',
+    //     //   icon: 'ri-book-open-line'
+    //     // }
+    //   ],
+    // },
     {
       title: 'Claims',
       icon: 'ri-file-list-3-line',
@@ -232,15 +373,15 @@ export class SidebarComponent implements OnInit {
       children: [
         {
           title: 'Awellam Invoices ',
-          route: '/main/claims',
-          icon: 'ri-list-view'
+          route: '/main/claims/awellam-claims',
+          icon: 'ri-list-view',
         },
         {
           title: 'Outside Load Invoices  ',
-          route: '/main/reports/purchase-list',
-          icon: 'ri-list-view'
+          route: '/main/claims/outside-claims',
+          icon: 'ri-list-view',
         },
-      ]
+      ],
     },
     {
       title: 'Reports',
@@ -249,15 +390,36 @@ export class SidebarComponent implements OnInit {
       roles: ['super_admin', 'Admin_Support'],
       children: [
         {
-          title: 'Sales Report ',
-          route: '/main/reports/list',
-          icon: 'ri-list-view'
+          title: 'Customer Summary ',
+          route: '/main/reports/customer-summary',
+          icon: 'ri-list-view',
         },
         {
-          title: 'Pruchase Report ',
-          route: '/main/reports/purchase-list',
-          icon: 'ri-list-view'
+          title: 'Active SOCs ',
+          route: '/main/reports/active-soc',
+          icon: 'ri-list-view',
         },
+        {
+          title: 'Sales Report ',
+          route: '/main/reports/list',
+          icon: 'ri-list-view',
+        },
+        // {
+        //   title: 'Pruchase Report ',
+        //   route: '/main/reports/purchase-list',
+        //   icon: 'ri-list-view'
+        // },
+        {
+          title: 'SOC Report ',
+          route: '/main/reports/soc-report',
+          icon: 'ri-list-view',
+        },
+        {
+          title: 'Borrowed SOC ',
+          route: '/main/reports/borrowed-soc',
+          icon: 'ri-list-view',
+        },
+
         // {
         //   title: 'Report Generator',
         //   route: '/main/reports/generator',
@@ -273,9 +435,9 @@ export class SidebarComponent implements OnInit {
         //   route: '/main/reports/templates',
         //   icon: 'ri-book-open-line'
         // }
-      ]
+      ],
     },
-    
+
     // {
     //   title: 'Customers Management',
     //   icon: 'ri-user-settings-line',
@@ -292,35 +454,42 @@ export class SidebarComponent implements OnInit {
     //       route: '/main/customers/new',
     //       icon: 'i-user-add-line'
     //     },
-       
+
     //   ]
     // },
 
-    // {
-    //   title: 'Customer Management',
-    //   icon: 'ri-user-settings-line',
-    //   route: '/main/customers-management',
-    // },
+    {
+      title: 'Banks',
+      icon: 'ri-user-settings-line',
+      route: '/main/banks',
+      roles: ['super_admin'],
+    },
+    {
+      title: 'Suppliers',
+      icon: 'ri-user-settings-line',
+      route: '/main/order-types',
+      roles: ['super_admin'],
+    },
+
+    
+
     {
       title: 'Settings',
       icon: 'ri-user-settings-line',
       route: '/main/user-management',
-      roles: ['super_admin']
+      roles: ['super_admin'],
     },
   ];
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {
-    router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.updateExpandedState();
-      if (this.isMobile) {
-        this.isMobileSidebarOpen = false;
-      }
-    });
+  constructor(private authService: AuthService, private router: Router) {
+    router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.updateExpandedState();
+        if (this.isMobile) {
+          this.isMobileSidebarOpen = false;
+        }
+      });
   }
 
   ngOnInit(): void {
@@ -358,16 +527,16 @@ export class SidebarComponent implements OnInit {
 
   private filterMenuByRole(): void {
     const userRole = this.authService.getUserRole();
-    
-    this.menuItems = this.menuItems.filter(item => {
+
+    this.menuItems = this.menuItems.filter((item) => {
       if (!item.roles || !userRole) return false; // Only show items with explicit role permissions
       return item.roles.includes(userRole);
     });
 
     // Filter children if they exist
-    this.menuItems.forEach(item => {
+    this.menuItems.forEach((item) => {
       if (item.children) {
-        item.children = item.children.filter(child => {
+        item.children = item.children.filter((child) => {
           if (!child.roles) return true; // Show child items without specific roles
           return userRole ? child.roles.includes(userRole) : false;
         });
@@ -375,7 +544,7 @@ export class SidebarComponent implements OnInit {
     });
 
     // Remove menu items with no remaining children
-    this.menuItems = this.menuItems.filter(item => {
+    this.menuItems = this.menuItems.filter((item) => {
       if (item.children) {
         return item.children.length > 0;
       }
@@ -384,9 +553,9 @@ export class SidebarComponent implements OnInit {
   }
 
   private updateExpandedState(): void {
-    this.menuItems.forEach(item => {
+    this.menuItems.forEach((item) => {
       if (item.children) {
-        item.expanded = item.children.some(child => 
+        item.expanded = item.children.some((child) =>
           child.route ? this.router.isActive(child.route, false) : false
         );
       }
@@ -402,7 +571,7 @@ export class SidebarComponent implements OnInit {
       return this.router.isActive(item.route, false);
     }
     if (item.children) {
-      return item.children.some(child => 
+      return item.children.some((child) =>
         child.route ? this.router.isActive(child.route, false) : false
       );
     }
